@@ -1016,12 +1016,14 @@ body:has(.a) {
    полупрозрачную заливку внутри кобальтового контура — иначе тонкий
    контур терялся на бликах. */
 @media (max-width: 719px) {
-  .a-display-wm { margin-bottom: 26vw; }
+  /* 13.09.2026: разрыв под именем 26vw → 12vw — на 375 полоса из четырёх
+     доказательств уходила под сгиб. Сцена короче на столько же. */
+  .a-display-wm { margin-bottom: 12vw; }
   .a-reel {
     /* + 2,75rem — плашка «что это» над именем (2rem + отступ 0,75rem). */
     top: calc(clamp(1.25rem, 4vh, 3rem) + 2.75rem - 2vw);
     bottom: auto;
-    height: calc((100vw - 32px) * 0.554 + 34vw);
+    height: calc((100vw - 32px) * 0.554 + 20vw);
     -webkit-mask-image:
       linear-gradient(to bottom, transparent 0%, #000 12%, #000 76%, transparent 100%),
       linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
@@ -1036,7 +1038,9 @@ body:has(.a) {
   .a-reel[data-mode="poster"] { background-size: cover; background-position: 50% 55%; }
   @supports (-webkit-text-stroke: 1px #000) {
     .a-display-wm .a-fit-2 {
-      color: rgba(255, 255, 255, 0.82);
+      /* Почти сплошная: при 0,82 кобальтовый тор просвечивал сквозь
+         буквы и контур «secure» читался плохо (аудит 13.09.2026). */
+      color: rgba(255, 255, 255, 0.94);
       -webkit-text-stroke-width: 1.5px;
     }
   }
@@ -1358,7 +1362,9 @@ body:has(.a) {
   .a-h2 {
     animation: a-h2-in linear both;
     animation-timeline: view();
-    animation-range: entry 5% entry 75%;
+    /* Короткий ход: при «entry 75 %» последний заголовок страницы так и
+       оставался обрезанным — прокрутка до него не доходила. */
+    animation-range: entry 0% entry 40%;
   }
 }
 @keyframes a-h2-in { from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); } }
@@ -1451,41 +1457,31 @@ body:has(.a) {
     animation-timeline: --a-pin;
     animation-range: contain 0% contain 100%;
   }
+  /* Текст проявляется, пока раздел ВХОДИТ в кадр, и дальше не гаснет.
+     Прежде вход и уход были внутри contain: до начала закрепления текст
+     стоял на opacity 0, к концу гас и он, и глобус — закреплённая сцена
+     целый экран оставалась белой на входе и на уходе (аудит 13.09.2026,
+     Chromium и WebKit, 1440 и 375). */
   .a-pin-copy {
-    animation: a-pin-copy linear both;
+    animation: a-pin-copy-in linear both;
     animation-timeline: --a-pin;
-    animation-range: contain 0% contain 100%;
+    animation-range: entry 35% contain 6%;
   }
   @keyframes a-pin-zoom {
-    0%   { transform: scale(0.62); opacity: 0.35; }
+    0%   { transform: scale(0.72); opacity: 0.6; }
     34%  { transform: scale(1); opacity: 1; }
     66%  { transform: scale(1.06); opacity: 1; }
-    100% { transform: scale(1.55); opacity: 0; }
+    100% { transform: scale(1.22); opacity: 0.85; }
   }
-  @keyframes a-pin-copy {
-    0%   { transform: translate3d(0, 48px, 0); opacity: 0; }
-    16%  { transform: none; opacity: 1; }
-    78%  { transform: none; opacity: 1; }
-    100% { transform: translate3d(0, -48px, 0); opacity: 0; }
-  }
-  /* Телефон: финал «глобус растворился, текст ушёл» совпадал с концом
-     закрепления — после него сцена уезжала вверх пустой, целый экран
-     белого перед разделом 04 (QA 12.09.2026, 375). Здесь глобус только
-     чуть подходит и остаётся видимым, текст остаётся на месте: сцена
-     уходит с содержимым, 04 въезжает сразу за ней. */
+  @keyframes a-pin-copy-in { from { transform: translate3d(0, 48px, 0); opacity: 0; } }
   @media (max-width: 720px) {
     .a-pin .a-pin-art canvas { animation-name: a-pin-zoom-m; }
-    .a-pin-copy { animation-name: a-pin-copy-m; }
   }
   @keyframes a-pin-zoom-m {
-    0%   { transform: scale(0.7); opacity: 0.4; }
+    0%   { transform: scale(0.7); opacity: 0.6; }
     34%  { transform: scale(1); opacity: 1; }
     70%  { transform: scale(1.04); opacity: 1; }
-    100% { transform: scale(1.14); opacity: 0.7; }
-  }
-  @keyframes a-pin-copy-m {
-    0%   { transform: translate3d(0, 48px, 0); opacity: 0; }
-    16%, 100% { transform: none; opacity: 1; }
+    100% { transform: scale(1.14); opacity: 0.85; }
   }
 }
 /* Упрощение: обычный раздел — глобус за текстом, без закрепления. */

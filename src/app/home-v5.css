@@ -734,7 +734,10 @@
   /* 02 — сцена в 2,8 окна: щелчок → четыре ситуации по очереди → пауза. */
   @media (prefers-reduced-motion: no-preference) and (min-width: 1000px) and (min-height: 700px),
          (prefers-reduced-motion: no-preference) and (max-width: 999px) and (min-height: 740px) {
-    html:not([data-static]) .h5-diff-hold { height: 280svh; view-timeline: --h5-diff block; }
+    /* Высоты закреплённых сцен сокращены 13.09.2026 (280/190/220/230 →
+       220/160/180/190): на 1440 между разделами шли экраны, пустые на
+       35–47 %. Диапазоны анимаций — в процентах сцены, сжались с ней. */
+    html:not([data-static]) .h5-diff-hold { height: 220svh; view-timeline: --h5-diff block; }
     html:not([data-static]) .h5-diff-stage {
       position: sticky;
       top: var(--a-head-h);
@@ -766,7 +769,7 @@
      заливается, линия бежит, затем дотягиваются шкалы канала. */
   @media (prefers-reduced-motion: no-preference) and (min-width: 1200px) and (min-height: 780px) {
     html:not([data-static]) .h5-plans-sec { padding-top: 0; }
-    html:not([data-static]) .h5-plans-sec .h5-hold { height: 190svh; view-timeline: --h5-hold block; }
+    html:not([data-static]) .h5-plans-sec .h5-hold { height: 160svh; view-timeline: --h5-hold block; }
     html:not([data-static]) .h5-plans-sec .h5-hold-stage {
       position: sticky;
       top: var(--a-head-h);
@@ -797,7 +800,7 @@
      с лёгким подскоком (62–100%). Пустых экранов прокрутки нет. */
   @media (prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-height: 700px) {
     html:not([data-static]) .h5-dev { padding-block: 0; }
-    html:not([data-static]) .h5-dev .h5-hold { height: 220svh; view-timeline: --h5-hold block; }
+    html:not([data-static]) .h5-dev .h5-hold { height: 180svh; view-timeline: --h5-hold block; }
     html:not([data-static]) .h5-dev .h5-hold-stage {
       position: sticky;
       top: var(--a-head-h);
@@ -837,7 +840,7 @@
   .h5-step h3, .h5-step p { animation-name: h5-text-on; }
 
   @media (min-width: 900px) {
-    .h5-steps { height: 230svh; padding-block: 0; }
+    .h5-steps { height: 190svh; padding-block: 0; }
     .h5-steps .h5-stage {
       position: sticky;
       top: var(--a-head-h);

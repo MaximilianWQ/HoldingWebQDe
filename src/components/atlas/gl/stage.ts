@@ -131,6 +131,11 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
   }
   const still = reason !== null;
   const tier = deviceTier();
+  // Постер — сразу, 3D сменяет его, когда соберётся первый кадр. Раньше
+  // до готовности (чанк three + init + компиляция шейдеров: на телефоне
+  // до 3–6 с после быстрой прокрутки) блок стоял пустым — белое место
+  // (аудит 13.09.2026).
+  if (o.hasPoster) setMode("poster");
 
   let disposed = false;
   let started = false;
@@ -306,7 +311,8 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
     (es) => {
       if (!started && es.some((e) => e.isIntersecting)) void init();
     },
-    { rootMargin: "100% 0px" }
+    // За два экрана до блока: к быстрой прокрутке сцена уже собрана.
+    { rootMargin: "200% 0px" }
   );
   const seen = new IntersectionObserver((es) => {
     inView = es[es.length - 1].isIntersecting;

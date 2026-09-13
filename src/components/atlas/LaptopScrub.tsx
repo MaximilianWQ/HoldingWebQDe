@@ -68,7 +68,10 @@ export default function LaptopScrub({ className }: { className: string }) {
         return clamp01((p - OPEN_FROM) / (OPEN_TO - OPEN_FROM));
       }
       const r = host.getBoundingClientRect();
-      return clamp01((vh * 0.9 - r.top) / (vh * 0.65));
+      // Телефон: открыт, когда верх ноутбука дошёл до середины окна.
+      // Прежде (0,9 → 0,25 окна) он оставался закрытым почти до верха
+      // экрана — «появляется поздно, мелко и внизу» (аудит 13.09.2026).
+      return clamp01((vh * 0.95 - r.top) / (vh * 0.45));
     };
     // Ближайший уже загруженный кадр — чтобы на медленной сети не было дыр.
     const nearest = (k: number) => {

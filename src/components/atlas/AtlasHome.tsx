@@ -344,10 +344,12 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
                 трафика — постер того же глобуса из Blender. */}
             <GlobeGL className="a-globe a-pin-art" poster="/media/globe2.jpg" />
             <div className="a-field a-pin-copy">
-              <h2 id="a-map-title" className="a-h2 a-settle">
+              {/* Без a-settle: текст сцены проявляет шкала раздела (6.8),
+                  второе скрытие оставляло его пустым (аудит 13.09.2026). */}
+              <h2 id="a-map-title" className="a-h2">
                 <span className="a-no">03</span>{COUNTRY_COUNT} {COUNTRY_WORD}. выбирайте ближайшую
               </h2>
-              <p className="a-p a-settle" style={{ ["--i" as string]: 2 }}>
+              <p className="a-p">
                 Чем ближе сервер, тем меньше задержка и тем быстрее открываются сайты и видео. Все{" "}
                 {COUNTRY_COUNT} {COUNTRY_WORD} входят в каждый тариф — доплачивать за страну не нужно.
               </p>

@@ -133,7 +133,10 @@
 }
 .ab-one-end { max-width: 52ch; }
 @supports (animation-timeline: view()) {
-  @media (min-height: 640px) {
+  /* Только от 720px: на телефоне десять разбросанных плиток и две
+     подписи в одной ячейке читались кашей, заголовок висел на 10 %
+     (аудит 13.09.2026) — там сцена показана итоговым кадром. */
+  @media (min-height: 640px) and (min-width: 720px) {
     .ab-one { height: 240svh; padding-block: 0; }
     .ab-one-stick {
       position: sticky;
@@ -305,7 +308,9 @@
   .ab-one .a-word {
     animation: ab-word linear both;
     animation-timeline: --ab-one;
-    animation-range: contain calc(var(--i) * 2.5%) contain calc(var(--i) * 2.5% + 9%);
+    /* Слова проявляются, пока раздел входит, а не после начала
+       закрепления: иначе заголовок входил в кадр почти невидимым. */
+    animation-range: entry calc(30% + var(--i) * 5%) contain calc(var(--i) * 2.5% + 6%);
   }
   .ab-tile {
     animation: ab-merge linear both;
@@ -328,6 +333,10 @@
     animation-range: contain 62% contain 74%;
   }
   .ab-one-end { animation-range: contain 70% contain 82%; }
+  @media (max-width: 719px) {
+    .ab-one .a-word, .ab-tile, .ab-bill::before,
+    .ab-merge-before, .ab-merge-after, .ab-one-end { animation: none; }
+  }
 
   /* 05 — слова заголовка заявки проявляются на входе плиты. */
   .ab-request .a-word {

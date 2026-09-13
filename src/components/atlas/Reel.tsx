@@ -48,8 +48,13 @@ export default function Reel({ webm, mp4, poster, className, eager = false, rate
 
     let loaded = false;
     let inView = false;
+    // Видео не пошло (ошибка сети, режим энергосбережения iOS запрещает
+    // автозапуск) — вместо пустого места неподвижный кадр той же сцены.
+    const toPoster = () => {
+      if (host.getAttribute("data-mode") !== "video") host.setAttribute("data-mode", "poster");
+    };
     const play = () => {
-      if (loaded && inView && !document.hidden) v.play().catch(() => {});
+      if (loaded && inView && !document.hidden) v.play().catch(toPoster);
     };
     const load = () => {
       if (loaded) return;
@@ -63,6 +68,15 @@ export default function Reel({ webm, mp4, poster, className, eager = false, rate
       play();
     };
     v.addEventListener("canplay", onReady, { once: true });
+    v.addEventListener("error", toPoster, { once: true });
+    // Загрузка началась, а играть видео так и не может — постер через 4 с.
+    let slow = 0;
+    const armSlow = () => {
+      slow = window.setTimeout(() => {
+        if (host.getAttribute("data-mode") !== "video") toPoster();
+      }, 4000);
+    };
+    v.addEventListener("loadstart", armSlow, { once: true });
 
     // Подгрузка — за экран до блока; игра — только когда он в кадре.
     const near = new IntersectionObserver(([e]) => e.isIntersecting && load(), { rootMargin: "100% 0px" });
@@ -86,6 +100,9 @@ export default function Reel({ webm, mp4, poster, className, eager = false, rate
       seen.disconnect();
       document.removeEventListener("visibilitychange", onVis);
       v.removeEventListener("canplay", onReady);
+      v.removeEventListener("error", toPoster);
+      v.removeEventListener("loadstart", armSlow);
+      window.clearTimeout(slow);
       v.pause();
     };
   }, [webm, mp4, eager, rate]);
@@ -93,7 +110,7 @@ export default function Reel({ webm, mp4, poster, className, eager = false, rate
   return (
     <div ref={box} className={className} style={{ "--poster": `url("${poster}")` } as CSSProperties} aria-hidden>
       <div className="a-reel-move">
-        <video ref={vid} className="a-reel-video" muted loop playsInline preload="none" />
+        <video ref={vid} className="a-reel-video" muted loop playsInline preload="none" poster={poster} />
       </div>
     </div>
   );

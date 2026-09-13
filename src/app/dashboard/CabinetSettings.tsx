@@ -2,7 +2,9 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
+import Link from "next/link";
 import Icon from "@/components/pixel/Icon";
+import { isIosBrowser } from "@/components/IosInstallSheet";
 
 /**
  * Кабинет · уведомления и вход. Push — логика PushToggleButton, быстрый
@@ -34,6 +36,11 @@ export default function CabinetSettings({ i }: { i: number }) {
   const [newsOn, setNewsOn] = useState<boolean | null>(null);
   const [newsSaving, setNewsSaving] = useState(false);
   const [newsError, setNewsError] = useState(false);
+
+  // iPhone/iPad в браузере — постоянная строка установки: нижний лист
+  // после «Не сейчас» молчит 3 дня, а путь к инструкции нужен всегда.
+  const [iosInstall, setIosInstall] = useState(false);
+  useEffect(() => setIosInstall(isIosBrowser()), []);
 
   useEffect(() => {
     fetch("/api/user/marketing-consent")
@@ -201,6 +208,17 @@ export default function CabinetSettings({ i }: { i: number }) {
           disabled={newsOn === null || newsSaving}
         />
       </div>
+
+      {iosInstall && (
+        <div className="ak-set-row">
+          <span className="ak-set-ico"><Icon name="iphone" size={16} /></span>
+          <div className="ak-set-copy">
+            <p className="ak-row-title">Atlas на экран «Домой»</p>
+            <p className="ak-row-text">Кабинет как приложение и уведомления о продлении</p>
+          </div>
+          <Link href="/install-ios" className="a-btn a-btn-primary">Как установить</Link>
+        </div>
+      )}
 
       <div className="ak-set-row">
         <span className="ak-set-ico"><Icon name="lock" size={16} /></span>

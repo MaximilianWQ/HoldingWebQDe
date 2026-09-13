@@ -6,7 +6,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
  * 06 — ноутбук открывается по прокрутке (владелец, 11.09.2026: «хочу,
  * чтобы при прокрутке открывался MacBook»).
  *
- * Кадры из Blender (сцена «AtlasLaptop», public/media/laptop/f00…f59.webp)
+ * Кадры из Blender (сцена «AtlasLaptop», public/media/laptop/f000…f119.webp)
  * перелистываются прокруткой, как на сайтах Apple. Прогресс: если раздел
  * с [data-scrub] закреплён (выше полутора окон) — прокрутка раздела; иначе
  * (телефон) — проход ноутбука через окно.
@@ -14,7 +14,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
  * ПЛАВНОСТЬ (12.09.2026, «прокрутку намного мягче»). Кадр не прыгает за
  * колесом: показанное открытие догоняет прокрутку по экспоненте, а между
  * соседними кадрами идёт перетекание (второй кадр поверх с долей), так
- * что 60 кадров читаются как непрерывное движение. Открытие занимает
+ * что 120 кадров читаются как непрерывное движение. Открытие занимает
  * середину закрепления (OPEN_FROM…OPEN_TO): сначала заливается заголовок,
  * в конце — свечение экрана и платформы. Доля открытия пишется в
  * `--open` (0…1) — от неё в CSS подъём ноутбука и свечение под экраном.
@@ -24,10 +24,10 @@ import { useEffect, useRef, type CSSProperties } from "react";
  * прокрутку. reduced-motion, экономия трафика и ?static=1 — только постер
  * (открытый ноутбук).
  */
-const N = 60;
+const N = 120;
 const OPEN_FROM = 0.1;
 const OPEN_TO = 0.7;
-const frameSrc = (k: number) => `/media/laptop/f${String(k).padStart(2, "0")}.webp`;
+const frameSrc = (k: number) => `/media/laptop/f${String(k).padStart(3, "0")}.webp`;
 const POSTER = "/media/laptop/poster.jpg";
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -150,7 +150,7 @@ export default function LaptopScrub({ className }: { className: string }) {
       }
     };
 
-    // 0,6 экрана до блока, а не полтора: 60 кадров (~700 КБ) иначе
+    // 0,6 экрана до блока, а не полтора: 120 кадров (~1,6 МБ) иначе
     // забирали канал у первого экрана на медленной сети (замер 13.09.2026).
     const io = new IntersectionObserver(([e]) => e.isIntersecting && load(), { rootMargin: "60% 0px" });
     io.observe(host);

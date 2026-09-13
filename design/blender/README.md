@@ -5,7 +5,7 @@
 | Файл | Что внутри | Куда рендерится |
 |---|---|---|
 | `atlas_iphone.blend` | Сцена «AtlasIphone»: iPhone 17 Pro Max (корень `IP_A`, корпус Deep Blue) | `public/media/ios/shell.webp` — корпус без экрана, см. ниже |
-| `atlas_laptop.blend` | Ноутбук раздела 06 главной, крышка открывается за 60 кадров | `public/media/laptop/f00–f59.webp`, `poster.jpg` |
+| `atlas_laptop.blend` | Сцена «AtlasLaptop»: MacBook Pro 14" (Silver) раздела 06 главной, крышка открывается за 120 кадров; модель строит `laptop_build.py` | `public/media/laptop/f000–f119.webp`, `poster.jpg` — см. ниже |
 | `atlas_globe2_blocks.blend` | Глобус раздела 03 (прежняя видеоверсия; сейчас на сайте глобус реального времени `GlobeGL.tsx`) | `public/media/globe2.jpg` — постер-заглушка |
 
 ## iPhone для /install-ios
@@ -49,5 +49,69 @@ node design/blender/iphone-screens/dash.cjs <путь к playwright> design/blen
 ```
 
 Скрипт заменяет в снимке слова кабинета на гостевые (`src/lib/key-names.ts`):
-страница публичная, «VPN» и «Обход» на ней не показываются. PNG → WebP
-(качество ~84, ≤ 120 КБ) — `public/media/ios/dash.webp`.
+страница публичная, «VPN» и «обход» (в любом виде) на ней не показываются.
+**Ключ не светится:** поле ключа заменяется точками `••••••••••••` (без домена
+и пути), QR-код и блок ручного копирования удаляются из DOM, в подмене API —
+заглушка `example.invalid`; скрипт падает, если на странице осталась ссылка, QR
+или запретное слово. PNG → WebP (качество ~88, ≤ 70 КБ) —
+`public/media/ios/dash.webp`.
+
+## MacBook Pro для раздела 06 главной
+
+Ноутбук на главной — 120 кадров открытия крышки (равный шаг, владелец
+13.09.2026: «120 фпс анимации нужны»), их перелистывает прокрутка
+(`src/components/atlas/LaptopScrub.tsx`, стили `.h5-laptop` в `home-v5.css`).
+
+Форма сверена с Apple, MacBook Pro 14" (M4 2024 / M5 2025;
+support.apple.com/en-us/121552, support.apple.com/en-us/125405,
+apple.com/macbook-pro/specs): корпус 31,26 × 22,12 × 1,55 см; дисплей 14,2"
+Liquid Retina XDR 3024 × 1964 px при 254 ppi — активная область
+302,4 × 196,4 мм, скруглённые верхние углы, вырез с камерой по центру
+(188 × 32 pt); узкие чёрные рамки и чёрная полоса у шарнира; 12
+полноразмерных функциональных клавиш и Touch ID; чёрные клавиши с узким
+зазором в чёрной нише; решётки динамиков по обе стороны клавиатуры; большой
+трекпад Force Touch вровень с корпусом; слева MagSafe 3, два Thunderbolt и
+разъём наушников, справа HDMI, Thunderbolt и SDXC; цвет — Silver (Space Black
+на этом свете читается серым). **Ни логотипа, ни надписей на модели нет**
+(товарные знаки) — только форма и материалы.
+
+### 1. Экран — снимок кабинета
+
+`laptop-screen/screen-1512.png` — 3024 × 1964 px (1512 × 982 CSS px @2x):
+строка меню 32 pt (высота выреза), панель браузера с адресом `qodev.dev` и
+живой `/dashboard` под ними. Снимает `laptop-screen/dash.cjs` на запущенной
+production-сборке с подменой API; маскировка ключа, гостевые названия ключей и
+проверка — те же, что у iPhone (см. выше):
+
+```bash
+node design/blender/laptop-screen/dash.cjs <путь к playwright> design/blender/laptop-screen/screen-1512.png http://localhost:3000
+```
+
+### 2. Модель
+
+Открыть `atlas_laptop.blend`, в Scripting выполнить `laptop_build.py`. Скрипт
+пересобирает только модель (корень `LT_Root`) в сцене «AtlasLaptop»: свет,
+карточка отражения, пол-ловец тени, мир, камера `LT_Cam` и настройки рендера
+остаются; снова ставит ключи анимации на `N_FRAMES` = 120 кадров (крышка
+0 → 115°, поворот −4°, экран загорается в последней трети) и диапазон сцены
+1…120. Экран берёт `//laptop-screen/screen-1512.png`. Перед запуском можно
+задать `FINISH = "black"` (Space Black) или другое `N_FRAMES` — тогда поменять
+`N` в `LaptopScrub.tsx`.
+
+### 3. Кадры
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b design/blender/atlas_laptop.blend -S AtlasLaptop -a
+```
+
+Cycles, 256 сэмплов, 1400 × 900, прозрачный фон, 16-бит PNG → путь из
+настроек рендера (`f0001…f0120.png`, ~7 с на кадр на M5 Max). Затем:
+
+```bash
+python design/blender/laptop_post.py <папка с f0001…f0120.png> public/media/laptop
+```
+
+PNG кладутся на белое (края кадра растворяются в белом), кодируются в WebP
+одним качеством на всю серию (кадр ≤ 40 КБ, вся серия ≤ 1,73 МБ) →
+`public/media/laptop/f000…f119.webp`, последний кадр — `poster.jpg`
+(JPEG 88). Кадры непрозрачные: так их ждут `LaptopScrub` и `home-v5.css`.

@@ -5,6 +5,7 @@ import { verifyAdmin } from "../../middleware";
 import { rotatePanelSubscription, syncUserToPanel } from "@/lib/subscription-sync";
 import { applySubscriptionEvent, withTransaction } from "@/lib/subscription-ledger";
 import { adminGrant, adminSetPlan } from "@/lib/admin-actions";
+import { adminGrantBypass } from "@/lib/bypass-grants";
 
 const PLAN_NAME: Record<string, string> = { trial: "Пробный", basic: "Basic", plus: "Plus" };
 
@@ -32,6 +33,7 @@ function formatDuration(key: string): string {
  *   revoke-subscription
  *   regen-key
  *   send-notification   { title, message }
+ *   grant-traffic       { gb: 0.1–5000, requestId } — bypass GB, idempotent per requestId
  */
 export async function POST(request: NextRequest) {
   const auth = await verifyAdmin();
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { action, userId, plan, duration, days, title, message } = await request.json();
+    const { action, userId, plan, duration, days, title, message, gb, requestId } = await request.json();
 
     if (!userId) {
       return NextResponse.json({ success: false, error: "userId обязателен" }, { status: 400 });
@@ -65,6 +67,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: { newEnd: g.newEnd, plan: g.plan, panelSynced: sync.ok, panelError: sync.ok ? undefined : sync.panelError },
+      });
+    }
+
+    if (action === "grant-traffic") {
+      // «Начислить ГБ» обхода: запись в журнал bypass_grants (id admin:<requestId>
+      // — повтор того же нажатия не начисляет второй раз) и прибавка в панели.
+      const admin = auth.userId ? await getUserById(auth.userId) : null;
+      const r = await adminGrantBypass(userId, { gb, requestId }, admin?.email ?? null);
+      if (!r.ok) return NextResponse.json({ success: false, error: r.error }, { status: r.status });
+      return NextResponse.json({
+        success: true,
+        data: {
+          duplicate: r.duplicate,
+          grantId: r.grantId,
+          bytes: r.bytes,
+          panelApplied: r.apply.ok,
+          created: r.apply.created,
+          panelUserId: r.apply.panelUserId,
+          panelError: r.apply.ok ? undefined : r.apply.error,
+        },
       });
     }
 

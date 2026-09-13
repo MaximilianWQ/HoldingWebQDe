@@ -582,8 +582,16 @@ export function botBypassUsername(telegramId: string): string {
   return fillBotPattern("BOT_BYPASS_USERNAME_PATTERN", DEFAULT_BOT_BYPASS_USERNAME_PATTERN, telegramId);
 }
 
-/** Reserved for the next phase (site-sold bypass): `ST00000042_bp`. Not created yet. */
+/** Site-created bypass entity: `ST00000042_bp` (src/lib/bypass-grants.ts). */
 export const SITE_BYPASS_USERNAME_SUFFIX = "_bp";
+/**
+ * Tag of site-created bypass entities. Deliberately NOT in SITE_TAGS /
+ * ALL_SITE_TAGS: isOurPanelUser() must stay false for a bypass entity, so
+ * the premium sync and reconciliation never treat it as a key.
+ */
+export const SITE_BYPASS_TAG = "SITE_BYPASS";
+/** Bypass lives by traffic, not by time — the same "infinity" the bot uses. */
+export const BYPASS_EXPIRE_AT = "2099-12-31T23:59:59Z";
 export function siteBypassUsername(publicId: string): string {
   return `${publicId}${SITE_BYPASS_USERNAME_SUFFIX}`;
 }
@@ -613,10 +621,9 @@ export const DEFAULT_BYPASS_SQUAD_UUID = "6947418d-83b6-4050-a10c-3829e4cd4b2c";
 export const DEFAULT_BYPASS_DEVICE_LIMIT = 5;
 
 /**
- * Config for bypass entities created by the SITE (next phase: «Пакеты
- * трафика»). Env overrides, defaults are the production values (one-time
- * warning, like REMNAWAVE_MAINSERVER_SQUAD_UUID). Nothing writes with
- * it yet.
+ * Config for bypass entities created by the SITE («Пакеты трафика»,
+ * src/lib/bypass-grants.ts). Env overrides, defaults are the production
+ * values (one-time warning, like REMNAWAVE_MAINSERVER_SQUAD_UUID).
  */
 export function getBypassConfig(): { squadUuids: string[]; deviceLimit: number } {
   let squadUuids = csv(process.env.REMNAWAVE_BYPASS_SQUAD_UUID);
@@ -695,6 +702,41 @@ export function buildCreateUserBody(input: {
     hwidDeviceLimit: DEVICE_LIMIT,
     activeInternalSquads: input.squadUuids,
   };
+}
+
+/**
+ * Pure builder for POST /api/users of a SITE bypass entity (`ST…_bp`).
+ * expireAt 2099, limit = the seed grant's bytes (0 would mean unlimited,
+ * so a bypass entity is never created without traffic), NO_RESET, the
+ * bypass squad and device limit, no externalSquadUuid. Exported for tests.
+ */
+export function buildBypassCreateBody(input: {
+  publicId: string;
+  email: string | null;
+  userId: string;
+  emailVerifiedAt: string | null;
+  bytes: number;
+  cfg?: { squadUuids: string[]; deviceLimit: number };
+}): CreateUserBody {
+  const cfg = input.cfg ?? getBypassConfig();
+  if (!Number.isSafeInteger(input.bytes) || input.bytes <= 0) throw new Error(`bypass create: bytes must be positive (${input.bytes})`);
+  return {
+    username: siteBypassUsername(input.publicId),
+    status: "ACTIVE",
+    expireAt: BYPASS_EXPIRE_AT,
+    email: panelSafeEmail(input.email),
+    description: withMarkers(null, { [PANEL_MARKERS.site]: input.userId, [PANEL_MARKERS.emailVerified]: input.emailVerifiedAt }),
+    tag: SITE_BYPASS_TAG,
+    trafficLimitBytes: input.bytes,
+    trafficLimitStrategy: "NO_RESET",
+    hwidDeviceLimit: cfg.deviceLimit,
+    activeInternalSquads: cfg.squadUuids,
+  };
+}
+
+/** A site bypass entity that belongs to THIS account (username shape + atlas-site marker). */
+export function isSiteBypassFor(u: { username?: string | null; description?: string | null }, userId: string): boolean {
+  return isBypassEntity({ username: u.username }) && markerTokens(u.description).includes(`${PANEL_MARKERS.site}:${userId}`);
 }
 
 // ─── Users ───────────────────────────────────────────────────────

@@ -58,15 +58,27 @@ export interface SubscriptionData {
   panelSyncState?: string | null;
   /** Which panel entity survived the Telegram link (bot | site | only-bot | only-site | none | adopted). */
   linkKept?: string | null;
-  /** Bypass (обход) of this person — read-only; null when none or the panel did not answer. */
-  bypass?: {
-    subscriptionUrl: string | null;
-    limitBytes: number;
-    usedBytes: number;
-    remainingBytes: number | null;
-    unlimited: boolean;
-    status: string;
-  } | null;
+  /**
+   * Key 2 («Обход») from the DB — no panel call. `known`: the entity is
+   * remembered; `maybe`: linked account, the bot's bypass not looked up
+   * yet. Live numbers: GET /api/user/bypass (BypassLive).
+   */
+  bypassKey?: { known: boolean; maybe: boolean; subscriptionUrl: string | null; origin: "site" | "bot" | null };
+  /** Gigabytes paid/granted but not yet credited in the panel, bytes. */
+  bypassOwedBytes?: number;
+}
+
+/** GET /api/user/bypass — key 2 live. */
+export interface BypassLive {
+  state: "ok" | "none" | "unavailable";
+  origin: "site" | "bot" | null;
+  subscriptionUrl: string | null;
+  limitBytes: number | null;
+  usedBytes: number | null;
+  remainingBytes: number | null;
+  unlimited: boolean;
+  status: string | null;
+  owedBytes: number;
 }
 
 export interface DeviceInfo {

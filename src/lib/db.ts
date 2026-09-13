@@ -372,6 +372,103 @@ export async function initDb(): Promise<void> {
        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
        applied_at TIMESTAMPTZ
      )`,
+    // ── «Пакеты трафика» on the site (13.09.2026) ──
+    // A payment is either a subscription (plan/period) or a traffic pack.
+    // Old rows are subscriptions by default; plan='traffic', period=0
+    // for packs (the columns are NOT NULL).
+    "ALTER TABLE payments ADD COLUMN IF NOT EXISTS product TEXT NOT NULL DEFAULT 'subscription'",
+    "ALTER TABLE payments ADD COLUMN IF NOT EXISTS traffic_pack_id TEXT",
+    "ALTER TABLE payments ADD COLUMN IF NOT EXISTS traffic_bytes BIGINT",
+    "CREATE INDEX IF NOT EXISTS idx_payments_product_paid ON payments(product, paid_at)",
+    // Where the bypass entity came from: 'site' (our ST…_bp, stays with the
+    // account on unlink) or 'bot' / NULL (the bot's {telegram_id}).
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS bypass_origin TEXT",
+    // Last subscriptionUrl of the bypass entity we saw — the cabinet shows
+    // key 2 from the DB without waiting for the panel.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS bypass_subscription_url TEXT",
+    // Bypass traffic ledger — the source of truth for GB the site owes a
+    // person (trial 500 MB, paid packs, admin grants). One row per source
+    // (id = 'trial:<user>' | 'payment:<payment>' | 'admin:<request>'),
+    // applied to the panel by src/lib/bypass-grants.ts; state
+    // pending → applied | skipped | conflict. 'seeding' = the grant the
+    // entity is being created with (limit = its bytes).
+    `CREATE TABLE IF NOT EXISTS bypass_grants (
+       id TEXT PRIMARY KEY,
+       user_id TEXT NOT NULL REFERENCES users(id),
+       kind TEXT NOT NULL,
+       bytes BIGINT NOT NULL,
+       pack_id TEXT,
+       payment_id TEXT,
+       actor TEXT,
+       note TEXT,
+       state TEXT NOT NULL DEFAULT 'pending',
+       panel_user_id BIGINT,
+       attempts INTEGER NOT NULL DEFAULT 0,
+       last_error TEXT,
+       next_attempt_at TIMESTAMPTZ,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       applied_at TIMESTAMPTZ
+     )`,
+    "CREATE INDEX IF NOT EXISTS idx_bypass_grants_user ON bypass_grants(user_id, created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_bypass_grants_due ON bypass_grants(state, next_attempt_at)",
+    // ── Рассылки и массовые начисления (13.09.2026) ──
+    // Unsubscribe token: 32 CSPRNG bytes (base64url), filled lazily in
+    // Node (unsubscribe.ts), never by SQL. Stored in the clear on purpose:
+    // the same link has to go into every future letter, and the only
+    // thing it can do is switch off marketing mail for that one person.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS unsubscribe_token TEXT",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_unsubscribe_token ON users(unsubscribe_token) WHERE unsubscribe_token IS NOT NULL",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_opt_out_at TIMESTAMPTZ",
+    // Consent (owner, 13.09.2026): privacy/terms at sign-up (required) and
+    // marketing (optional, off by default) — src/lib/consent.ts. Marketing
+    // campaigns go only to consent IS NOT NULL AND opt_out IS NULL.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS privacy_consent_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS privacy_consent_version TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_source TEXT",
+    // `grant` is a reserved word in Postgres — the column is grant_spec
+    // ({ plan?, days?, trafficGb? } or NULL); the API field is still `grant`.
+    `CREATE TABLE IF NOT EXISTS email_campaigns (
+       id TEXT PRIMARY KEY,
+       kind TEXT NOT NULL CHECK (kind IN ('service', 'marketing')),
+       subject TEXT NOT NULL,
+       body_md TEXT NOT NULL,
+       audience JSONB NOT NULL,
+       channel TEXT NOT NULL DEFAULT 'email' CHECK (channel IN ('email', 'site', 'both')),
+       grant_spec JSONB,
+       status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'queued', 'sending', 'paused', 'done', 'cancelled')),
+       created_by TEXT,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       started_at TIMESTAMPTZ,
+       finished_at TIMESTAMPTZ,
+       counts JSONB,
+       last_error TEXT
+     )`,
+    "CREATE INDEX IF NOT EXISTS idx_email_campaigns_status ON email_campaigns(status, created_at)",
+    // One row per (campaign, person): the primary key is what makes «one
+    // letter per person per campaign» hold across retries and restarts.
+    // batch_id = the Resend batch the row went out in (its idempotency key);
+    // granted_at / notified_at — side effects done before the letter.
+    `CREATE TABLE IF NOT EXISTS email_deliveries (
+       campaign_id TEXT NOT NULL REFERENCES email_campaigns(id),
+       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+       email TEXT NOT NULL,
+       status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'sent', 'failed', 'skipped_optout', 'skipped_no_consent', 'skipped_invalid', 'skipped_placeholder')),
+       attempts INTEGER NOT NULL DEFAULT 0,
+       last_error TEXT,
+       resend_id TEXT,
+       sent_at TIMESTAMPTZ,
+       batch_id TEXT,
+       next_attempt_at TIMESTAMPTZ,
+       granted_at TIMESTAMPTZ,
+       notified_at TIMESTAMPTZ,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       PRIMARY KEY (campaign_id, user_id)
+     )`,
+    "CREATE INDEX IF NOT EXISTS idx_email_deliveries_sent ON email_deliveries(sent_at) WHERE status = 'sent'",
+    "CREATE INDEX IF NOT EXISTS idx_email_deliveries_queue ON email_deliveries(campaign_id, status, next_attempt_at)",
+    "CREATE INDEX IF NOT EXISTS idx_email_deliveries_batch ON email_deliveries(campaign_id, batch_id) WHERE batch_id IS NOT NULL",
   ];
 
   const failed: string[] = [];

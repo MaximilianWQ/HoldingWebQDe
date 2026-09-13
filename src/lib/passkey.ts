@@ -13,7 +13,9 @@ import { pool } from "./db";
 import { v4 as uuidv4 } from "uuid";
 
 const RP_NAME = "Atlas Secure";
-const RP_ID = process.env.PASSKEY_RP_ID || "atlassecure.uk";
+// Прод — qodev.dev (atlassecure.uk — другой, старый сайт): с чужим RP ID
+// браузер отказывает в создании ключа входа.
+const RP_ID = process.env.PASSKEY_RP_ID || "qodev.dev";
 const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || `https://${RP_ID}`;
 
 // ─── Challenge store ────────────────────────────────────────────

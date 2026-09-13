@@ -8,6 +8,10 @@ import Icon, { type IconName } from "@/components/pixel/Icon";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
+import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT, type KeyAudience } from "@/lib/key-names";
+import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
+import { TRAFFIC_TRIAL_MB } from "@/lib/traffic-packs";
+import type { SubscriptionData } from "@/types";
 import "./devices-atlas.css";
 
 /**
@@ -23,9 +27,12 @@ import "./devices-atlas.css";
  * Что изменилось — только оформление:
  *   01 первый экран: заголовок буквами, строки устройств въезжают
  *      с разных сторон, наведение переворачивает строку в плиту;
- *   02 настройка: инструкция раскрывается лесенкой из трёх шагов
- *      с крупными кобальтовыми цифрами (как «три шага» на главной),
- *      при смене устройства или приложения лесенка собирается заново;
+ *   02 настройка: инструкция раскрывается лесенкой из четырёх шагов
+ *      с крупными кобальтовыми цифрами: установить приложение, ключ 1
+ *      (основной), ключ 2 (усиленный / «Обход» — гигабайты пакета),
+ *      включить; при смене устройства или приложения лесенка
+ *      собирается заново. Слова ключей — src/lib/key-names.ts: гостю
+ *      нейтральные, вошедшему (hasSession) — «Основной VPN» / «Обход»;
  *   03 финал: кобальтовая плита, одно действие.
  *
  * Блок настройки присутствует в разметке всегда и скрыт атрибутом
@@ -218,9 +225,17 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
   const [vpnKey, setVpnKey] = useState<string | null>(null);
   /** null — ещё грузим, true/false — ответ получен. */
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+  /** Ключ 2 («Обход»/«Усиленный») из БД — без ожидания панели. */
+  const [bk, setBk] = useState<SubscriptionData["bypassKey"] | null>(null);
+  const [owed, setOwed] = useState(0);
+  /** Какой ключ скопирован / у какого открыт QR: 0 — ни у какого. */
+  const [copied, setCopied] = useState<0 | 1 | 2>(0);
+  const [showQR, setShowQR] = useState<0 | 1 | 2>(0);
   const setupRef = useRef<HTMLElement>(null);
+  // Живой остаток ключа 2 — после первой отрисовки и только вошедшему.
+  const { live, status: liveStatus } = useBypassLive(signedIn === true && !!(bk?.known || bk?.maybe || owed > 0));
+  // Слова: гостю — «Основной» / «Усиленный», вошедшему — «Основной VPN» / «Обход».
+  const aud: KeyAudience = hasSession && signedIn !== false ? "member" : "guest";
 
   /** Показать блок настройки: прокрутка к нему и фокус на заголовок,
    *  чтобы и глаз, и чтец экрана сразу оказались на втором шаге. */
@@ -278,6 +293,10 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
       if (result.success && result.data.vpnKey) {
         setVpnKey(result.data.vpnKey);
       }
+      if (result.success) {
+        setBk(result.data.bypassKey ?? null);
+        setOwed(result.data.bypassOwedBytes ?? 0);
+      }
     } catch {
       setSignedIn(false);
     }
@@ -289,20 +308,19 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
   const currentApp = selectedApps[appIndex] ?? selectedApps[0];
   const platformMeta = PLATFORMS.find((p) => p.id === platform)!;
 
-  const getKeyUrl = useCallback(() => {
-    if (!vpnKey) return null;
-    if (currentApp?.jsonFormat) {
-      const sep = vpnKey.includes("?") ? "&" : "?";
-      return `${vpnKey}${sep}format=json`;
-    }
-    return vpnKey;
-  }, [vpnKey, currentApp]);
+  // Ссылка для выбранного приложения: Happ получает `?format=json` —
+  // так было у основного ключа на проде и так же для ключа 2 (это та же
+  // подписка Remnawave, только другой сущности).
+  const forApp = useCallback(
+    (raw: string | null) => (raw ? (currentApp?.jsonFormat ? withJsonFormat(raw) : raw) : null),
+    [currentApp]
+  );
 
   const goToSetup = (p: Platform) => {
     setPlatform(p);
     setAppIndex(0);
-    setShowQR(false);
-    setCopied(false);
+    setShowQR(0);
+    setCopied(0);
     setStep("setup");
     // Push a new URL so the browser back button returns to step 1.
     const url = new URL(window.location.href);
@@ -321,8 +339,8 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
       window.history.back();
     } else {
       setStep("device");
-      setShowQR(false);
-      setCopied(false);
+      setShowQR(0);
+      setCopied(0);
       const url = new URL(window.location.href);
       url.searchParams.delete("step");
       url.searchParams.delete("platform");
@@ -333,12 +351,11 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
 
   const handleSelectApp = (idx: number) => {
     setAppIndex(idx);
-    setShowQR(false);
-    setCopied(false);
+    setShowQR(0);
+    setCopied(0);
   };
 
-  const handleCopy = async () => {
-    const key = getKeyUrl();
+  const handleCopy = async (n: 1 | 2, key: string | null) => {
     if (!key) return;
     try {
       await navigator.clipboard.writeText(key);
@@ -350,18 +367,70 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
       document.execCommand("copy");
       document.body.removeChild(ta);
     }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setCopied(n);
+    setTimeout(() => setCopied(0), 2500);
   };
 
-  const handleAutoInstall = () => {
-    const key = getKeyUrl();
+  const handleAutoInstall = (key: string | null) => {
     if (!key || !currentApp?.deepLink) return;
     window.location.href = currentApp.deepLink(key);
   };
 
-  const keyUrl = getKeyUrl();
+  const keyUrl = forApp(vpnKey);
+  const key2Url = forApp(live?.subscriptionUrl ?? bk?.subscriptionUrl ?? null);
+  const owedNow = live ? live.owedBytes : owed;
   const isSetup = step === "setup";
+
+  /** Кнопки одного ключа: открыть в приложении, скопировать, QR. */
+  const keyActions = (n: 1 | 2, url: string | null, what: string) => (
+    <>
+      <div className="a-actions ad-key-actions">
+        {currentApp.deepLink && (
+          <button
+            type="button"
+            onClick={() => handleAutoInstall(url)}
+            disabled={!url}
+            className={`a-btn ${n === 1 ? "a-btn-primary" : "a-btn-quiet"}`}
+          >
+            Открыть в приложении<span className="b-sr"> — {what}</span>
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => handleCopy(n, url)}
+          disabled={!url}
+          className="a-btn a-btn-quiet ad-copy"
+          data-copied={copied === n || undefined}
+        >
+          {copied === n ? (
+            <>
+              <Icon name="check" size={16} />
+              Скопировано
+            </>
+          ) : (
+            "Скопировать ссылку"
+          )}
+          <span className="b-sr"> — {what}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowQR((v) => (v === n ? 0 : n))}
+          disabled={!url}
+          aria-pressed={showQR === n}
+          className="a-btn a-btn-quiet"
+        >
+          {showQR === n ? "Скрыть QR-код" : "Показать QR-код"}
+          <span className="b-sr"> — {what}</span>
+        </button>
+      </div>
+      {showQR === n && url && (
+        <figure className="ad-qr">
+          <QRCodeSVG value={url} size={192} bgColor="#ffffff" fgColor="#0B1322" level="M" />
+          <figcaption>Наведите камеру приложения на код — ключ добавится сам.</figcaption>
+        </figure>
+      )}
+    </>
+  );
 
   return (
     <main id="main" className="a-main ad" data-step={step}>
@@ -506,7 +575,9 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
             <li className="ad-step" style={{ ["--i" as string]: 1 }}>
               <span className="ad-step-n" aria-hidden>2</span>
               <div className="ad-step-body">
-                <h3>Добавьте ключ</h3>
+                <p className="ad-kname">{MAIN_KEY[aud].title}</p>
+                <h3>{aud === "member" ? "Добавьте основной VPN" : "Добавьте основной ключ"}</h3>
+                <p className="ad-kline">{MAIN_KEY[aud].text}</p>
                 {keyUrl ? (
                   <>
                     <p>Ссылка ниже — только ваша. Кнопка сама откроет приложение и добавит её.</p>
@@ -534,66 +605,71 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
                   </div>
                 )}
 
-                {signedIn !== false && (
-                  <div className="a-actions ad-key-actions">
-                    {currentApp.deepLink && (
-                      <button
-                        type="button"
-                        onClick={handleAutoInstall}
-                        disabled={!keyUrl}
-                        className="a-btn a-btn-primary"
-                      >
-                        Открыть в приложении
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      disabled={!keyUrl}
-                      className="a-btn a-btn-quiet ad-copy"
-                      data-copied={copied || undefined}
-                    >
-                      {copied ? (
-                        <>
-                          <Icon name="check" size={16} />
-                          Скопировано
-                        </>
-                      ) : (
-                        "Скопировать ссылку"
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowQR((v) => !v)}
-                      disabled={!keyUrl}
-                      aria-pressed={showQR}
-                      className="a-btn a-btn-quiet"
-                    >
-                      {showQR ? "Скрыть QR-код" : "Показать QR-код"}
-                    </button>
-                  </div>
-                )}
+                {signedIn !== false && keyActions(1, keyUrl, MAIN_KEY[aud].title)}
                 <p className="b-sr" role="status" aria-live="polite">
-                  {copied ? "Ссылка скопирована" : ""}
+                  {copied ? `Ссылка скопирована: ${copied === 1 ? MAIN_KEY[aud].title : BYPASS_KEY[aud].title}` : ""}
                 </p>
-
-                {showQR && keyUrl && (
-                  <figure className="ad-qr">
-                    <QRCodeSVG value={keyUrl} size={192} bgColor="#ffffff" fgColor="#0B1322" level="M" />
-                    <figcaption>Наведите камеру приложения на код — ключ добавится сам.</figcaption>
-                  </figure>
-                )}
               </div>
             </li>
 
             <li className="ad-step" style={{ ["--i" as string]: 2 }}>
               <span className="ad-step-n" aria-hidden>3</span>
               <div className="ad-step-body">
+                <p className="ad-kname">{BYPASS_KEY[aud].title}</p>
+                <h3>{aud === "member" ? "Добавьте ключ «Обход»" : "Добавьте усиленный ключ"}</h3>
+                <p className="ad-kline">{BYPASS_KEY[aud].text}</p>
+                {signedIn === false ? (
+                  <div className="ad-guest">
+                    <p>
+                      Усиленный ключ приходит вместе с пробным периодом — в нём {TRAFFIC_TRIAL_MB} МБ. Дальше
+                      гигабайты докупаются пакетами трафика: срока у них нет, пакеты складываются.
+                    </p>
+                    <div className="a-actions">
+                      <Link href="/auth" className="a-btn a-btn-primary">Попробовать бесплатно</Link>
+                      <Link href="/pricing#traffic" className="a-btn a-btn-quiet">Пакеты трафика</Link>
+                    </div>
+                  </div>
+                ) : signedIn === null || (liveStatus === "loading" && !key2Url) ? (
+                  <div className="ad-key" aria-busy="true">
+                    <span className="ad-key-text ad-key-wait">Секунду, проверяем ключ…</span>
+                    <span className="ad-key-flow a-idle" aria-hidden />
+                  </div>
+                ) : key2Url ? (
+                  <>
+                    {live?.state === "ok" && !live.unlimited && (
+                      <p className="ad-kleft">
+                        Осталось <b className="a-num">{formatBytes(live.remainingBytes ?? 0)}</b> из {formatBytes(live.limitBytes ?? 0)}
+                      </p>
+                    )}
+                    <div className="ad-key">
+                      <span className="ad-key-text">{key2Url}</span>
+                      <span className="ad-key-flow a-idle" aria-hidden />
+                    </div>
+                    {keyActions(2, key2Url, BYPASS_KEY[aud].title)}
+                    <div className="a-actions">
+                      <Link href={BUY_TRAFFIC_HREF} className="a-btn a-btn-quiet">Докупить гигабайты</Link>
+                    </div>
+                  </>
+                ) : owedNow > 0 ? (
+                  <p>Гигабайты оплачены и зачисляются — ключ появится здесь через пару минут.</p>
+                ) : (
+                  <div className="ad-guest">
+                    <p>Ключа «Обход» пока нет. Купите пакет трафика — ключ появится сразу после оплаты.</p>
+                    <Link href={BUY_TRAFFIC_HREF} className="a-btn a-btn-primary">Получить ключ «Обход»</Link>
+                  </div>
+                )}
+              </div>
+            </li>
+
+            <li className="ad-step" style={{ ["--i" as string]: 3 }}>
+              <span className="ad-step-n" aria-hidden>4</span>
+              <div className="ad-step-body">
                 <h3>Включите</h3>
                 <p>
                   Нажмите кнопку подключения в {currentApp.name}. Дальше всё работает само.{" "}
                   <span className="ad-on a-idle">включено</span>
                 </p>
+                <p className="ad-switch">{SWITCH_HINT[aud]}</p>
 
                 <details className="ad-manual">
                   <summary>

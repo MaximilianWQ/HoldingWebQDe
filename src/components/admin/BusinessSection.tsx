@@ -5,6 +5,7 @@ import { PERIOD_LABEL, type Period } from "@/lib/plans";
 import {
   LEDGER_LABELS,
   PLAN_LABELS,
+  bytes,
   isErr,
   money,
   num,
@@ -51,6 +52,7 @@ export default function BusinessSection({ ov, ovError, reloadKey = 0 }: { ov: Ov
       <PlansCard r={revenue} />
       <FunnelCard f={funnel} r={revenue} />
       <AudienceCard f={funnel} />
+      <TrafficCard r={revenue} />
       <LedgerCard l={ledger} />
     </div>
   );
@@ -134,7 +136,7 @@ function PlansCard({ r }: { r: Overview["revenue"] | null }) {
   return (
     <section className="ak-card adm-plans" data-sheet="24" style={at(3)} aria-labelledby="adm-plans-h">
       <div className="ak-card-head">
-        <h2 id="adm-plans-h" className="ak-eyebrow">По тарифам · 30 дней</h2>
+        <h2 id="adm-plans-h" className="ak-eyebrow">Подписки по тарифам · 30 дней</h2>
         {total > 0 && <span className="ak-plan a-num">{money(total)}</span>}
       </div>
       {r === null ? (
@@ -162,6 +164,58 @@ function PlansCard({ r }: { r: Overview["revenue"] | null }) {
               note: `${num(x.n)} ${x.n % 10 === 1 && x.n % 100 !== 11 ? "оплата" : "оплат"} · ${pcs(x.amount, total)}`,
             }))}
           />
+        </>
+      )}
+    </section>
+  );
+}
+
+/* ─── Пакеты трафика ─────────────────────────────────────────────── */
+
+const packLabel = (pack: string | null) => {
+  const m = /^gb(\d+)$/.exec(pack || "");
+  return m ? `${num(Number(m[1]))} ГБ` : pack || "—";
+};
+
+function TrafficCard({ r }: { r: Overview["revenue"] | null }) {
+  const v = r && !isErr(r) ? r : null;
+  const t = v?.traffic30d;
+  const rows = t ? [...t.byPack].sort((a, b) => b.amount - a.amount) : [];
+  const share = v && t && v.gross.d30 > 0 ? pcs(t.amount, v.gross.d30) : null;
+  return (
+    <section className="ak-card adm-traffic" data-sheet="24" style={at(6)} aria-labelledby="adm-traffic-h">
+      <div className="ak-card-head">
+        <h2 id="adm-traffic-h" className="ak-eyebrow">Пакеты трафика · 30 дней</h2>
+        {t && t.amount > 0 && <span className="ak-plan a-num">{money(t.amount)}</span>}
+      </div>
+      {r === null ? (
+        <Skel rows={3} />
+      ) : !v ? (
+        <BlockError title="Нет данных о выручке" />
+      ) : !t ? (
+        <p className="adm-empty">Сервер ещё не отдаёт пакеты трафика — обновите бэкенд.</p>
+      ) : (
+        <>
+          <ul className="adm-tiles adm-tiles-row">
+            <Tile label="Выручка" value={money(t.amount)} note={share ? `${share} всей выручки` : undefined} tone="ok" />
+            <Tile label="Продано пакетов" value={num(t.n)} />
+            <Tile label="Гигабайт" value={bytes(t.bytes)} tone="mute" />
+          </ul>
+          {rows.length === 0 ? (
+            <p className="adm-empty">За 30 дней пакеты не покупали.</p>
+          ) : (
+            <Bars
+              label="Выручка по пакетам трафика за 30 дней"
+              items={rows.map((x) => ({
+                key: x.pack || "none",
+                label: packLabel(x.pack),
+                value: x.amount,
+                shown: money(x.amount),
+                note: `${num(x.n)} ${x.n % 10 === 1 && x.n % 100 !== 11 ? "покупка" : "покупок"} · ${pcs(x.amount, t.amount)}`,
+              }))}
+            />
+          )}
+          <p className="ak-fine">Суммы входят в «Выручку · 30 дней». Конверсия и продления выше считаются только по подпискам.</p>
         </>
       )}
     </section>
@@ -247,7 +301,7 @@ function LedgerCard({ l }: { l: Overview["ledger30d"] | null }) {
   const rows = v ? Object.entries(v).sort((a, b) => b[1] - a[1]) : [];
   const total = rows.reduce((s, [, n]) => s + n, 0);
   return (
-    <section className="ak-card adm-ledger" data-sheet="24" style={at(6)} aria-labelledby="adm-ledger-h">
+    <section className="ak-card adm-ledger" data-sheet="24" style={at(7)} aria-labelledby="adm-ledger-h">
       <div className="ak-card-head">
         <h2 id="adm-ledger-h" className="ak-eyebrow">События подписок · 30 дней</h2>
         {total > 0 && <span className="ak-plan a-num">{num(total)}</span>}

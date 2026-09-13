@@ -174,9 +174,12 @@
   align-items: start;
   max-width: 60rem;
 }
+/* Четыре ступени (13.09.2026: основной ключ и ключ 2 — отдельными шагами),
+   шаг лесенки чуть мельче, чтобы четвёртая не уезжала за колонку. */
 @media (min-width: 900px) {
-  .ad-step:nth-child(2) { margin-left: clamp(4rem, 11vw, 11rem); }
-  .ad-step:nth-child(3) { margin-left: clamp(8rem, 22vw, 22rem); }
+  .ad-step:nth-child(2) { margin-left: clamp(3rem, 7vw, 7.5rem); }
+  .ad-step:nth-child(3) { margin-left: clamp(6rem, 14vw, 15rem); }
+  .ad-step:nth-child(4) { margin-left: clamp(9rem, 21vw, 22.5rem); }
 }
 .ad-step-n {
   display: block;
@@ -233,6 +236,32 @@
 .ad-copy[data-copied] { color: var(--a-cobalt); }
 
 .ad-guest { margin-bottom: 0.5rem; }
+
+/* Имя ключа над шагом: «Ключ 1 · Основной» / «Ключ 2 · Усиленный». */
+.ad-kname {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.35rem !important;
+  font-family: var(--a-wide);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--a-cobalt) !important;
+}
+.ad-kname::before { content: ""; width: 12px; height: 2px; background: currentColor; }
+.ad-step-body .ad-kline { color: var(--a-ink); }
+.ad-step-body .ad-kleft { margin-bottom: 0.6rem; font-family: var(--a-wide); font-size: 0.9375rem; color: var(--a-ink-2); }
+.ad-kleft b { font-weight: 700; color: var(--a-ink); }
+/* Как переключаться между ключами — плашка под «Включите». */
+.ad-step-body .ad-switch {
+  max-width: 46ch;
+  padding: 0.75rem 1rem;
+  background: var(--a-shoal);
+  color: var(--a-ink);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
 
 .ad-qr {
   display: inline-grid;

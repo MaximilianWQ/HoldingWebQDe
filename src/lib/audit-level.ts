@@ -19,6 +19,8 @@ export const WARN_ACTIONS = [
   "bot_sync.disabled",
   "sync.overwrite",
   "system.ghost_date_repair",
+  "admin.campaign_pause",
+  "admin.campaign_cancel",
 ];
 
 const ERROR_RE = /fail|error/i;

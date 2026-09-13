@@ -68,6 +68,107 @@ export interface HistoryPayment {
   appliedAt: string | null;
   refundedAt: string | null;
   refundId: string | null;
+  /** «Пакеты трафика» (13.09.2026): у старого бэкенда полей нет. */
+  product?: "subscription" | "traffic";
+  trafficPackId?: string | null;
+  trafficBytes?: number | null;
+}
+
+/* ─── Обход пользователя: GET /api/admin/users/{id}/bypass ────────── */
+
+export interface BypassEntityInfo {
+  panelUserId: number;
+  username: string;
+  subscriptionUrl: string | null;
+  limitBytes: number;
+  usedBytes: number;
+  remainingBytes: number | null;
+  unlimited: boolean;
+  status: string;
+  trafficLimitStrategy: string | null;
+  hwidDeviceLimit: number | null;
+  expireAt: string;
+  tag: string | null;
+}
+
+export type BypassGrantKind = "trial" | "payment" | "admin";
+export type BypassGrantState = "pending" | "seeding" | "applied" | "skipped" | "conflict";
+
+export interface BypassGrantRow {
+  id: string;
+  userId: string;
+  kind: BypassGrantKind;
+  bytes: number;
+  packId: string | null;
+  paymentId: string | null;
+  actor: string | null;
+  note: string | null;
+  state: BypassGrantState;
+  panelUserId: number | null;
+  attempts: number;
+  lastError: string | null;
+  nextAttemptAt: string | null;
+  createdAt: string;
+  appliedAt: string | null;
+}
+
+export interface BypassOpRow {
+  opId: string;
+  panelUserId: number;
+  addBytes: number;
+  baseLimit: number | null;
+  state: string;
+  note: string | null;
+  createdAt: string;
+  appliedAt: string | null;
+}
+
+export interface UserBypass {
+  panelUserId: number | null;
+  origin: "site" | "bot" | null;
+  entity: BypassEntityInfo | null;
+  panelError: string | null;
+  grants: BypassGrantRow[];
+  ops: BypassOpRow[];
+  owedBytes: number;
+}
+
+/** POST manage grant-traffic → data. */
+export interface GrantTrafficResult {
+  duplicate: boolean;
+  grantId: string;
+  bytes: number;
+  panelApplied: boolean;
+  created: boolean;
+  panelUserId: number | null;
+  panelError?: string;
+}
+
+export const BYPASS_GRANT_KIND: Record<string, string> = {
+  trial: "Пробные",
+  payment: "Пакет трафика",
+  admin: "Вручную",
+};
+
+export const BYPASS_GRANT_STATE: Record<string, { label: string; tone?: "warn" | "off" | "mute" | "ink" }> = {
+  applied: { label: "в панели" },
+  pending: { label: "ждёт панели", tone: "warn" },
+  seeding: { label: "создаётся", tone: "warn" },
+  skipped: { label: "пропущено", tone: "mute" },
+  conflict: { label: "конфликт — вручную", tone: "off" },
+};
+
+export const BYPASS_OP_STATE: Record<string, { label: string; tone?: "warn" | "off" | "mute" | "ink" }> = {
+  applied: { label: "прибавлено" },
+  pending: { label: "в процессе", tone: "warn" },
+  conflict: { label: "конфликт", tone: "off" },
+};
+
+/** «Пакет трафика 50 ГБ» — заголовок оплаты пакета в истории. */
+export function trafficTitle(bytesN: number | null | undefined, packId: string | null | undefined): string {
+  if (bytesN && bytesN > 0) return `Пакет трафика ${bytes(bytesN)}`;
+  const m = /^gb(\d+)$/.exec(packId || "");
+  return m ? `Пакет трафика ${num(Number(m[1]))} ГБ` : "Пакет трафика";
 }
 
 export interface HistoryEvent {
@@ -101,6 +202,9 @@ export interface SeriesPoint {
   conversions: number;
   renewals: number;
   expirations: number;
+  /** «Пакеты трафика» — уже внутри revenue и payments; у старого бэкенда нет. */
+  trafficRevenue?: number;
+  trafficPayments?: number;
 }
 
 export interface DailySeries {
@@ -200,7 +304,10 @@ export interface OverviewSync {
 export interface OverviewRevenue {
   gross: { today: number; d7: number; d30: number; all_time: number; count30: number };
   refunds30d: { n: number; amount: number };
+  /** Только подписки (пакеты трафика — в traffic30d). */
   byPlan30d: Array<{ plan: string; period: number; n: number; amount: number }>;
+  /** «Пакеты трафика» за 30 дней; суммы уже входят в gross. */
+  traffic30d?: { n: number; amount: number; bytes: number; byPack: Array<{ pack: string | null; n: number; amount: number; bytes: number }> };
   currency: string;
 }
 
@@ -313,11 +420,20 @@ export const ACTION_LABELS: Record<string, { label: string; tone?: "warn" | "off
   "admin.set_plan": { label: "Смена тарифа", tone: "warn" },
   "admin.device_delete": { label: "Устройство отвязано", tone: "warn" },
   "admin.devices_delete_all": { label: "Все устройства отвязаны", tone: "warn" },
+  "admin.bypass_grant": { label: "Начислен трафик" },
   "telegram.link": { label: "Telegram привязан", tone: "mute" },
   "telegram.unlink": { label: "Telegram отвязан", tone: "mute" },
   "sync.overwrite": { label: "Перезапись ботом", tone: "warn" },
   "bot_sync.enabled": { label: "Бот включён", tone: "mute" },
   "bot_sync.disabled": { label: "Бот выключен", tone: "warn" },
+  "admin.campaign_start": { label: "Рассылка запущена" },
+  "admin.campaign_pause": { label: "Рассылка на паузе", tone: "warn" },
+  "admin.campaign_resume": { label: "Рассылка продолжена" },
+  "admin.campaign_cancel": { label: "Рассылка отменена", tone: "warn" },
+  "admin.campaign_test": { label: "Тестовое письмо", tone: "mute" },
+  "user.marketing_opt_out": { label: "Отписка от рассылки", tone: "mute" },
+  "user.marketing_consent_on": { label: "Согласие на новости", tone: "mute" },
+  "user.marketing_consent_off": { label: "Отказ от новостей", tone: "mute" },
 };
 
 export const LEDGER_LABELS: Record<string, string> = {

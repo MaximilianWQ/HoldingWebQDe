@@ -63,12 +63,6 @@ function humanRemaining(days: number, hours: number): string {
 
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
-/** Гигабайты для строки обхода: до 10 ГБ — с десятыми. */
-function gb(bytes: number): string {
-  const v = bytes / 1024 ** 3;
-  return `${v.toLocaleString("ru-RU", { maximumFractionDigits: v < 10 ? 1 : 0 })} ГБ`;
-}
-
 /** Привязка Telegram с сайта: одноразовая ссылка на бота (15 минут). */
 type TgLinkState =
   | { state: "idle" }
@@ -80,7 +74,7 @@ type TgLinkState =
    (телефон) — один список, одна подсветка. */
 const SECTIONS: { id: string; label: string; icon: IconName }[] = [
   { id: "ak-sub", label: "Подписка", icon: "clock" },
-  { id: "ak-key", label: "Ключ", icon: "qr" },
+  { id: "ak-key", label: "Ключи", icon: "qr" },
   { id: "referral-section", label: "Друзья", icon: "users" },
   { id: "ak-set", label: "Настройки", icon: "bell" },
 ];
@@ -96,7 +90,6 @@ export default function DashboardView() {
   const [unlinkStep, setUnlinkStep] = useState(0);
   const [unlinking, setUnlinking] = useState(false);
   const [tgLink, setTgLink] = useState<TgLinkState>({ state: "idle" });
-  const [copiedBypass, setCopiedBypass] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [resyncing, setResyncing] = useState(false);
@@ -206,16 +199,6 @@ export default function DashboardView() {
     }
   };
 
-  const copyBypass = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopiedBypass(true);
-      setTimeout(() => setCopiedBypass(false), 2000);
-    } catch {
-      // буфер недоступен — ссылка видна целиком ниже
-    }
-  };
-
   const handleUnlinkTelegram = async () => {
     setUnlinking(true);
     try {
@@ -311,8 +294,12 @@ export default function DashboardView() {
   // Тридцать клеток — месяц. Больше месяца — полная полоса.
   const filled = isExpired ? 0 : Math.min(30, Math.max(1, data.daysLeft));
   const unreadLabel = unreadCount > 9 ? "9+" : String(unreadCount);
-  // Без активной подписки ключа нет — и раздела «Ключ» тоже.
-  const sections = isExpired ? SECTIONS.filter((s) => s.id !== "ak-key") : SECTIONS;
+  // Ключи: основной — пока подписка активна; «Обход» живёт отдельно
+  // (гигабайты без срока), поэтому раздел остаётся и после окончания
+  // подписки, если ключ 2 есть или ждёт зачисления.
+  const hasSecondKey = !!(data.bypassKey?.known || data.bypassKey?.maybe || (data.bypassOwedBytes ?? 0) > 0);
+  const showKeys = !isExpired || hasSecondKey;
+  const sections = showKeys ? SECTIONS : SECTIONS.filter((s) => s.id !== "ak-key");
 
   // Первые шаги — только на пробном: платный уже прошёл этот путь, а те
   // же кнопки у него есть в панелях Telegram и «Друзья».
@@ -421,7 +408,7 @@ export default function DashboardView() {
             </div>
             <span className="ak-bar-plan">{planLabel}</span>
           </nav>
-          <div className="ak-grid" data-nokey={isExpired ? "" : undefined}>
+          <div className="ak-grid" data-nokey={showKeys ? undefined : ""}>
             {/* ── 1 · Подписка ─────────────────────────────────────── */}
             <section id="ak-sub" className="ak-card ak-sub ak-dark ak-has-orb" data-sheet="20" style={at(1)} aria-labelledby="ak-sub-h">
               <Corner href="/pricing" label="Тарифы и цены" />
@@ -578,10 +565,8 @@ export default function DashboardView() {
               </section>
             )}
 
-            {/* ── 3 · Ключ ─────────────────────────────────────────── */}
-            {!isExpired && (
-              <CabinetKey subscriptionUrl={data.subscriptionUrl ?? null} happCryptoLink={data.happCryptoLink ?? null} i={3} />
-            )}
+            {/* ── 3 · Ключи: основной VPN и «Обход» ─────────────────── */}
+            {showKeys && <CabinetKey data={data} i={3} />}
 
             {/* ── 4 · Быстрые переходы ─────────────────────────────── */}
             <section className="ak-card ak-quick" data-sheet="20" style={at(4)} aria-labelledby="ak-q-h">
@@ -712,31 +697,6 @@ export default function DashboardView() {
                 )
               )}
               {tgLink.state === "error" && <p className="ak-err" role="alert">{tgLink.error}</p>}
-
-              {data.bypass && (
-                <div className="ak-row">
-                  <div className="ak-row-copy">
-                    <p className="ak-row-title">
-                      Обход: {data.bypass.unlimited ? "без лимита" : `остаток ${gb(data.bypass.remainingBytes ?? 0)}`}
-                    </p>
-                    <p className="ak-row-text">
-                      {data.bypass.unlimited ? `Использовано ${gb(data.bypass.usedBytes)}.` : `Использовано ${gb(data.bypass.usedBytes)} из ${gb(data.bypass.limitBytes)}.`}{" "}
-                      Отдельная ссылка, трафик докупается в боте.
-                    </p>
-                  </div>
-                  {data.bypass.subscriptionUrl && (
-                    <button
-                      type="button"
-                      onClick={() => copyBypass(data.bypass!.subscriptionUrl!)}
-                      className="a-btn ak-btn-soft"
-                      data-state={copiedBypass ? "ok" : undefined}
-                    >
-                      <Icon name={copiedBypass ? "check" : "copy"} size={16} />
-                      {copiedBypass ? "Скопировано" : "Ссылка обхода"}
-                    </button>
-                  )}
-                </div>
-              )}
             </section>
 
             {/* ── 8 · Уведомления и вход ───────────────────────────── */}

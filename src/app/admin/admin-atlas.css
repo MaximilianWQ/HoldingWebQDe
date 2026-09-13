@@ -31,7 +31,7 @@
 @media (min-width: 720px) {
   .adm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-verdict, .adm-h-nodes, .adm-h-sync,
-  .adm-rev, .adm-plans, .adm-series,
+  .adm-rev, .adm-plans, .adm-series, .adm-traffic,
   .adm-s-sync, .adm-s-cast, .adm-s-log { grid-column: 1 / -1; }
 }
 @media (min-width: 1100px) {
@@ -48,6 +48,8 @@
   /* Тарифы — длинный список: справа от него столбиком воронка и аудитория. */
   .adm-plans { grid-column: span 7; grid-row: span 2; }
   .adm-funnel, .adm-aud { grid-column: span 5; }
+  /* Пакеты трафика — отдельной строкой во всю ширину, под тарифами. */
+  .adm-traffic { grid-column: 1 / -1; }
   .adm-ledger { grid-column: 1 / -1; }
   .adm-h-panel .adm-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* Сервис. */
@@ -1085,3 +1087,12 @@
 }
 html[data-static] .adm *, html[data-static] .adm *::before, html[data-static] .adm *::after { animation: none !important; transition: none !important; }
 html[data-static] .adm-ring { display: none; }
+
+/* ─── Карточка пользователя · обход (пакеты трафика, 13.09.2026) ─────
+   Рабочий экран: без входных анимаций, только короткий отклик. */
+.adm-bp-left { margin: 0.4rem 0 0; font-size: 0.875rem; color: var(--a-ink-3); }
+.adm-bp-left b { font-size: clamp(1.5rem, 2.4vw, 1.9rem); font-weight: 700; color: var(--a-ink); letter-spacing: -0.02em; }
+.adm-bp-grants { margin-top: 0.9rem; }
+.adm-bp-form { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--a-g200); }
+.adm-bp-form .adm-input { min-height: 44px; }
+.adm-traffic .adm-tiles { margin-bottom: 0.9rem; }

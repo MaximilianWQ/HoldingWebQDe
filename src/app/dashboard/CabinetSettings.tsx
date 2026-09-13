@@ -29,6 +29,41 @@ export default function CabinetSettings({ i }: { i: number }) {
   const [passkeyStatus, setPasskeyStatus] = useState<"" | "success" | "error">("");
   const [confirmRemove, setConfirmRemove] = useState(false);
 
+  // Новости и предложения — согласие на рекламные письма (владелец,
+  // 13.09.2026). null — ещё не знаем состояние.
+  const [newsOn, setNewsOn] = useState<boolean | null>(null);
+  const [newsSaving, setNewsSaving] = useState(false);
+  const [newsError, setNewsError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/user/marketing-consent")
+      .then((r) => r.json())
+      .then((d) => setNewsOn(d.success ? !!d.data.on : null))
+      .catch(() => setNewsOn(null));
+  }, []);
+
+  const toggleNews = async () => {
+    if (newsSaving || newsOn === null) return;
+    const next = !newsOn;
+    setNewsSaving(true);
+    setNewsError(false);
+    setNewsOn(next);
+    try {
+      const r = await fetch("/api/user/marketing-consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ on: next }),
+      });
+      const d = await r.json();
+      if (!d.success) throw new Error();
+    } catch {
+      setNewsOn(!next);
+      setNewsError(true);
+    } finally {
+      setNewsSaving(false);
+    }
+  };
+
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
       setPushSupported(true);
@@ -140,6 +175,30 @@ export default function CabinetSettings({ i }: { i: number }) {
           className="ak-switch"
           onClick={togglePush}
           disabled={!pushSupported || pushLoading}
+        />
+      </div>
+
+      <div className="ak-set-row">
+        <span className="ak-set-ico"><Icon name="send" size={16} /></span>
+        <div className="ak-set-copy">
+          <p className="ak-row-title" id="ak-news-l">Новости и предложения</p>
+          <p className="ak-row-text">
+            {newsOn === null
+              ? "Загружаем…"
+              : newsOn
+                ? "Присылаем акции и новости на почту"
+                : "Выключено — приходят только письма о подписке"}
+          </p>
+          {newsError && <p className="ak-err">Не удалось сохранить. Попробуйте ещё раз.</p>}
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!!newsOn}
+          aria-labelledby="ak-news-l"
+          className="ak-switch"
+          onClick={toggleNews}
+          disabled={newsOn === null || newsSaving}
         />
       </div>
 

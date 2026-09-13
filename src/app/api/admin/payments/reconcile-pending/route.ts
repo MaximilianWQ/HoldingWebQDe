@@ -3,6 +3,7 @@ import { pool } from "@/lib/db";
 import { rowToPayment } from "@/lib/store";
 import { reconcilePaymentWithYooKassa } from "@/lib/payments";
 import { periodDays } from "@/lib/plans";
+import { formatTraffic } from "@/lib/traffic-packs";
 import { verifyAdmin } from "../../middleware";
 
 /**
@@ -43,7 +44,7 @@ export async function POST() {
         let outcome: string = r.outcome;
         if (r.outcome === "applied") {
           result.applied += 1;
-          outcome = `applied +${periodDays(p.period) ?? "?"}d`;
+          outcome = p.product === "traffic" ? `applied +${p.trafficBytes ? formatTraffic(p.trafficBytes) : "?"}` : `applied +${periodDays(p.period) ?? "?"}d`;
         } else if (r.outcome === "canceled") result.canceled += 1;
         else if (r.outcome === "lookup_failed") {
           result.failed += 1;

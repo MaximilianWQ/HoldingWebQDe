@@ -152,7 +152,7 @@ async function syncBlock() {
 }
 
 async function revenueBlock() {
-  const [sums, refunds, byPlan] = await Promise.all([
+  const [sums, refunds, byPlan, traffic] = await Promise.all([
     pool.query(
       `SELECT
          COALESCE(SUM(amount) FILTER (WHERE paid_at >= date_trunc('day', NOW() AT TIME ZONE 'Europe/Moscow') AT TIME ZONE 'Europe/Moscow'), 0)::float AS today,
@@ -169,10 +169,32 @@ async function revenueBlock() {
     pool.query(
       `SELECT plan, period, COUNT(*)::int AS n, COALESCE(SUM(amount), 0)::float AS amount
        FROM payments WHERE status IN ('confirmed', 'refunded') AND paid_at >= NOW() - INTERVAL '30 days'
+         AND product = 'subscription'
        GROUP BY plan, period ORDER BY plan, period`
     ),
+    // «Пакеты трафика» — отдельной строкой: в gross они входят (это деньги),
+    // в разбивку по тарифам и в конверсию пробный → подписка — нет.
+    pool.query(
+      `SELECT traffic_pack_id AS pack, COUNT(*)::int AS n, COALESCE(SUM(amount), 0)::float AS amount,
+              COALESCE(SUM(traffic_bytes), 0)::float AS bytes
+       FROM payments WHERE status IN ('confirmed', 'refunded') AND paid_at >= NOW() - INTERVAL '30 days'
+         AND product = 'traffic'
+       GROUP BY traffic_pack_id ORDER BY amount DESC`
+    ),
   ]);
-  return { gross: sums.rows[0], refunds30d: refunds.rows[0], byPlan30d: byPlan.rows, currency: "RUB" };
+  const packs = traffic.rows as Array<{ pack: string | null; n: number; amount: number; bytes: number }>;
+  return {
+    gross: sums.rows[0],
+    refunds30d: refunds.rows[0],
+    byPlan30d: byPlan.rows,
+    traffic30d: {
+      n: packs.reduce((s, x) => s + x.n, 0),
+      amount: packs.reduce((s, x) => s + x.amount, 0),
+      bytes: packs.reduce((s, x) => s + x.bytes, 0),
+      byPack: packs,
+    },
+    currency: "RUB",
+  };
 }
 
 export const EXPIRATION_RULE_NOTE =
@@ -186,14 +208,15 @@ async function funnelBlock() {
     pool.query(
       `SELECT COUNT(*)::int AS trials,
               COUNT(*) FILTER (WHERE EXISTS (
-                SELECT 1 FROM payments p WHERE p.user_id = u.id AND p.status IN ('confirmed','refunded')
+                SELECT 1 FROM payments p WHERE p.user_id = u.id AND p.status IN ('confirmed','refunded') AND p.product = 'subscription'
               ))::int AS converted
        FROM users u WHERE u.trial_used_at >= NOW() - INTERVAL '30 days'`
     ),
+    // Продления — подписки: пакет трафика продлением не считается.
     pool.query(
       `SELECT COUNT(*)::int AS n FROM payments p
-       WHERE p.status IN ('confirmed','refunded') AND p.paid_at >= NOW() - INTERVAL '30 days'
-         AND EXISTS (SELECT 1 FROM payments q WHERE q.user_id = p.user_id AND q.status IN ('confirmed','refunded') AND q.paid_at < p.paid_at)`
+       WHERE p.status IN ('confirmed','refunded') AND p.paid_at >= NOW() - INTERVAL '30 days' AND p.product = 'subscription'
+         AND EXISTS (SELECT 1 FROM payments q WHERE q.user_id = p.user_id AND q.status IN ('confirmed','refunded') AND q.product = 'subscription' AND q.paid_at < p.paid_at)`
     ),
     pool.query(
       `SELECT COUNT(*)::int AS total,

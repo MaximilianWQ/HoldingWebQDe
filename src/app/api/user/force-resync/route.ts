@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserById, rowToPayment } from "@/lib/store";
 import { syncUserToPanel } from "@/lib/subscription-sync";
 import { reconcilePaymentWithYooKassa } from "@/lib/payments";
+import { applyBypassGrants } from "@/lib/bypass-grants";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSessionUser } from "@/lib/session";
 import { pool } from "@/lib/db";
@@ -18,6 +19,7 @@ import { pool } from "@/lib/db";
 
 interface ReconciledPayment {
   paymentId: string;
+  product: "subscription" | "traffic";
   plan: string;
   period: number;
   outcome: "applied" | "canceled" | "still_pending" | "lookup_failed";
@@ -67,10 +69,13 @@ export async function POST(request: NextRequest) {
               ? "lookup_failed"
               : "still_pending";
       if (r.outcome === "applied") appliedCount += 1;
-      reconciled.push({ paymentId: p.id, plan: p.plan, period: p.period, outcome, ...(r.error ? { errorMessage: r.error } : {}) });
+      reconciled.push({ paymentId: p.id, product: p.product, plan: p.plan, period: p.period, outcome, ...(r.error ? { errorMessage: r.error } : {}) });
     }
 
     const syncResult = await syncUserToPanel(before.id);
+    // Owed bypass gigabytes (a pack paid while the panel was down, the
+    // trial 500 MB) — pushed here too. Idempotent; never touches premium.
+    const bypass = await applyBypassGrants(before.id);
 
     const after = await getUserById(before.id);
     const afterEnd = after?.subscriptionEnd ?? beforeEnd;
@@ -81,9 +86,11 @@ export async function POST(request: NextRequest) {
       data: {
         beforeSubscriptionEnd: beforeEnd,
         afterSubscriptionEnd: afterEnd,
-        changed: dateChanged || appliedCount > 0,
+        changed: dateChanged || appliedCount > 0 || bypass.applied > 0,
         paymentsScanned: pending.length,
         paymentsApplied: appliedCount,
+        bypassApplied: bypass.applied,
+        bypassOwed: bypass.ok ? 0 : bypass.owed,
         reconciled,
         panelAction: syncResult.action,
         panelUuid: syncResult.uuid,

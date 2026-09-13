@@ -188,6 +188,19 @@ export async function sendPaymentSucceededEmail(
   );
 }
 
+/** Receipt for a «Пакет трафика». packTitle is built by the server (no user input). */
+export async function sendTrafficPackEmail(email: string, packTitle: string, dashboardUrl: string): Promise<boolean> {
+  return sendTransactional(
+    email,
+    "Пакет трафика зачислен",
+    wrapHtml(
+      "Спасибо за покупку",
+      `<p><b>${packTitle}</b> оплачен. Гигабайты прибавляются к остатку отдельного ключа: срока у него нет, он работает, пока есть гигабайты.</p>
+       <p style="margin-top:16px"><a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Открыть личный кабинет</a></p>`
+    )
+  );
+}
+
 export async function sendRefundAdminAlertEmail(params: {
   adminEmail: string;
   orderId: string;

@@ -27,12 +27,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Email и код обязательны" }, { status: 400 });
     }
 
+    // Согласия — та же cookie, что пишет шаг почты (sendCodeAction).
+    const consentParts = (request.cookies.get("pending_consent")?.value ?? "").split(",");
     const result = await completeEmailSignIn({
       email: String(email),
       code: String(code),
       referralCode: referralCode ? String(referralCode) : undefined,
       fingerprint: fingerprint ? String(fingerprint) : undefined,
       ip,
+      consent: { privacy: consentParts.includes("privacy"), marketing: consentParts.includes("marketing") },
     });
     if (!result.ok) {
       return NextResponse.json({ success: false, error: result.error }, { status: 400 });

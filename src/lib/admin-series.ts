@@ -51,6 +51,8 @@ export interface SeriesPayment {
   hasEarlierPaid: boolean;
   /** The user had a trial before this payment. */
   hadTrial: boolean;
+  /** «Пакет трафика»: counted in revenue/payments and in traffic*, never as a conversion or renewal. */
+  product?: "subscription" | "traffic";
 }
 
 export interface SeriesInput {
@@ -71,15 +73,31 @@ export interface SeriesPoint {
   conversions: number;
   renewals: number;
   expirations: number;
+  /** «Пакеты трафика»: сумма и число оплат (уже входят в revenue и payments). */
+  trafficRevenue: number;
+  trafficPayments: number;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+const zeroPoint = (day: string): SeriesPoint => ({
+  day,
+  revenue: 0,
+  refunds: 0,
+  refundsCount: 0,
+  payments: 0,
+  registrations: 0,
+  trials: 0,
+  conversions: 0,
+  renewals: 0,
+  expirations: 0,
+  trafficRevenue: 0,
+  trafficPayments: 0,
+});
+
 /** Pure: bucket raw events into Moscow days. Events outside `range` are ignored. */
 export function buildDailySeries(input: SeriesInput, range: string[]): SeriesPoint[] {
-  const map = new Map<string, SeriesPoint>(
-    range.map((day) => [day, { day, revenue: 0, refunds: 0, refundsCount: 0, payments: 0, registrations: 0, trials: 0, conversions: 0, renewals: 0, expirations: 0 }])
-  );
+  const map = new Map<string, SeriesPoint>(range.map((day) => [day, zeroPoint(day)]));
   const at = (d: Date | null) => (d ? map.get(mskDay(d)) : undefined);
 
   for (const p of input.payments) {
@@ -87,7 +105,10 @@ export function buildDailySeries(input: SeriesInput, range: string[]): SeriesPoi
     if (paid) {
       paid.revenue += p.amount;
       paid.payments += 1;
-      if (p.hasEarlierPaid) paid.renewals += 1;
+      if (p.product === "traffic") {
+        paid.trafficRevenue += p.amount;
+        paid.trafficPayments += 1;
+      } else if (p.hasEarlierPaid) paid.renewals += 1;
       else if (p.hadTrial) paid.conversions += 1;
     }
     const refunded = at(p.refundedAt);
@@ -110,7 +131,7 @@ export function buildDailySeries(input: SeriesInput, range: string[]): SeriesPoi
   }
   return range.map((day) => {
     const p = map.get(day)!;
-    return { ...p, revenue: round2(p.revenue), refunds: round2(p.refunds) };
+    return { ...p, revenue: round2(p.revenue), refunds: round2(p.refunds), trafficRevenue: round2(p.trafficRevenue) };
   });
 }
 
@@ -152,10 +173,10 @@ export async function getDailySeries(days: number, now: Date = new Date()): Prom
   const since = mskDayStart(range[0]);
 
   const [payments, regs, trials, expirations] = await Promise.all([
-    pool.query<{ user_id: string; amount: number; paid_at: Date | null; refunded_at: Date | null; has_earlier: boolean; had_trial: boolean }>(
-      `SELECT p.user_id, p.amount::float AS amount, p.paid_at, p.refunded_at,
+    pool.query<{ user_id: string; amount: number; paid_at: Date | null; refunded_at: Date | null; has_earlier: boolean; had_trial: boolean; product: string | null }>(
+      `SELECT p.user_id, p.amount::float AS amount, p.paid_at, p.refunded_at, p.product,
               EXISTS (SELECT 1 FROM payments q WHERE q.user_id = p.user_id AND q.status IN ('confirmed','refunded')
-                      AND q.paid_at < p.paid_at) AS has_earlier,
+                      AND q.product = 'subscription' AND q.paid_at < p.paid_at) AS has_earlier,
               (u.trial_used_at IS NOT NULL AND u.trial_used_at < p.paid_at) AS had_trial
        FROM payments p JOIN users u ON u.id = p.user_id
        WHERE p.status IN ('confirmed', 'refunded') AND (p.paid_at >= $1 OR p.refunded_at >= $1)`,
@@ -175,6 +196,7 @@ export async function getDailySeries(days: number, now: Date = new Date()): Prom
         refundedAt: r.refunded_at ? new Date(r.refunded_at) : null,
         hasEarlierPaid: r.has_earlier,
         hadTrial: r.had_trial,
+        product: r.product === "traffic" ? ("traffic" as const) : ("subscription" as const),
       })),
       registrations: regs.rows.map((r) => new Date(r.created_at)),
       trials: trials.rows.map((r) => new Date(r.trial_used_at)),
@@ -188,10 +210,11 @@ export async function getDailySeries(days: number, now: Date = new Date()): Prom
       for (const k of Object.keys(t) as Array<keyof typeof t>) t[k] += p[k];
       return t;
     },
-    { revenue: 0, refunds: 0, refundsCount: 0, payments: 0, registrations: 0, trials: 0, conversions: 0, renewals: 0, expirations: 0 }
+    (({ day: _day, ...rest }) => rest)(zeroPoint(""))
   );
   totals.revenue = round2(totals.revenue);
   totals.refunds = round2(totals.refunds);
+  totals.trafficRevenue = round2(totals.trafficRevenue);
 
   return {
     days,
@@ -203,8 +226,9 @@ export async function getDailySeries(days: number, now: Date = new Date()): Prom
     notes: [
       "revenue — оплаты сайта (confirmed и позже возвращённые) по дню оплаты; оплаты в боте сюда не входят",
       "refunds — сумма исходного платежа по дню возврата",
-      "conversions — первая оплата пользователя, у которого до неё был пробный период",
-      "renewals — оплата пользователя, у которого уже была более ранняя оплата",
+      "conversions — первая оплата подписки пользователем, у которого до неё был пробный период",
+      "renewals — оплата подписки пользователем, у которого уже была более ранняя оплата подписки",
+      "traffic — пакеты трафика: входят в выручку и число платежей, в конверсии и продления не входят",
       "expirations — окончание подписки без продления до момента окончания (журнал; для истории до журнала — дата окончания)",
     ],
   };

@@ -26,7 +26,11 @@ import { isPlanId, periodDays } from "./plans";
 import { syncUserToPanel } from "./subscription-sync";
 import { pool, waitForDb } from "./db";
 import { getPaymentStatus, PaymentStatus, YooKassaRefund } from "./yookassa";
-import { sendPaymentSucceededEmail, sendRefundAdminAlertEmail } from "./email";
+import { sendPaymentSucceededEmail, sendRefundAdminAlertEmail, sendTrafficPackEmail } from "./email";
+import { grantId, insertBypassGrant } from "./bypass-ledger";
+import { applyBypassGrants } from "./bypass-grants";
+import { formatTraffic } from "./traffic-packs";
+import type { Queryable } from "./subscription-ledger";
 
 export type ConfirmSource = "webhook" | "status" | "force_resync" | "admin_reconcile";
 
@@ -36,11 +40,43 @@ export interface ConfirmResult {
   newEnd?: string;
   referral?: ReferralCredit | null;
   panelSynced?: boolean;
+  /** Traffic pack: bytes added to the bypass ledger by this confirmation. */
+  trafficBytes?: number;
+}
+
+/** Human label of what a payment bought — for logs, audit and the admin alert. */
+export function paymentLabel(p: Pick<PaymentRecord, "product" | "plan" | "period" | "trafficBytes" | "trafficPackId">): string {
+  if (p.product === "traffic") return `пакет трафика ${p.trafficBytes ? formatTraffic(p.trafficBytes) : p.trafficPackId ?? "?"}`;
+  return `${p.plan} ${p.period}мес`;
+}
+
+/**
+ * Referral cashback on any paid purchase (subscription or traffic pack):
+ * the referral rules say «кешбэк с оплат приглашённых» — a pack is a
+ * payment too. Isolated in a savepoint: cashback never blocks a payment.
+ * One reward per (buyer, payment id) — creditReferrerOnPayment is idempotent.
+ */
+async function creditInSavepoint(c: Queryable, payment: PaymentRecord): Promise<ReferralCredit | null> {
+  await c.query("SAVEPOINT referral");
+  try {
+    const referral = await creditReferrerOnPayment(payment.userId, payment.amount, payment.id, c);
+    await c.query("RELEASE SAVEPOINT referral");
+    return referral;
+  } catch (err) {
+    await c.query("ROLLBACK TO SAVEPOINT referral");
+    console.error(`[PAYMENT] referral credit failed for ${payment.id}:`, err instanceof Error ? err.message : err);
+    return null;
+  }
 }
 
 /**
  * Atomically confirm and apply a payment. Side effects (panel sync,
  * notification, email, audit) run only for the caller that applied it.
+ *
+ * A traffic pack writes a bypass grant (`payment:<id>`) in the same
+ * transaction instead of a ledger event: the premium term is NOT touched.
+ * The grant is pushed to the panel right after commit (bypass-grants.ts);
+ * if the panel is down it stays owed and the worker retries.
  */
 export async function confirmPayment(paymentId: string, source: ConfirmSource): Promise<ConfirmResult> {
   await waitForDb();
@@ -60,6 +96,22 @@ export async function confirmPayment(paymentId: string, source: ConfirmSource): 
     }
 
     const payment = rowToPayment(claimed.rows[0]);
+
+    if (payment.product === "traffic") {
+      const bytes = payment.trafficBytes ?? 0;
+      await insertBypassGrant(c, {
+        id: grantId.payment(payment.id),
+        userId: payment.userId,
+        kind: "payment",
+        bytes,
+        packId: payment.trafficPackId,
+        paymentId: payment.id,
+        actor: source,
+      });
+      const referral = await creditInSavepoint(c, payment);
+      return { outcome: "applied", payment, referral, trafficBytes: bytes };
+    }
+
     const days = periodDays(payment.period);
     if (!days) throw new Error(`payment ${payment.id}: unknown period ${payment.period}`);
 
@@ -73,24 +125,44 @@ export async function confirmPayment(paymentId: string, source: ConfirmSource): 
       meta: { transactionId: payment.transactionId, amount: payment.amount, period: payment.period },
     });
 
-    // Cashback must never block a payment: isolate it in a savepoint.
-    let referral: ReferralCredit | null = null;
-    await c.query("SAVEPOINT referral");
-    try {
-      referral = await creditReferrerOnPayment(payment.userId, payment.amount, payment.id, c);
-      await c.query("RELEASE SAVEPOINT referral");
-    } catch (err) {
-      await c.query("ROLLBACK TO SAVEPOINT referral");
-      console.error(`[PAYMENT] referral credit failed for ${payment.id}:`, err instanceof Error ? err.message : err);
-    }
-
+    const referral = await creditInSavepoint(c, payment);
     return { outcome: "applied", payment, newEnd: led.newEnd.toISOString(), referral };
   });
 
   if (result.outcome === "applied" && result.payment) {
-    result.panelSynced = await afterPaymentApplied(result.payment, source);
+    result.panelSynced =
+      result.payment.product === "traffic" ? await afterTrafficApplied(result.payment, source) : await afterPaymentApplied(result.payment, source);
   }
   return result;
+}
+
+/** Traffic pack confirmed: push the grant, tell the buyer. Never touches the premium key. */
+async function afterTrafficApplied(payment: PaymentRecord, source: ConfirmSource): Promise<boolean> {
+  let applied = false;
+  try {
+    const r = await applyBypassGrants(payment.userId);
+    applied = r.ok;
+    if (!r.ok) console.warn(`[PAYMENT] ${payment.id}: bypass credit deferred (${r.error ?? "busy"}) — worker will retry`);
+  } catch (err) {
+    console.error(`[PAYMENT] ${payment.id}: bypass credit threw`, err);
+  }
+  const volume = payment.trafficBytes ? formatTraffic(payment.trafficBytes) : "";
+  await createNotificationForUser(
+    payment.userId,
+    "Оплата подтверждена",
+    applied
+      ? `Пакет трафика ${volume} зачислен — гигабайты прибавлены к остатку ключа «Обход».`
+      : `Пакет трафика ${volume} оплачен. Гигабайты появятся в ключе «Обход» в течение нескольких минут.`
+  );
+  await createAuditLog("payment.success", `traffic ${payment.trafficPackId} (${volume}), ${payment.amount}₽ (${source})${applied ? "" : " — panel deferred"}`, payment.userId);
+  const user = await getUserById(payment.userId);
+  if (user) {
+    const baseUrl = (process.env.SITE_BASE_URL || "https://qodev.dev").replace(/\/+$/, "");
+    sendTrafficPackEmail(user.email, `Пакет трафика ${volume}`, `${baseUrl}/dashboard`).catch((err) =>
+      console.warn(`[PAYMENT] ${payment.id}: receipt email failed:`, err instanceof Error ? err.message : err)
+    );
+  }
+  return applied;
 }
 
 async function afterPaymentApplied(payment: PaymentRecord, source: ConfirmSource): Promise<boolean> {
@@ -179,6 +251,8 @@ export async function findLocalPayment(ykPaymentId: string, metadataPaymentId: s
  * refund.succeeded: mark the payment refunded and record a ledger event
  * with 0 days. Owner decision (12.09.2026): days are NOT removed
  * automatically — support handles refunds manually. Admin gets an alert.
+ * The same for a traffic pack (13.09.2026): the payment is marked, the
+ * gigabytes stay in the bypass entity — support decides by hand.
  */
 export async function handleRefund(refund: YooKassaRefund): Promise<"recorded" | "duplicate" | "payment_not_found" | "not_succeeded"> {
   if (refund.status !== "succeeded") return "not_succeeded";
@@ -195,7 +269,14 @@ export async function handleRefund(refund: YooKassaRefund): Promise<"recorded" |
       kind: "refund",
       sourceId: refund.id,
       actor: "yookassa",
-      meta: { paymentId: payment.id, yookassaPaymentId: refund.payment_id, amount: refund.amount?.value, currency: refund.amount?.currency },
+      meta: {
+        paymentId: payment.id,
+        yookassaPaymentId: refund.payment_id,
+        amount: refund.amount?.value,
+        currency: refund.amount?.currency,
+        product: payment.product,
+        ...(payment.product === "traffic" ? { trafficPackId: payment.trafficPackId, trafficBytes: payment.trafficBytes } : {}),
+      },
     });
     if (!led.applied) return false;
     await c.query(
@@ -209,7 +290,12 @@ export async function handleRefund(refund: YooKassaRefund): Promise<"recorded" |
   if (!applied) return "duplicate";
 
   const user = await getUserById(payment.userId);
-  await createAuditLog("payment.refunded", `refund ${refund.id}, payment ${payment.id}, ${refund.amount?.value ?? "?"} ${refund.amount?.currency ?? ""}`, payment.userId, user?.email);
+  await createAuditLog(
+    "payment.refunded",
+    `refund ${refund.id}, payment ${payment.id} (${paymentLabel(payment)}), ${refund.amount?.value ?? "?"} ${refund.amount?.currency ?? ""}${payment.product === "traffic" ? " — ГБ не сняты автоматически" : ""}`,
+    payment.userId,
+    user?.email
+  );
   const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || process.env.ADMIN_EMAIL;
   if (!adminEmail) {
     console.error(`[REFUND] refund ${refund.id} recorded but no ADMIN_NOTIFY_EMAIL/ADMIN_EMAIL to alert`);
@@ -220,7 +306,7 @@ export async function handleRefund(refund: YooKassaRefund): Promise<"recorded" |
       userEmail: user.email,
       remnawaveUuid: user.remnawaveUserUuid,
       amountRub: parseFloat(refund.amount?.value ?? String(payment.amount)),
-      plan: `${payment.plan} ${payment.period}m`,
+      plan: payment.product === "traffic" ? `traffic ${payment.trafficPackId ?? "?"} (${paymentLabel(payment)}; ГБ не сняты)` : `${payment.plan} ${payment.period}m`,
       yookassaPaymentId: refund.payment_id,
       appliedAt: payment.appliedAt ? new Date(payment.appliedAt) : payment.paidAt ? new Date(payment.paidAt) : null,
     }).catch((err) => {

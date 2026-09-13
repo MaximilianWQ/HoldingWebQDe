@@ -227,6 +227,70 @@
 .ak-apps a { display: inline-flex; align-items: center; min-height: 44px; color: var(--a-ink); text-decoration: none;
   background: linear-gradient(currentColor, currentColor) no-repeat left calc(50% + 0.75em) / 100% 1px; }
 
+/* ─── 3 · Два ключа: основной VPN и «Обход» (13.09.2026) ──────────
+   Два блока в одной панели: номер ключа, имя, одна строка «что это»,
+   ссылка, действия. У второго — остаток гигабайт шкалой. Рабочий
+   экран: движения входа нет, только отклик кнопок (общий, ниже). */
+.ak-keys-lead { margin: -0.4rem 0 0; max-width: 62ch; }
+.ak-kpair { display: grid; gap: 8px; margin-top: 1rem; }
+@media (min-width: 720px) { .ak-kpair { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ak-kblock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--a-g100);
+  border-radius: 16px;
+  background: var(--a-g50);
+}
+.ak-kblock-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.6rem; }
+.ak-kblock-head .ak-status { margin-left: auto; }
+.ak-kno {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--a-ink);
+  color: #FFFFFF;
+  font-family: var(--a-wide);
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+.ak-kblock[data-k="2"] .ak-kno { background: var(--a-cobalt); }
+.ak-ktitle { margin: 0; font-family: var(--a-wide); font-weight: 700; font-size: 1.0625rem; line-height: 1.25; color: var(--a-ink); }
+.ak-kblock .ak-text { margin-top: 0.5rem; }
+.ak-kblock .ak-key-strip { margin-top: 0.9rem; background: var(--a-paper); }
+.ak-kactions { margin-top: 0; padding-top: 0.9rem; }
+.ak-kmore { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; }
+.ak-kgb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.5rem;
+  margin: 0.9rem 0 0;
+  font-family: var(--a-wide);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--a-ink);
+}
+.ak-kgb small { font-weight: 500; font-size: 0.8125rem; letter-spacing: 0; color: var(--a-ink-3); }
+/* Шкала — остаток: полная полоса = весь лимит, уменьшается по мере расхода. */
+.ak-meter { position: relative; height: 8px; margin-top: 0.6rem; border-radius: 999px; background: var(--a-g200); overflow: hidden; }
+.ak-meter > i { position: absolute; inset: 0; border-radius: inherit; background: var(--a-cobalt); transform-origin: left; transform: scaleX(var(--p, 0)); }
+.ak-meter[data-tone="warn"] > i { background: var(--ak-warn); }
+.ak-meter-cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--a-ink-3); }
+.ak-kskel {
+  width: min(11rem, 60%);
+  height: 1.75rem;
+  margin-top: 0.9rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--a-g100) 0%, var(--a-paper) 50%, var(--a-g100) 100%) 0 0 / 200% 100%;
+}
+
 /* ─── 4 · Быстрые переходы ──────────────────────────────────────── */
 .ak-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
 .ak-link {
@@ -892,7 +956,7 @@ html:has(.ak) { scroll-behavior: smooth; }
 .ak-spark-line { stroke-dasharray: 6 4; animation: ak-flow 2.4s linear infinite; }                         /* 6 · линия идёт */
 .ak-tg-ico svg { animation: ak-float 3.6s var(--m-tide) infinite; }                                       /* 7 · бот */
 .ak-set-ico { animation: ak-float 5.2s var(--m-tide) infinite; }                                         /* 8 · настройки */
-.ak-skel { animation: ak-sweep-bg 1.4s linear infinite; }
+.ak-skel, .ak-kskel { animation: ak-sweep-bg 1.4s linear infinite; }  /* ожидание данных, не вход */
 
 .ak-card:not([data-inview]) *, .ak-card:not([data-inview])::after { animation-play-state: paused; }
 

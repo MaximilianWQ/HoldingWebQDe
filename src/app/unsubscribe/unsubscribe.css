@@ -1,0 +1,29 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /unsubscribe — одна карточка рабочего экрана (корпус «Атлас», ak-*).
+   Порядок: раскладка → карточка → ДВИЖЕНИЕ.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.unsub { display: grid; align-content: start; }
+.unsub-card { max-width: 36rem; margin-inline: auto; margin-top: clamp(1rem, 6vh, 4rem); }
+.unsub-h1 {
+  margin: 0.5rem 0 0;
+  font-family: var(--a-wide);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--a-ink);
+}
+.unsub-text { font-size: 0.9375rem; overflow-wrap: anywhere; }
+.unsub .ak-actions { margin-top: 0; }
+.unsub-fine { padding-top: 1rem; border-top: 1px solid var(--a-g100); margin-top: 1.25rem; }
+
+/* ─── Движение: карточка встаёт снизу на загрузке ───────────────── */
+@keyframes unsub-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.unsub-card { animation: unsub-in 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .unsub-card { animation: none; }
+}

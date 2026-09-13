@@ -67,6 +67,35 @@
 .asb-lead { margin: 0 0 1.25rem; max-width: 60ch; }
 .asb-cq { container-type: inline-size; }
 
+/* ─── Продукт: «Подписка / Пакет трафика» ─────────────────────── */
+.asb-product {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 0.85rem;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--a-g100);
+  max-width: 100%;
+}
+.asb-product-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--a-ink-2);
+  font: inherit;
+  font-family: var(--a-wide);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.asb-product-btn[aria-pressed="true"] { background: var(--a-paper); color: var(--a-cobalt); cursor: default; }
+.asb-product-btn:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 2px; }
+
 /* ─── Шаги ──────────────────────────────────────────────────────── */
 /* Полоса шагов — общая полоса мастеров (.ak-bar + .ak-stepper,
    work-atlas.css): та же, что на входе и новом устройстве. Кабинет
@@ -157,6 +186,13 @@
   font-size: 0.8125rem;
   color: var(--a-cobalt);
 }
+
+/* Пакет трафика */
+@container (min-width: 420px) { .asb-packs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (min-width: 700px) { .asb-packs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.asb-packs .asb-choice { padding: 0.9rem 1rem; border-radius: 16px; }
+.asb-pack-name { font-family: var(--a-wide); font-weight: 700; font-size: 1.125rem; line-height: 1.2; white-space: nowrap; }
+.asb-packs .asb-pack-price { margin-top: 0.55rem; font-size: clamp(1.35rem, 2.6vw, 1.7rem); }
 
 /* Срок */
 .asb-period-name { font-family: var(--a-wide); font-size: 0.9375rem; line-height: 1.2; }
@@ -309,97 +345,36 @@
 @media (min-width: 1024px) { .asb-skel { grid-template-columns: minmax(0, 1fr) 380px; } }
 
 /* ═══ ДВИЖЕНИЕ ═══════════════════════════════════════════════════════
-   Только transform, opacity и переменные. Скрытые до входа состояния —
-   под .a-js (без скрипта всё в конечном виде). Вход панелей и сводки
-   даёт work-atlas.css (.ak-card + data-sheet); здесь — то, что внутри.
-   Холостой слой внутри панелей стоит на паузе вне кадра — правило
-   `.ak-card:not([data-inview]) *` из work-atlas.css.
+   Рабочий экран (владелец, 13.09.2026): содержимое появляется сразу —
+   без входов, лесенок и проявлений по прокрутке; холостых украшений
+   нет. Остаётся только короткий (≤150 мс) отклик на руку и на выбор,
+   плюс индикатор ожидания платежа (крутилка и три точки) — он сообщает
+   состояние, а не украшает. */
 
-   Блоки:
-     верх      — вход (ak-top); стрелка «Назад» отъезжает под рукой;
-                 холостое: замок «безопасной оплаты» покачивается
-     шаги      — общий слой мастеров (work-atlas.css): пилюля
-                 перекрашивается, пройденный шаг под рукой
-                 переворачивается в чернильный; холостое: кольцо у
-                 текущего номера
-     тариф     — карточки поднимаются после панели; наведение поднимает
-                 карточку, выбор набивает точку переключателя; холостое:
-                 поток по знаку канала, быстрее у быстрого тарифа
-     срок      — то же; холостое: мигает точка «дешевле всего»
-     оплата    — строки ложатся; холостое: знак способа оплаты парит
-     сводка    — сменившаяся сумма поднимается снизу; холостое: блик
-                 под итогом (ak-value-live) и пульс статуса
-     панель    — въезжает снизу, сумма поднимается при смене;
-                 холостое: стрелка на кнопке подталкивает вперёд
-     состояния — знак входит с поворотом; ожидание: кольцо и три точки;
-                 холостое — пульс статуса */
-
-/* Вход содержимого панели: после самой панели, по очереди. */
-.a-js .asb-panel:not([data-seen]) .asb-choice,
-.a-js .asb-panel:not([data-seen]) .asb-method,
-.a-js .asb-panel:not([data-seen]) .asb-next li { opacity: 0; }
-.a-js .asb-panel[data-seen] .asb-choice,
-.a-js .asb-panel[data-seen] .asb-method,
-.a-js .asb-panel[data-seen] .asb-next li {
-  animation: asb-rise var(--d-3) var(--m-settle) backwards;
-  animation-delay: calc(140ms + var(--i, 0) * 80ms);
-}
-
-/* Переключатель и карточки: отклик на руку и на выбор. */
-.asb-choice { transition: transform var(--d-1) var(--m-settle), border-color var(--d-1) var(--m-turn), opacity var(--d-1) var(--m-turn); }
-.asb-radio, .asb-radio::after { transition: transform var(--d-1) var(--m-settle), border-color var(--d-1) var(--m-turn); }
-.asb-choice-cta svg, .asb-back-ico, .asb-go svg { transition: transform var(--d-1) var(--m-settle); }
-.asb-back { transition: color var(--d-1) var(--m-turn), background-color var(--d-1) var(--m-turn); }
+.asb-choice { transition: transform 120ms var(--m-settle), border-color 120ms var(--m-turn), opacity 120ms var(--m-turn); }
+.asb-radio, .asb-radio::after { transition: transform 120ms var(--m-settle), border-color 120ms var(--m-turn); }
+.asb-choice-cta svg, .asb-back-ico, .asb-go svg { transition: transform 120ms var(--m-settle); }
+.asb-back, .asb-product-btn { transition: color 120ms var(--m-turn), background-color 120ms var(--m-turn); }
 @media (hover: hover) {
-  .asb-choice:not(:disabled):hover { transform: translateY(-3px); border-color: var(--a-g300); }
+  .asb-choice:not(:disabled):hover { transform: translateY(-2px); border-color: var(--a-g300); }
   .asb-choice[aria-checked="true"]:not(:disabled):hover { border-color: var(--a-cobalt-deep); }
-  .asb-choice:hover .asb-choice-cta svg, .asb-go:hover svg { transform: translateX(4px); }
+  .asb-choice:hover .asb-choice-cta svg, .asb-go:hover svg { transform: translateX(3px); }
   .asb-back:hover { color: var(--a-ink); background: var(--a-g100); }
-  .asb-back:hover .asb-back-ico { transform: scaleX(-1) translateX(4px); }
+  .asb-back:hover .asb-back-ico { transform: scaleX(-1) translateX(3px); }
+  .asb-product-btn[aria-pressed="false"]:hover { color: var(--a-ink); background: color-mix(in srgb, var(--a-paper) 60%, transparent); }
 }
 .asb-choice:active:not(:disabled) { transform: scale(0.985); }
-/* Выбор набивает точку с отскоком. */
-[aria-checked="true"] > .asb-choice-top .asb-radio::after { animation: asb-pop var(--d-2) var(--m-settle); }
 
-/* Холостой слой. */
-.asb-lane-flow { animation: asb-flow var(--flow, 2.4s) linear infinite; }           /* тариф: поток */
-.asb-best i::after {                                                                /* срок: лучшее */
-  content: ""; position: absolute; inset: -4px; border-radius: 50%;
-  border: 1.5px solid currentColor; animation: ak-ping 2.4s var(--m-tide) infinite;
-}
-.asb-method-ico svg { animation: ak-float 3.6s var(--m-tide) infinite; }             /* оплата */
-.asb-safe-ico { animation: ak-float 4.2s var(--m-tide) infinite; }                  /* верх */
-.asb-dock .asb-go svg { animation: asb-nudge 2.8s var(--m-tide) infinite; }         /* панель */
-
-/* Смена суммы: новая поднимается снизу (элемент пересоздаётся по ключу). */
-.asb-tick { animation: asb-tick var(--d-2) var(--m-settle) backwards; }
-
-/* Нижняя панель въезжает снизу. */
-.a-js .asb-dock { animation: asb-dock-in var(--d-3) var(--m-settle) 200ms backwards; }
-
-/* Состояния после кассы. */
-.a-js .asb-result[data-seen] .asb-mark { animation: asb-mark-in var(--d-3) var(--m-settle) 120ms backwards; }
-.a-js .asb-result:not([data-seen]) .asb-mark { opacity: 0; }
-.asb-mark-bad svg { animation: asb-shake 600ms var(--m-settle) 700ms backwards; }
+/* Ожидание ответа кассы. */
 .asb-spin { animation: asb-turn 900ms linear infinite; }
 .asb-dots i { animation: ak-wave 1.4s var(--m-tide) infinite; }
 .asb-dots i:nth-child(2) { animation-delay: 140ms; }
 .asb-dots i:nth-child(3) { animation-delay: 280ms; }
 
-@keyframes asb-rise { from { opacity: 0; transform: translateY(14px); } }
-@keyframes asb-pop { 0% { transform: scale(0); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
-@keyframes asb-flow { from { transform: translateX(-100%); } to { transform: translateX(360%); } }
-@keyframes asb-tick { from { opacity: 0; transform: translateY(40%); } }
-@keyframes asb-nudge { 0%, 70%, 100% { transform: none; } 85% { transform: translateX(3px); } }
-@keyframes asb-dock-in { from { transform: translateY(100%); } }
-@keyframes asb-mark-in { from { opacity: 0; transform: scale(0.6) rotate(-12deg); } }
-@keyframes asb-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 50% { transform: translateX(3px); } 75% { transform: translateX(-2px); } }
 @keyframes asb-turn { to { transform: rotate(360deg); } }
 
-/* Упрощение: конечный кадр, без холостого и без событий. */
+/* Упрощение: без отклика и без крутилки. */
 @media (prefers-reduced-motion: reduce) {
   .asb *, .asb *::before, .asb *::after { animation: none !important; transition: none !important; }
-  .a-js .asb-panel .asb-choice, .a-js .asb-panel .asb-method, .a-js .asb-panel .asb-next li,
-  .a-js .asb-result .asb-mark { opacity: 1; transform: none; }
 }
 html[data-static] .asb *, html[data-static] .asb *::before, html[data-static] .asb *::after { animation: none !important; transition: none !important; }

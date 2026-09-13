@@ -50,6 +50,15 @@ describe("getOrCreateUser grants the trial inside user creation", () => {
     expect(new Date(u.subscriptionEnd).getTime()).toBeGreaterThanOrEqual(before + TRIAL_DURATION_MS - 1000);
     expect(fakeDb.events.filter((e) => e.kind === "trial")).toHaveLength(1);
     expect(fakeDb.blocklist.map((b) => b.email_normalized)).toContain("fresh@example.com");
+    // …and the 500 MB bypass, in the same transaction, once.
+    const g = fakeDb.grants.get(`trial:${u.id}`);
+    expect(g).toMatchObject({ kind: "trial", bytes: 500 * 1024 * 1024, state: "pending", user_id: u.id });
+  });
+
+  it("the bot's /api/bot/register path (bypassTrial: false) gets the trial days but no site bypass", async () => {
+    const u = await getOrCreateUser("telegram_42@tg.atlassecure.uk", undefined, "telegram-bot", undefined, { bypassTrial: false });
+    expect(u.trialGranted).toBe(true);
+    expect(fakeDb.grants.size).toBe(0);
   });
 
   it("blocked user is created WITHOUT a trial (subscription already ended)", async () => {
@@ -60,6 +69,8 @@ describe("getOrCreateUser grants the trial inside user creation", () => {
     expect(u.trialBlockedReason).toBe("already_used_email");
     expect(new Date(u.subscriptionEnd).getTime()).toBeLessThanOrEqual(Date.now());
     expect(fakeDb.events).toHaveLength(0);
+    // Anti-abuse blocks the 500 MB too — neither days nor gigabytes.
+    expect(fakeDb.grants.size).toBe(0);
   });
 
   it("existing user: no second trial", async () => {
@@ -67,6 +78,7 @@ describe("getOrCreateUser grants the trial inside user creation", () => {
     const again = await getOrCreateUser("x@example.com");
     expect(again.isNew).toBe(false);
     expect(fakeDb.events.filter((e) => e.kind === "trial")).toHaveLength(1);
+    expect([...fakeDb.grants.values()].filter((g) => g.kind === "trial")).toHaveLength(1);
   });
 });
 

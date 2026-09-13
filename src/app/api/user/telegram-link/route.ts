@@ -6,8 +6,8 @@ import { botStartUrl, createTelegramLinkToken } from "@/lib/telegram-link-tokens
 /**
  * POST /api/user/telegram-link — one-time link to the bot (site first).
  * → { url: "https://t.me/<bot>?start=link_<token>" | null, startParam, expiresAt, botConfigured }
- * `url` is null when TELEGRAM_BOT_USERNAME is not set; the dashboard then
- * shows the /start command to send by hand.
+ * `url` is null only for an invalid TELEGRAM_BOT_USERNAME override (default
+ * atlassecure_bot); the dashboard then shows the /start command to send by hand.
  */
 export async function POST(request: NextRequest) {
   try {

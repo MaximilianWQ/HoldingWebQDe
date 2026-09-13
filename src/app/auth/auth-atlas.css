@@ -286,3 +286,23 @@ html[data-static] .au *, html[data-static] .au *::before, html[data-static] .au 
   .au .au-perks-card .ak-dark-title { max-width: calc(100% - 170px); }
   .au .au-perks-card .ak-orb { --orb-s: 180px; top: 40px; right: -8px; }
 }
+
+/* Согласия на шаге почты (владелец, 13.09.2026): две маленькие галочки
+   под полем. Нажимается вся строка (≥ 44px), флажок 20px, ссылки на
+   Политику и Условия подчёркнуты. */
+.au-checks { display: grid; gap: 0.15rem; margin: 0.25rem 0 0.75rem; }
+.au-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding-block: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--a-ink-2);
+  cursor: pointer;
+}
+.au-check input { flex: none; width: 20px; height: 20px; margin: 0.1rem 0 0; accent-color: var(--a-cobalt); cursor: pointer; }
+.au-check input:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 2px; }
+.au-check a { color: var(--a-ink); text-decoration: underline; text-underline-offset: 2px; }
+@media (hover: hover) { .au-check a:hover { color: var(--a-cobalt); } }

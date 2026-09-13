@@ -21,6 +21,8 @@ export const LOCK_KEYS = {
   RECONCILE: 2,
   CRON_CLEANUP: 3,
   HEALTH_SAMPLE: 4,
+  /** Email campaigns / mass grants (src/lib/campaigns-pg.ts). */
+  CAMPAIGNS: 5,
 } as const;
 
 export type LockResult<T> = { acquired: true; result: T } | { acquired: false };

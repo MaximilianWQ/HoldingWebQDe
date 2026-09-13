@@ -60,6 +60,8 @@ interface AuthPageProps {
   initialStep: "email" | "code";
   initialEmail: string;
   referralCode?: string;
+  /** Куда вернуть после входа (проверенный путь сайта, auth/page.tsx); по умолчанию — кабинет. */
+  next?: string;
 }
 
 /* Полоса шагов: у каждого сценария свой ряд. */
@@ -274,8 +276,9 @@ function Perk({ icon, title, text, n }: { icon: IconName; title: string; text: s
   );
 }
 
-export default function AuthPage({ initialStep, initialEmail, referralCode }: AuthPageProps) {
+export default function AuthPage({ initialStep, initialEmail, referralCode, next }: AuthPageProps) {
   const router = useRouter();
+  const after = next || "/dashboard";
   const [step, setStep] = useState<AuthStep>(initialStep);
   const [email, setEmail] = useState(initialEmail);
   const [deviceFingerprint, setDeviceFingerprint] = useState("");
@@ -348,7 +351,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
       const verData = await verRes.json();
 
       if (verData.success) {
-        router.push("/dashboard");
+        router.push(after);
       } else {
         setPasskeyError(verData.error || "Ключ не распознан");
       }
@@ -494,7 +497,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
       });
       const data = await res.json();
       if (data.success) {
-        router.push("/dashboard");
+        router.push(after);
       } else {
         setLoginError(data.error || "Не получилось войти. Проверьте почту и пароль.");
       }
@@ -539,7 +542,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
       });
       const data = await res.json();
       if (data.success) {
-        router.push("/dashboard");
+        router.push(after);
       } else {
         setSetPasswordError(data.error || "Ошибка сохранения пароля");
       }
@@ -751,6 +754,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
                     <form action={sendAction} className="au-form">
                       {/* Pass referral code through the form */}
                       {referralCode && <input type="hidden" name="ref" value={referralCode} />}
+                      {next && <input type="hidden" name="next" value={next} />}
 
                       <div className="au-field">
                         <label className="au-label" htmlFor="au-email">Почта</label>
@@ -774,6 +778,32 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
                           />
                         </div>
                         {emailError && <FieldError id="au-email-err" text={emailError} />}
+                      </div>
+
+                      {/* Согласия (владелец, 13.09.2026): Политика — обязательно,
+                          новости — по желанию, по умолчанию не отмечено. Ссылки —
+                          в новой вкладке, чтобы не потерять форму. */}
+                      <div className="au-checks">
+                        <label className="au-check">
+                          <input
+                            type="checkbox"
+                            name="privacy"
+                            value="1"
+                            required
+                            // Подсказка браузера — по-русски при любом языке системы.
+                            onInvalid={(e) => e.currentTarget.setCustomValidity("Отметьте согласие с Политикой, чтобы продолжить")}
+                            onChange={(e) => e.currentTarget.setCustomValidity("")}
+                          />
+                          <span>
+                            Я соглашаюсь с{" "}
+                            <a href="/privacy" target="_blank" rel="noopener">Политикой обработки персональных данных</a>{" "}
+                            и <a href="/terms" target="_blank" rel="noopener">Условиями использования</a>
+                          </span>
+                        </label>
+                        <label className="au-check">
+                          <input type="checkbox" name="marketing" value="1" />
+                          <span>Хочу получать новости и специальные предложения</span>
+                        </label>
                       </div>
 
                       <button type="submit" disabled={sendPending} className="a-btn a-btn-primary au-submit">
@@ -822,6 +852,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
                       <input type="hidden" name="email" value={email} />
                       <input type="hidden" name="fingerprint" value={deviceFingerprint} />
                       {referralCode && <input type="hidden" name="ref" value={referralCode} />}
+                      {next && <input type="hidden" name="next" value={next} />}
 
                       <CodeField
                         id="au-code"
@@ -896,7 +927,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode }: Au
                       <button type="submit" disabled={setPasswordLoading} className="a-btn a-btn-primary au-submit">
                         {setPasswordLoading ? <Busy>Сохраняем…</Busy> : "Сохранить пароль"}
                       </button>
-                      <button type="button" onClick={() => router.push("/dashboard")} className="a-btn ak-btn-soft au-submit">
+                      <button type="button" onClick={() => router.push(after)} className="a-btn ak-btn-soft au-submit">
                         Пропустить
                       </button>
                     </form>

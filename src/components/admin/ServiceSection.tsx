@@ -5,14 +5,15 @@ import Icon from "@/components/pixel/Icon";
 import { useAdminConfirm, useAdminToast, Spin } from "@/app/admin/AdminConfirm";
 import { formatDate, getJson, num, postJson, type NotificationItem } from "@/app/admin/admin-shared";
 import PanelSyncCard from "./PanelSyncCard";
-import BroadcastCard from "./BroadcastCard";
+import CampaignsCard from "./CampaignsCard";
 import JournalCard from "./JournalCard";
 import { Tile } from "./Viz";
 
 /**
  * «Сервис» — редкие операции, компактно. Сверка с панелью, оплаты
  * YooKassa, рубильник бота, предпросмотр дат за 400 дней, диагностика
- * одного адреса в панели, рассылка и журнал.
+ * одного адреса в панели, рассылки и начисления (CampaignsCard — письма
+ * через Resend, уведомления в кабинете, массовый подарок) и журнал.
  *
  * Убрано: массовая миграция, sync-all, полный сброс панели, чистка
  * дублей (маршрутов больше нет), кнопка «Применить» у дат за 400 дней
@@ -36,7 +37,7 @@ export default function ServiceSection({ notifications, notifError, onReload, on
       <BotSyncCard i={3} />
       <GhostCard i={4} onOpenUser={onOpenUser} />
       <DiagnoseCard i={5} />
-      <BroadcastCard i={6} notifications={notifications} error={notifError} onChanged={onReload} />
+      <CampaignsCard i={6} notifications={notifications} notifError={notifError} onNotificationsChanged={onReload} />
       <JournalCard i={7} reloadKey={reloadKey} onOpenUser={onOpenUser} />
     </div>
   );

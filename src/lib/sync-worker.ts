@@ -18,10 +18,14 @@ import { runReconciliation, ReconciliationReport } from "./reconciliation";
 import { syncUserToPanel } from "./subscription-sync";
 import { recordHealthSample } from "./health";
 import { recordWorkerError, recordWorkerEvent, setWorkerRunning } from "./worker-state";
+import { runBypassGrantsPass } from "./bypass-grants";
+import { runCampaignPassLocked } from "./campaigns-pg";
 
 const PENDING_INTERVAL_MS = 60 * 1000;
 const HEALTH_INTERVAL_MS = 60 * 1000;
 const RECONCILE_INTERVAL_MS = 60 * 60 * 1000;
+/** Рассылки и массовые начисления (campaigns-pg.ts) — свой замок и свой таймер. */
+const CAMPAIGN_INTERVAL_MS = 30 * 1000;
 const PENDING_BATCH = 50;
 
 export interface PendingPassResult {
@@ -29,6 +33,7 @@ export interface PendingPassResult {
   scanned: number;
   ok: number;
   failed: number;
+  bypass?: { scanned: number; ok: number; failed: number };
 }
 
 export async function runPendingPass(limit = PENDING_BATCH): Promise<PendingPassResult> {
@@ -53,10 +58,19 @@ export async function runPendingPass(limit = PENDING_BATCH): Promise<PendingPass
         else if (res.action !== "busy") failed += 1;
       }
       if (rows.length > 0) console.log(`[SYNC-WORKER] pending pass: scanned=${rows.length} ok=${ok} failed=${failed}`);
-      return { scanned: rows.length, ok, failed };
+      // Bypass grants owed to the panel (trial 500 MB, packs, admin) — a
+      // separate pass: it never touches premium keys, and a failure here
+      // does not fail the premium pass.
+      let bypass = { scanned: 0, ok: 0, failed: 0 };
+      try {
+        bypass = await runBypassGrantsPass(limit);
+      } catch (err) {
+        console.error("[SYNC-WORKER] bypass grants pass failed:", err instanceof Error ? err.message : err);
+      }
+      return { scanned: rows.length, ok, failed, bypass };
     });
     if (!locked.acquired) return { acquired: false, scanned: 0, ok: 0, failed: 0 };
-    await recordWorkerEvent("pending", locked.result);
+    await recordWorkerEvent("pending", { ...locked.result });
     return { acquired: true, ...locked.result };
   } catch (err) {
     await recordWorkerError("pending", err);
@@ -89,7 +103,12 @@ export async function runHealthSample(): Promise<boolean> {
   }
 }
 
-type Timers = { pending: ReturnType<typeof setInterval>; reconcile: ReturnType<typeof setInterval>; health: ReturnType<typeof setInterval> };
+type Timers = {
+  pending: ReturnType<typeof setInterval>;
+  reconcile: ReturnType<typeof setInterval>;
+  health: ReturnType<typeof setInterval>;
+  campaigns: ReturnType<typeof setInterval>;
+};
 const g = globalThis as unknown as { __atlasSyncWorker?: Timers; __atlasSyncWorkerStarting?: boolean };
 
 /**
@@ -110,15 +129,19 @@ export function startSyncWorker(): void {
       const pending = setInterval(safe("pending", () => runPendingPass()), PENDING_INTERVAL_MS);
       const health = setInterval(safe("health", () => runHealthSample()), HEALTH_INTERVAL_MS);
       const reconcile = setInterval(safe("reconcile", () => runReconcilePass()), RECONCILE_INTERVAL_MS);
+      const campaigns = setInterval(safe("campaigns", () => runCampaignPassLocked()), CAMPAIGN_INTERVAL_MS);
       pending.unref?.();
       health.unref?.();
       reconcile.unref?.();
-      g.__atlasSyncWorker = { pending, reconcile, health };
+      campaigns.unref?.();
+      g.__atlasSyncWorker = { pending, reconcile, health, campaigns };
       setWorkerRunning(true, null);
       safe("pending", () => runPendingPass())();
       safe("health", () => runHealthSample())();
+      // После рестарта рассылка продолжается с того места, где встала.
+      safe("campaigns", () => runCampaignPassLocked())();
       console.log(
-        `[SYNC-WORKER] started (pending every ${PENDING_INTERVAL_MS / 1000}s, health every ${HEALTH_INTERVAL_MS / 1000}s, reconcile every ${RECONCILE_INTERVAL_MS / 60000}min)`
+        `[SYNC-WORKER] started (pending every ${PENDING_INTERVAL_MS / 1000}s, health every ${HEALTH_INTERVAL_MS / 1000}s, reconcile every ${RECONCILE_INTERVAL_MS / 60000}min, campaigns every ${CAMPAIGN_INTERVAL_MS / 1000}s)`
       );
     },
     (err) => {

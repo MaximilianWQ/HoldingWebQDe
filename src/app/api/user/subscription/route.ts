@@ -3,7 +3,7 @@ import { getLoyaltyInfo } from "@/lib/store";
 import { pool } from "@/lib/db";
 import { clearSessionCookie, getSessionUser, refreshSessionCookie, SESSION_COOKIE } from "@/lib/session";
 import { isAdminEmail } from "@/app/api/admin/middleware";
-import { getBypassForUser } from "@/lib/bypass";
+import { getOwedBypassBytes } from "@/lib/bypass-grants";
 
 /**
  * The user's subscription for the dashboard — READ-ONLY.
@@ -55,9 +55,11 @@ export async function GET(request: NextRequest) {
     const provisioningError =
       !isExpired && !user.subscriptionUrl ? (panelSyncState === "error" ? "panel_sync_error" : "panel_sync_pending") : null;
 
-    // Bypass (обход) — read-only, from the panel with a short timeout and a
-    // cache (src/lib/bypass.ts). The only panel read here; null → not shown.
-    const bypass = user.bypassPanelUserId || user.telegramId ? await getBypassForUser(user).catch(() => null) : null;
+    // Key 2 (обход) — from the DB only: this handler never waits for the
+    // panel (owner, 13.09.2026: the cabinet must not be slow). The live
+    // remaining GB come from GET /api/user/bypass after the first render.
+    // Paid / granted but not yet in the panel — the cabinet says «зачисляем».
+    const bypassOwedBytes = await getOwedBypassBytes(user.id).catch(() => 0);
 
     const response = NextResponse.json({
       success: true,
@@ -90,16 +92,16 @@ export async function GET(request: NextRequest) {
         provisioningError,
         panelSyncState,
         linkKept: user.linkKept,
-        bypass: bypass
-          ? {
-              subscriptionUrl: bypass.subscriptionUrl,
-              limitBytes: bypass.limitBytes,
-              usedBytes: bypass.usedBytes,
-              remainingBytes: bypass.remainingBytes,
-              unlimited: bypass.unlimited,
-              status: bypass.status,
-            }
-          : null,
+        // DB snapshot of key 2: whether the entity is known and its cached
+        // link. `maybe` — a linked account whose bot bypass is not known yet
+        // (GET /api/user/bypass looks it up).
+        bypassKey: {
+          known: !!user.bypassPanelUserId,
+          maybe: !user.bypassPanelUserId && !!user.telegramId,
+          subscriptionUrl: user.bypassPanelUserId ? user.bypassSubscriptionUrl : null,
+          origin: user.bypassPanelUserId ? (user.bypassOrigin === "site" ? "site" : "bot") : null,
+        },
+        bypassOwedBytes,
       },
     });
     refreshSessionCookie(response, auth);

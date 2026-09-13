@@ -43,3 +43,39 @@ export function trafficPackById(id: string): TrafficPack | undefined {
 
 /** Самый дешёвый пакет — для «от N ₽» на витрине. */
 export const TRAFFIC_ENTRY_RUB = Math.min(...TRAFFIC_PACKS.map((p) => p.priceRub));
+
+// ─── Помощники (13.09.2026, продажа на сайте) ─────────────────────
+// Единицы — двоичные, как у бота и у панели: 1 ГБ = 1024³ байт,
+// 1 МБ = 1024² байт. Пробные 500 МБ = 524 288 000 байт.
+
+export const MB = 1024 ** 2;
+
+/** Пробный обход в байтах. */
+export const TRAFFIC_TRIAL_BYTES = TRAFFIC_TRIAL_MB * MB;
+
+/** Проверка значения из тела запроса: только известный id пакета. */
+export function isTrafficPackId(v: unknown): v is TrafficPack["id"] {
+  return typeof v === "string" && TRAFFIC_PACKS.some((p) => p.id === v);
+}
+
+/** Байты пакета — то, что прибавляется к trafficLimitBytes. */
+export function trafficPackBytes(p: TrafficPack): number {
+  return p.gb * GB;
+}
+
+/** Цена за гигабайт в рублях, с копейками (для сравнения пакетов). */
+export function pricePerGb(p: TrafficPack): number {
+  return Math.round((p.priceRub / p.gb) * 100) / 100;
+}
+
+/** «5,93» — цена за гигабайт строкой по-русски. */
+export function formatPricePerGb(p: TrafficPack): string {
+  return pricePerGb(p).toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** «1 000 ГБ» / «500 МБ» — объём строкой по-русски. */
+export function formatTraffic(bytes: number): string {
+  if (bytes < GB) return `${Math.round(bytes / MB).toLocaleString("ru-RU")} МБ`;
+  const v = bytes / GB;
+  return `${v.toLocaleString("ru-RU", { maximumFractionDigits: v < 10 ? 1 : 0 })} ГБ`;
+}

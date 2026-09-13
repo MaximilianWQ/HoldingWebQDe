@@ -8,6 +8,7 @@
      1. Первый экран
      2. Срок и цена
      3. Что входит
+     3б. Пакеты трафика
      4. Вопросы
      5. ДВИЖЕНИЕ — весь моушн страницы, и только здесь
    ═══════════════════════════════════════════════════════════════════ */
@@ -230,6 +231,73 @@
   text-underline-offset: 3px;
 }
 
+.ap-servers-next { margin-top: 0.25rem; }
+
+/* ═══ 3б. Пакеты трафика ════════════════════════════════════════════
+   Строки, как у тарифов: объём крупно, полоса запаса (логарифм объёма),
+   цена, цена за гигабайт, «Купить». Цены — только traffic-packs.ts. */
+.ap-traffic-head { display: grid; gap: 1.5rem 3rem; align-items: end; }
+@media (min-width: 1000px) {
+  .ap-traffic-head { grid-template-columns: minmax(0, 1fr) minmax(0, 30rem); }
+}
+.ap-traffic-head .a-p { margin: 0; max-width: 56ch; }
+.ap-traffic-facts { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--a-g200); }
+.ap-traffic-facts li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem 0.75rem;
+  border-bottom: 1px solid var(--a-g100);
+}
+.ap-traffic-facts b { font-weight: 700; font-size: 1rem; line-height: 1.3; }
+.ap-traffic-facts span { color: var(--a-ink-2); font-size: 0.9375rem; line-height: 1.5; }
+
+.ap-pack-list { list-style: none; margin: clamp(2rem, 5vh, 3rem) 0 0; padding: 0; border-top: 1px solid var(--a-g200); }
+.ap-pack {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 1fr) minmax(0, 2.2fr) minmax(5.5rem, 0.9fr) minmax(7.5rem, 1fr) auto;
+  grid-template-areas: "vol bar price per cta";
+  align-items: center;
+  gap: 0.75rem 2rem;
+  min-height: 72px;
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid var(--a-g100);
+}
+.ap-pack-vol {
+  grid-area: vol;
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--a-ink-2);
+  white-space: nowrap;
+}
+.ap-pack-vol b {
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--a-ink);
+}
+.ap-pack-bar { grid-area: bar; position: relative; display: block; height: 6px; background: var(--a-g100); overflow: hidden; }
+.ap-pack-bar i {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: calc(var(--len, 0.5) * 100%);
+  background: var(--a-cobalt);
+  transform-origin: left;
+}
+.ap-pack-price { grid-area: price; margin: 0; text-align: right; white-space: nowrap; color: var(--a-ink-2); }
+.ap-pack-price b { font-weight: 700; font-size: clamp(1.25rem, 1.8vw, 1.5rem); letter-spacing: -0.02em; color: var(--a-ink); }
+.ap-pack-per { grid-area: per; margin: 0; text-align: right; white-space: nowrap; font-size: 0.875rem; color: var(--a-ink-3); }
+.ap-pack-cta { grid-area: cta; justify-self: end; }
+@media (max-width: 860px) {
+  .ap-pack {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "vol price" "bar bar" "per cta";
+    gap: 0.6rem 1rem;
+  }
+  .ap-pack-per { text-align: left; }
+}
+
 /* ═══ 4. Вопросы ════════════════════════════════════════════════════ */
 .ap-faq-list { max-width: 64rem; border-top: 1px solid var(--a-g200); }
 .ap-q { border-bottom: 1px solid var(--a-g200); }
@@ -306,6 +374,12 @@
     animation-timeline: view();
     animation-range: exit 0% exit 100%;
   }
+  /* Полоса запаса в строке пакета наливается по мере входа. */
+  .ap-pack .ap-pack-bar i {
+    animation: ap-pour linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 40%;
+  }
   /* Знак канала в строке тарифа наливается по мере входа. */
   .ap-plan .a-sym {
     transform-origin: left;
@@ -324,7 +398,10 @@
 
 /* ─── 5.4 Отклик на руку ───────────────────────────────────────────
    Наведение переворачивает строку в кобальтовую плиту. */
-.ap-plan, .ap-row, .ap-q summary, .ap-period-btn {
+.ap-plan, .ap-row, .ap-q summary, .ap-period-btn, .ap-pack {
+  transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn);
+}
+.ap-pack :is(.ap-pack-vol, .ap-pack-vol b, .ap-pack-price, .ap-pack-price b, .ap-pack-per, .ap-pack-cta, .ap-pack-bar, .ap-pack-bar i) {
   transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn);
 }
 .ap-plan :is(.ap-plan-tag, .ap-plan-val, .ap-plan-val b, .ap-unit, .ap-total, .ap-save, .a-sym) {
@@ -339,6 +416,10 @@
   .ap-plan:hover .a-sym-flow {
     background-image: repeating-linear-gradient(90deg, var(--a-paper) 0 18px, transparent 18px 30px);
   }
+  .ap-pack:hover { background: var(--a-cobalt); color: var(--a-paper); }
+  .ap-pack:hover :is(.ap-pack-vol, .ap-pack-vol b, .ap-pack-price, .ap-pack-price b, .ap-pack-per, .ap-pack-cta) { color: var(--a-paper); }
+  .ap-pack:hover .ap-pack-bar { background: color-mix(in srgb, var(--a-paper) 22%, transparent); }
+  .ap-pack:hover .ap-pack-bar i { background: var(--a-paper); }
   .ap-period-btn[aria-pressed="false"]:hover { background: var(--a-shoal); }
   .ap-row:hover, .ap-q summary:hover { background: var(--a-cobalt); color: var(--a-paper); }
   .ap-row:hover::before { background: var(--a-paper); }
@@ -348,14 +429,14 @@
 /* ─── 5.5 Упрощение и стабильный кадр ──────────────────────────────
    Конечный кадр: новая цена сразу на месте, плашка без переезда. */
 @media (prefers-reduced-motion: reduce) {
-  .ap-in, .ap-out, .ap-swap, .ap-q > p, .ap-cover .ap-line, .ap-plan .a-sym {
+  .ap-in, .ap-out, .ap-swap, .ap-q > p, .ap-cover .ap-line, .ap-plan .a-sym, .ap-pack .ap-pack-bar i {
     animation: none !important;
   }
-  .ap-period-mark, .ap-q-sign::after, .ap-plan, .ap-row, .ap-q summary, .ap-period-btn {
+  .ap-period-mark, .ap-q-sign::after, .ap-plan, .ap-row, .ap-q summary, .ap-period-btn, .ap-pack, .ap-pack * {
     transition: none !important;
   }
 }
-html[data-static] :is(.ap-in, .ap-out, .ap-swap, .ap-q > p, .ap-cover .ap-line, .ap-plan .a-sym),
+html[data-static] :is(.ap-in, .ap-out, .ap-swap, .ap-q > p, .ap-cover .ap-line, .ap-plan .a-sym, .ap-pack .ap-pack-bar i),
 html[data-static] .ap-q-sign::after,
 html[data-static] .ap-period-mark {
   animation: none !important;

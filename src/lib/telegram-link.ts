@@ -275,6 +275,8 @@ const LINK_UPDATE_SQL = `UPDATE users SET
        link_kept = $3, link_disabled_panel_user_id = $4, link_disable_ids = $5, link_panel_state = 'pending',
        panel_user_id = $6, remnawave_user_uuid = $7, remnawave_short_uuid = $8, subscription_url = $9,
        panel_username = $10, panel_status = $11, panel_expire_at = $12,
+       bypass_origin = CASE WHEN $13::bigint IS NOT NULL AND $13::bigint IS DISTINCT FROM bypass_panel_user_id THEN 'bot' ELSE bypass_origin END,
+       bypass_subscription_url = CASE WHEN $13::bigint IS NOT NULL AND $13::bigint IS DISTINCT FROM bypass_panel_user_id THEN NULL ELSE bypass_subscription_url END,
        bypass_panel_user_id = COALESCE($13, bypass_panel_user_id),
        happ_crypto_link = NULL, crypto_link_updated_at = NULL,
        panel_sync_state = 'pending', panel_sync_attempts = 0, panel_next_sync_at = NOW()
@@ -612,7 +614,10 @@ export async function unlinkTelegramAccount(userId: string, via: "bot" | "site")
     if (before.telegramId) await lockLinkKey(c, `tg:${before.telegramId}`);
     await lockLinkKey(c, `email:${before.email.toLowerCase()}`);
     const r = await c.query(
-      `UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2, bypass_panel_user_id = NULL,
+      `UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2,
+              bypass_panel_user_id = CASE WHEN bypass_origin = 'site' THEN bypass_panel_user_id ELSE NULL END,
+              bypass_origin = CASE WHEN bypass_origin = 'site' THEN 'site' ELSE NULL END,
+              bypass_subscription_url = CASE WHEN bypass_origin = 'site' THEN bypass_subscription_url ELSE NULL END,
               link_panel_state = CASE WHEN panel_user_id IS NULL THEN link_panel_state ELSE 'unlink_pending' END,
               panel_sync_state = CASE WHEN panel_user_id IS NULL THEN panel_sync_state ELSE 'pending' END,
               panel_next_sync_at = CASE WHEN panel_user_id IS NULL THEN panel_next_sync_at ELSE NOW() END

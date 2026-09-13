@@ -44,8 +44,9 @@
 /* Шаг 3. Телефон: действие → шаги → QR (он для другого устройства).
    Шире: QR крупно слева во всю высоту, справа шаги и действие. */
 .aad-act { order: 1; }
-.aad-steps { order: 2; }
-.aad-qrcard { order: 3; }
+.aad-key2 { order: 2; }
+.aad-steps { order: 3; }
+.aad-qrcard { order: 4; }
 @media (min-width: 720px) {
   /* QR держится под рядом пилюль, пока читаются шаги справа: код в
      кадре с первого экрана и до кнопки «Готово». */
@@ -56,6 +57,8 @@
   .aad-grid-go .aad-qr-wrap { flex: none; }
   .aad-grid-go .aad-steps { order: 0; grid-column: 2; grid-row: 1; }
   .aad-grid-go .aad-act { order: 0; grid-column: 2; grid-row: 2; }
+  /* Ключ 2 — под QR и действием, во всю ширину. */
+  .aad-grid-go .aad-key2 { order: 0; grid-column: 1 / -1; grid-row: 3; }
 }
 @media (min-width: 1100px) {
   .aad-grid-go .aad-qrcard { grid-column: 1 / span 5; }
@@ -64,7 +67,8 @@
 /* Без ключа QR нет — всё во всю ширину, действие первым. */
 .aad-grid-go[data-nokey] > .ak-card { grid-column: 1 / -1; grid-row: auto; }
 .aad-grid-go[data-nokey] .aad-act { order: 1; }
-.aad-grid-go[data-nokey] .aad-steps { order: 2; }
+.aad-grid-go[data-nokey] .aad-key2 { order: 2; }
+.aad-grid-go[data-nokey] .aad-steps { order: 3; }
 
 /* Подписи только для телефона / только для широкого экрана. */
 .aad-only-d { display: none; }
@@ -211,6 +215,23 @@
   overflow-wrap: anywhere;
   user-select: all;
   color: rgba(255, 255, 255, 0.86);
+}
+
+/* ─── 3 · Два ключа (13.09.2026) ────────────────────────────────── */
+/* Подпись ключа 1 над ссылкой на тёмной плите. */
+.aad-kname { margin: 1.1rem 0 0; font-size: 0.8125rem; line-height: 1.45; color: rgba(255, 255, 255, 0.74); }
+.aad .ak-dark .aad-kname + .aad-key { margin-top: 0.5rem; }
+/* Ключ 2 — белая панель: остаток, ссылка, QR, «Докупить». */
+.aad-key2 .ak-key-strip { margin-top: 0.9rem; }
+.aad-key2 .ak-actions { margin-top: 0; }
+.aad-switch {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: var(--a-shoal);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--a-ink);
 }
 
 /* ─── 3 · QR ────────────────────────────────────────────────────── */

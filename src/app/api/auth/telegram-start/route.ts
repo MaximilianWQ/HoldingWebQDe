@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { startTelegramLogin, TG_LOGIN_COOKIE, TG_LOGIN_COOKIE_PATH, TG_LOGIN_TTL_MS } from "@/lib/telegram-login";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpFrom } from "@/lib/client-ip";
+import { botStartUrl } from "@/lib/telegram-link-tokens";
 
 /**
  * POST /api/auth/telegram-start — begin "sign in with Telegram".
@@ -12,9 +13,8 @@ import { clientIpFrom } from "@/lib/client-ip";
  * code and asks the person to confirm. Then the page polls
  * /api/auth/telegram-check?nonce=… .
  *
- * Optional env TELEGRAM_BOT_USERNAME (without @) fills `botUrl`.
+ * `botUrl` — botStartUrl (the main bot, env TELEGRAM_BOT_USERNAME overrides).
  */
-const BOT_USERNAME_RE = /^[A-Za-z0-9_]{3,64}$/;
 
 export async function POST(request: NextRequest) {
   const ip = clientIpFrom(request.headers);
@@ -28,7 +28,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const s = await startTelegramLogin({ ip, userAgent: request.headers.get("user-agent") });
-    const bot = (process.env.TELEGRAM_BOT_USERNAME || "").trim().replace(/^@/, "");
     const startParam = `tglogin_${s.nonce}`;
 
     const response = NextResponse.json({
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
       data: {
         nonce: s.nonce,
         startParam,
-        botUrl: BOT_USERNAME_RE.test(bot) ? `https://t.me/${bot}?start=${startParam}` : null,
+        botUrl: botStartUrl(startParam),
         confirmCode: s.confirmCode,
         expiresAt: s.expiresAt.toISOString(),
       },

@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const created = await getOrCreateUser(userEmail, referralCode || undefined, "telegram-bot");
+    // No site bypass trial here: the bot gives its own trial traffic to `{telegram_id}`.
+    const created = await getOrCreateUser(userEmail, referralCode || undefined, "telegram-bot", undefined, { bypassTrial: false });
 
     await updateUser(created.id, { telegramId: String(telegramId), telegramLinked: true });
 

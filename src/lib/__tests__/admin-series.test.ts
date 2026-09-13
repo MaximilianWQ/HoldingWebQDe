@@ -47,9 +47,26 @@ describe("buildDailySeries", () => {
       range
     );
     expect(pts).toEqual([
-      { day: "2026-09-11", revenue: 199, refunds: 0, refundsCount: 0, payments: 1, registrations: 1, trials: 0, conversions: 1, renewals: 0, expirations: 1 },
-      { day: "2026-09-12", revenue: 848.5, refunds: 349, refundsCount: 1, payments: 2, registrations: 1, trials: 1, conversions: 0, renewals: 1, expirations: 2 },
+      { day: "2026-09-11", revenue: 199, refunds: 0, refundsCount: 0, payments: 1, registrations: 1, trials: 0, conversions: 1, renewals: 0, expirations: 1, trafficRevenue: 0, trafficPayments: 0 },
+      { day: "2026-09-12", revenue: 848.5, refunds: 349, refundsCount: 1, payments: 2, registrations: 1, trials: 1, conversions: 0, renewals: 1, expirations: 2, trafficRevenue: 0, trafficPayments: 0 },
     ]);
+  });
+
+  it("«Пакеты трафика»: in revenue and payments and in traffic*, never a conversion or renewal", () => {
+    const pts = buildDailySeries(
+      {
+        payments: [
+          { userId: "a", amount: 199, paidAt: new Date("2026-09-12T09:00:00Z"), refundedAt: null, hasEarlierPaid: false, hadTrial: true, product: "subscription" },
+          { userId: "a", amount: 269, paidAt: new Date("2026-09-12T10:00:00Z"), refundedAt: null, hasEarlierPaid: true, hadTrial: true, product: "traffic" },
+          { userId: "b", amount: 89, paidAt: new Date("2026-09-12T11:00:00Z"), refundedAt: null, hasEarlierPaid: false, hadTrial: true, product: "traffic" },
+        ],
+        registrations: [],
+        trials: [],
+        expirations: [],
+      },
+      range
+    );
+    expect(pts[1]).toMatchObject({ revenue: 557, payments: 3, trafficRevenue: 358, trafficPayments: 2, conversions: 1, renewals: 0 });
   });
 
   it("returns zero points for empty days", () => {

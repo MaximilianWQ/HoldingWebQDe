@@ -9,6 +9,9 @@ import Corner from "@/components/atlas/Corner";
 import OrbGL from "@/components/atlas/OrbGL";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { plural } from "@/lib/ru-words";
+import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT } from "@/lib/key-names";
+import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
+import type { SubscriptionData } from "@/types";
 import "@/app/work-atlas.css";
 import "./add-device-atlas.css";
 
@@ -232,6 +235,11 @@ export default function AddDeviceView() {
   const [keyLoaded, setKeyLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [detected, setDetected] = useState<Platform | null>(null);
+  // Ключ 2 («Обход»): ссылка из БД сразу, остаток — после первой отрисовки.
+  const [bk, setBk] = useState<SubscriptionData["bypassKey"] | null>(null);
+  const [owed, setOwed] = useState(0);
+  const [copied2, setCopied2] = useState(false);
+  const [qr2, setQr2] = useState(false);
   const headRef = useRef<HTMLHeadingElement>(null);
   const pillsRef = useRef<HTMLOListElement>(null);
   const firstStep = useRef(true);
@@ -241,9 +249,14 @@ export default function AddDeviceView() {
       const res = await fetch("/api/user/subscription");
       const r = await res.json();
       if (r.success && r.data.vpnKey) setVpnKey(r.data.vpnKey);
+      if (r.success) {
+        setBk(r.data.bypassKey ?? null);
+        setOwed(r.data.bypassOwedBytes ?? 0);
+      }
     } catch { /* silent */ }
     finally { setKeyLoaded(true); }
   }, []);
+  const { live, status: liveStatus } = useBypassLive(keyLoaded && !!(bk?.known || bk?.maybe || owed > 0));
 
   useEffect(() => { fetchKey(); }, [fetchKey]);
   useEffect(() => { setDetected(detectPlatform()); }, []);
@@ -265,14 +278,13 @@ export default function AddDeviceView() {
   const apps = platform ? APPS[platform] : [];
   const currentApp = apps[appIndex] || null;
 
-  const getKeyUrl = useCallback(() => {
-    if (!vpnKey) return null;
-    if (currentApp?.jsonFormat) {
-      const sep = vpnKey.includes("?") ? "&" : "?";
-      return `${vpnKey}${sep}format=json`;
-    }
-    return vpnKey;
-  }, [vpnKey, currentApp]);
+  // Happ получает `?format=json` — у основного ключа, как на проде, и у
+  // ключа 2 (та же подписка Remnawave, другая сущность).
+  const forApp = useCallback(
+    (raw: string | null) => (raw ? (currentApp?.jsonFormat ? withJsonFormat(raw) : raw) : null),
+    [currentApp]
+  );
+  const getKeyUrl = useCallback(() => forApp(vpnKey), [forApp, vpnKey]);
 
   const handleBack = () => {
     if (step === "instruction") setStep(apps.length > 1 ? "app" : "platform");
@@ -300,6 +312,17 @@ export default function AddDeviceView() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const copyKey2 = async (url: string) => {
+    try { await navigator.clipboard.writeText(url); }
+    catch {
+      const ta = document.createElement("textarea");
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    setCopied2(true);
+    setTimeout(() => setCopied2(false), 2500);
+  };
+
   const backLabel =
     step === "platform" ? "В кабинет"
     : step === "app"    ? "К устройствам"
@@ -309,6 +332,10 @@ export default function AddDeviceView() {
   const platformMeta = PLATFORMS.find((p) => p.id === platform) ?? null;
   const detectedMeta = PLATFORMS.find((p) => p.id === detected) ?? null;
   const keyUrl = step === "instruction" ? getKeyUrl() : null;
+  const key2Url = step === "instruction" ? forApp(live?.subscriptionUrl ?? bk?.subscriptionUrl ?? null) : null;
+  const owedNow = live ? live.owedBytes : owed;
+  const key2Waiting = !keyLoaded || liveStatus === "loading";
+  const key2Exhausted = live?.state === "ok" && !live.unlimited && (live.remainingBytes ?? 0) <= 0;
 
   const title =
     step === "platform" ? "На каком устройстве?"
@@ -564,6 +591,7 @@ export default function AddDeviceView() {
                   </div>
                 </div>
 
+                {keyUrl && <p className="aad-kname">{MAIN_KEY.member.title} · {MAIN_KEY.member.text}</p>}
                 {keyUrl && (
                   <div className="ak-key-strip aad-key">
                     <span title={keyUrl}>{keyUrl}</span>
@@ -598,11 +626,11 @@ export default function AddDeviceView() {
                       data-state={copied ? "ok" : undefined}
                     >
                       <Icon name={copied ? "check" : "copy"} size={16} />
-                      {copied ? "Скопировано" : "Скопировать ключ"}
+                      {copied ? "Скопировано" : "Скопировать ключ 1"}
                     </button>
                   )}
                 </div>
-                <p className="b-sr" role="status" aria-live="polite">{copied ? "Ключ скопирован" : ""}</p>
+                <p className="b-sr" role="status" aria-live="polite">{copied ? "Ключ 1 скопирован" : copied2 ? "Ключ 2 скопирован" : ""}</p>
 
                 {keyUrl && (
                   <p className="ak-fine aad-only-m">
@@ -618,13 +646,77 @@ export default function AddDeviceView() {
                 )}
               </section>
 
+              {/* Ключ 2 · Обход — отдельная панель: остаток, ссылка, QR, докупить. */}
+              <section className="ak-card aad-key2" data-sheet="23" style={at(2)} aria-labelledby="aad-k2-h">
+                <div className="ak-card-head">
+                  <h2 id="aad-k2-h" className="ak-eyebrow">{BYPASS_KEY.member.title}</h2>
+                  {key2Waiting ? (
+                    <span className="ak-status" data-tone="warn"><i />Проверяем</span>
+                  ) : owedNow > 0 ? (
+                    <span className="ak-status" data-tone="warn"><i />Зачисляем</span>
+                  ) : key2Exhausted ? (
+                    <span className="ak-status" data-tone="off"><i />Гигабайты закончились</span>
+                  ) : key2Url ? (
+                    <span className="ak-status"><i />Готов</span>
+                  ) : null}
+                </div>
+                <p className="ak-text">{BYPASS_KEY.member.text}</p>
+                {key2Waiting ? (
+                  <div className="ak-kskel" aria-hidden />
+                ) : live?.state === "ok" && !live.unlimited ? (
+                  <p className="ak-kgb">
+                    <span className="a-num">{formatBytes(live.remainingBytes ?? 0)}</span>
+                    <small>осталось из {formatBytes(live.limitBytes ?? 0)}</small>
+                  </p>
+                ) : null}
+                {key2Url ? (
+                  <>
+                    <div className="ak-key-strip aad-key2-strip">
+                      <span title={key2Url}>{key2Url}</span>
+                    </div>
+                    <div className="ak-reveal" data-open={qr2 ? "" : undefined}>
+                      <div>
+                        <div className="ak-qr">
+                          <QRCodeSVG value={key2Url} size={200} level="M" marginSize={2} />
+                        </div>
+                        <p className="ak-fine">{currentApp.instructions.qrHint}</p>
+                      </div>
+                    </div>
+                    <div className="ak-actions">
+                      <button type="button" onClick={() => copyKey2(key2Url)} className="a-btn ak-btn-soft" data-state={copied2 ? "ok" : undefined}>
+                        <Icon name={copied2 ? "check" : "copy"} size={16} />
+                        {copied2 ? "Скопировано" : "Скопировать ключ 2"}
+                      </button>
+                      <button type="button" onClick={() => setQr2((v) => !v)} className="a-btn ak-btn-soft" aria-expanded={qr2}>
+                        <Icon name="qr" size={16} />
+                        {qr2 ? "Скрыть QR" : "QR-код ключа 2"}
+                      </button>
+                      <Link href={BUY_TRAFFIC_HREF} className="a-btn ak-btn-soft">Докупить гигабайты</Link>
+                    </div>
+                  </>
+                ) : key2Waiting ? null : owedNow > 0 ? (
+                  <p className="ak-fine" role="status">Гигабайты оплачены и зачисляются — ключ появится здесь через пару минут.</p>
+                ) : (
+                  <>
+                    <p className="ak-fine">Ключа «Обход» пока нет. Купите пакет трафика — ключ появится сразу после оплаты.</p>
+                    <div className="ak-actions">
+                      <Link href={BUY_TRAFFIC_HREF} className="a-btn a-btn-primary">
+                        Получить ключ «Обход»
+                        <Icon name="arrow-right" size={16} />
+                      </Link>
+                    </div>
+                  </>
+                )}
+                <p className="aad-switch">{SWITCH_HINT.member}</p>
+              </section>
+
               {/* QR: на широком экране — крупно и сразу, на телефоне — в конце. */}
               {keyUrl && (
                 <section className="ak-card aad-qrcard" data-sheet="23" style={at(2)} aria-labelledby="aad-qr-h">
                   <div className="ak-card-head">
                     <h2 id="aad-qr-h" className="ak-eyebrow">
-                      <span className="aad-only-d">QR-код подписки</span>
-                      <span className="aad-only-m">QR-код для другого устройства</span>
+                      <span className="aad-only-d">QR-код · {MAIN_KEY.member.title}</span>
+                      <span className="aad-only-m">QR-код ключа 1 для другого устройства</span>
                     </h2>
                     <span className="aad-qr-tag"><Icon name="qr" size={14} />Импорт</span>
                   </div>

@@ -25,9 +25,12 @@ export function hashLinkToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/** `https://t.me/<bot>?start=link_<token>`, or null when TELEGRAM_BOT_USERNAME is not configured. */
+/** Основной бот (владелец, 13.09.2026); env TELEGRAM_BOT_USERNAME переопределяет. */
+export const DEFAULT_BOT_USERNAME = "atlassecure_bot";
+
+/** `https://t.me/<bot>?start=<param>` — one place for every link into the bot. */
 export function botStartUrl(startParam: string): string | null {
-  const bot = (process.env.TELEGRAM_BOT_USERNAME || "").trim().replace(/^@/, "");
+  const bot = (process.env.TELEGRAM_BOT_USERNAME || DEFAULT_BOT_USERNAME).trim().replace(/^@/, "");
   return BOT_USERNAME_RE.test(bot) ? `https://t.me/${bot}?start=${startParam}` : null;
 }
 

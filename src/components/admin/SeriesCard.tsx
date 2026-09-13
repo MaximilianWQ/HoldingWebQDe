@@ -23,6 +23,7 @@ const NOTE_KEYS: Record<string, string> = {
   conversions: "Оплатили после пробного",
   renewals: "Продления",
   expirations: "Окончания",
+  traffic: "Пакеты трафика",
 };
 
 function Axis({ pts }: { pts: SeriesPoint[] }) {
@@ -129,6 +130,7 @@ export default function SeriesCard({ i, reloadKey }: { i: number; reloadKey: num
             <Tile label="Выручка" value={money(t.revenue)} tone="ok" />
             <Tile label="Возвраты" value={money(t.refunds)} note={`${num(t.refundsCount)} шт.`} tone={t.refundsCount > 0 ? "off" : undefined} />
             <Tile label="Платежей" value={num(t.payments)} />
+            <Tile label="Пакеты трафика" value={money(t.trafficRevenue ?? 0)} note={`${num(t.trafficPayments ?? 0)} шт. · в выручке`} tone="mute" />
             <Tile label="Регистраций" value={num(t.registrations)} />
             <Tile label="Пробных" value={num(t.trials)} />
             <Tile label="Оплатили после пробного" value={num(t.conversions)} tone="ok" />
@@ -142,6 +144,7 @@ export default function SeriesCard({ i, reloadKey }: { i: number; reloadKey: num
               <>
                 <b>{dayLong(cur.day)}</b> · выручка {money(cur.revenue)}
                 {cur.refunds > 0 && <span data-tone="off"> · возвраты {money(cur.refunds)}</span>} · платежей {num(cur.payments)}
+                {(cur.trafficPayments ?? 0) > 0 && <> · из них пакеты трафика {money(cur.trafficRevenue ?? 0)} ({num(cur.trafficPayments ?? 0)})</>}
               </>
             )}
           </p>
@@ -262,6 +265,8 @@ export default function SeriesCard({ i, reloadKey }: { i: number; reloadKey: num
                 <th scope="col">Выручка, ₽</th>
                 <th scope="col">Возвраты, ₽</th>
                 <th scope="col">Платежей</th>
+                <th scope="col">Пакеты трафика, ₽</th>
+                <th scope="col">Пакетов трафика</th>
                 <th scope="col">Регистраций</th>
                 <th scope="col">Пробных</th>
                 <th scope="col">Оплатили после пробного</th>
@@ -276,6 +281,8 @@ export default function SeriesCard({ i, reloadKey }: { i: number; reloadKey: num
                   <td>{num(p.revenue)}</td>
                   <td>{num(p.refunds)}</td>
                   <td>{p.payments}</td>
+                  <td>{num(p.trafficRevenue ?? 0)}</td>
+                  <td>{p.trafficPayments ?? 0}</td>
                   <td>{p.registrations}</td>
                   <td>{p.trials}</td>
                   <td>{p.conversions}</td>

@@ -17,7 +17,7 @@
  * COMPLIANCE-CHECK.md. Здесь они намеренно оставлены минимальными:
  * лучше не заявить, чем заявить неподтверждённое.
  */
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://atlassecure.uk";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://qodev.dev";
 
 /** Родительская организация группы. Название дано брифом; сайт и
  *  реквизиты группы подставить, когда будут подтверждены. */

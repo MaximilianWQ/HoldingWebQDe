@@ -61,7 +61,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    // «Отправить ещё раз» идёт сюда, а галочки согласия записал шаг почты
+    // (sendCodeAction) в cookie на 10 минут. Новый код живёт 10 минут
+    // от этой минуты — продлеваем и отметку, иначе при позднем вводе
+    // согласие потеряется.
+    const consent = request.cookies.get("pending_consent")?.value;
+    if (consent === "privacy" || consent === "privacy,marketing") {
+      response.cookies.set("pending_consent", consent, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 10 * 60,
+        path: "/",
+      });
+    }
+    return response;
   } catch {
     return NextResponse.json(
       { success: false, error: "Внутренняя ошибка сервера" },

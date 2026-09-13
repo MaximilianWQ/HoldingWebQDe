@@ -20,6 +20,7 @@ import {
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { SERVER_ENTRY_USD, formatUsd } from "@/lib/servers";
+import { TRAFFIC_ENTRY_RUB, TRAFFIC_PACKS, TRAFFIC_TRIAL_MB, formatPricePerGb } from "@/lib/traffic-packs";
 import { plural } from "@/lib/ru-words";
 import "./pricing-atlas.css";
 
@@ -35,8 +36,13 @@ import "./pricing-atlas.css";
  *   01 первый экран — буквы поднимаются, знаки канала текут
  *   02 срок и цена — сцена: смена срока перелистывает цифры цены
  *   03 что входит — строки ложатся, наведение переворачивает строку
- *   04 вопросы — те же, что в разметке FAQPage (page.tsx)
- *   05 финал — кобальтовая плита, одно действие
+ *   04 пакеты трафика — строки пакетов из traffic-packs.ts (цены только
+ *      оттуда, как у тарифов — plans.ts); полоса запаса наливается по
+ *      прокрутке, наведение переворачивает строку; «Купить» ведёт в
+ *      оплату пакета (/subscribe?product=traffic&pack=…, без сессии —
+ *      через вход с возвратом)
+ *   05 вопросы — те же, что в разметке FAQPage (page.tsx)
+ *   06 финал — кобальтовая плита, одно действие
  *
  * Весь моушн — pricing-atlas.css, раздел «Движение».
  */
@@ -48,6 +54,23 @@ const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройство", "устрой�
 
 const HERO_1 = "два тарифа";
 const HERO_2 = "разница в скорости";
+
+/**
+ * Пакеты трафика на витрине. Слов «VPN» и «обход» здесь нет (правила
+ * витрины, CLAUDE.md): отдельный ключ с запасом гигабайт, без срока,
+ * пакеты складываются. «Чем больше, тем дешевле гигабайт» не пишем —
+ * цена за ГБ у пакетов не монотонна; она показана у каждой строки.
+ */
+const TRAFFIC_FACTS: [string, string][] = [
+  ["Без срока действия", "Ключ не сгорает в конце месяца — он работает, пока есть гигабайты."],
+  ["Пакеты складываются", "Купили ещё — новые гигабайты прибавились к тому, что осталось."],
+  ["Отдельно от подписки", "Свой ключ и своя ссылка. Покупать подписку для него не нужно."],
+];
+
+const GB_MIN = Math.min(...TRAFFIC_PACKS.map((p) => p.gb));
+const GB_MAX = Math.max(...TRAFFIC_PACKS.map((p) => p.gb));
+/** Длина полосы запаса: объём в логарифмической шкале (15 ГБ … 5000 ГБ). */
+const packLen = (gb: number) => (0.1 + (0.9 * Math.log(gb / GB_MIN)) / Math.log(GB_MAX / GB_MIN)).toFixed(3);
 
 /** Пользовательские свойства в style без приведения на каждом месте. */
 const v = (vars: Record<string, string | number>) => vars as CSSProperties;
@@ -331,14 +354,76 @@ export default function PricingView() {
           <p className="ap-servers a-settle" style={v({ "--i": 8 })}>
             Нужен целый сервер? <Link href="/vds">Выделенные серверы</Link> — от {formatUsd(SERVER_ENTRY_USD)} в месяц.
           </p>
+          <p className="ap-servers ap-servers-next a-settle" style={v({ "--i": 9 })}>
+            Нужны гигабайты без срока? <a href="#traffic">Пакеты трафика</a> — от {formatRub(TRAFFIC_ENTRY_RUB)} ₽.
+          </p>
         </div>
       </section>
 
-      {/* ── 04 · Вопросы ─────────────────────────────────────────── */}
+      {/* ── 04 · Пакеты трафика ──────────────────────────────────── */}
+      <section className="a-sheet ap-traffic" data-sheet="10" data-title="Пакеты трафика" id="traffic" aria-labelledby="ap-traffic-title">
+        <div className="a-field">
+          <div className="ap-traffic-head">
+            <div>
+              <h2 id="ap-traffic-title" className="a-h2 a-settle">
+                <span className="a-no">04</span>пакеты трафика
+              </h2>
+              <p className="a-p a-settle" style={v({ "--i": 1 })}>
+                Отдельный ключ с запасом гигабайт. Срока у него нет: ключ работает, пока гигабайты не закончатся.
+                Докупите пакет — новые гигабайты прибавятся к остатку.
+              </p>
+            </div>
+            <ul className="ap-traffic-facts">
+              {TRAFFIC_FACTS.map(([title, text], i) => (
+                <li key={title} className="a-settle" style={v({ "--i": i + 2 })}>
+                  <b>{title}</b>
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <ol className="ap-pack-list" aria-label="Пакеты трафика: объём, цена, цена за гигабайт">
+            {TRAFFIC_PACKS.map((p, i) => {
+              const price = formatRub(p.priceRub);
+              const volume = `${formatRub(p.gb)} ГБ`;
+              return (
+                <li key={p.id} className="a-slide" style={v({ "--i": Math.min(i, 6) + 1, "--dir": i % 2 ? 1 : -1 })}>
+                  <div className="ap-pack">
+                    <p className="ap-pack-vol">
+                      <b className="a-num">{formatRub(p.gb)}</b> ГБ
+                    </p>
+                    <span className="ap-pack-bar" style={v({ "--len": packLen(p.gb) })} aria-hidden>
+                      <i />
+                    </span>
+                    <p className="ap-pack-price">
+                      <b className="a-num">{price}</b> ₽
+                    </p>
+                    <p className="ap-pack-per a-num">{formatPricePerGb(p)} ₽ за ГБ</p>
+                    <Link
+                      href={`/subscribe?product=traffic&pack=${p.id}`}
+                      className="a-btn a-btn-quiet ap-pack-cta"
+                      aria-label={`Купить ${volume} за ${price} ₽`}
+                    >
+                      Купить
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+
+          <p className="ap-fine a-settle" style={v({ "--i": 4 })}>
+            Цены в рублях, оплата разовая, без автосписаний. В пробный период входят {TRAFFIC_TRIAL_MB} МБ на этом ключе.
+          </p>
+        </div>
+      </section>
+
+      {/* ── 05 · Вопросы ─────────────────────────────────────────── */}
       <section className="a-sheet ap-faq" data-sheet="10" data-title="Вопросы" aria-labelledby="ap-faq-title">
         <div className="a-field">
           <h2 id="ap-faq-title" className="a-h2 a-settle">
-            <span className="a-no">04</span>вопросы до оплаты
+            <span className="a-no">05</span>вопросы до оплаты
           </h2>
           {/* Один открытый ответ за раз — атрибутом name у <details>, без
               стейта: ответы остаются в разметке и находятся поиском. */}
@@ -356,11 +441,11 @@ export default function PricingView() {
         </div>
       </section>
 
-      {/* ── 05 · Финал ───────────────────────────────────────────── */}
+      {/* ── 06 · Финал ───────────────────────────────────────────── */}
       <section className="a-sheet a-plate a-final ap-final" data-sheet="10" data-title="Попробовать" aria-labelledby="ap-final-title">
         <div className="a-field">
           <h2 id="ap-final-title" className="a-h2">
-            <span className="a-no">05</span>
+            <span className="a-no">06</span>
             <Words text={`попробуйте ${TRIAL} бесплатно`} />
           </h2>
           <p className="a-p a-settle" style={v({ "--i": 6 })}>

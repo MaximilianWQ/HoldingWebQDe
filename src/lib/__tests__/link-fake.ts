@@ -64,6 +64,12 @@ export class LinkFakeDb extends FakeDb {
     }
     if (s.startsWith("UPDATE users SET telegram_id = $2, telegram_linked = ($2::text IS NOT NULL)")) {
       const u = this.user(p[0]);
+      // Mirrors LINK_UPDATE_SQL: a DIFFERENT bypass id → the bot's; its cached link is dropped.
+      const bpChanged = p[12] != null && String(p[12]) !== String(u.bypass_panel_user_id ?? "");
+      Object.assign(u, {
+        bypass_origin: bpChanged ? "bot" : u.bypass_origin ?? null,
+        bypass_subscription_url: bpChanged ? null : u.bypass_subscription_url ?? null,
+      });
       Object.assign(u, {
         telegram_id: p[1], telegram_linked: p[1] != null, telegram_linked_at: p[1] != null ? new Date() : u.telegram_linked_at ?? null,
         link_kept: p[2], link_disabled_panel_user_id: p[3], link_disable_ids: p[4], link_panel_state: "pending",
@@ -77,7 +83,14 @@ export class LinkFakeDb extends FakeDb {
     if (s.startsWith("UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2")) {
       const u = this.users.get(p[0]);
       if (!u || (u.telegram_id == null && !u.telegram_linked)) return res();
-      Object.assign(u, { telegram_id: null, telegram_linked: false, telegram_link_token: p[1], bypass_panel_user_id: null });
+      // A site bypass (ST…_bp) stays with the account; the bot's goes back to the bot.
+      const site = u.bypass_origin === "site";
+      Object.assign(u, {
+        telegram_id: null, telegram_linked: false, telegram_link_token: p[1],
+        bypass_panel_user_id: site ? u.bypass_panel_user_id : null,
+        bypass_origin: site ? "site" : null,
+        bypass_subscription_url: site ? u.bypass_subscription_url ?? null : null,
+      });
       if (u.panel_user_id != null) Object.assign(u, { link_panel_state: "unlink_pending", panel_sync_state: "pending" });
       return res([{ ...u }]);
     }
@@ -191,12 +204,15 @@ export const linkDb = new LinkFakeDb();
 export class FakePanel {
   users = new Map<number, Record<string, unknown>>();
   down = false;
+  /** Create the user, then answer as if the connection dropped (a lost response). */
+  loseNextCreate = false;
   calls: Array<{ fn: string; arg: unknown }> = [];
   private nextId = 900;
 
   reset() {
     this.users.clear();
     this.down = false;
+    this.loseNextCreate = false;
     this.calls = [];
     this.nextId = 900;
   }
@@ -254,11 +270,33 @@ export class FakePanel {
   createUser = async (body: Record<string, unknown>): Promise<RwResult<PanelUser>> => {
     this.calls.push({ fn: "createUser", arg: body });
     if (this.down) return this.unavailable("POST", "/api/users");
+    // Like the real panel: a taken username is 400 A019.
+    if ([...this.users.values()].some((u) => u.username === body.username)) {
+      return { ok: false, kind: "conflict", status: 400, errorCode: "A019", message: "User username already exists", method: "POST", path: "/api/users" };
+    }
     const id = this.nextId++;
-    const raw = contractUser({ ...body, id, shortUuid: `short${id}`, subscriptionUrl: `https://sub.test/short${id}`, telegramId: null });
+    const squads = Array.isArray(body.activeInternalSquads) ? (body.activeInternalSquads as unknown[]).map((u) => (typeof u === "string" ? { uuid: u, name: "squad" } : u)) : [];
+    const raw = contractUser({
+      ...body,
+      id,
+      shortUuid: `short${id}`,
+      subscriptionUrl: `https://sub.test/short${id}`,
+      telegramId: null,
+      activeInternalSquads: squads,
+      userTraffic: { usedTrafficBytes: 0, lifetimeUsedTrafficBytes: 0, onlineAt: null, firstConnectedAt: null, lastConnectedNodeUuid: null },
+    });
     this.users.set(id, raw);
+    if (this.loseNextCreate) {
+      this.loseNextCreate = false;
+      return this.unavailable("POST", "/api/users");
+    }
     return { ok: true, status: 201, data: parsePanelUser(raw)! };
   };
+
+  /** Raw panel object (as the panel stores it) by username — for exact-field assertions. */
+  raw(username: string): Record<string, unknown> | undefined {
+    return [...this.users.values()].find((u) => u.username === username);
+  }
 
   updates(id: number) {
     return this.calls.filter((c) => c.fn === "updateUser" && (c.arg as UpdateUserBody).id === id).map((c) => c.arg as UpdateUserBody);

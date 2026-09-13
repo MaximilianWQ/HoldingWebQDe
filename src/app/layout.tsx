@@ -19,7 +19,7 @@ import PageTransition from "@/components/brand/PageTransition";
 import BackToTop from "@/components/brand/BackToTop";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://atlassecure.uk"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://qodev.dev"),
   // Заголовок по умолчанию для страниц, которые не объявили свой.
   // Шаблон добавляет имя компании к заголовку раздела — иначе в
   // выдаче все страницы сайта выглядят одинаково.

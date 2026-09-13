@@ -501,6 +501,13 @@ Lenis; возврат по «Назад» — своя позиция в session
   «ширину канала» с бытовым объяснением, «аптайм» — на «время без
   сбоев». Термин, который приходится объяснять покупателю, на
   публичной странице не работает.
+- **Экраны только для вошедших** (кабинет, `/add-device`, `/subscribe`,
+  шаг установки с ключами на `/devices` при сессии) — слова «VPN» и
+  «обход» можно и нужно использовать для ясности (владелец, 13.09.2026):
+  «Ключ 1 · Основной VPN» и «Ключ 2 · Обход». Всё, что видит гость или
+  поисковик (витрина, `/devices` без сессии, metadata, structured
+  data) — по-прежнему без «VPN» и «обход»: «Основной» / «Усиленный»,
+  «Пакеты трафика».
 - **Автосписаний нет**: оплата разовая за выбранный срок, кнопки
   «отменить подписку» в кабинете нет. Писать «отмена в один клик»
   нельзя — только «без автосписаний» / «продлеваете, когда сами решите»
@@ -514,6 +521,24 @@ Lenis; возврат по «Назад» — своя позиция в session
   связку один раз. Сквад обхода — `6947418d-83b6-4050-a10c-3829e4cd4b2c`
   (по умолчанию `REMNAWAVE_BYPASS_SQUAD_UUID`, тот же, что у бота),
   лимит устройств обхода — 5.
+  **Как устроено (13.09.2026):** витрина — раздел «Пакеты трафика» на
+  `/pricing` (`#traffic`); оплата — `/subscribe?product=traffic&pack=gbN`
+  → `POST /api/payments/create {product:"traffic", packId}` (сумма только
+  с сервера; `payments.product/traffic_pack_id/traffic_bytes`, plan =
+  'traffic', period = 0). `confirmPayment` пишет в журнал `bypass_grants`
+  (`payment:<id>`, в той же транзакции; премиум не продлевается), затем
+  `src/lib/bypass-grants.ts` прибавляет ГБ в панели: сущность связанного —
+  ботовская `{telegram_id}`, иначе сайтовая `ST…_bp` (создаётся первой
+  покупкой или пробным периодом; тег `SITE_BYPASS`, 2099, `NO_RESET`);
+  прибавка — read-modify-write через `bypass_traffic_ops`, панель
+  недоступна — долг, повторяет воркер. Пробные 500 МБ — `trial:<id>` в
+  транзакции пробного (`store.getOrCreateUser`). Возврат — пометка + письмо,
+  ГБ не снимаются. Кешбэк рефереру — как с любой оплаты. Админ — «Начислить
+  ГБ» (`admin:<requestId>`, идемпотентно). Кабинет не ждёт панель:
+  `/api/user/subscription` — только БД (ссылка ключа 2 кешем
+  `users.bypass_subscription_url`), остаток — `GET /api/user/bypass` после
+  отрисовки. Два ключа везде подписаны одинаково — `src/lib/key-names.ts`
+  (гостю «Основной» / «Усиленный», вошедшему «Основной VPN» / «Обход»).
 - Trial: **3 дня** (`TRIAL_DURATION_DAYS` в `src/lib/remnawave.ts`)
 - Referral: **только кешбэк** на баланс с оплат приглашённых — 10%, с 25
   оплативших — 25%, с 50 — 45% (`getLoyaltyTier`, `src/lib/store.ts`).
@@ -583,3 +608,22 @@ Lenis; возврат по «Назад» — своя позиция в session
   рассылка, журнал). UI — `src/app/admin/**`, `src/components/admin/**`
   (префикс `adm-`); данные — `src/lib/admin-*.ts`. Страница сама права не
   проверяет — это делает API (`verifyAdmin`, 403).
+- **Рассылки и массовые начисления** (13.09.2026) — «Сервис» → «Рассылки и
+  начисления» (`CampaignsCard.tsx`), API `/api/admin/campaigns/**`, движок
+  `src/lib/campaigns.ts`, SQL `campaigns-pg.ts`, письмо `campaign-email.ts`
+  (ограниченный Markdown → безопасный HTML), транспорт `campaign-mailer.ts`
+  (Resend batch ≤ 100, ключ идемпотентности на пачку). Таблицы
+  `email_campaigns` / `email_deliveries` (PK кампания+человек — одно письмо
+  на человека). Очередь — таймер воркера каждые 30 с под `LOCK_KEYS.CAMPAIGNS`:
+  фаза 1 — подарок всем сразу (дни — `admin_grant`, source
+  `campaign:<id>:user:<userId>`; ГБ — `bypass_grants` с id `…:traffic`,
+  применяет `bypass-grants.ts`), фаза 2 — письма не больше
+  `RESEND_DAILY_LIMIT` (по умолчанию 80 — из 100 бесплатных Resend) за скользящие
+  24 ч по `email_deliveries.sent_at`. **Квота Resend общая с кодами входа**:
+  на бесплатном тарифе рассылка может съесть коды — ставить лимит ниже
+  квоты. `service` — всем с адресом (подарок, условия), `marketing` — только
+  `marketing_consent_at IS NOT NULL AND marketing_opt_out_at IS NULL`
+  (`src/lib/consent.ts`); подарок в рекламной запрещён. Аккаунты бота
+  `telegram_<id>@tg.…` — без письма, но с начислением и уведомлением.
+  Отписка — `/unsubscribe?t=` + one-click `POST /api/unsubscribe`
+  (заголовки `List-Unsubscribe`), токен `users.unsubscribe_token`.

@@ -10,8 +10,11 @@ import { TRIAL_DAYS } from "./brand-facts";
 import { isDisposableEmail } from "./disposable-emails";
 import { createAuditLog, createNotificationForUser, getOrCreateUser, getUserByEmail, NewUserResult, verifyCode } from "./store";
 import { requestPanelSync } from "./subscription-sync";
+import { requestBypassApply } from "./bypass-grants";
 import { adoptVerifiedPanelAccount } from "./telegram-link";
 import { plural } from "./ru-words";
+import { pool } from "./db";
+import { recordPrivacyConsent, setMarketingConsent } from "./consent";
 
 export type SignInResult = { ok: true; user: NewUserResult } | { ok: false; error: string };
 
@@ -23,6 +26,8 @@ export async function completeEmailSignIn(input: {
   referralCode?: string;
   fingerprint?: string;
   ip: string | null;
+  /** Отметки с шага почты: Политика (обязательная в UI) и рассылки (по желанию). */
+  consent?: { privacy: boolean; marketing: boolean };
 }): Promise<SignInResult> {
   const email = input.email.trim().toLowerCase();
   if (isDisposableEmail(email)) return { ok: false, error: DISPOSABLE_EMAIL_ERROR };
@@ -42,6 +47,20 @@ export async function completeEmailSignIn(input: {
   }
   const user = adopted ?? (await getOrCreateUser(email, input.referralCode || undefined, input.ip || undefined, input.fingerprint || undefined));
   const wasAdopted = !!adopted && adopted.isNew;
+
+  // Согласия (владелец, 13.09.2026): Политика — версия и момент отметки;
+  // рассылки — только если человек сам отметил (снять — ссылкой в письме
+  // или в кабинете). Сбой записи согласия не должен ломать вход.
+  if (input.consent?.privacy) {
+    await recordPrivacyConsent(pool, user.id).catch((err) =>
+      console.error("[AUTH] privacy consent not recorded:", err instanceof Error ? err.message : err)
+    );
+  }
+  if (input.consent?.marketing) {
+    await setMarketingConsent(pool, user.id, true, "signup").catch((err) =>
+      console.error("[AUTH] marketing consent not recorded:", err instanceof Error ? err.message : err)
+    );
+  }
 
   await createAuditLog(
     user.isNew ? "user.register" : "user.login",
@@ -70,10 +89,12 @@ export async function completeEmailSignIn(input: {
         "Добро пожаловать в Atlas Secure!",
         `Ваш пробный период активирован на ${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}. В личном кабинете доступен QR-код и кнопки для подключения в Happ и V2RayTun.`
       );
-      // The panel user is created by the sync; do it now so the key is
+      // The panel users are created by the sync; do it now so the keys are
       // ready by the time the dashboard loads. Failures stay pending for
-      // the worker.
+      // the worker. Two entities: the premium key (ST…) and the bypass
+      // with the trial 500 MB (ST…_bp) — independent, separate locks.
       requestPanelSync(user.id, "signup");
+      requestBypassApply(user.id, "signup");
     }
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPaymentById } from "@/lib/store";
 import { reconcilePaymentWithYooKassa } from "@/lib/payments";
+import { applyBypassGrants, getBypassGrant, grantId } from "@/lib/bypass-grants";
 import { getSessionUser } from "@/lib/session";
 
 /**
@@ -9,6 +10,10 @@ import { getSessionUser } from "@/lib/session";
  * it asks YooKassa; a success goes through the same atomic
  * confirmPayment as the webhook, so polling and the webhook can never
  * extend twice. Only the owner of the payment gets an answer.
+ *
+ * A traffic pack additionally reports its grant: `traffic.state`
+ * 'applied' — the gigabytes are in the panel; 'pending' — paid, being
+ * credited (this call nudges the credit once; it is idempotent).
  */
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +39,16 @@ export async function GET(request: NextRequest) {
     }
 
     const fresh = (await getPaymentById(paymentId)) ?? payment;
-    return NextResponse.json({ success: true, data: { status: fresh.status, payment: fresh } });
+    let traffic: { bytes: number | null; packId: string | null; state: string | null } | null = null;
+    if (fresh.product === "traffic") {
+      let grant = await getBypassGrant(grantId.payment(fresh.id));
+      if (grant && (grant.state === "pending" || grant.state === "seeding") && fresh.status === "confirmed") {
+        await applyBypassGrants(user.id);
+        grant = await getBypassGrant(grantId.payment(fresh.id));
+      }
+      traffic = { bytes: fresh.trafficBytes, packId: fresh.trafficPackId, state: grant?.state ?? null };
+    }
+    return NextResponse.json({ success: true, data: { status: fresh.status, product: fresh.product, traffic, payment: fresh } });
   } catch (err) {
     console.error("[PAYMENTS/STATUS] error:", err);
     return NextResponse.json(

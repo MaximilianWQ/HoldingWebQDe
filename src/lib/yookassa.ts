@@ -8,9 +8,19 @@
 
 import { v4 as uuidv4 } from "uuid";
 
-const YOOKASSA_API_URL = "https://api.yookassa.ru/v3";
+const DEFAULT_YOOKASSA_API_URL = "https://api.yookassa.ru/v3";
 const YOOKASSA_SHOP_ID = process.env.YOOKASSA_SHOP_ID || "";
 const YOOKASSA_SECRET_KEY = process.env.YOOKASSA_SECRET_KEY || "";
+
+/**
+ * API base. YOOKASSA_API_URL_OVERRIDE points a local run (end-to-end check
+ * against a fake cashier) elsewhere; it is IGNORED in production builds,
+ * so a stray env value can never divert real payments.
+ */
+function apiUrl(): string {
+  const override = process.env.NODE_ENV !== "production" ? (process.env.YOOKASSA_API_URL_OVERRIDE || "").trim() : "";
+  return (override || DEFAULT_YOOKASSA_API_URL).replace(/\/+$/, "");
+}
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -79,7 +89,7 @@ export async function createPayment(params: CreatePaymentParams): Promise<Create
     metadata: params.metadata || {},
   };
 
-  const res = await fetch(`${YOOKASSA_API_URL}/payments`, {
+  const res = await fetch(`${apiUrl()}/payments`, {
     method: "POST",
     headers: {
       "Authorization": getAuthHeader(),
@@ -116,7 +126,7 @@ export async function createPayment(params: CreatePaymentParams): Promise<Create
 export async function getPaymentStatus(paymentId: string): Promise<YooKassaPayment> {
   ensureConfigured();
 
-  const res = await fetch(`${YOOKASSA_API_URL}/payments/${paymentId}`, {
+  const res = await fetch(`${apiUrl()}/payments/${paymentId}`, {
     method: "GET",
     headers: {
       "Authorization": getAuthHeader(),
@@ -146,7 +156,7 @@ export interface YooKassaRefund {
 /** GET /v3/refunds/{id} — used to verify a refund.succeeded notification. */
 export async function getRefund(refundId: string): Promise<YooKassaRefund> {
   ensureConfigured();
-  const res = await fetch(`${YOOKASSA_API_URL}/refunds/${encodeURIComponent(refundId)}`, {
+  const res = await fetch(`${apiUrl()}/refunds/${encodeURIComponent(refundId)}`, {
     method: "GET",
     headers: { Authorization: getAuthHeader() },
   });

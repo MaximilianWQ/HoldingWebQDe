@@ -9,8 +9,10 @@ export async function GET() {
     return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
 
+  // Личные уведомления рассылок (id «cmp:<кампания>:<человек>») — по одному
+  // на получателя; их прогресс показывает карточка «Рассылки и начисления».
   const result = await pool.query(
-    "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100"
+    "SELECT * FROM notifications WHERE id NOT LIKE 'cmp:%' ORDER BY created_at DESC LIMIT 100"
   );
 
   const notifications = result.rows.map((row) => ({

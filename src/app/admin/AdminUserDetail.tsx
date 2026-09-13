@@ -4,9 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import { DEVICE_LIMIT, PERIOD_LABEL, type Period } from "@/lib/plans";
 import { useAdminConfirm, useAdminToast, Spin } from "./AdminConfirm";
+import { Meter } from "@/components/admin/Viz";
 import {
   ACTION_LABELS,
   ACTOR_LABELS,
+  BYPASS_GRANT_KIND,
+  BYPASS_GRANT_STATE,
+  BYPASS_OP_STATE,
+  bytes,
+  trafficTitle,
+  type GrantTrafficResult,
+  type UserBypass,
   LEDGER_LABELS,
   LINK_KEPT_LABELS,
   PAYMENT_STATUS,
@@ -144,7 +152,7 @@ function buildTimeline(h: UserHistory): TimelineItem[] {
       key: `p-${p.id}`,
       at: p.paidAt || p.createdAt,
       type: "pay",
-      title: `Оплата ${PLAN_LABELS[p.plan] || p.plan} · ${periodLabel(p.period)}`,
+      title: p.product === "traffic" || p.plan === "traffic" ? trafficTitle(p.trafficBytes, p.trafficPackId) : `Оплата ${PLAN_LABELS[p.plan] || p.plan} · ${periodLabel(p.period)}`,
       tag: st,
       amount: p.currency === "RUB" ? money(p.amount) : `${num(p.amount)} ${p.currency}`,
       lines,
@@ -182,7 +190,7 @@ interface Props {
 export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
   const confirm = useAdminConfirm();
   const toast = useAdminToast();
-  const [busy, setBusy] = useState<null | "grant" | "plan" | "revoke" | "regen" | "resync" | "notify">(null);
+  const [busy, setBusy] = useState<null | "grant" | "plan" | "revoke" | "regen" | "resync" | "notify" | "traffic">(null);
   const [grantPlan, setGrantPlan] = useState<"basic" | "plus">(user.subscriptionPlan === "plus" ? "plus" : "basic");
   const [grantDur, setGrantDur] = useState("30d");
   const [customDays, setCustomDays] = useState("");
@@ -247,6 +255,23 @@ export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
     toast(r.data.removed === "all" ? "Все устройства отвязаны" : `«${all ? "" : deviceName(d)}» отвязано`);
     loadLogs();
   };
+
+  /* ── Обход: сущность в панели, начисления, операции ─────────── */
+  const [bp, setBp] = useState<UserBypass | null>(null);
+  const [bpErr, setBpErr] = useState<string | null>(null);
+  const [bpLoading, setBpLoading] = useState(false);
+  const [bpGb, setBpGb] = useState("");
+  const loadBypass = useCallback(async () => {
+    setBpLoading(true);
+    setBpErr(null);
+    const r = await getJson<UserBypass>(`/api/admin/users/${user.id}/bypass`);
+    if (r.ok) setBp(r.data);
+    else setBpErr(r.error);
+    setBpLoading(false);
+  }, [user.id]);
+  useEffect(() => {
+    loadBypass();
+  }, [loadBypass]);
 
   /* ── История и журнал ───────────────────────────────────────── */
   const [hist, setHist] = useState<UserHistory | null>(null);
@@ -440,6 +465,45 @@ export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
     toast(r.data.sync.ok ? `Синхронизировано: ${SYNC_ACTION[r.data.sync.action] || r.data.sync.action}` : "Панель ответила ошибкой — подробности в карточке", r.data.sync.ok ? "ok" : "warn");
     onChanged();
     loadDevices();
+  };
+
+  // Объём в ГБ: 0,1–5000, запятая или точка, до десятой.
+  const gbNum = bpGb.trim() === "" ? null : Number(bpGb.trim().replace(",", "."));
+  const gbValid = gbNum !== null && Number.isFinite(gbNum) && gbNum > 0 && gbNum <= 5000 && Math.round(gbNum * 10) === gbNum * 10;
+  const gbBad = bpGb.trim() !== "" && !gbValid;
+
+  const grantTraffic = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!gbValid || gbNum === null) return;
+    const shown = `${gbNum.toLocaleString("ru-RU")} ГБ`;
+    const where = bp?.entity
+      ? `в ${bp.entity.username} (№ ${bp.entity.panelUserId})`
+      : "в новый ключ обхода сайта — он будет создан";
+    const ok = await confirm({
+      title: `Начислить ${shown} обхода?`,
+      text: `${user.email}\n\nГигабайты прибавятся к остатку ${where}. Срок подписки не меняется. Пользователь получит уведомление.`,
+      confirmLabel: `Начислить ${shown}`,
+      tone: "primary",
+    });
+    if (!ok) return;
+    // Новый ключ запроса на каждое подтверждённое нажатие: повтор того же
+    // запроса (сеть моргнула) сервер не начислит второй раз.
+    const requestId = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `adm-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    setBusy("traffic");
+    setErr(null);
+    const r = await postJson<GrantTrafficResult>("/api/admin/users/manage", { userId: user.id, action: "grant-traffic", gb: gbNum, requestId });
+    setBusy(null);
+    if (!r.ok) {
+      setErr(r.error);
+      toast(`Не начислили: ${r.error}`, "off");
+      return;
+    }
+    if (r.data.duplicate) toast("Это начисление уже было — второй раз не прибавлено", "warn");
+    else if (!r.data.panelApplied) toast(`${shown} записано, но панель не ответила — синхронизатор прибавит сам. ${r.data.panelError ?? ""}`, "warn");
+    else toast(`Начислено ${shown}${r.data.created ? " — ключ обхода создан" : ""}`);
+    setBpGb("");
+    loadBypass();
+    afterAction();
   };
 
   const notify = async (e: React.FormEvent) => {
@@ -761,12 +825,6 @@ export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
               </dd>
             </div>
           )}
-          {user.bypassPanelUserId != null && (
-            <div>
-              <dt>Обход в панели</dt>
-              <dd className="a-num">{user.bypassPanelUserId}</dd>
-            </div>
-          )}
         </dl>
         {user.subscriptionUrl ? (
           <div className="adm-url">
@@ -834,6 +892,164 @@ export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
             </details>
           </div>
         )}
+      </div>
+
+      {/* Обход: остаток ГБ, начисления, операции, ручное начисление */}
+      <div className="adm-block adm-bp">
+        <div className="adm-block-head">
+          <h3 className="adm-block-title"><Icon name="bolt" size={16} />Обход · пакеты трафика</h3>
+          <span className="adm-block-aside">
+            {bp?.entity && (
+              <span className="adm-tag" data-tone={bp.entity.status === "ACTIVE" ? undefined : bp.entity.status === "LIMITED" ? "warn" : "off"}>
+                {bp.entity.status === "ACTIVE" ? "активен" : bp.entity.status === "LIMITED" ? "ГБ закончились" : bp.entity.status.toLowerCase()}
+              </span>
+            )}
+            <button type="button" className="ak-icon adm-icon-sm" onClick={loadBypass} disabled={bpLoading} aria-label="Обновить данные обхода">
+              {bpLoading ? <Spin /> : <Icon name="refresh" size={16} />}
+            </button>
+          </span>
+        </div>
+
+        {bpErr ? (
+          <p className="adm-note" data-tone="off">{bpErr}</p>
+        ) : !bp ? (
+          <p className="ak-fine">Спрашиваем панель…</p>
+        ) : (
+          <>
+            {bp.entity ? (
+              <>
+                <p className="adm-bp-left a-num">
+                  <b>{bp.entity.unlimited ? "без лимита" : bytes(bp.entity.remainingBytes ?? 0)}</b>
+                  {!bp.entity.unlimited && <span> осталось из {bytes(bp.entity.limitBytes)}</span>}
+                </p>
+                {!bp.entity.unlimited && (
+                  <Meter
+                    p={bp.entity.limitBytes > 0 ? bp.entity.usedBytes / bp.entity.limitBytes : 0}
+                    tone={bp.entity.remainingBytes !== null && bp.entity.remainingBytes <= 0 ? "off" : undefined}
+                    label={`Использовано ${bytes(bp.entity.usedBytes)} из ${bytes(bp.entity.limitBytes)}`}
+                  />
+                )}
+                <dl className="adm-dl">
+                  <div>
+                    <dt>Использовано</dt>
+                    <dd className="a-num">{bytes(bp.entity.usedBytes)}</dd>
+                  </div>
+                  <div>
+                    <dt>В панели</dt>
+                    <dd>
+                      <button type="button" className="adm-chipbtn" onClick={() => copy(bp.entity!.username, "bpname")} aria-label={`Скопировать имя обхода ${bp.entity.username}`}>
+                        <span className="a-num">{bp.entity.username} · № {bp.entity.panelUserId}</span>
+                        <Icon name={copied === "bpname" ? "check" : "copy"} size={14} />
+                      </button>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Чей ключ</dt>
+                    <dd>{bp.origin === "site" ? "сайта (ST…_bp)" : bp.origin === "bot" ? "бота ({telegram_id})" : "—"}</dd>
+                  </div>
+                  <div>
+                    <dt>Устройств · сброс трафика</dt>
+                    <dd className="a-num">{bp.entity.hwidDeviceLimit ?? "—"} · {bp.entity.trafficLimitStrategy === "NO_RESET" ? "без сброса" : bp.entity.trafficLimitStrategy ?? "—"}</dd>
+                  </div>
+                </dl>
+                {bp.entity.subscriptionUrl && (
+                  <div className="adm-url">
+                    <div className="adm-url-row">
+                      <code className="adm-code">{bp.entity.subscriptionUrl}</code>
+                      <button
+                        type="button"
+                        onClick={() => copy(bp.entity!.subscriptionUrl || "", "bpurl")}
+                        className="ak-icon adm-copy"
+                        data-state={copied === "bpurl" ? "ok" : undefined}
+                        aria-label={copied === "bpurl" ? "Ссылка обхода скопирована" : "Скопировать ссылку обхода"}
+                      >
+                        <Icon name={copied === "bpurl" ? "check" : "copy"} size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : bp.panelError ? (
+              <p className="adm-note" data-tone="off">Панель не ответила{bp.panelUserId ? ` по обходу № ${bp.panelUserId}` : ""}: {bp.panelError}</p>
+            ) : (
+              <p className="ak-fine">Ключа обхода нет. Первое начисление (покупка пакета или вручную) создаст ключ сайта ST…_bp.</p>
+            )}
+
+            {bp.owedBytes > 0 && (
+              <p className="adm-note" data-tone="warn" role="status">
+                Ждёт панели: <b className="a-num">{bytes(bp.owedBytes)}</b> — синхронизатор прибавит при следующем проходе.
+              </p>
+            )}
+
+            {bp.grants.length > 0 && (
+              <ol className="adm-hist adm-bp-grants" aria-label="Начисления обхода">
+                {bp.grants.map((g) => {
+                  const st = BYPASS_GRANT_STATE[g.state] || { label: g.state };
+                  return (
+                    <li key={g.id}>
+                      <span className="adm-tag" data-tone={st.tone}>{st.label}</span>
+                      <span className="adm-hist-d adm-break">
+                        <b className="a-num">+{bytes(g.bytes)}</b> · {BYPASS_GRANT_KIND[g.kind] || g.kind}
+                        {g.packId ? ` ${g.packId}` : ""}
+                        {g.actor ? ` · ${ACTOR_LABELS[g.actor] || g.actor}` : ""}
+                        {g.note ? ` · ${g.note}` : ""}
+                        {g.lastError && g.state !== "applied" ? ` · ошибка: ${g.lastError}` : ""}
+                        {g.attempts > 0 && g.state !== "applied" ? ` · попыток ${g.attempts}` : ""}
+                      </span>
+                      <span className="adm-hist-t a-num">{formatShort(g.appliedAt || g.createdAt)}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+            )}
+
+            {bp.ops.length > 0 && (
+              <details className="adm-details">
+                <summary>Операции в панели ({bp.ops.length})</summary>
+                <ol className="adm-hist">
+                  {bp.ops.map((o) => {
+                    const st = BYPASS_OP_STATE[o.state] || { label: o.state };
+                    return (
+                      <li key={o.opId}>
+                        <span className="adm-tag" data-tone={st.tone}>{st.label}</span>
+                        <span className="adm-hist-d adm-break a-num">
+                          +{bytes(o.addBytes)} → № {o.panelUserId}
+                          {o.baseLimit !== null ? ` · было ${bytes(o.baseLimit)}` : ""}
+                          {o.note ? ` · ${o.note}` : ""} · {o.opId}
+                        </span>
+                        <span className="adm-hist-t a-num">{formatShort(o.appliedAt || o.createdAt)}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </details>
+            )}
+          </>
+        )}
+
+        <form className="adm-bp-form" onSubmit={grantTraffic}>
+          <label className="adm-f adm-days">
+            <span className="adm-f-label">Начислить, ГБ</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder="например, 10"
+              value={bpGb}
+              onChange={(e) => setBpGb(e.target.value)}
+              className="adm-input"
+              aria-invalid={gbBad || undefined}
+              aria-describedby="adm-bp-hint"
+            />
+          </label>
+          <p id="adm-bp-hint" className={gbBad ? "ak-err" : "ak-fine"}>
+            {gbBad ? "От 0,1 до 5000 ГБ, с точностью до десятой." : "Прибавляется к остатку, ничего не сбрасывает. Повтор того же нажатия второй раз не начислит."}
+          </p>
+          <div className="adm-sub-actions">
+            <button type="submit" disabled={busy !== null || !gbValid} className="a-btn ak-btn-soft">
+              {busy === "traffic" ? <><Spin />Начисляем…</> : <><Icon name="bolt" size={16} />{gbValid ? `Начислить ${gbNum!.toLocaleString("ru-RU")} ГБ` : "Начислить ГБ"}</>}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* История: оплаты и события подписки */}

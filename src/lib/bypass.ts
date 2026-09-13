@@ -108,6 +108,21 @@ export function clearBypassCache(): void {
   cache.clear();
 }
 
+/**
+ * Remember the entity's link on the account (users.bypass_subscription_url),
+ * so the cabinet shows key 2 from the DB without waiting for the panel.
+ * Written only when it changed; a failure is harmless (next read retries).
+ */
+function rememberBypassUrl(userId: string, panelUserId: number, url: string | null): void {
+  if (!url) return;
+  pool
+    .query(
+      "UPDATE users SET bypass_subscription_url = $3 WHERE id = $1 AND bypass_panel_user_id = $2 AND bypass_subscription_url IS DISTINCT FROM $3",
+      [userId, panelUserId, url]
+    )
+    .catch((err) => console.warn("[BYPASS] could not cache the bypass link:", err instanceof Error ? err.message : err));
+}
+
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   return new Promise((resolve) => {
     const t = setTimeout(() => resolve(null), ms);
@@ -155,6 +170,7 @@ export async function getBypassForUser(
       .catch((err) => console.warn("[BYPASS] could not remember bypass id:", err instanceof Error ? err.message : err));
     const snap = toBypassSnapshot(found.user);
     cache.set(`id:${found.user.id}`, { at: now, snap });
+    rememberBypassUrl(user.id, found.user.id, snap.subscriptionUrl);
     return snap;
   }
   if (!id) return null;
@@ -169,6 +185,7 @@ export async function getBypassForUser(
   }
   const snap = toBypassSnapshot(r.data);
   cache.set(`id:${id}`, { at: now, snap });
+  rememberBypassUrl(user.id, id, snap.subscriptionUrl);
   return snap;
 }
 

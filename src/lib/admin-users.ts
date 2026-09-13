@@ -298,6 +298,9 @@ export interface UserHistory {
     appliedAt: string | null;
     refundedAt: string | null;
     refundId: string | null;
+    product: "subscription" | "traffic";
+    trafficPackId: string | null;
+    trafficBytes: number | null;
   }>;
   events: Array<{
     id: string;
@@ -318,7 +321,8 @@ const isoOrNull = (v: unknown) => (v ? new Date(v as string).toISOString() : nul
 export async function getUserHistory(userId: string, limit = HISTORY_LIMIT): Promise<UserHistory> {
   const [payments, events] = await Promise.all([
     pool.query(
-      `SELECT id, status, amount, currency, plan, period, transaction_id, created_at, paid_at, applied_at, refunded_at, refund_id
+      `SELECT id, status, amount, currency, plan, period, transaction_id, created_at, paid_at, applied_at, refunded_at, refund_id,
+              product, traffic_pack_id, traffic_bytes
        FROM payments WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
       [userId, limit]
     ),
@@ -342,6 +346,9 @@ export async function getUserHistory(userId: string, limit = HISTORY_LIMIT): Pro
       appliedAt: isoOrNull(r.applied_at),
       refundedAt: isoOrNull(r.refunded_at),
       refundId: r.refund_id ?? null,
+      product: r.product === "traffic" ? ("traffic" as const) : ("subscription" as const),
+      trafficPackId: r.traffic_pack_id ?? null,
+      trafficBytes: r.traffic_bytes != null ? Number(r.traffic_bytes) : null,
     })),
     events: events.rows.map((r) => ({
       id: r.id,

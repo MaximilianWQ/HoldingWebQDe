@@ -15,6 +15,8 @@ import { checkTrialEligibility, recordTrialUsage, TrialBlockReason } from "./tri
 import { generateTelegramLinkToken } from "./tokens";
 import { auditLevelFor } from "./audit-level";
 import { revokeAllSessions } from "./session-store";
+import { grantId, insertBypassGrant } from "./bypass-ledger";
+import { TRAFFIC_TRIAL_BYTES } from "./traffic-packs";
 
 // Hard ceiling for direct subscription_end writes through updateUser.
 // Ledger events are not subject to it (stacked paid renewals may go
@@ -72,6 +74,10 @@ export interface UserRecord {
   linkPanelState: string | null;
   /** Bypass (обход) panel entity of this person, if known. */
   bypassPanelUserId: number | null;
+  /** 'site' — our ST…_bp (stays with the account on unlink); 'bot' / null — the bot's {telegram_id}. */
+  bypassOrigin: string | null;
+  /** Last seen subscriptionUrl of the bypass entity (cache; the panel is the truth). */
+  bypassSubscriptionUrl: string | null;
   emailVerifiedAt: string | null;
 }
 
@@ -130,6 +136,8 @@ export function rowToUser(row: any): UserRecord {
     linkDisabledPanelUserId: row.link_disabled_panel_user_id != null ? Number(row.link_disabled_panel_user_id) : null,
     linkPanelState: row.link_panel_state ?? null,
     bypassPanelUserId: row.bypass_panel_user_id != null ? Number(row.bypass_panel_user_id) : null,
+    bypassOrigin: row.bypass_origin ?? null,
+    bypassSubscriptionUrl: row.bypass_subscription_url ?? null,
     emailVerifiedAt: iso(row.email_verified_at),
   };
 }
@@ -241,7 +249,14 @@ export async function getOrCreateUser(
   email: string,
   referredByCode?: string,
   ip?: string,
-  fingerprint?: string
+  fingerprint?: string,
+  /**
+   * bypassTrial: the 500 MB bypass that comes with the site trial (owner,
+   * 13.09.2026) — a grant in the SAME transaction as the trial, so it is
+   * granted exactly when the trial is (same anti-abuse). The bot's
+   * /api/bot/register passes false: the bot gives its own trial traffic.
+   */
+  opts: { bypassTrial?: boolean } = {}
 ): Promise<NewUserResult> {
   await waitForDb(); // user creation must not race the startup migrations
   const existing = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -274,6 +289,10 @@ export async function getOrCreateUser(
       });
       await c.query("UPDATE users SET trial_used_at = NOW() WHERE id = $1", [id]);
       await recordTrialUsage(c, { email, ip, fingerprint });
+      if (opts.bypassTrial !== false) {
+        // Applied to the panel after commit (bypass-grants.ts) — creates ST…_bp.
+        await insertBypassGrant(c, { id: grantId.trial(id), userId: id, kind: "trial", bytes: TRAFFIC_TRIAL_BYTES, actor: "signup" });
+      }
     } else {
       console.warn(`[TRIAL] not granted to ${email}: ${blocked}`);
     }
@@ -577,6 +596,10 @@ export interface PaymentRecord {
   appliedAt: string | null;
   refundedAt: string | null;
   refundId: string | null;
+  /** 'subscription' (plan/period) or 'traffic' (a «Пакет трафика»: plan='traffic', period=0). */
+  product: "subscription" | "traffic";
+  trafficPackId: string | null;
+  trafficBytes: number | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -597,6 +620,9 @@ export function rowToPayment(row: any): PaymentRecord {
     appliedAt: iso(row.applied_at),
     refundedAt: iso(row.refunded_at),
     refundId: row.refund_id ?? null,
+    product: row.product === "traffic" ? "traffic" : "subscription",
+    trafficPackId: row.traffic_pack_id ?? null,
+    trafficBytes: row.traffic_bytes != null ? Number(row.traffic_bytes) : null,
   };
 }
 
@@ -608,13 +634,14 @@ export async function createPaymentRecord(
   amount: number,
   transactionId: string | null,
   redirectUrl: string | null,
-  expiresAt: Date
+  expiresAt: Date,
+  traffic?: { packId: string; bytes: number }
 ): Promise<PaymentRecord> {
   const result = await pool.query(
-    `INSERT INTO payments (id, user_id, plan, period, amount, transaction_id, redirect_url, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO payments (id, user_id, plan, period, amount, transaction_id, redirect_url, expires_at, product, traffic_pack_id, traffic_bytes)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      RETURNING *`,
-    [id, userId, plan, period, amount, transactionId, redirectUrl, expiresAt]
+    [id, userId, plan, period, amount, transactionId, redirectUrl, expiresAt, traffic ? "traffic" : "subscription", traffic?.packId ?? null, traffic?.bytes ?? null]
   );
   return rowToPayment(result.rows[0]);
 }

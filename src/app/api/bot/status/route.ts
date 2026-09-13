@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByTelegramId, getLoyaltyInfo } from "@/lib/store";
 import { getBypassForUser } from "@/lib/bypass";
+import { getOwedBypassBytes, hasSiteBypassTrial } from "@/lib/bypass-grants";
 import { verifyBotApiKey, unauthorizedResponse } from "../auth";
 import { bypassJson } from "../link-http";
 
@@ -35,6 +36,10 @@ export async function GET(request: NextRequest) {
     const link = isExpired ? null : user.subscriptionUrl;
     const plan = isExpired ? "expired" : (user.subscriptionPlan || "trial");
     const bypass = await getBypassForUser(user).catch(() => null);
+    const [bypassTrialGranted, bypassOwedBytes] = await Promise.all([
+      hasSiteBypassTrial(user.id).catch(() => false),
+      getOwedBypassBytes(user.id).catch(() => 0),
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -58,6 +63,13 @@ export async function GET(request: NextRequest) {
         subscriptionUrl: link,
         xrayUuid: null,
         bypass: bypassJson(bypass),
+        // 'site' — the site's ST…_bp (a linked person without a bot bypass
+        // bought on the site); 'bot' — the bot's {telegram_id}.
+        bypassOrigin: bypass ? (user.bypassOrigin === "site" ? "site" : "bot") : null,
+        // The site already gave its trial 500 MB — the bot must not give its own.
+        bypassTrialGranted,
+        // Paid on the site, not yet in the panel (it will be added — do not add it yourself).
+        bypassOwedBytes,
         referralCode: user.referralCode,
         referrals: user.referrals,
         paidReferrals: user.paidReferrals,

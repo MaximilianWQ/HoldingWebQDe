@@ -8,8 +8,9 @@
 
 import { TRIAL_DAYS } from "./brand-facts";
 import { isDisposableEmail } from "./disposable-emails";
-import { createAuditLog, createNotificationForUser, getOrCreateUser, NewUserResult, verifyCode } from "./store";
+import { createAuditLog, createNotificationForUser, getOrCreateUser, getUserByEmail, NewUserResult, verifyCode } from "./store";
 import { requestPanelSync } from "./subscription-sync";
+import { adoptVerifiedPanelAccount } from "./telegram-link";
 import { plural } from "./ru-words";
 
 export type SignInResult = { ok: true; user: NewUserResult } | { ok: false; error: string };
@@ -29,17 +30,40 @@ export async function completeEmailSignIn(input: {
   const check = verifyCode(email, input.code);
   if (!check.valid) return { ok: false, error: check.error || "Неверный код" };
 
-  const user = await getOrCreateUser(email, input.referralCode || undefined, input.ip || undefined, input.fingerprint || undefined);
+  // E (13.09.2026): no account yet, but the panel holds a key whose email
+  // was proven through our Telegram link flow (marker
+  // atlas-email-verified) → the new account takes that key, no trial.
+  let adopted: NewUserResult | null = null;
+  if (!(await getUserByEmail(email))) {
+    adopted = await adoptVerifiedPanelAccount(email, { ip: input.ip }).catch((err) => {
+      console.error("[AUTH] panel adoption failed — ordinary registration:", err instanceof Error ? err.message : err);
+      return null;
+    });
+  }
+  const user = adopted ?? (await getOrCreateUser(email, input.referralCode || undefined, input.ip || undefined, input.fingerprint || undefined));
+  const wasAdopted = !!adopted && adopted.isNew;
 
   await createAuditLog(
     user.isNew ? "user.register" : "user.login",
-    user.isNew ? (user.trialGranted ? "trial granted" : `trial not granted: ${user.trialBlockedReason}`) : undefined,
+    user.isNew
+      ? wasAdopted
+        ? "panel key adopted (atlas-email-verified), no trial"
+        : user.trialGranted
+          ? "trial granted"
+          : `trial not granted: ${user.trialBlockedReason}`
+      : undefined,
     user.id,
     user.email,
     input.ip || undefined
   );
 
-  if (user.isNew) {
+  if (wasAdopted) {
+    await createNotificationForUser(
+      user.id,
+      "Подписка подключена",
+      "Мы нашли подписку, привязанную к этой почте через Telegram-бот, — она и её ключ теперь в кабинете."
+    );
+  } else if (user.isNew) {
     if (user.trialGranted) {
       await createNotificationForUser(
         user.id,

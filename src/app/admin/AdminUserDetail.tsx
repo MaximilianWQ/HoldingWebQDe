@@ -8,6 +8,7 @@ import {
   ACTION_LABELS,
   ACTOR_LABELS,
   LEDGER_LABELS,
+  LINK_KEPT_LABELS,
   PAYMENT_STATUS,
   PLAN_LABELS,
   SYNC_ONE,
@@ -747,6 +748,25 @@ export default function AdminUserDetail({ user, onClose, onChanged }: Props) {
             <dt>Номер в панели</dt>
             <dd className="adm-break a-num">{user.panelUserId ?? user.remnawaveUserUuid ?? "—"}</dd>
           </div>
+          <div>
+            <dt>Telegram ID</dt>
+            <dd className="adm-break a-num">{user.telegramId || (user.telegramLinked ? "привязан" : "—")}</dd>
+          </div>
+          {user.linkKept && (
+            <div>
+              <dt>Связка с ботом</dt>
+              <dd>
+                {LINK_KEPT_LABELS[user.linkKept] || user.linkKept}
+                {user.linkDisabledPanelUserId ? <> · отключён <span className="a-num">{user.linkDisabledPanelUserId}</span></> : null}
+              </dd>
+            </div>
+          )}
+          {user.bypassPanelUserId != null && (
+            <div>
+              <dt>Обход в панели</dt>
+              <dd className="a-num">{user.bypassPanelUserId}</dd>
+            </div>
+          )}
         </dl>
         {user.subscriptionUrl ? (
           <div className="adm-url">

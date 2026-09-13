@@ -56,6 +56,17 @@ export interface SubscriptionData {
   /** "panel_sync_pending" | "panel_sync_error" while a live subscription has no link yet. */
   provisioningError?: string | null;
   panelSyncState?: string | null;
+  /** Which panel entity survived the Telegram link (bot | site | only-bot | only-site | none | adopted). */
+  linkKept?: string | null;
+  /** Bypass (обход) of this person — read-only; null when none or the panel did not answer. */
+  bypass?: {
+    subscriptionUrl: string | null;
+    limitBytes: number;
+    usedBytes: number;
+    remainingBytes: number | null;
+    unlimited: boolean;
+    status: string;
+  } | null;
 }
 
 export interface DeviceInfo {

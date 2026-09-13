@@ -34,6 +34,11 @@ export interface UserInfo {
   panelSyncState?: string | null;
   panelSyncError?: string | null;
   lastPaymentAt?: string | null;
+  /** Связка с Telegram (13.09.2026). */
+  telegramId?: string | null;
+  linkKept?: string | null;
+  linkDisabledPanelUserId?: number | null;
+  bypassPanelUserId?: number | null;
 }
 
 export type UserFilter = "all" | "active" | "paid" | "trial" | "expiring" | "expired" | "shared_ip" | "no_link" | "sync_error";
@@ -326,6 +331,19 @@ export const LEDGER_LABELS: Record<string, string> = {
   bot_overwrite: "Перезапись ботом",
   refund: "Возврат",
   ghost_repair_manual: "Правка даты",
+  link_merge: "Связка с Telegram",
+  panel_pull: "Срок из панели (общий ключ)",
+};
+
+/** users.link_kept → which panel entity survived the Telegram link. */
+export const LINK_KEPT_LABELS: Record<string, string> = {
+  bot: "ключ бота (длиннее)",
+  site: "ключ сайта (длиннее)",
+  "only-bot": "ключ бота (у сайта не было)",
+  "only-site": "ключ сайта (у бота не было)",
+  none: "без подписки",
+  adopted: "усыновлён при входе",
+  absorbed: "поглощён другим аккаунтом",
 };
 
 export const SYNC_STATE_LABELS: Record<string, string> = {

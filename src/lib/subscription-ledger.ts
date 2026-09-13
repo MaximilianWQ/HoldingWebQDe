@@ -30,7 +30,11 @@ export type LedgerKind =
   | "bot_extend"
   | "bot_overwrite"
   | "refund"
-  | "ghost_repair_manual";
+  | "ghost_repair_manual"
+  /** Telegram ↔ site link: the account takes the term of the surviving panel entity. */
+  | "link_merge"
+  /** A linked (shared) key got a later term in the panel than in our DB — pulled, never shortened. */
+  | "panel_pull";
 
 /** Minimal query interface — a pg PoolClient in production, a fake in tests. */
 export interface Queryable {

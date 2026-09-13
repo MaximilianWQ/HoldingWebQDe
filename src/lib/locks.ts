@@ -54,6 +54,20 @@ export function withJobLock<T>(key: number, fn: () => Promise<T>): Promise<LockR
   );
 }
 
+/** Namespace of transaction-level locks around a Telegram ↔ site link. */
+export const LINK_LOCK_NS = LOCK_NS + 2;
+
+type TxQuery = { query: (sql: string, params?: unknown[]) => Promise<unknown> };
+
+/**
+ * pg_advisory_xact_lock inside the caller's transaction (released on
+ * COMMIT/ROLLBACK). Take keys in a fixed order (telegram, then email)
+ * so two links never deadlock.
+ */
+export async function lockLinkKey(client: TxQuery, key: string): Promise<void> {
+  await client.query("SELECT pg_advisory_xact_lock($1::int, hashtext($2))", [LINK_LOCK_NS, key]);
+}
+
 /** Per-user lock around a panel sync, so two syncs never race on create. */
 export function withUserSyncLock<T>(userId: string, fn: () => Promise<T>): Promise<LockResult<T>> {
   return withLock(

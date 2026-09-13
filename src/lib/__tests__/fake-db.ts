@@ -54,13 +54,13 @@ export class FakeDb {
     connect: async () => ({ query: (sql: string, params?: any[]) => this.query(sql, params), release: () => {} }),
   };
 
-  private user(id: string): Row {
+  protected user(id: string): Row {
     const u = this.users.get(id);
     if (!u) throw new Error(`fake-db: no user ${id}`);
     return u;
   }
 
-  private exec(s: string, p: any[]): Result {
+  protected exec(s: string, p: any[]): Result {
     // ── transaction control / locks ──
     if (/^(BEGIN|COMMIT|ROLLBACK|SAVEPOINT|RELEASE SAVEPOINT|ROLLBACK TO SAVEPOINT)\b/.test(s)) return res();
     if (s.startsWith("SELECT pg_try_advisory_lock")) return res([{ ok: true }]);

@@ -23,6 +23,8 @@
 
 import { pool } from "./db";
 import { withUserSyncLock } from "./locks";
+import { applySubscriptionEvent, withTransaction } from "./subscription-ledger";
+import { applyLinkPanelOps, describeLinkOpsError, linkOpsOwed } from "./link-panel";
 import {
   buildCreateUserBody,
   createUser,
@@ -30,7 +32,9 @@ import {
   getUserById,
   getUserByUsername,
   hasPerPlanSquads,
+  isBypassEntity,
   isOurPanelUser,
+  isSiteUsername,
   isUserGone,
   PanelUser,
   RwError,
@@ -69,6 +73,12 @@ interface SyncUserRow {
   subscription_plan: string | null;
   subscription_url: string | null;
   panel_sync_attempts: number | null;
+  telegram_id?: string | null;
+  /** Panel expireAt as last seen/pushed by us — tells "changed elsewhere" from "we changed it". */
+  panel_expire_at?: Date | string | null;
+  bypass_panel_user_id?: string | number | null;
+  link_panel_state?: string | null;
+  link_disable_ids?: Array<string | number> | null;
 }
 
 /** Less than this left → treat as expired (the panel rejects past expireAt). */
@@ -101,7 +111,8 @@ export function backoffMs(attempts: number): number {
 async function loadRow(userId: string): Promise<SyncUserRow | null> {
   const r = await pool.query<SyncUserRow>(
     `SELECT id, email, public_id, panel_id, panel_username, panel_user_id, remnawave_user_uuid,
-            subscription_end, subscription_plan, subscription_url, panel_sync_attempts
+            subscription_end, subscription_plan, subscription_url, panel_sync_attempts,
+            telegram_id, panel_expire_at, bypass_panel_user_id, link_panel_state, link_disable_ids
      FROM users WHERE id = $1`,
     [userId]
   );
@@ -237,6 +248,7 @@ async function discover(row: SyncUserRow, publicId: string): Promise<Discovery> 
     const r = await getUserByUsername(username);
     if (r.ok) {
       const u = r.data;
+      if (isBypassEntity(u) || (row.bypass_panel_user_id != null && u.id === Number(row.bypass_panel_user_id))) continue;
       const provablyOurs =
         isOurPanelUser(u) ||
         (u.description ?? "").includes(row.id) ||
@@ -261,8 +273,48 @@ async function ownedByAnotherLocalUser(panelId: number, userId: string): Promise
   return r.rows[0]?.email ?? null;
 }
 
+/**
+ * A shared key: the account is linked to Telegram, or its panel user is
+ * not one of our `ST…` users (the bot's premium entity kept by a link).
+ */
+function isLinkedRow(row: SyncUserRow, panel: PanelUser): boolean {
+  return !!row.telegram_id || !isSiteUsername(panel.username);
+}
+
+/**
+ * Rule "общий ключ не укорачивать" (13.09.2026). For a shared key the
+ * panel may have been extended by someone else (the bot, before it
+ * switched to /api/bot/extend). If the panel term is LATER than ours
+ * AND differs from what we last saw there (panel_expire_at), the term
+ * is pulled into our DB (ledger `panel_pull`, idempotent per panel
+ * value) instead of being overwritten. If the panel still shows what
+ * we last saw, the local change is deliberate (admin revoke, refund,
+ * bot overwrite) and is pushed as before.
+ */
+async function pullLaterPanelTerm(row: SyncUserRow, panel: PanelUser, endMs: number): Promise<SyncUserRow | null> {
+  const now = Date.now();
+  const panelMs = Date.parse(panel.expireAt);
+  const panelLive = (panel.status === "ACTIVE" || panel.status === "LIMITED") && Number.isFinite(panelMs) && panelMs - now > MIN_REMAINING_MS;
+  if (!panelLive || panelMs <= endMs + EXPIRE_EQUAL_TOLERANCE_MS) return null;
+  const snapMs = row.panel_expire_at ? new Date(row.panel_expire_at).getTime() : null;
+  if (snapMs !== null && Number.isFinite(snapMs) && Math.abs(snapMs - panelMs) <= EXPIRE_EQUAL_TOLERANCE_MS) return null;
+  const iso = new Date(panelMs).toISOString();
+  const led = await withTransaction((c) =>
+    applySubscriptionEvent(c, {
+      userId: row.id,
+      kind: "panel_pull",
+      sourceId: `pull:${panel.id}:${iso}`,
+      setEnd: new Date(panelMs),
+      actor: "sync",
+      meta: { panelUserId: panel.id, panelUsername: panel.username, localEnd: new Date(endMs).toISOString(), lastSeenPanelEnd: snapMs ? new Date(snapMs).toISOString() : null },
+    })
+  );
+  log("info", row.id, `shared key ${panel.id}: panel term ${iso} is later than ours — pulled${led.applied ? "" : " (already recorded)"}, not shortened`);
+  return loadRow(row.id);
+}
+
 async function doSync(userId: string): Promise<SyncResult> {
-  const row = await loadRow(userId);
+  let row = await loadRow(userId);
   if (!row) {
     return { ok: false, action: "failed", reason: "user_not_found", publicId: null, panelUserId: null, uuid: null, subscriptionUrl: null, expireAt: null };
   }
@@ -270,10 +322,10 @@ async function doSync(userId: string): Promise<SyncResult> {
   if (!publicId) return markFailed(row, null, "no_public_id");
 
   const now = Date.now();
-  const endMs = new Date(row.subscription_end).getTime();
-  const live = endMs - now > MIN_REMAINING_MS;
-  const plan = row.subscription_plan || "trial";
-  const tag = tagForPlan(plan) ?? SITE_TAGS.trial;
+  let endMs = new Date(row.subscription_end).getTime();
+  let live = endMs - now > MIN_REMAINING_MS;
+  let plan = row.subscription_plan || "trial";
+  let tag = tagForPlan(plan) ?? SITE_TAGS.trial;
 
   // ─── 1. Locate the panel user ───
   let panel: PanelUser | null = null;
@@ -294,6 +346,33 @@ async function doSync(userId: string): Promise<SyncResult> {
       panel = d.user;
       adopted = true;
       log("info", userId, `adopted panel user ${d.user.id} (${d.user.username})`);
+    }
+  }
+
+  // A bypass entity is never the key: the premium ledger must not touch it.
+  if (panel && (isBypassEntity(panel) || (row.bypass_panel_user_id != null && panel.id === Number(row.bypass_panel_user_id)))) {
+    return markFailed(row, publicId, "bypass_as_premium", `panel user ${panel.id} (${panel.username}) is a bypass entity — not synced as the key`);
+  }
+
+  // ─── 1b. Panel writes owed by a Telegram link/unlink (link-panel.ts) ───
+  if (linkOpsOwed(row)) {
+    const ops = await applyLinkPanelOps(
+      { id: row.id, email: row.email, telegram_id: row.telegram_id ?? null, link_panel_state: row.link_panel_state ?? null, link_disable_ids: row.link_disable_ids ?? null, bypass_panel_user_id: row.bypass_panel_user_id ?? null },
+      panel
+    );
+    if (!ops.ok) return markFailed(row, publicId, "link_ops_failed", describeLinkOpsError(ops.error));
+    panel = ops.panel;
+  }
+
+  // ─── 1c. Shared key: pull a later panel term, never shorten it ───
+  if (panel && isLinkedRow(row, panel)) {
+    const pulled = await pullLaterPanelTerm(row, panel, endMs);
+    if (pulled) {
+      row = pulled;
+      endMs = new Date(row.subscription_end).getTime();
+      live = endMs - now > MIN_REMAINING_MS;
+      plan = row.subscription_plan || "trial";
+      tag = tagForPlan(plan) ?? SITE_TAGS.trial;
     }
   }
 
@@ -346,7 +425,10 @@ async function doSync(userId: string): Promise<SyncResult> {
 
   // ─── 4. Live: absolute PATCH when anything differs ───
   const squads = squadsForPlan(plan);
-  const perPlan = hasPerPlanSquads();
+  // Squads of a panel user the BOT created (kept by a link) are the bot's
+  // (main squad + its externalSquadUuid): never moved. The SITE_* tag is
+  // written — the bot does not use tags, and it marks the key as ours.
+  const perPlan = hasPerPlanSquads() && isSiteUsername(panel.username);
   const panelSquads = panel.activeInternalSquads.map((s) => s.uuid).sort().join(",");
   const needsPatch =
     panel.status !== "ACTIVE" ||

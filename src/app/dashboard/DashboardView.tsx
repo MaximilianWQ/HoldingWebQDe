@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { QRCodeSVG } from "qrcode.react";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import NotificationsModal from "@/components/NotificationsModal";
 import WelcomeToast from "@/components/WelcomeToast";
@@ -62,6 +63,19 @@ function humanRemaining(days: number, hours: number): string {
 
 const at = (i: number) => ({ "--i": i }) as CSSProperties;
 
+/** Гигабайты для строки обхода: до 10 ГБ — с десятыми. */
+function gb(bytes: number): string {
+  const v = bytes / 1024 ** 3;
+  return `${v.toLocaleString("ru-RU", { maximumFractionDigits: v < 10 ? 1 : 0 })} ГБ`;
+}
+
+/** Привязка Telegram с сайта: одноразовая ссылка на бота (15 минут). */
+type TgLinkState =
+  | { state: "idle" }
+  | { state: "busy" }
+  | { state: "ready"; url: string | null; startParam: string; mobile: boolean }
+  | { state: "error"; error: string };
+
 /* Разделы кабинета: пилюли на доске (планшет, десктоп) и вкладки внизу
    (телефон) — один список, одна подсветка. */
 const SECTIONS: { id: string; label: string; icon: IconName }[] = [
@@ -81,6 +95,8 @@ export default function DashboardView() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [unlinkStep, setUnlinkStep] = useState(0);
   const [unlinking, setUnlinking] = useState(false);
+  const [tgLink, setTgLink] = useState<TgLinkState>({ state: "idle" });
+  const [copiedBypass, setCopiedBypass] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [resyncing, setResyncing] = useState(false);
@@ -138,6 +154,66 @@ export default function DashboardView() {
     }
     setCopiedRef(true);
     setTimeout(() => setCopiedRef(false), 2500);
+  };
+
+  // Пока ссылка на бота открыта — раз в 5 с проверяем, не привязал ли
+  // человек Telegram (15 минут, столько живёт ссылка).
+  const waitingLink = tgLink.state === "ready" && !data?.telegramLinked;
+  useEffect(() => {
+    if (!waitingLink) return;
+    const until = Date.now() + 15 * 60_000;
+    const t = setInterval(async () => {
+      if (Date.now() > until) return clearInterval(t);
+      try {
+        const res = await fetch("/api/user/subscription");
+        const j = await res.json();
+        if (j.success && j.data.telegramLinked) {
+          setData(j.data);
+          setTgLink({ state: "idle" });
+        }
+      } catch {
+        // сеть мигнула — следующая проверка через 5 с
+      }
+    }, 5000);
+    return () => clearInterval(t);
+  }, [waitingLink]);
+
+  const startTelegramLink = async () => {
+    if (tgLink.state === "busy") return;
+    const mobile = window.matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    // Вкладку открываем сразу, в обработчике нажатия, — иначе браузер
+    // сочтёт её всплывающим окном и заблокирует.
+    const win = mobile ? null : window.open("", "_blank");
+    if (win) win.opener = null;
+    setTgLink({ state: "busy" });
+    try {
+      const res = await fetch("/api/user/telegram-link", { method: "POST" });
+      const j = await res.json();
+      if (!j.success) {
+        win?.close();
+        if (res.status === 409) await fetchSubscription();
+        setTgLink({ state: "error", error: j.error || "Не удалось получить ссылку. Попробуйте ещё раз." });
+        return;
+      }
+      const { url, startParam } = j.data as { url: string | null; startParam: string };
+      if (url && mobile) window.location.href = url;
+      else if (url && win) win.location.href = url;
+      else win?.close();
+      setTgLink({ state: "ready", url, startParam, mobile });
+    } catch {
+      win?.close();
+      setTgLink({ state: "error", error: "Нет связи с сервером. Попробуйте ещё раз." });
+    }
+  };
+
+  const copyBypass = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedBypass(true);
+      setTimeout(() => setCopiedBypass(false), 2000);
+    } catch {
+      // буфер недоступен — ссылка видна целиком ниже
+    }
   };
 
   const handleUnlinkTelegram = async () => {
@@ -268,15 +344,15 @@ export default function DashboardView() {
         data.telegramLinked ? (
           <span className="ak-status"><i />Готово</span>
         ) : (
-          <a
-            href={`https://t.me/atlas_suppbot?start=${data.telegramLinkToken || ""}`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={startTelegramLink}
+            disabled={tgLink.state === "busy"}
             className={`a-btn ${primary ? "a-btn-primary" : "ak-btn-soft"}`}
           >
-            Привязать
+            {tgLink.state === "busy" ? "Готовим ссылку…" : "Привязать"}
             <span className="b-sr"> Telegram (откроется бот)</span>
-          </a>
+          </button>
         ),
     },
     {
@@ -573,28 +649,25 @@ export default function DashboardView() {
               <Corner href="https://t.me/atlas_suppbot" label="Открыть Telegram-бот" external />
               <div className="ak-card-head">
                 <h2 id="ak-tg-h" className="ak-eyebrow">Telegram</h2>
-                {data.telegramLinked && <span className="ak-status"><i />Привязан</span>}
+                {data.telegramLinked && <span className="ak-status"><i />Бот подключён</span>}
               </div>
               <div className="ak-tg-row">
                 <span className="ak-tg-ico"><Icon name="send" size={20} /></span>
                 <div>
                   <p className="ak-h3">Atlas Secure Bot</p>
                   <p className="ak-text">
-                    {data.telegramLinked ? "Подписка синхронизирована с ботом." : "Управляйте подпиской с любого устройства."}
+                    {data.telegramLinked
+                      ? "Одна подписка и один ключ — в боте и на сайте."
+                      : `Одна подписка на бот и сайт. +${tgBonus} за привязку.`}
                   </p>
                 </div>
               </div>
               <div className="ak-actions">
                 {!data.telegramLinked ? (
-                  <a
-                    href={`https://t.me/atlas_suppbot?start=${data.telegramLinkToken || ""}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="a-btn a-btn-primary"
-                  >
+                  <button type="button" onClick={startTelegramLink} disabled={tgLink.state === "busy"} className="a-btn a-btn-primary">
                     <Icon name="send" size={16} />
-                    Привязать Telegram
-                  </a>
+                    {tgLink.state === "busy" ? "Готовим ссылку…" : tgLink.state === "ready" ? "Новая ссылка" : "Привязать Telegram"}
+                  </button>
                 ) : unlinkStep === 0 ? (
                   <button type="button" onClick={() => setUnlinkStep(1)} className="a-btn ak-btn-soft">
                     Отвязать
@@ -610,6 +683,60 @@ export default function DashboardView() {
                   </>
                 )}
               </div>
+              {data.telegramLinked && unlinkStep === 1 && (
+                <p className="ak-fine">Подписка и ключ останутся в этом кабинете. Бонус за повторную привязку не начисляется.</p>
+              )}
+
+              {!data.telegramLinked && tgLink.state === "ready" && (
+                tgLink.url ? (
+                  tgLink.mobile ? (
+                    <p className="ak-fine" role="status">
+                      Если Telegram не открылся — <a href={tgLink.url}>откройте бота по ссылке</a>. Ссылка одноразовая, действует 15 минут.
+                    </p>
+                  ) : (
+                    <div role="status" style={{ marginTop: "1rem" }}>
+                      <div className="ak-qr">
+                        <QRCodeSVG value={tgLink.url} size={200} level="M" marginSize={2} />
+                      </div>
+                      <p className="ak-fine">
+                        Бот открылся в новой вкладке. Можно и с телефона — наведите камеру на QR-код или{" "}
+                        <a href={tgLink.url} target="_blank" rel="noopener noreferrer">откройте ссылку</a>. Ссылка одноразовая, действует 15 минут.
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  <div className="ak-fallback" role="status">
+                    <p className="ak-fine" style={{ margin: 0 }}>Ссылка на бота не настроена. Откройте бота Atlas Secure и отправьте ему команду:</p>
+                    <code>/start {tgLink.startParam}</code>
+                  </div>
+                )
+              )}
+              {tgLink.state === "error" && <p className="ak-err" role="alert">{tgLink.error}</p>}
+
+              {data.bypass && (
+                <div className="ak-row">
+                  <div className="ak-row-copy">
+                    <p className="ak-row-title">
+                      Обход: {data.bypass.unlimited ? "без лимита" : `остаток ${gb(data.bypass.remainingBytes ?? 0)}`}
+                    </p>
+                    <p className="ak-row-text">
+                      {data.bypass.unlimited ? `Использовано ${gb(data.bypass.usedBytes)}.` : `Использовано ${gb(data.bypass.usedBytes)} из ${gb(data.bypass.limitBytes)}.`}{" "}
+                      Отдельная ссылка, трафик докупается в боте.
+                    </p>
+                  </div>
+                  {data.bypass.subscriptionUrl && (
+                    <button
+                      type="button"
+                      onClick={() => copyBypass(data.bypass!.subscriptionUrl!)}
+                      className="a-btn ak-btn-soft"
+                      data-state={copiedBypass ? "ok" : undefined}
+                    >
+                      <Icon name={copiedBypass ? "check" : "copy"} size={16} />
+                      {copiedBypass ? "Скопировано" : "Ссылка обхода"}
+                    </button>
+                  )}
+                </div>
+              )}
             </section>
 
             {/* ── 8 · Уведомления и вход ───────────────────────────── */}

@@ -63,6 +63,16 @@ export interface UserRecord {
   panelStatus: string | null;
   panelSyncedAt: string | null;
   telegramBonusGrantedAt: string | null;
+  /** When this account was (last) linked to Telegram through the link flow. */
+  telegramLinkedAt: string | null;
+  /** Which panel entity survived the link merge (see src/lib/telegram-link.ts). */
+  linkKept: string | null;
+  linkDisabledPanelUserId: number | null;
+  /** Panel writes still owed after a link/unlink ('pending' | 'unlink_pending' | 'ok'). */
+  linkPanelState: string | null;
+  /** Bypass (обход) panel entity of this person, if known. */
+  bypassPanelUserId: number | null;
+  emailVerifiedAt: string | null;
 }
 
 export interface CodeRecord {
@@ -115,7 +125,49 @@ export function rowToUser(row: any): UserRecord {
     panelStatus: row.panel_status ?? null,
     panelSyncedAt: iso(row.panel_synced_at),
     telegramBonusGrantedAt: iso(row.telegram_bonus_granted_at),
+    telegramLinkedAt: iso(row.telegram_linked_at),
+    linkKept: row.link_kept ?? null,
+    linkDisabledPanelUserId: row.link_disabled_panel_user_id != null ? Number(row.link_disabled_panel_user_id) : null,
+    linkPanelState: row.link_panel_state ?? null,
+    bypassPanelUserId: row.bypass_panel_user_id != null ? Number(row.bypass_panel_user_id) : null,
+    emailVerifiedAt: iso(row.email_verified_at),
   };
+}
+
+/** Accounts the bot's /api/bot/register created without an email. */
+export function isPlaceholderEmail(email: string | null | undefined): boolean {
+  return typeof email === "string" && /^telegram_\d+@tg\./i.test(email);
+}
+
+/**
+ * INSERT a new users row (expired subscription, fresh referral code and
+ * legacy link token, next ST public id). Returns the row, or null when
+ * the email already exists. The ONE insert used by sign-up, the bot
+ * link flow and panel adoption.
+ */
+export async function insertUserRow(
+  c: Queryable,
+  input: { email: string; referredBy?: string | null; ip?: string | null; fingerprint?: string | null; id?: string }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any | null> {
+  const inserted = await c.query(
+    `INSERT INTO users (id, email, created_at, subscription_end, referral_code, referred_by,
+                        telegram_link_token, registration_ip, device_fingerprint, public_id)
+     VALUES ($1, $2, $3, $3, $4, $5, $6, $7, $8, 'ST' || LPAD(NEXTVAL('user_public_id_seq')::text, 8, '0'))
+     ON CONFLICT (email) DO NOTHING
+     RETURNING *`,
+    [
+      input.id ?? uuidv4(),
+      input.email,
+      new Date(),
+      generateReferralCode(),
+      input.referredBy || null,
+      generateTelegramLinkToken(),
+      input.ip || null,
+      input.fingerprint || null,
+    ]
+  );
+  return inserted.rows[0] ?? null;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
@@ -199,25 +251,8 @@ export async function getOrCreateUser(
 
   return withTransaction(async (c) => {
     const id = uuidv4();
-    const now = new Date();
-    const inserted = await c.query(
-      `INSERT INTO users (id, email, created_at, subscription_end, referral_code, referred_by,
-                          telegram_link_token, registration_ip, device_fingerprint, public_id)
-       VALUES ($1, $2, $3, $3, $4, $5, $6, $7, $8, 'ST' || LPAD(NEXTVAL('user_public_id_seq')::text, 8, '0'))
-       ON CONFLICT (email) DO NOTHING
-       RETURNING *`,
-      [
-        id,
-        email,
-        now,
-        generateReferralCode(),
-        referredByCode || null,
-        generateTelegramLinkToken(),
-        ip || null,
-        fingerprint || null,
-      ]
-    );
-    if (inserted.rows.length === 0) {
+    const inserted = await insertUserRow(c, { id, email, referredBy: referredByCode, ip, fingerprint });
+    if (!inserted) {
       // Lost a race with a concurrent sign-in for the same email.
       const again = await c.query("SELECT * FROM users WHERE email = $1", [email]);
       return { ...rowToUser(again.rows[0]), isNew: false, trialGranted: false, trialBlockedReason: null };

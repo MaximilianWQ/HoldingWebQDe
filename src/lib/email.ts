@@ -89,6 +89,37 @@ export async function sendVerificationEmail(
   }
 }
 
+const escHtml = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+
+/**
+ * Code for linking a Telegram account to Atlas Secure (bot → site,
+ * docs/bot/TZ_BOT_EMAIL_LINK.md). Separate text from the sign-in code:
+ * the person must understand that confirming binds THIS mailbox to a
+ * Telegram account. Only the 6 digits are interpolated (escaped anyway).
+ */
+export async function sendTelegramLinkCodeEmail(email: string, code: string): Promise<boolean> {
+  const safeCode = escHtml(code);
+  if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("[EMAIL] RESEND_API_KEY is not set — Telegram link code NOT sent");
+      return false;
+    }
+    console.log(`[DEV] Telegram link code for ${email}: ${code}`);
+    return true;
+  }
+  return sendTransactional(
+    email,
+    "Код для привязки Telegram к Atlas Secure",
+    wrapHtml(
+      "Привязка Telegram к Atlas Secure",
+      `<p>Кто-то (надеемся, вы) хочет привязать эту почту к Telegram-аккаунту в боте Atlas Secure. Введите код в боте:</p>
+       <p style="margin:20px 0;text-align:center"><span style="display:inline-block;background:#f4f4f5;border-radius:8px;padding:16px 32px;font-size:32px;font-weight:bold;letter-spacing:8px;color:#111">${safeCode}</span></p>
+       <p>Код действует 10 минут. После привязки у бота и сайта будет одна подписка и один ключ.</p>
+       <p style="color:#666">Если вы ничего не запрашивали — просто проигнорируйте письмо: без кода почта никуда не привяжется.</p>`
+    )
+  );
+}
+
 // ─── Generic transactional sender (plain HTML body) ───────────────
 
 async function sendTransactional(to: string, subject: string, html: string): Promise<boolean> {

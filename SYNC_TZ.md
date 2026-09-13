@@ -324,6 +324,8 @@ if response["pendingCashback"]:
 
 `vpnKey` и `subscriptionUrl` — ссылка подписки Remnawave (одно и то же значение). Если подписка истекла или ссылка ещё не выдана панелью — оба `null`. `xrayUuid` всегда `null`.
 
+**Новые поля (13.09.2026):** `linked: true`, `panelUserId` (id ОБЩЕЙ сущности панели — бот не создаёт и не продлевает свою `tg_{id}_premium` для связанного), `linkKept`, `plan` (= `subscriptionPlan`), `bypass: {panelUserId, subscriptionUrl, limitBytes, usedBytes, remainingBytes, unlimited, status} | null`. Не связан → `404 {code: "NOT_LINKED", data: {linked: false}}`. Подробности — раздел 9.
+
 ---
 
 ## 5. ЧТО НЕ СИНХРОНИЗИРУЕТСЯ
@@ -415,3 +417,25 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 
 UNIQUE INDEX (buyer_id, purchase_id)       -- Защита от дубликатов
 ```
+
+---
+
+## 9. СВЯЗКА БОТ ↔ САЙТ: ОДИН ЧЕЛОВЕК — ОДНА ПОДПИСКА — ОДИН КЛЮЧ (13.09.2026)
+
+Полное ТЗ для бота — `docs/bot/TZ_BOT_EMAIL_LINK.md`; модель сущностей бота — `docs/bot/PANEL_USER_MODEL.md`.
+
+| Метод и путь | Назначение |
+|---|---|
+| `POST /api/bot/email/start {telegramId, email}` | бот первым: код 6 цифр на почту (10 мин, 5 попыток). Ответ нейтральный. `200 {sent}` · `400 VALIDATION/DISPOSABLE_EMAIL` · `409 TELEGRAM_LINKED_OTHER` · `429` · `502` |
+| `POST /api/bot/email/confirm {telegramId, email, code, premiumPanelUserId?}` | проверка кода → связка. `200 {linked, userId, email, subscriptionUrl, panelUserId, subscriptionEnd, plan, kept, disabledPanelUserId, bonusDays, …}` · `400 CODE_*` · `409 TELEGRAM_LINKED_OTHER/EMAIL_LINKED_OTHER` · `503 PANEL_UNAVAILABLE` (код остаётся годным) |
+| `GET /api/bot/link?token=` | превью одноразовой ссылки из кабинета: `{valid, maskedEmail, expiresAt}` · `404/410` |
+| `POST /api/bot/link {token, telegramId, premiumPanelUserId?}` | сайт первым: `/start link_<token>` (одноразовый, 15 мин). Старые постоянные токены принимаются и сразу заменяются. Ответ как у confirm |
+| `POST /api/bot/unlink {telegramId}` | отвязка: подписка и ключ остаются у аккаунта сайта; бонус повторно не выдаётся |
+| `POST /api/bot/relink {telegramId, premiumPanelUserId?}` | миграция связанных до 13.09.2026: повторить слияние ключей для УЖЕ связанного Telegram (идемпотентно) |
+| `POST /api/bot/extend` | для связанных — ЕДИНСТВЕННЫЙ способ продления после оплаты в боте (с `paymentId`); PATCH `expireAt` общей сущности бот не делает |
+
+**Слияние при связке:** есть подписки и в боте, и на сайте → остаётся сущность с большим сроком (её ключ общий), вторая `DISABLED`, срок её не трогаем, дни не складываются. `kept`: `bot | site | only-bot | only-site | none`. Бонус +7 дней — один раз на аккаунт и на Telegram ID.
+
+**Обход (bypass `{telegram_id}`):** ведёт бот; сайт запоминает его за аккаунтом, показывает остаток и никогда не трогает его срок/сквад/лимиты. Трафик — только read-modify-write `trafficLimitBytes` (в следующей фазе сайт тоже будет добавлять трафик в ту же сущность).
+
+**Страховка «общий ключ не укорачивать»:** если у общей сущности в панели срок позже, чем в БД сайта, и его изменил не сайт, сайт подтягивает срок к себе (событие журнала `panel_pull`), а не перезаписывает.

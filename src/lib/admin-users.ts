@@ -97,6 +97,7 @@ const BASE_CTE = `
     SELECT u.id, u.email, u.created_at, u.subscription_end, u.subscription_plan, u.telegram_linked,
            u.referrals, u.paid_referrals, u.registration_ip, u.panel_id, u.public_id, u.panel_username,
            u.remnawave_user_uuid, u.panel_user_id, u.subscription_url, u.panel_sync_state, u.panel_sync_error,
+           u.telegram_id, u.link_kept, u.link_disabled_panel_user_id, u.bypass_panel_user_id,
            COUNT(*) OVER (PARTITION BY COALESCE(u.registration_ip, 'unknown'))::int AS accounts_on_ip,
            (SELECT MAX(p.paid_at) FROM payments p WHERE p.user_id = u.id AND p.status IN ('confirmed', 'refunded')) AS last_payment_at
     FROM users u
@@ -140,6 +141,10 @@ export function rowToAdminUser(row: any) {
     subscriptionEnd: new Date(row.subscription_end).toISOString(),
     subscriptionPlan: row.subscription_plan || "trial",
     telegramLinked: !!row.telegram_linked,
+    telegramId: row.telegram_id ?? null,
+    linkKept: row.link_kept ?? null,
+    linkDisabledPanelUserId: row.link_disabled_panel_user_id != null ? Number(row.link_disabled_panel_user_id) : null,
+    bypassPanelUserId: row.bypass_panel_user_id != null ? Number(row.bypass_panel_user_id) : null,
     referrals: row.referrals ?? 0,
     paidReferrals: row.paid_referrals ?? 0,
     isActive: new Date(row.subscription_end) > new Date(),

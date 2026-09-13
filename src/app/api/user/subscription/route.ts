@@ -3,6 +3,7 @@ import { getLoyaltyInfo } from "@/lib/store";
 import { pool } from "@/lib/db";
 import { clearSessionCookie, getSessionUser, refreshSessionCookie, SESSION_COOKIE } from "@/lib/session";
 import { isAdminEmail } from "@/app/api/admin/middleware";
+import { getBypassForUser } from "@/lib/bypass";
 
 /**
  * The user's subscription for the dashboard — READ-ONLY.
@@ -54,6 +55,10 @@ export async function GET(request: NextRequest) {
     const provisioningError =
       !isExpired && !user.subscriptionUrl ? (panelSyncState === "error" ? "panel_sync_error" : "panel_sync_pending") : null;
 
+    // Bypass (обход) — read-only, from the panel with a short timeout and a
+    // cache (src/lib/bypass.ts). The only panel read here; null → not shown.
+    const bypass = user.bypassPanelUserId || user.telegramId ? await getBypassForUser(user).catch(() => null) : null;
+
     const response = NextResponse.json({
       success: true,
       data: {
@@ -84,6 +89,17 @@ export async function GET(request: NextRequest) {
         trialUsedAt: user.trialUsedAt,
         provisioningError,
         panelSyncState,
+        linkKept: user.linkKept,
+        bypass: bypass
+          ? {
+              subscriptionUrl: bypass.subscriptionUrl,
+              limitBytes: bypass.limitBytes,
+              usedBytes: bypass.usedBytes,
+              remainingBytes: bypass.remainingBytes,
+              unlimited: bypass.unlimited,
+              status: bypass.status,
+            }
+          : null,
       },
     });
     refreshSessionCookie(response, auth);

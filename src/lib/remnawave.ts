@@ -118,6 +118,8 @@ export interface UpdateUserBody {
   tag?: string | null;
   description?: string | null;
   email?: string | null;
+  /** Telegram id on the panel user — written on link, cleared on unlink. */
+  telegramId?: number | null;
   hwidDeviceLimit?: number | null;
   trafficLimitBytes?: number;
   activeInternalSquads?: string[];
@@ -547,7 +549,124 @@ export function isOurPanelUser(u: { username?: string | null; tag?: string | nul
   return typeof u.username === "string" && SITE_USERNAME_RE.test(u.username);
 }
 
-function panelSafeEmail(email: string | null | undefined): string | null {
+/** True for the site's own `ST` + digits usernames. */
+export function isSiteUsername(username: string | null | undefined): boolean {
+  return typeof username === "string" && SITE_USERNAME_RE.test(username);
+}
+
+// ─── Bot conventions (docs/bot/PANEL_USER_MODEL.md) ──────────────
+//
+// The Telegram bot keeps TWO panel users per Telegram id: premium
+// `tg_{telegram_id}_premium` (term = subscription) and bypass
+// `{telegram_id}` (expireAt 2099, limited by traffic). The site adopts
+// the premium one when it is the longer subscription (one key per
+// person) and only ever READS the bypass one, except for explicit
+// traffic operations (src/lib/bypass.ts).
+
+export const DEFAULT_BOT_PREMIUM_USERNAME_PATTERN = "tg_{telegram_id}_premium";
+export const DEFAULT_BOT_BYPASS_USERNAME_PATTERN = "{telegram_id}";
+
+function fillBotPattern(envName: string, fallback: string, telegramId: string): string {
+  const pattern = (process.env[envName] || "").trim() || fallback;
+  // The bot trims usernames to the panel's 32-character limit, so do we.
+  return pattern.split("{telegram_id}").join(telegramId).slice(0, 32);
+}
+
+/** Username of the bot's premium panel user for a Telegram id (env BOT_PREMIUM_USERNAME_PATTERN). */
+export function botPremiumUsername(telegramId: string): string {
+  return fillBotPattern("BOT_PREMIUM_USERNAME_PATTERN", DEFAULT_BOT_PREMIUM_USERNAME_PATTERN, telegramId);
+}
+
+/** Username of the bot's bypass panel user for a Telegram id (env BOT_BYPASS_USERNAME_PATTERN). */
+export function botBypassUsername(telegramId: string): string {
+  return fillBotPattern("BOT_BYPASS_USERNAME_PATTERN", DEFAULT_BOT_BYPASS_USERNAME_PATTERN, telegramId);
+}
+
+/** Reserved for the next phase (site-sold bypass): `ST00000042_bp`. Not created yet. */
+export const SITE_BYPASS_USERNAME_SUFFIX = "_bp";
+export function siteBypassUsername(publicId: string): string {
+  return `${publicId}${SITE_BYPASS_USERNAME_SUFFIX}`;
+}
+
+/** A bypass entity — the bot's (`Bypass via bot (…)`) or a future site one (`ST…_bp`). Never a premium key. */
+export function isBypassEntity(u: { username?: string | null; description?: string | null }): boolean {
+  if (typeof u.description === "string" && /^\s*bypass via bot\b/i.test(u.description)) return true;
+  return typeof u.username === "string" && u.username.endsWith(SITE_BYPASS_USERNAME_SUFFIX) && isSiteUsername(u.username.slice(0, -SITE_BYPASS_USERNAME_SUFFIX.length));
+}
+
+/** Plan from the bot's description `Premium via bot ({tariff})`; null when it is not a bot premium description. */
+export function planFromBotDescription(description: string | null | undefined): "basic" | "plus" | null {
+  const m = /premium via bot\s*\(([^)]*)\)/i.exec(description || "");
+  if (!m) return null;
+  return /plus/i.test(m[1]) ? "plus" : "basic";
+}
+
+/** Plan from a SITE_* tag, or null. */
+export function planFromSiteTag(tag: string | null | undefined): "trial" | "basic" | "plus" | null {
+  const hit = (Object.entries(SITE_TAGS) as Array<[keyof typeof SITE_TAGS, string]>).find(([, t]) => t === tag);
+  return hit ? hit[0] : null;
+}
+
+/** Bypass (обход) squad — owner, 13.09.2026; the bot's squad for bypass entities. */
+export const DEFAULT_BYPASS_SQUAD_UUID = "6947418d-83b6-4050-a10c-3829e4cd4b2c";
+/** Same device limit the bot gives its bypass entities (REMNAWAVE_BYPASS_DEVICE_LIMIT in the bot). */
+export const DEFAULT_BYPASS_DEVICE_LIMIT = 5;
+
+/**
+ * Config for bypass entities created by the SITE (next phase: «Пакеты
+ * трафика»). Env overrides, defaults are the production values (one-time
+ * warning, like REMNAWAVE_MAINSERVER_SQUAD_UUID). Nothing writes with
+ * it yet.
+ */
+export function getBypassConfig(): { squadUuids: string[]; deviceLimit: number } {
+  let squadUuids = csv(process.env.REMNAWAVE_BYPASS_SQUAD_UUID);
+  if (squadUuids.length === 0) {
+    squadUuids = [DEFAULT_BYPASS_SQUAD_UUID];
+    warnDefaultOnce("REMNAWAVE_BYPASS_SQUAD_UUID", DEFAULT_BYPASS_SQUAD_UUID);
+  }
+  const limit = Number((process.env.REMNAWAVE_BYPASS_DEVICE_LIMIT || "").trim());
+  return {
+    squadUuids,
+    deviceLimit: Number.isInteger(limit) && limit > 0 ? limit : DEFAULT_BYPASS_DEVICE_LIMIT,
+  };
+}
+
+// ─── Description markers ─────────────────────────────────────────
+//
+// The panel description is shared with the bot ("Premium via bot
+// (basic)"). The site only appends ` | key:value` tokens and replaces
+// its own tokens; the bot's text is never rewritten.
+
+export const PANEL_MARKERS = {
+  /** Email confirmed through the site's code flow — the only proof E (sign-in adoption) accepts. */
+  emailVerified: "atlas-email-verified",
+  /** Site account that owns this panel user. */
+  site: "atlas-site",
+  /** Telegram unlinked; the key stays with the site account. */
+  unlinked: "atlas-unlinked",
+} as const;
+export type PanelMarker = (typeof PANEL_MARKERS)[keyof typeof PANEL_MARKERS];
+
+function markerTokens(description: string | null | undefined): string[] {
+  return (description || "").split(/\s*\|\s*/).map((t) => t.trim()).filter(Boolean);
+}
+
+export function hasMarker(description: string | null | undefined, marker: PanelMarker): boolean {
+  return markerTokens(description).some((t) => t.startsWith(`${marker}:`));
+}
+
+/** Set (value) or remove (null) our markers, keeping every other token in place. */
+export function withMarkers(description: string | null | undefined, set: Partial<Record<PanelMarker, string | null>>): string {
+  const keys = Object.keys(set) as PanelMarker[];
+  const kept = markerTokens(description).filter((t) => !keys.some((k) => t.startsWith(`${k}:`)));
+  for (const k of keys) {
+    const v = set[k];
+    if (v) kept.push(`${k}:${v}`);
+  }
+  return kept.join(" | ");
+}
+
+export function panelSafeEmail(email: string | null | undefined): string | null {
   if (!email) return null;
   const e = email.trim().toLowerCase();
   // The panel validates with z.email(); anything that obviously would

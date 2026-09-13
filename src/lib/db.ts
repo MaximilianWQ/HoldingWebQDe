@@ -323,6 +323,55 @@ export async function initDb(): Promise<void> {
     "ALTER TABLE telegram_auth_nonces ADD COLUMN IF NOT EXISTS request_ua TEXT",
     "ALTER TABLE telegram_auth_nonces ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ",
     "CREATE INDEX IF NOT EXISTS idx_tg_nonces_expires ON telegram_auth_nonces(expires_at)",
+    // ── Telegram ↔ site linking, one key per person (13.09.2026) ──
+    // docs/bot/TZ_BOT_EMAIL_LINK.md. link_kept: which panel entity survived
+    // the merge (bot | site | only-bot | only-site | none | adopted);
+    // link_panel_state: panel writes still owed by the sync worker
+    // ('pending' after a link, 'unlink_pending' after an unlink, 'ok').
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_linked_at TIMESTAMPTZ",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS link_kept TEXT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS link_disabled_panel_user_id BIGINT",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS link_disable_ids BIGINT[]",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS link_panel_state TEXT",
+    // Bypass (обход) panel entity of this person — the bot's `{telegram_id}`
+    // user for now; site-sold bypass (`ST…_bp`) plugs in here later.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS bypass_panel_user_id BIGINT",
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_bypass_panel_user_id ON users(bypass_panel_user_id) WHERE bypass_panel_user_id IS NOT NULL",
+    // Email codes for linking from the bot — separate from the site's
+    // sign-in codes; only a salted SHA-256 of the code is stored.
+    `CREATE TABLE IF NOT EXISTS bot_email_codes (
+       telegram_id TEXT PRIMARY KEY,
+       email TEXT NOT NULL,
+       code_salt TEXT NOT NULL,
+       code_hash TEXT NOT NULL,
+       attempts INTEGER NOT NULL DEFAULT 0,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       expires_at TIMESTAMPTZ NOT NULL,
+       request_ip TEXT
+     )`,
+    // One-time "link Telegram" tokens from the dashboard (SHA-256 stored).
+    `CREATE TABLE IF NOT EXISTS telegram_link_tokens (
+       token_hash TEXT PRIMARY KEY,
+       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       expires_at TIMESTAMPTZ NOT NULL,
+       used_at TIMESTAMPTZ,
+       used_by_telegram_id TEXT
+     )`,
+    "CREATE INDEX IF NOT EXISTS idx_tg_link_tokens_user ON telegram_link_tokens(user_id, created_at DESC)",
+    "CREATE INDEX IF NOT EXISTS idx_tg_link_tokens_expires ON telegram_link_tokens(expires_at)",
+    // Idempotent read-modify-write of a bypass traffic limit (merge now,
+    // site purchases later): one row per operation id.
+    `CREATE TABLE IF NOT EXISTS bypass_traffic_ops (
+       op_id TEXT PRIMARY KEY,
+       panel_user_id BIGINT NOT NULL,
+       add_bytes BIGINT NOT NULL,
+       base_limit BIGINT,
+       state TEXT NOT NULL DEFAULT 'pending',
+       note TEXT,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       applied_at TIMESTAMPTZ
+     )`,
   ];
 
   const failed: string[] = [];

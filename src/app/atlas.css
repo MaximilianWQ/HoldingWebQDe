@@ -1509,3 +1509,23 @@ html[data-static] .a *,
 html[data-static] .a *::before,
 html[data-static] .a *::after { animation: none !important; transition: none !important; }
 html[data-static] .a-unfold { display: none !important; }
+
+/* ─── Рабочие экраны: без «кино» (владелец, 13.09.2026) ─────────────
+   Кабинет, админка, оплата, новое устройство, вход (AtlasShell ставит
+   `a-work` при коротком подвале). Карточки проявлялись по мере
+   прокрутки за 0,5–0,9 с с задержками лесенкой, панели админки и шаги
+   выезжали — рабочий экран казался медленным. Здесь всё видно сразу;
+   остаются только короткие отклики цвета на наведение и постоянные
+   индикаторы (точки «на связи», скелетоны загрузки). */
+.a-work .a-settle, .a-work .a-print, .a-work .a-slide,
+.a-work .ak-top, .a-work .ak-card, .a-work .ak-perk,
+.a-work .ak-enter, .a-work .ak-kicker-step, .a-work .ak-tabbar,
+.a-work .adm-panel {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition-delay: 0s !important;
+}
+.a-work .ak-top, .a-work .ak-card, .a-work .ak-perk {
+  transition: border-color var(--d-1) var(--m-turn), background-color var(--d-1) var(--m-turn) !important;
+}

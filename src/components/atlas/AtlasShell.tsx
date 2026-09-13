@@ -41,15 +41,21 @@ export default function AtlasShell({
   footer?: "full" | "compact";
   children: React.ReactNode;
 }) {
+  // Рабочие экраны (короткий подвал: кабинет, админка, оплата, новое
+  // устройство, вход) — без мягкой прокрутки и без «кино» при появлении:
+  // человек пришёл что-то сделать (владелец, 13.09.2026: «медленно всё
+  // прокручивается, очень бесит»). Класс `a-work` снимает проявление
+  // блоков в atlas.css; Lenis здесь не поднимается — родная прокрутка.
+  const work = footer === "compact";
   return (
-    <div className="a">
+    <div className={work ? "a a-work" : "a"}>
       <a href="#main" className="b-skip">К содержимому</a>
       <AtlasHeader sheetNo={sheetNo} sheetTitle={sheetTitle} cta={headCta} />
       {unfold ? <Unfold /> : null}
       {children}
       <AtlasFooter variant={footer} />
       <MotionController />
-      <SmoothScroll />
+      {work ? null : <SmoothScroll />}
     </div>
   );
 }

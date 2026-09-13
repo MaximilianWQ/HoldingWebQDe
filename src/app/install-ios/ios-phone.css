@@ -1,0 +1,663 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /install-ios — живой iPhone 17 Pro Max (IosPhone.tsx). Корень .ios-dev,
+   всё внутри телефона — префикс iosp-: страница уже держит ios-card,
+   ios-text и т. п., общий префикс ломал карточки шагов.
+
+   Корпус — рендер Blender shell.webp (960 × 1992, кадр 80 × 166 мм,
+   design/blender/iphone_shell.py). Экран лежит ПОД корпусом: вырез в
+   картинке прозрачный, Dynamic Island остаётся в рендере.
+   Координаты выреза (iphone_shell_post.py):
+     x 4.4437 %  y 2.2982 %  w 91.1125 %  h 95.4036 %
+     радиус 13.2391 % / 6.0933 % (9,65 мм — концентрично корпусу)
+   Внутри экрана всё в пунктах iPhone: 440 × 956, --u = 100cqw / 440.
+
+   Раздел 1 — устройство, 2 — интерфейс iOS 26 (Safari, меню, лист
+   «Поделиться», «На экран „Домой“», экран «Домой»), 3 — ключевые
+   статичные кадры шагов, 4 — движение (сцены 1–5), 5 — упрощение.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Устройство ─────────────────────────────────────────────── */
+.ios-dev {
+  --u: calc(100cqw / 440);
+  --D: 4.4s;
+  --N: infinite;
+  --tx: 397;
+  --ty: 899;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 960 / 1992;
+  margin-inline: auto;
+}
+.ios-dev[data-mode="tour"] { --N: 1; }
+/* Тень корпуса — отдельной плитой по силуэту (78 × 163,4 мм, R 12,2 мм):
+   drop-shadow картинки упал бы в прозрачный вырез и затемнил экран. */
+.ios-dev-shadow {
+  position: absolute;
+  left: 1.25%;
+  top: 0.783%;
+  width: 97.5%;
+  height: 98.434%;
+  border-radius: 15.64% / 7.47%;
+  box-shadow: 0 28px 56px -18px rgba(11, 19, 34, 0.34), 0 8px 18px -6px rgba(11, 19, 34, 0.16);
+}
+/* Чёрная подложка чуть шире выреза: под сглаженным краем корпуса не
+   просвечивает фон страницы. */
+.ios-dev::before {
+  content: "";
+  position: absolute;
+  left: 3.9%;
+  top: 2.03%;
+  width: 92.2%;
+  height: 95.94%;
+  border-radius: 14% / 6.6%;
+  background: #000;
+}
+.iosp-scr {
+  position: absolute;
+  left: 4.4437%;
+  top: 2.2982%;
+  width: 91.1125%;
+  height: 95.4036%;
+  overflow: hidden;
+  clip-path: inset(0 round 13.2391% / 6.0933%);
+  border-radius: 13.2391% / 6.0933%;
+  container-type: size;
+  background: #fff;
+  color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.2;
+  user-select: none;
+}
+.iosp-scr *, .iosp-scr *::before, .iosp-scr *::after { box-sizing: border-box; }
+.iosp-shell {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── 2. Интерфейс iOS 26 ───────────────────────────────────────── */
+.iosp-l { position: absolute; inset: 0; }
+.iosp-g {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iosp-glass {
+  background: rgba(255, 255, 255, 0.74);
+  -webkit-backdrop-filter: blur(calc(14 * var(--u))) saturate(1.8);
+  backdrop-filter: blur(calc(14 * var(--u))) saturate(1.8);
+  box-shadow:
+    0 calc(8 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.14),
+    inset 0 0 0 calc(0.8 * var(--u)) rgba(255, 255, 255, 0.85),
+    inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.95);
+}
+.iosp-hl { position: absolute; inset: 0; border-radius: inherit; background: rgba(0, 0, 0, 0.09); opacity: 0; }
+.iosp-ind {
+  position: absolute;
+  left: 50%;
+  bottom: calc(8 * var(--u));
+  width: calc(146 * var(--u));
+  height: calc(5 * var(--u));
+  margin-left: calc(-73 * var(--u));
+  border-radius: calc(3 * var(--u));
+  background: #000;
+  z-index: 3;
+}
+
+/* Строка состояния: 54 pt, по бокам от острова (x 156–284 pt). */
+.iosp-st {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  height: calc(54 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8 * var(--u)) calc(38 * var(--u)) 0 calc(58 * var(--u));
+  font-size: calc(17 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #000;
+  fill: currentColor;
+}
+.iosp-st.is-w { color: #fff; }
+.iosp-st-i { width: calc(78 * var(--u)); height: calc(14 * var(--u)); }
+
+/* Safari: страница под строкой состояния (верхний отступ 62 pt). */
+.iosp-web { background: #fff; }
+.iosp-page { position: absolute; left: 0; top: calc(62 * var(--u)); display: block; width: 100%; height: auto; }
+.iosp-bar {
+  position: absolute;
+  left: calc(16 * var(--u));
+  right: calc(16 * var(--u));
+  bottom: calc(30 * var(--u));
+  height: calc(54 * var(--u));
+  display: flex;
+  gap: calc(8 * var(--u));
+}
+.iosp-btn {
+  width: calc(54 * var(--u));
+  height: calc(54 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #1c1c1e;
+}
+.iosp-dots { display: flex; justify-content: center; align-items: center; gap: calc(4 * var(--u)); }
+.iosp-dots i { width: calc(5 * var(--u)); height: calc(5 * var(--u)); border-radius: 50%; background: #1c1c1e; }
+.iosp-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(27 * var(--u));
+  font-size: calc(16 * var(--u));
+  font-weight: 500;
+  color: #111;
+}
+.iosp-dim { background: rgba(0, 0, 0, 0.3); opacity: 0; }
+
+/* Меню «•••»: 266 pt высотой, низ на 96 pt от края. */
+.iosp-menu {
+  position: absolute;
+  right: calc(16 * var(--u));
+  bottom: calc(96 * var(--u));
+  width: calc(282 * var(--u));
+  padding: calc(8 * var(--u));
+  border-radius: calc(28 * var(--u));
+  transform-origin: 88% 118%;
+  opacity: 0;
+  transform: scale(0.4);
+  /* плотнее общего стекла: синяя кнопка кабинета под меню иначе
+     просвечивала и читалась выделенным пунктом */
+  background: rgba(250, 250, 252, 0.9);
+}
+.iosp-mrow {
+  position: relative;
+  height: calc(48 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 calc(14 * var(--u));
+  border-radius: calc(16 * var(--u));
+  font-size: calc(17 * var(--u));
+  color: #111;
+  white-space: nowrap;
+}
+.iosp-sep { height: calc(1 * var(--u)); margin: calc(4 * var(--u)) calc(12 * var(--u)); background: rgba(0, 0, 0, 0.1); }
+
+/* Лист «Поделиться»: сверху на 62 pt, в среднем положении сдвинут на 238 pt. */
+.iosp-share, .iosp-add {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(62 * var(--u));
+  height: calc(894 * var(--u));
+  padding: calc(8 * var(--u)) calc(16 * var(--u)) 0;
+  border-radius: calc(38 * var(--u)) calc(38 * var(--u)) 0 0;
+  background: #f2f2f7;
+  box-shadow: 0 calc(-2 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.14);
+  transform: translateY(100%);
+}
+.iosp-grab { width: calc(36 * var(--u)); height: calc(5 * var(--u)); margin: 0 auto calc(13 * var(--u)); border-radius: calc(3 * var(--u)); background: rgba(60, 60, 67, 0.3); }
+.iosp-shd { display: flex; align-items: center; gap: calc(12 * var(--u)); height: calc(56 * var(--u)); padding: 0 calc(4 * var(--u)); }
+.iosp-ico {
+  width: calc(52 * var(--u));
+  height: calc(52 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 22.5%;
+  background: linear-gradient(135deg, #0a0a0a, #161616);
+  color: #fff;
+}
+.iosp-ico svg { width: 61%; height: 61%; }
+.iosp-ico.is-l { width: calc(64 * var(--u)); height: calc(64 * var(--u)); }
+.iosp-shd-t { flex: 1; min-width: 0; display: grid; gap: calc(2 * var(--u)); }
+.iosp-shd-t b { font-size: calc(15 * var(--u)); font-weight: 600; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iosp-shd-t span { font-size: calc(13 * var(--u)); color: #6c6c70; }
+.iosp-shd-t em { font-style: normal; font-size: calc(13 * var(--u)); color: #007aff; }
+.iosp-x {
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(120, 120, 128, 0.16);
+  color: #6c6c70;
+}
+.iosp-x .iosp-g { width: calc(16 * var(--u)); height: calc(16 * var(--u)); stroke-width: 2.4; }
+.iosp-row5 { display: flex; justify-content: space-between; height: calc(88 * var(--u)); margin-top: calc(10 * var(--u)); padding: 0 calc(4 * var(--u)); }
+.iosp-shd + .iosp-row5 { margin-top: calc(12 * var(--u)); }
+.iosp-cell { display: flex; flex-direction: column; align-items: center; }
+.iosp-av, .iosp-sq { display: block; width: calc(60 * var(--u)); height: calc(60 * var(--u)); background: linear-gradient(160deg, #e6e8ee, #cfd3dc); }
+.iosp-av { border-radius: 50%; }
+.iosp-sq { border-radius: calc(14 * var(--u)); }
+.iosp-lbl { display: block; width: calc(40 * var(--u)); height: calc(6 * var(--u)); margin-top: calc(10 * var(--u)); border-radius: calc(3 * var(--u)); background: rgba(60, 60, 67, 0.16); }
+.iosp-grp { margin-top: calc(14 * var(--u)); border-radius: calc(14 * var(--u)); background: #fff; overflow: hidden; }
+.iosp-row5 + .iosp-grp { margin-top: calc(12 * var(--u)); }
+.iosp-srow {
+  position: relative;
+  height: calc(52 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 calc(16 * var(--u));
+  font-size: calc(17 * var(--u));
+  color: #111;
+  white-space: nowrap;
+}
+.iosp-srow + .iosp-srow::after {
+  content: "";
+  position: absolute;
+  left: calc(16 * var(--u));
+  right: 0;
+  top: 0;
+  height: calc(0.8 * var(--u));
+  background: rgba(60, 60, 67, 0.18);
+}
+.iosp-srow .iosp-hl { border-radius: 0; background: rgba(0, 0, 0, 0.08); }
+
+/* «На экран „Домой“»: кнопки-капсулы Liquid Glass, «Добавить» — синяя. */
+.iosp-add { box-shadow: 0 calc(-2 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.18); }
+.iosp-nav { position: relative; display: flex; align-items: center; justify-content: space-between; height: calc(44 * var(--u)); }
+.iosp-nav b {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: calc(17 * var(--u));
+  font-weight: 600;
+  white-space: nowrap;
+}
+.iosp-cap {
+  height: calc(44 * var(--u));
+  display: flex;
+  align-items: center;
+  padding: 0 calc(16 * var(--u));
+  border-radius: calc(22 * var(--u));
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.08);
+  font-size: calc(17 * var(--u));
+  color: #111;
+}
+.iosp-cap.is-ok { width: calc(108 * var(--u)); justify-content: center; padding: 0; background: #007aff; color: #fff; font-weight: 600; }
+.iosp-card { display: flex; align-items: center; gap: calc(14 * var(--u)); margin-top: calc(20 * var(--u)); padding: calc(16 * var(--u)); border-radius: calc(14 * var(--u)); background: #fff; }
+.iosp-card-f { flex: 1; }
+.iosp-card-f div { height: calc(40 * var(--u)); display: flex; align-items: center; border-bottom: calc(0.8 * var(--u)) solid rgba(60, 60, 67, 0.2); font-size: calc(17 * var(--u)); }
+.iosp-card-f span { display: block; padding-top: calc(8 * var(--u)); font-size: calc(13 * var(--u)); color: #8a8a8e; }
+.iosp-tgl {
+  position: relative;
+  height: calc(52 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: calc(16 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border-radius: calc(14 * var(--u));
+  background: #fff;
+  font-size: calc(17 * var(--u));
+}
+.iosp-sw { position: relative; width: calc(51 * var(--u)); height: calc(31 * var(--u)); border-radius: calc(16 * var(--u)); background: #34c759; }
+.iosp-sw::after {
+  content: "";
+  position: absolute;
+  right: calc(2 * var(--u));
+  top: calc(2 * var(--u));
+  width: calc(27 * var(--u));
+  height: calc(27 * var(--u));
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0, 0, 0, 0.2);
+}
+.iosp-ring { position: absolute; inset: calc(-4 * var(--u)); border-radius: calc(18 * var(--u)); box-shadow: 0 0 0 calc(2.5 * var(--u)) #1432b8; opacity: 0; }
+.iosp-note { margin: calc(8 * var(--u)) calc(16 * var(--u)) 0; font-size: calc(13 * var(--u)); line-height: 1.35; color: #8a8a8e; }
+
+/* Экран «Домой»: сетка 4 × 4, иконки 64 pt, шаг ряда 102 pt; Atlas —
+   десятая ячейка (ряд 3, колонка 2), центр (172, 312) pt. Соседние
+   иконки — нейтральные заглушки, чужих логотипов нет. */
+.iosp-home { overflow: hidden; }
+.iosp-wall {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 70% at 15% 5%, #7c95ff 0, transparent 55%),
+    radial-gradient(90% 60% at 95% 95%, #0c2a8f 0, transparent 60%),
+    linear-gradient(165deg, #2b4bdb, #0b1a6b);
+}
+.iosp-grid {
+  position: absolute;
+  left: calc(28 * var(--u));
+  right: calc(28 * var(--u));
+  top: calc(76 * var(--u));
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: calc(18 * var(--u));
+}
+.iosp-tile {
+  display: block;
+  width: calc(64 * var(--u));
+  height: calc(64 * var(--u));
+  border-radius: 22.5%;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14));
+  box-shadow: inset 0 0 0 calc(0.8 * var(--u)) rgba(255, 255, 255, 0.4);
+}
+.iosp-home .iosp-lbl { background: rgba(255, 255, 255, 0.35); height: calc(6 * var(--u)); margin-top: calc(10 * var(--u)); margin-bottom: calc(4 * var(--u)); }
+.iosp-atl { width: calc(64 * var(--u)); height: calc(64 * var(--u)); box-shadow: 0 calc(6 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.3); }
+.iosp-atl-l { height: calc(20 * var(--u)); padding-top: calc(6 * var(--u)); font-size: calc(12 * var(--u)); font-weight: 500; color: #fff; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
+.iosp-srch {
+  position: absolute;
+  left: 50%;
+  bottom: calc(124 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--u));
+  height: calc(30 * var(--u));
+  padding: 0 calc(12 * var(--u));
+  border-radius: calc(15 * var(--u));
+  background: rgba(255, 255, 255, 0.22);
+  font-size: calc(13 * var(--u));
+  font-weight: 500;
+  color: #fff;
+  transform: translateX(-50%);
+}
+.iosp-srch .iosp-g { width: calc(14 * var(--u)); height: calc(14 * var(--u)); stroke-width: 2.4; }
+.iosp-dock {
+  position: absolute;
+  left: calc(14 * var(--u));
+  right: calc(14 * var(--u));
+  bottom: calc(20 * var(--u));
+  height: calc(92 * var(--u));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: calc(36 * var(--u));
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 calc(0.8 * var(--u)) rgba(255, 255, 255, 0.3);
+}
+.iosp-home .iosp-ind { background: #fff; }
+/* Веб-приложение, открытое с экрана «Домой»: без панелей Safari. */
+/* Скруглён как экран: при масштабе 0,145 угол ≈ углу иконки 64 pt. */
+.iosp-app {
+  overflow: hidden;
+  border-radius: calc(62 * var(--u));
+  background: #fff;
+  opacity: 0;
+  transform-origin: calc(172 * var(--u)) calc(312 * var(--u));
+  transform: scale(0.145);
+}
+
+/* Касание: кольцо цвета бренда, центр — (--tx, --ty) в пунктах. */
+.iosp-touch {
+  position: absolute;
+  z-index: 20;
+  left: calc(var(--tx) * var(--u) - 23 * var(--u));
+  top: calc(var(--ty) * var(--u) - 23 * var(--u));
+  width: calc(46 * var(--u));
+  height: calc(46 * var(--u));
+  border-radius: 50%;
+  background: rgba(20, 50, 184, 0.2);
+  box-shadow: 0 0 0 calc(2 * var(--u)) rgba(20, 50, 184, 0.88), 0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(20, 50, 184, 0.3);
+  opacity: 1;
+  pointer-events: none;
+}
+.iosp-touch i { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 calc(2 * var(--u)) rgba(20, 50, 184, 0.7); opacity: 0.45; transform: scale(1.55); }
+.iosp-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, 0.06) 100%);
+}
+
+/* ─── 3. Ключевые кадры шагов (без движения и при reduced-motion) ── */
+.ios-dev[data-scene="2"] { --D: 4.6s; --tx: 300; --ty: 626; }
+.ios-dev[data-scene="3"] { --D: 5.4s; --tx: 220; --ty: 654; }
+.ios-dev[data-scene="4"] { --D: 4.8s; --tx: 370; --ty: 92; }
+.ios-dev[data-scene="5"] { --D: 5.2s; --tx: 172; --ty: 312; }
+.ios-dev[data-scene="2"] .iosp-dim { opacity: 0.45; }
+.ios-dev[data-scene="2"] .iosp-menu { opacity: 1; transform: none; }
+.ios-dev[data-scene="2"] .iosp-mrow.is-t .iosp-hl { opacity: 1; }
+.ios-dev[data-scene="3"] .iosp-dim,
+.ios-dev[data-scene="4"] .iosp-dim { opacity: 1; }
+.ios-dev[data-scene="3"] .iosp-share { transform: none; }
+.ios-dev[data-scene="3"] .iosp-srow.is-t .iosp-hl { opacity: 1; }
+.ios-dev[data-scene="4"] .iosp-add { transform: none; }
+.ios-dev[data-scene="4"] .iosp-ring { opacity: 1; }
+.ios-dev[data-scene="5"] .iosp-web { opacity: 0; }
+
+/* ═══ 4. ДВИЖЕНИЕ ═══════════════════════════════════════════════════
+   Одна длительность на сцену (--D), проценты — общая шкала сцены.
+   Кривые: лист iOS cubic-bezier(.32,.72,0,1), пружина с перелётом
+   cubic-bezier(.2,.9,.25,1.12), нажатие — короткий ход вниз и отскок. */
+.ios-dev[data-play] .iosp-scr * {
+  animation-duration: var(--D);
+  animation-iteration-count: var(--N);
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.ios-dev[data-play] :is(.iosp-menu, .iosp-share, .iosp-add, .iosp-app, .iosp-web, .iosp-touch) { will-change: transform, opacity; }
+
+/* Сцена 1 — «•••» → меню Safari. */
+.ios-dev[data-play][data-scene="1"] .iosp-touch { animation-name: ios1-touch; }
+.ios-dev[data-play][data-scene="1"] .iosp-touch i { animation-name: ios1-rip; }
+.ios-dev[data-play][data-scene="1"] .iosp-dots { animation-name: ios1-press; }
+.ios-dev[data-play][data-scene="1"] .iosp-menu { animation-name: ios1-menu; }
+.ios-dev[data-play][data-scene="1"] .iosp-dim { animation-name: ios1-dim; }
+@keyframes ios1-touch {
+  0%, 14% { opacity: 0; transform: translate(calc(70 * var(--u)), calc(120 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  30% { opacity: 1; transform: translate(0, 0) scale(1); }
+  34% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  38% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  45% { opacity: 1; transform: translate(0, 0) scale(1); }
+  54%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes ios1-rip {
+  0%, 37% { opacity: 0; transform: scale(0.6); }
+  38% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  60%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes ios1-press {
+  0%, 35% { transform: scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  38% { transform: scale(0.88); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  46%, 100% { transform: scale(1); }
+}
+@keyframes ios1-menu {
+  0%, 39% { opacity: 0; transform: scale(0.4); animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.12); }
+  54% { opacity: 1; transform: scale(1); }
+  90% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  97%, 100% { opacity: 0; transform: scale(0.85); }
+}
+@keyframes ios1-dim {
+  0%, 39% { opacity: 0; }
+  52%, 90% { opacity: 0.45; }
+  97%, 100% { opacity: 0; }
+}
+
+/* Сцена 2 — «Поделиться» → лист поднимается до середины. */
+.ios-dev[data-play][data-scene="2"] .iosp-touch { animation-name: ios2-touch; }
+.ios-dev[data-play][data-scene="2"] .iosp-touch i { animation-name: ios2-rip; }
+.ios-dev[data-play][data-scene="2"] .iosp-mrow.is-t .iosp-hl { animation-name: ios2-hl; }
+.ios-dev[data-play][data-scene="2"] .iosp-menu { animation-name: ios2-menu; }
+.ios-dev[data-play][data-scene="2"] .iosp-dim { animation-name: ios2-dim; }
+.ios-dev[data-play][data-scene="2"] .iosp-share { animation-name: ios2-share; }
+@keyframes ios2-touch {
+  0%, 12% { opacity: 0; transform: translate(calc(-80 * var(--u)), calc(110 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  28% { opacity: 1; transform: translate(0, 0) scale(1); }
+  32% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  36% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  43% { opacity: 1; transform: translate(0, 0) scale(1); }
+  52%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes ios2-rip {
+  0%, 35% { opacity: 0; transform: scale(0.6); }
+  36% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  58%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes ios2-hl {
+  0%, 34% { opacity: 0; }
+  37%, 50% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+@keyframes ios2-menu {
+  0%, 42% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  52%, 92% { opacity: 0; transform: scale(0.9); animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ios2-dim {
+  0%, 42% { opacity: 0.45; }
+  56%, 90% { opacity: 1; }
+  100% { opacity: 0.45; }
+}
+@keyframes ios2-share {
+  0%, 42% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  62% { transform: translateY(calc(238 * var(--u))); }
+  90% { transform: translateY(calc(238 * var(--u))); animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  98%, 100% { transform: translateY(100%); }
+}
+
+/* Сцена 3 — лист тянется вверх, касание «На экран „Домой“». */
+.ios-dev[data-play][data-scene="3"] .iosp-touch { animation-name: ios3-touch; }
+.ios-dev[data-play][data-scene="3"] .iosp-touch i { animation-name: ios3-rip; }
+.ios-dev[data-play][data-scene="3"] .iosp-share { animation-name: ios3-share; }
+.ios-dev[data-play][data-scene="3"] .iosp-srow.is-t .iosp-hl { animation-name: ios3-hl; }
+@keyframes ios3-share {
+  0%, 16% { transform: translateY(calc(238 * var(--u))); animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1); }
+  34%, 90% { transform: translateY(0); animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1); }
+  98%, 100% { transform: translateY(calc(238 * var(--u))); }
+}
+@keyframes ios3-touch {
+  0%, 12% { opacity: 0; transform: translate(0, calc(226 * var(--u))) scale(1.15); }
+  16% { opacity: 1; transform: translate(0, calc(226 * var(--u))) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1); }
+  34% { opacity: 1; transform: translate(0, calc(-12 * var(--u))) scale(1); }
+  38% { opacity: 0; transform: translate(0, calc(-12 * var(--u))) scale(1.1); }
+  44% { opacity: 0; transform: translate(calc(60 * var(--u)), calc(90 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  54% { opacity: 1; transform: translate(0, 0) scale(1); }
+  57% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  61% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  67% { opacity: 1; transform: translate(0, 0) scale(1); }
+  76%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes ios3-rip {
+  0%, 60% { opacity: 0; transform: scale(0.6); }
+  61% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  82%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes ios3-hl {
+  0%, 60% { opacity: 0; }
+  63%, 88% { opacity: 1; }
+  96%, 100% { opacity: 0; }
+}
+
+/* Сцена 4 — экран добавления, «Открыть как веб-приложение», «Добавить». */
+.ios-dev[data-play][data-scene="4"] .iosp-touch { animation-name: ios4-touch; }
+.ios-dev[data-play][data-scene="4"] .iosp-touch i { animation-name: ios4-rip; }
+.ios-dev[data-play][data-scene="4"] .iosp-share { animation-name: ios4-share; }
+.ios-dev[data-play][data-scene="4"] .iosp-add { animation-name: ios4-add; }
+.ios-dev[data-play][data-scene="4"] .iosp-dim { animation-name: ios4-dim; }
+.ios-dev[data-play][data-scene="4"] .iosp-ring { animation-name: ios4-ring; }
+.ios-dev[data-play][data-scene="4"] .iosp-cap.is-ok { animation-name: ios4-press; }
+@keyframes ios4-share {
+  0%, 16% { opacity: 1; transform: translateY(0); }
+  18%, 94% { opacity: 0; transform: translateY(0); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes ios4-add {
+  0% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  18% { transform: translateY(0); }
+  58% { transform: translateY(0); animation-timing-function: cubic-bezier(0.4, 0, 0.9, 0.6); }
+  70%, 100% { transform: translateY(100%); }
+}
+@keyframes ios4-dim {
+  0%, 58% { opacity: 1; }
+  70%, 94% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes ios4-ring {
+  0%, 20% { opacity: 0; transform: scale(1.04); }
+  25% { opacity: 1; transform: scale(1); }
+  34% { opacity: 1; transform: scale(1); }
+  38%, 100% { opacity: 0; transform: scale(1); }
+}
+@keyframes ios4-touch {
+  0%, 34% { opacity: 0; transform: translate(calc(-90 * var(--u)), calc(150 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  46% { opacity: 1; transform: translate(0, 0) scale(1); }
+  48% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  51% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  56% { opacity: 1; transform: translate(0, 0) scale(1); }
+  62%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes ios4-rip {
+  0%, 50% { opacity: 0; transform: scale(0.6); }
+  51% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  70%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes ios4-press {
+  0%, 48% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  51% { opacity: 0.7; transform: scale(0.92); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  57%, 100% { opacity: 1; transform: scale(1); }
+}
+
+/* Сцена 5 — Safari уходит, иконка Atlas встаёт на экран «Домой»,
+   касание — кабинет раскрывается из иконки во весь экран. */
+.ios-dev[data-play][data-scene="5"] .iosp-touch { animation-name: ios5-touch; }
+.ios-dev[data-play][data-scene="5"] .iosp-touch i { animation-name: ios5-rip; }
+.ios-dev[data-play][data-scene="5"] .iosp-web { animation-name: ios5-web; }
+.ios-dev[data-play][data-scene="5"] .iosp-home { animation-name: ios5-home; }
+.ios-dev[data-play][data-scene="5"] .iosp-atl { animation-name: ios5-atl; }
+.ios-dev[data-play][data-scene="5"] .iosp-atl-l { animation-name: ios5-lbl; }
+.ios-dev[data-play][data-scene="5"] .iosp-app { animation-name: ios5-app; }
+.iosp-web { transform-origin: 50% 60%; }
+@keyframes ios5-web {
+  0%, 5% { opacity: 1; transform: scale(1); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  18%, 100% { opacity: 0; transform: scale(0.3); }
+}
+@keyframes ios5-home {
+  0%, 5% { transform: scale(1.1); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  20%, 100% { transform: scale(1); }
+}
+@keyframes ios5-atl {
+  0%, 18% { opacity: 0; transform: translateY(calc(-24 * var(--u))) scale(0.3); animation-timing-function: cubic-bezier(0.3, 1.6, 0.5, 1); }
+  32% { opacity: 1; transform: translateY(0) scale(1); }
+  49% { transform: translateY(0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  52% { transform: translateY(0) scale(0.9); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  57%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes ios5-lbl {
+  0%, 26% { opacity: 0; }
+  34%, 100% { opacity: 1; }
+}
+@keyframes ios5-touch {
+  0%, 38% { opacity: 0; transform: translate(calc(70 * var(--u)), calc(110 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  48% { opacity: 1; transform: translate(0, 0) scale(1); }
+  50% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  53% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  58% { opacity: 1; transform: translate(0, 0) scale(1); }
+  64%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes ios5-rip {
+  0%, 52% { opacity: 0; transform: scale(0.6); }
+  53% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  72%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes ios5-app {
+  0%, 56% { opacity: 0; transform: scale(0.145); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  60% { opacity: 1; }
+  74%, 100% { opacity: 1; transform: scale(1); }
+}
+
+/* ─── 5. Упрощение движения: ключевой кадр шага, без петель ─────── */
+@media (prefers-reduced-motion: reduce) {
+  .ios-dev .iosp-scr * { animation: none !important; }
+}

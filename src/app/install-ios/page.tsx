@@ -2,18 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import AtlasShell from "@/components/atlas/AtlasShell";
 import Corner from "@/components/atlas/Corner";
+import IosPhone from "./IosPhone";
 import "@/app/work-atlas.css";
 import "./install-ios.css";
+import "./ios-phone.css";
 
 /**
  * /install-ios — как добавить кабинет Atlas на экран «Домой» iPhone и
- * iPad (владелец, 11.09.2026: «инструкция шаг за шагом, рендеры iPhone 17
- * Pro Max из Blender — наш дашборд в Safari, куда нажимать, текстом рядом»).
+ * iPad (владелец, 11.09.2026: «инструкция шаг за шагом, iPhone 17 Pro Max
+ * — наш дашборд в Safari, куда нажимать, текстом рядом»; 13.09.2026:
+ * «рендеры плавные, чтобы постепенно анимировалось, что делать»).
  *
  * Сюда ведёт нижний лист из кабинета (IosInstallSheet) и подсказка
  * IosInstallBanner. Шаги — для Safari в iOS 26 («•••» → «Поделиться» →
  * «На экран «Домой»» → «Добавить»), с оговоркой для iOS 18 и раньше.
- * Рендеры — public/media/ios/ (сцена Blender «AtlasIphone»).
+ *
+ * Телефон — IosPhone: корпус iPhone 17 Pro Max из Blender
+ * (public/media/ios/shell.webp, design/blender/iphone_shell.py) и живой
+ * экран на HTML/CSS поверх снимка кабинета (public/media/ios/dash.webp).
+ * У каждого шага своя петля; на первом экране — все пять шагов подряд.
  */
 export const metadata: Metadata = {
   title: "Atlas на iPhone",
@@ -26,27 +33,27 @@ const STEPS: { t: string; d: string; tip?: string; alt: string }[] = [
     t: "Откройте меню Safari",
     d: "Внизу справа, рядом с адресной строкой, нажмите «•••».",
     tip: "В iOS 18 и раньше этот шаг не нужен: кнопка «Поделиться» — квадрат со стрелкой — стоит прямо в нижней панели Safari.",
-    alt: "iPhone: кабинет Atlas в Safari, отмечена кнопка «•••» справа внизу",
+    alt: "iPhone 17 Pro Max: кабинет Atlas в Safari, палец нажимает «•••» справа внизу — открывается меню",
   },
   {
     t: "Нажмите «Поделиться»",
     d: "Первый пункт меню — с квадратом и стрелкой вверх.",
-    alt: "iPhone: открыто меню Safari, отмечен пункт «Поделиться»",
+    alt: "iPhone 17 Pro Max: в меню Safari нажат пункт «Поделиться» — снизу поднимается лист",
   },
   {
     t: "Выберите «На экран „Домой“»",
-    d: "Пункт с плюсом в квадрате. Если его не видно — прокрутите список вниз.",
-    alt: "iPhone: лист «Поделиться», отмечен пункт «На экран „Домой“»",
+    d: "Пункт с плюсом в квадрате. Если его не видно — потяните лист вверх и прокрутите список.",
+    alt: "iPhone 17 Pro Max: лист «Поделиться» вытянут вверх, нажат пункт «На экран „Домой“»",
   },
   {
     t: "Нажмите «Добавить»",
     d: "Оставьте включённым «Открыть как веб-приложение» — так Atlas откроется во весь экран, без адресной строки.",
-    alt: "iPhone: экран добавления, включено «Открыть как веб-приложение», отмечена кнопка «Добавить»",
+    alt: "iPhone 17 Pro Max: экран добавления, включено «Открыть как веб-приложение», нажата кнопка «Добавить»",
   },
   {
     t: "Готово",
     d: "На экране «Домой» появилась иконка Atlas. Нажмите её — сразу откроется ваш кабинет.",
-    alt: "iPhone: экран «Домой» с иконкой Atlas Secure",
+    alt: "iPhone 17 Pro Max: на экране «Домой» появляется иконка Atlas Secure, касание открывает кабинет во весь экран",
   },
 ];
 
@@ -75,20 +82,23 @@ export default function InstallIosPage() {
               </div>
             </div>
             <figure className="ios-hero-art">
-              <img src="/media/ios/hero.webp" alt="iPhone 17 Pro Max с кабинетом Atlas на экране" width={1400} height={1400} />
+              <IosPhone
+                scene="tour"
+                eager
+                label="iPhone 17 Pro Max с кабинетом Atlas в Safari: по очереди показаны все пять шагов — «•••», «Поделиться», «На экран „Домой“», «Добавить» и иконка на экране «Домой»"
+              />
             </figure>
           </div>
         </section>
 
         <ol className="ios-steps">
           {STEPS.map((s, k) => (
-            // Телефон на рендерах нечётных шагов смотрит экраном влево —
-            // ставим его справа от текста, чётных — слева: экран всегда
-            // обращён к тексту шага.
+            // Телефон чётных шагов слева от текста, нечётных — справа: полоса
+            // читается зигзагом, а не колонкой одинаковых карточек.
             <li key={s.t} id={`step-${k + 1}`} className="a-sheet ios-step" data-sheet="25" data-flip={k % 2 ? undefined : ""}>
               <div className="a-field ios-step-grid">
                 <figure className="ios-shot">
-                  <img src={`/media/ios/step${k + 1}.webp`} alt={s.alt} width={1200} height={1500} loading="lazy" />
+                  <IosPhone scene={(k + 1) as 1 | 2 | 3 | 4 | 5} label={s.alt} />
                 </figure>
                 <div className="ios-card">
                   {k < STEPS.length - 1 && <Corner href={`#step-${k + 2}`} label="Следующий шаг" />}

@@ -456,9 +456,16 @@ Lenis; возврат по «Назад» — своя позиция в session
   устройства и входа (на телефоне скрыто).
 - Установка на iPhone: в кабинете нижний лист `IosInstallSheet.tsx`
   (только iOS Safari не в режиме приложения, через 2,5 с, очередь
-  «install» — сразу после cookie, пауза 3 дня) → страница `/install-ios`
-  с рендерами iPhone 17 Pro Max из Blender (`public/media/ios/`, сцена
-  «AtlasIphone»; экраны для текстур — HTML-макеты iOS 26 Safari).
+  «install» — сразу после cookie, пауза 3 дня; `?install=1` — сразу, для
+  проверки; в Telegram/Chrome на iPhone — «Откройте в Safari»; постоянная
+  строка в «Настройках» кабинета) → страница `/install-ios`: корпус
+  iPhone 17 Pro Max из Blender (`public/media/ios/shell.webp`, экран
+  вырезан; размеры сверены с support.apple.com/125091,
+  `design/blender/iphone_shell.py`) и живой экран поверх — HTML/CSS
+  анимация iOS 26 Safari по шагам (`IosPhone.tsx`, `ios-phone.css`,
+  префикс `iosp-`; только transform/opacity; вне кадра — пауза;
+  reduced-motion — ключевой кадр). Снимок кабинета для экрана —
+  `design/blender/iphone-screens/dash.cjs` (гостевые имена ключей).
 
 **Кабинет `/dashboard`** переведён 11.09.2026: серверная обёртка
 `page.tsx` + `DashboardView.tsx`, панели `Cabinet*.tsx`, стили

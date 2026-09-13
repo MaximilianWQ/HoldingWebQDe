@@ -37,8 +37,10 @@
   transform: rotate(-45deg);
 }
 .ios-hero .a-actions { margin-top: 1.75rem; }
-.ios-hero-art { margin: 0; }
-.ios-hero-art img { display: block; width: min(100%, 560px); height: auto; margin-inline: auto; }
+.ios-hero-art { margin: 0; padding-block: 0.5rem 1.5rem; }
+/* Телефон — IosPhone (ios-phone.css): ширина задаёт всё, высота — по пропорции корпуса. */
+.ios-hero-art .ios-dev { width: min(100%, clamp(220px, 62vw, 300px)); }
+@media (min-width: 900px) { .ios-hero-art .ios-dev { width: clamp(260px, 25vw, 340px); } }
 
 /* ─── Шаги ──────────────────────────────────────────────────────── */
 .ios-steps { list-style: none; margin: 0; padding: 0; }
@@ -48,8 +50,9 @@
   .ios-step-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); }
   .ios-step[data-flip] .ios-shot { order: 2; }
 }
-.ios-shot { margin: 0; }
-.ios-shot img { display: block; width: min(100%, 480px); height: auto; margin-inline: auto; }
+.ios-shot { margin: 0; padding-block: 0.5rem 1.25rem; }
+.ios-shot .ios-dev { width: min(100%, clamp(210px, 58vw, 280px)); }
+@media (min-width: 900px) { .ios-shot .ios-dev { width: clamp(250px, 22vw, 310px); } }
 .ios-card {
   position: relative;
   padding: clamp(1.5rem, 3vw, 2.5rem);
@@ -96,18 +99,19 @@
 @media (hover: hover) {
   .ios-card:hover { transform: translateY(-3px); border-color: var(--a-cobalt); }
 }
-/* Телефон на первом экране медленно парит — холостой слой. */
-.ios-hero-art img { animation: ios-float 7s var(--m-tide) infinite; }
+/* Телефон на первом экране медленно парит — холостой слой. Экран внутри
+   играет свою петлю (ios-phone.css), корпус и экран двигаются вместе. */
+.ios-hero-art .ios-dev { animation: ios-float 7s var(--m-tide) infinite; }
 @keyframes ios-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
 @supports (animation-timeline: view()) {
   /* Телефон шага поднимается и выпрямляется, пока шаг входит в кадр. */
-  .ios-shot img {
+  .ios-shot .ios-dev {
     animation: ios-rise linear both;
     animation-timeline: view();
     animation-range: entry 0% cover 40%;
   }
-  .ios-step[data-flip] .ios-shot img { animation-name: ios-rise-r; }
+  .ios-step[data-flip] .ios-shot .ios-dev { animation-name: ios-rise-r; }
   @keyframes ios-rise { from { transform: translateY(70px) scale(0.9) rotate(-3deg); opacity: 0.2; } }
   @keyframes ios-rise-r { from { transform: translateY(70px) scale(0.9) rotate(3deg); opacity: 0.2; } }
   /* Номер шага проявляется, линия под текстом заполняется синим. */

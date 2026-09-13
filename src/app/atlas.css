@@ -961,50 +961,29 @@ body:has(.a) {
 /* ─── Погружение: раскладка слоёв редакции 4 (движение — раздел 6.6) ─ */
 .a-char, .a-word { display: inline-block; }
 
-/* 01 — поле изохрон за заголовком. Край растворён маской: линии не
-   спорят ни с заголовком, ни с текстом внизу. */
 .a-cover > .a-field { position: relative; z-index: 1; }
-.a-hf {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 34%, #000 74%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 34%, #000 74%, transparent 100%);
-}
-.a-hf-move { position: absolute; inset: -4%; }
-.a-hf-svg { display: block; width: 100%; height: 100%; }
-/* Поле крупным планом увеличивает всё вчетверо: штрих суши светлее,
-   точки серверов уменьшены — иначе квадраты по 11 px читаются как
-   мусор на афише, а штриховка спорит с заголовком. */
-.a-hf-land { fill: none; stroke: var(--a-g200); stroke-width: 1; opacity: 0.8; }
-.a-hf-dot { fill: var(--a-ink-3); transform-box: fill-box; transform-origin: center; transform: scale(0.42); }
-.a-hf-dot-near { fill: var(--a-cobalt); transform: scale(0.7); }
 
-/* 01 — объёмные формы из Blender (HeroReel → Reel). Появляются плавно,
-   когда видео может играть; плоское поле под ними гаснет. Без видео
-   (reduced-motion, экономия трафика, ?static=1) — неподвижный постер
-   того же кадра (--poster пишет Reel). */
+/* 01 — объёмные формы в реальном времени (HeroGL, сцена gl/hero.ts).
+   Постер — <img> из разметки сервера: виден сразу, без скрипта, и он
+   же элемент LCP. Холст проявляется поверх, когда собран первый кадр
+   (data-mode="gl"); фон сцены — цвет листа, край растворён маской.
+   reduced-motion, экономия трафика, ?static=1, нет WebGL — только
+   постер (data-mode="poster"). */
 .a-reel {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 26%, #000 42%, #000 68%, transparent 86%);
   mask-image: linear-gradient(to bottom, transparent 0%, transparent 26%, #000 42%, #000 68%, transparent 86%);
 }
 .a-reel-move { position: absolute; inset: -4%; }
-.a-reel-video { display: block; width: 100%; height: 100%; object-fit: cover; }
-.a-reel[data-mode="video"] { opacity: 1; }
-.a-reel[data-mode="poster"] {
-  opacity: 1;
-  background: var(--poster) center / cover no-repeat;
-}
-.a-reel[data-mode="poster"] .a-reel-video { display: none; }
-.a-cover:has(.a-reel[data-mode]) .a-hf { opacity: 0; }
+.a-reel-poster { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.a-reel-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; }
+.a-reel[data-mode="gl"] .a-reel-canvas { opacity: 1; }
+/* Под готовой сценой постер снимается со слоя, когда холст проявился. */
+.a-reel[data-mode="gl"] .a-reel-move { visibility: hidden; transition: visibility 0s 1s; }
 
 /* Телефон (владелец, 12.09.2026: «сцена отдельной полосой под именем
    выглядит убого — наложить текст на анимацию»). Имя лежит ПОВЕРХ
@@ -1034,8 +1013,7 @@ body:has(.a) {
     mask-composite: intersect;
   }
   .a-reel-move { inset: 0; }
-  .a-reel-video { object-fit: cover; object-position: 50% 55%; }
-  .a-reel[data-mode="poster"] { background-size: cover; background-position: 50% 55%; }
+  .a-reel-poster { object-position: 50% 55%; }
   @supports (-webkit-text-stroke: 1px #000) {
     .a-display-wm .a-fit-2 {
       /* Почти сплошная: при 0,82 кобальтовый тор просвечивал сквозь
@@ -1192,7 +1170,6 @@ body:has(.a) {
    прилив мелей, поток по знаку со скоростью тарифа, вода под плитой,
    живое показание. Вне кадра слой стоит на паузе. */
 .a-band,
-.a-hf-level,
 .a-void-ring {
   animation: a-tide 8s var(--m-tide) infinite alternate;
   animation-delay: calc(var(--l, 1) * -1.6s);
@@ -1257,29 +1234,24 @@ body:has(.a) {
 }
 @keyframes a-char { from { opacity: 0; transform: translateY(0.42em); } }
 
-/* 01 — видео рельефа проявляется, плоское поле под ним гаснет. */
-.a-reel, .a-hf { transition: opacity 1.2s var(--m-settle); }
+/* 01 — сцена проявляется поверх постера, когда собран первый кадр. */
+.a-reel-canvas { transition: opacity 0.9s var(--m-settle); }
 
-/* 01 — видео рельефа идёт за рукой (PointerDrift пишет --px/--py). */
+/* 01 — постер идёт за рукой (PointerDrift пишет --px/--py). Сцена идёт
+   за рукой сама, поворотом в 3D (gl/stage.ts, gl/hero.ts). */
 .a-reel-move {
   transform: translate3d(calc(var(--px, 0) * -18px), calc(var(--py, 0) * -12px), 0);
   transition: transform 1.4s var(--m-settle);
 }
 @supports (animation-timeline: view()) {
-  /* При уходе первого экрана рельеф приближается — «нырок». */
-  .a-reel .a-reel-video {
+  /* При уходе первого экрана постер приближается — «нырок». Сцена
+     ныряет сама: формы подходят к камере (gl/hero.ts). */
+  .a-reel .a-reel-poster {
     transform-origin: 42% 60%;
     animation: a-dive linear both;
     animation-timeline: view();
     animation-range: exit 0% exit 100%;
   }
-}
-
-/* 01 — поле за рукой: PointerDrift пишет --px/--py, сглаживает
-   переход. Цикла rAF нет. */
-.a-hf-move {
-  transform: translate3d(calc(var(--px, 0) * -22px), calc(var(--py, 0) * -14px), 0);
-  transition: transform 1.4s var(--m-settle);
 }
 
 /* 04 — строки тарифов въезжают с разных сторон. */
@@ -1324,12 +1296,6 @@ body:has(.a) {
   /* 01 — уход первого экрана: строки разъезжаются, поле ныряет. */
   .a-cover .a-fit-1 { animation: a-exit-l linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
   .a-cover .a-fit-2 { animation: a-exit-r linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
-  .a-hf-svg {
-    transform-origin: 42% 50%;
-    animation: a-dive linear both;
-    animation-timeline: view();
-    animation-range: exit 0% exit 100%;
-  }
 
   /* 03 — глобус поднимается из-под листа и подходит ближе, пока
      читатель доходит до карты. */

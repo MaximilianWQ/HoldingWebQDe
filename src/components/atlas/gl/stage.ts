@@ -71,6 +71,8 @@ export interface StageOptions {
   /** Бюджет треугольников сцены (проверяется в разработке). */
   budget: number;
   fov?: number;
+  /** Потолок DPR поверх потолка уровня устройства (холст во весь экран — ниже). */
+  maxDpr?: number;
   /**
    * Получить управление живой сценой после первого кадра. `redraw`
    * перерисовывает неподвижный кадр (reduced-motion, ?static=1), когда
@@ -156,7 +158,7 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
   let last = -1;
   let w = 0;
   let h = 0;
-  const dprCap = tier === 0 ? 1.5 : 2;
+  const dprCap = Math.min(tier === 0 ? 1.5 : 2, o.maxDpr ?? 2);
   let dpr = Math.min(window.devicePixelRatio || 1, dprCap);
 
   const draw = () => {

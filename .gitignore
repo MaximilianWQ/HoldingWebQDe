@@ -48,3 +48,6 @@ qa-*.png
 /.agents/
 /.claude/skills/
 skills-lock.json
+
+# Резервные копии Blender
+*.blend1

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import AtlasShell from "./AtlasShell";
 import AtlasDefs from "./AtlasDefs";
-import HeroField from "./HeroField";
-import HeroReel from "./HeroReel";
+import HeroGL from "./HeroGL";
 import GlobeGL from "./GlobeGL";
 import MissionGL from "./MissionGL";
 import PointerDrift from "./PointerDrift";
@@ -216,8 +215,7 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
       <main id="main" className="a-main h5-home">
         {/* ── 01 · Обещание ─────────────────────────────────────── */}
         <section className="a-sheet a-cover" data-sheet="01" data-title="Главная" aria-labelledby="a-cover-title">
-          <HeroField />
-          <HeroReel />
+          <HeroGL />
           {/* Вуаль под нижним текстом (широкий экран): объекты уходят в
               белый к низу, обещание и пояснение не лежат на бликах. */}
           <div className="a-cover-veil" aria-hidden />

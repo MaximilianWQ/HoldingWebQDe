@@ -10,7 +10,7 @@
    06 — стоп и заливка + ноутбук открывается по прокрутке (LaptopScrub),
         платформы загораются по очереди.
    07 — миссия: заливка заголовка, три числа, ценности плитками; сфера
-        MissionGL за текстом (на телефоне — приглушённым фоном).
+        мягкая сеть HeroGL "mission-soft" за текстом.
    08 — кольцо из бесплатных дней заполняется по прокрутке.
 
    Префикс h5-. Раскладка сверху, всё движение — в разделе «Движение»
@@ -477,33 +477,28 @@
 /* ─── 07 · миссия и компания ────────────────────────────────────── */
 .h5-mission { isolation: isolate; }
 .h5-mission > .a-field { position: relative; z-index: 1; }
-/* Сфера-сеть справа за текстом. Холст с запасом по краям: облако на
-   входе шире собранной сферы (MissionGL, 11.09.2026) — рамки и
-   overflow у холста нет. */
+/* Мягкая сеть справа за текстом (HeroGL "mission-soft", 14.09.2026):
+   кадр 1 : 1, постер и холст ложатся в блок слоями (atlas.css, .a-reel-*). */
+/* Правило «3D не заходит на текст» (14.09.2026): сеть — плотный
+   хромированный предмет, а не облако точек, и прежние размеры (60vw)
+   клали её на ценности и заголовок. Широкий экран: предмет справа, рядом
+   с лидом и числами, выше плиток ценностей. */
 .h5-mission-art {
   position: absolute;
   z-index: 0;
-  right: -6vw;
-  top: clamp(0rem, 2vh, 2rem);
-  width: min(60vw, 880px);
+  right: var(--a-gutter);
+  /* 18 % и 32vw: при 20 % и 34vw тень под предметом касалась верха
+     плитки ценностей на 1440 (замер по пикселям 14.09.2026, ~230 px). */
+  top: 18%;
+  width: min(32vw, 470px);
   aspect-ratio: 1;
   pointer-events: none;
 }
-/* Телефон: отдельной плиткой под текстом сфера была «бессмысленна»
-   (владелец). Здесь она — приглушённый фон за заголовком и числами:
-   сдвинута вправо за край, текст остаётся на белом. */
-@media (max-width: 899px) {
-  .h5-mission-art { top: 0.5rem; right: -38%; width: 108%; opacity: 0.42; }
-}
-/* Заглушка без видеокарты: MissionGL ставит корню data-mission и
-   --mission-x/y/r, режим data-mode="poster" — точечная сфера из фона. */
-[data-mission][data-mode="poster"] {
-  background:
-    radial-gradient(circle closest-side at var(--mission-x) var(--mission-y), rgba(20, 50, 184, 0.1) 0, rgba(20, 50, 184, 0.04) calc(var(--mission-r) * 0.8), transparent calc(var(--mission-r) * 1.25)),
-    radial-gradient(circle, #1432B8 0 1.6px, transparent 2.2px) 0 0 / 46px 46px,
-    radial-gradient(circle, #8F9AB0 0 1.2px, transparent 1.8px) 0 0 / 15px 15px;
-  -webkit-mask-image: radial-gradient(circle closest-side at var(--mission-x) var(--mission-y), #000 calc(var(--mission-r) * 0.72), transparent var(--mission-r));
-  mask-image: radial-gradient(circle closest-side at var(--mission-x) var(--mission-y), #000 calc(var(--mission-r) * 0.72), transparent var(--mission-r));
+/* Планшет и телефон: текст идёт во всю ширину, места рядом нет — предмет
+   стоит в потоке над заголовком раздела (прежний приглушённый фон за
+   текстом у плотного предмета мешал читать). */
+@media (max-width: 1099px) {
+  .h5-mission-art { position: relative; top: auto; right: auto; display: block; width: min(72vw, 420px); margin: 0 auto 1rem; }
 }
 .h5-mission .h5-h2 { max-width: 15ch; }
 .h5-mission .h5-rule { max-width: 44rem; }

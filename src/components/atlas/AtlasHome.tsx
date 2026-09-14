@@ -1,16 +1,15 @@
 import Link from "next/link";
 import AtlasShell from "./AtlasShell";
 import AtlasDefs from "./AtlasDefs";
-import HeroGL from "./HeroGL";
-import GlobeGL from "./GlobeGL";
-import MissionGL from "./MissionGL";
-import PointerDrift from "./PointerDrift";
+import HeroGL, { type HeroPoster } from "./HeroGL";
 import LaptopScrub from "./LaptopScrub";
+import HeroSchema from "./HeroSchema";
 import Corner from "./Corner";
 import Chars from "./Chars";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import type { ReactNode } from "react";
 import "@/app/home-v5.css";
+import "@/app/home-hero.css";
 import {
   PLANS, PLAN_SPEED, PLAN_CONTENT, DEVICE_LIMIT, formatRub, pricePerMonth, type PlanId,
 } from "@/lib/plans";
@@ -51,11 +50,24 @@ const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дне
 const COUNTRY_WORD = plural(COUNTRY_COUNT, ["страна", "страны", "стран"]);
 const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"]);
 
-/* Владелец, 12.09.2026: вместо «всё открывается и не тормозит» — имя
-   большим набором, как в подвале. Смысл фразы остаётся в лиде и в
-   скрытой части заголовка для читалок и поиска. */
-const HERO_1 = "atlas";
-const HERO_2 = "secure";
+/* 01 — первый экран (владелец, 14.09.2026: утверждён вариант лаборатории
+   V6, режим E): фраза пользы крупно, плоско и плотно вместо имени;
+   справа — «Схема» (HeroSchema: огромный знак, модули-плиты, пластина
+   шлифованного металла, провода; вариант лаборатории 7). Имя и позиция
+   «VPS-ускоритель» — в скрытой части заголовка для читалок и поиска. */
+const HERO_A = "Видео, сайты и игры —";
+const HERO_B = "без тормозов.";
+
+/** Постеры мягких сцен: кадр покоя той же сцены, прозрачный WebP. */
+const softPoster = (name: string, w: number, h: number, sizes: string): HeroPoster => ({
+  src: `/media/${name}-1000.webp`,
+  srcSet: `/media/${name}-700.webp 700w, /media/${name}-1000.webp 1000w, /media/${name}-1400.webp 1400w`,
+  sizes,
+  w,
+  h,
+});
+const GLOBE_POSTER = softPoster("globe-soft", 1000, 1000, "(min-width: 721px) 55vw, 100vw");
+const MISSION_POSTER = softPoster("mission-soft", 1000, 1000, "(min-width: 900px) 60vw, 100vw");
 
 /** Изобаты под плитой: линии глубины, светлее плиты. */
 const ISOBATHS = Array.from({ length: 7 }, (_, k) => {
@@ -98,15 +110,13 @@ function FillTitle({ id, no, children }: { id: string; no: string; children: Rea
   );
 }
 
-/** 01 — четыре доказательства под действием: снимают вопросы «сколько
- *  стоит», «где работает», «на скольких устройствах», «чем рискую». */
-const PROOF: { icon: IconName; t: string; d: string }[] = [
-  { icon: "clock", t: `${TRIAL} бесплатно`, d: "без карты и обязательств" },
-  { icon: "globe", t: `${COUNTRY_COUNT} ${COUNTRY_WORD}`, d: "смена страны в один тап" },
-  { icon: "devices", t: `до ${DEVICE_LIMIT} ${DEVICE_WORD}`, d: "в одной подписке" },
-  // «Без автосписаний», а не «отмена в один клик»: оплата разовая, кнопки
-  // отмены нет — продлевать нечего (COMPLIANCE-CHECK.md).
-  { icon: "shield", t: `от ${formatRub(PLANS.basic[1])} ₽ в месяц`, d: "без автосписаний" },
+/** 01 — три стеклянные карточки на краю поля: «чем рискую», «где
+ *  работает», «сколько стоит». Первая — тёмная. «Без автосписаний», а не
+ *  «отмена в один клик»: оплата разовая (COMPLIANCE-CHECK.md). */
+const HERO_CARDS: { t: string; d: string; dark?: boolean }[] = [
+  { t: `${TRIAL} бесплатно`, d: "без карты", dark: true },
+  { t: `${COUNTRY_COUNT} ${COUNTRY_WORD}`, d: "смена страны в один тап" },
+  { t: `от ${formatRub(PLANS.basic[1])} ₽ в месяц`, d: "без автосписаний" },
 ];
 
 /** 08 — возражения перед финальным призывом. Факты: оплата — экран
@@ -212,73 +222,58 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
   return (
     <AtlasShell sheetNo="01" sheetTitle="Главная">
       <AtlasDefs />
-      <PointerDrift target=".a-cover" />
       <main id="main" className="a-main h5-home">
         {/* ── 01 · Обещание ─────────────────────────────────────── */}
-        <section className="a-sheet a-cover" data-sheet="01" data-title="Главная" aria-labelledby="a-cover-title">
-          <HeroGL />
-          {/* Вуаль под нижним текстом (широкий экран): объекты уходят в
-              белый к низу, обещание и пояснение не лежат на бликах. */}
-          <div className="a-cover-veil" aria-hidden />
-
-          {/* Лицо сайта (разбор продажника, 12.09.2026): за пять секунд
-              человек должен понять, что это, зачем ему, сколько стоит и
-              что делать. Сверху вниз: что это (плашка) → имя → обещание
-              пользы → как работает → действие → четыре доказательства. */}
-          <div className="a-field">
-            <div className="a-cover-top">
-              <p className="a-cover-kicker a-settle">
-                <span className="a-cover-pulse a-idle" aria-hidden />
-                <span>
-                  VPS-ускоритель интернета<span className="a-cover-kicker-more"> для телефона, компьютера и ТВ</span>
-                </span>
-              </p>
-              <h1 id="a-cover-title" className="a-display a-display-wm">
+        {/* Утверждённый вариант V6 режим E (владелец, 14.09.2026; стиль —
+            Yandex Tech): нейтральное поле #EDF0F6 со светом кобальта,
+            фраза пользы крупно, короткий лид с живым переключателем,
+            чёрная и стеклянная пилюли, справа «Схема», внизу три
+            стеклянные карточки на краю поля. Буквы фразы поднимаются при
+            загрузке (Chars / .a-char), на уходе — мягкий спуск без зума.
+            Стили — src/app/home-hero.css. */}
+        <section className="a-sheet a-cover a-hero" data-sheet="01" data-title="Главная" aria-labelledby="a-cover-title">
+          <div className="a-hero-panel">
+            <div className="a-field a-hero-grid">
+              <h1 id="a-cover-title" className="a-hero-title">
                 <span className="sr-only">Atlas Secure — VPS-ускоритель: видео, сайты и игры без тормозов</span>
-                <span className="a-fit a-fit-1" aria-hidden><Chars text={HERO_1} /></span>{" "}
-                <span className="a-fit a-fit-2" aria-hidden><Chars text={HERO_2} start={HERO_1.length + 1} /></span>
+                <span aria-hidden>
+                  <Chars text={HERO_A} />{" "}
+                  <em><Chars text={HERO_B} start={HERO_A.length + 1} /></em>
+                </span>
               </h1>
-            </div>
 
-            <div className="a-cover-bottom">
-              <div className="a-cover-grid">
-                <div>
-                  <p className="a-cover-promise a-settle" style={{ ["--i" as string]: 2 }}>
-                    Видео, сайты и игры — <em>без&nbsp;тормозов</em>
-                  </p>
-                  {/* В строке — переключатель, который щёлкает при загрузке:
-                      «включаете Atlas» показано жестом. */}
-                  <p className="a-lead a-settle" style={{ ["--i" as string]: 3 }}>
-                    Включаете{" "}
-                    <span style={{ whiteSpace: "nowrap" }}>
-                      Atlas <span className="a-switch" aria-hidden><i /></span>
-                    </span>{" "}
-                    — и всё открывается сразу и на полной скорости. Трафик зашифрован, а страну можно
-                    сменить в один тап.
-                  </p>
-                </div>
-                <div>
-                  <div className="a-actions a-settle" style={{ ["--i" as string]: 4 }}>
-                    <Link href={enter} className="a-btn a-btn-primary">Попробовать {TRIAL} бесплатно</Link>
-                    <Link href="#tariffs" className="a-btn a-btn-quiet">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
-                  </div>
-                  <p className="a-fine a-settle" style={{ ["--i" as string]: 5 }}>
-                    Карта не нужна — после пробных дней ничего не спишется.
-                  </p>
+              {/* «Схема» — только в правой колонке (на телефоне — полосой
+                  под фразой): формы не заходят на текст. Декоративная
+                  (aria-hidden): те же факты — в тексте и карточках. */}
+              <HeroSchema />
+
+              <div className="a-hero-text">
+                {/* «Включаете Atlas» показано жестом: переключатель щёлкает,
+                    когда буквы фразы поднялись (atlas.css, 6.6). */}
+                <p className="a-lead a-hero-lead" style={{ ["--i" as string]: 3 }}>
+                  Включаете{" "}
+                  <span style={{ whiteSpace: "nowrap" }}>
+                    Atlas <span className="a-switch" aria-hidden><i /></span>
+                  </span>{" "}
+                  — и&nbsp;всё открывается сразу, на&nbsp;полной скорости.
+                </p>
+                <div className="a-hero-actions" style={{ ["--i" as string]: 4 }}>
+                  <Link href={enter} className="a-hero-btn a-hero-btn-ink">Попробовать {TRIAL} бесплатно</Link>
+                  <Link href="#tariffs" className="a-hero-btn a-hero-btn-glass">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
                 </div>
               </div>
 
-              <ul className="a-cover-proof" aria-label="Коротко об Atlas">
-                {PROOF.map((p, k) => (
-                  <li key={p.t} className="a-settle" style={{ ["--i" as string]: 6 + k }}>
-                    <span className="a-cover-proof-ico" aria-hidden><Icon name={p.icon} size={18} /></span>
-                    <b>{p.t}</b>
-                    <span>{p.d}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
+
+          <ul className="a-field a-hero-cards" aria-label="Коротко об Atlas">
+            {HERO_CARDS.map((c, k) => (
+              <li key={c.t} className="a-hero-card" data-dark={c.dark ? "" : undefined} style={{ ["--i" as string]: 6 + k }}>
+                <b>{c.t}</b>
+                <span>{c.d}</span>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ── 02 · Что меняется — закреплённая сцена ────────────── */}
@@ -335,12 +330,12 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
             текстом; на входе — одно мягкое проявление (atlas.css, 6.8). */}
         <section className="a-sheet a-map a-pin" data-sheet="03" data-title="Страны" aria-labelledby="a-map-title">
           <div className="a-pin-stage">
-            {/* Глобус реального времени (владелец, 11.09.2026: видео 30 fps
-                «очень резкое», нужна максимальная плавность). Рисуется на
-                частоте экрана — 60/120/240 Гц, движение по реальному
-                времени. Без WebGL/WebGPU, при reduced-motion и экономии
-                трафика — постер того же глобуса из Blender. */}
-            <GlobeGL className="a-globe a-pin-art" poster="/media/globe2.jpg" />
+            {/* Мягкий глобус реального времени (HeroGL "globe-soft",
+                14.09.2026): белая керамика, кобальтовые точки суши, города
+                наших локаций, дуги с огнями. Кадр на частоте экрана; без
+                WebGL, при reduced-motion и экономии трафика — постер той
+                же сцены. Стоит в правой части сцены — не под текстом. */}
+            <HeroGL className="a-pin-art a-pin-soft" composition="globe-soft" poster={GLOBE_POSTER} />
             <div className="a-field a-pin-copy">
               {/* Без a-settle: текст сцены проявляет шкала раздела (6.8),
                   второе скрытие оставляло его пустым (аудит 13.09.2026). */}
@@ -532,7 +527,9 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
             Сфера-сеть реального времени — за текстом справа; на телефоне
             — приглушённым фоном за заголовком и числами (home-v5.css). */}
         <section className="a-sheet h5-mission" data-sheet="07" data-title="Компания" aria-labelledby="a-company-title">
-          <MissionGL className="h5-mission-art" />
+          {/* Мягкая сеть (HeroGL "mission-soft", 14.09.2026): белые и
+              кобальтовые узлы на хромированных связях вокруг матового ядра. */}
+          <HeroGL className="h5-mission-art" composition="mission-soft" poster={MISSION_POSTER} />
           <div className="a-field">
             <FillTitle id="a-company-title" no="07">свободный и быстрый интернет для каждого</FillTitle>
             <p className="a-lead h5-mission-lead a-settle" style={{ ["--i" as string]: 1 }}>

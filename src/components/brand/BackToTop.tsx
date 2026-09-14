@@ -28,10 +28,14 @@ import { scrollToTop } from "./scroll-top";
  * прокруткой сейчас управляет.
  *
  * ПОЯВЛЕНИЕ. Кнопки нет, пока читатель не ушёл ниже первого экрана:
- * на самом первом экране возвращать некуда. Порог считает пассивный
- * слушатель через rAF и пишет его в data-атрибут, а не в состояние
- * React: перерисовывать дерево на каждом кадре прокрутки ради одного
- * логического значения незачем.
+ * на самом первом экране возвращать некуда. И пока в кадр не вошёл
+ * подвал (14.09.2026): в правом нижнем углу широкого экрана кнопка
+ * ложилась на карточки и плиты главной (карточки тарифов, «коротко о
+ * главном»), а поля страницы уже кнопки. Над подвалом она стоит на
+ * тёмной плите и ничего не закрывает. Страница без <footer> — прежнее
+ * правило. Порог считает пассивный слушатель через rAF и пишет его в
+ * data-атрибут, а не в состояние React: перерисовывать дерево на
+ * каждом кадре прокрутки ради одного логического значения незачем.
  */
 export default function BackToTop() {
   const ref = useRef<HTMLButtonElement>(null);
@@ -48,7 +52,12 @@ export default function BackToTop() {
 
     const read = () => {
       ticking = false;
-      const next = window.scrollY > window.innerHeight * 0.9;
+      const vh = window.innerHeight;
+      // Подвал должен занимать низ окна с запасом на высоту кнопки и её
+      // отступ (до 64 + 24 px), иначе кнопка легла бы на блок над ним.
+      const foot = document.querySelector<HTMLElement>("footer");
+      const overFoot = foot ? foot.getBoundingClientRect().top < vh - 104 : true;
+      const next = window.scrollY > vh * 0.9 && overFoot;
       if (next === shown) return;
       shown = next;
       node.dataset.on = next ? "true" : "false";

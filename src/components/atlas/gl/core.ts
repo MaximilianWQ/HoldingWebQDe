@@ -104,20 +104,3 @@ export function disposeScene(scene: THREE.Object3D): void {
   });
   scene.clear();
 }
-
-/** Широта/долгота → точка на сфере. Долгота 0 смотрит на камеру (+Z). */
-export function geo(lat: number, lon: number, r: number, out = new THREE.Vector3()): THREE.Vector3 {
-  const f = THREE.MathUtils.degToRad(lat);
-  const l = THREE.MathUtils.degToRad(lon);
-  return out.set(r * Math.cos(f) * Math.sin(l), r * Math.sin(f), r * Math.cos(f) * Math.cos(l));
-}
-
-/** Матрица плоского элемента, лежащего на сфере по касательной. */
-const Z = new THREE.Vector3(0, 0, 1);
-const _q = new THREE.Quaternion();
-const _s = new THREE.Vector3();
-export function tangentMatrix(normal: THREE.Vector3, r: number, size: number, out = new THREE.Matrix4()): THREE.Matrix4 {
-  _q.setFromUnitVectors(Z, normal);
-  _s.set(size, size, size);
-  return out.compose(normal.clone().multiplyScalar(r), _q, _s);
-}

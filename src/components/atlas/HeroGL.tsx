@@ -1,112 +1,109 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { mountStage } from "./gl/stage";
-import type { HeroLive } from "./gl/hero";
+import type { Composition, HeroLive } from "./gl/hero";
 
 /**
- * Фон первого экрана — объёмные формы в реальном времени (three.js,
- * WebGPU с уходом на WebGL 2): кобальтовое кольцо-канал, сквозь которое
- * летят хромированные капсулы, керамические и стеклянная сферы,
- * ступенчатая шайба. Сцена — `gl/hero.ts`.
+ * Мягкая 3D-сцена реального времени в любом блоке главной (three.js,
+ * WebGPU с уходом на WebGL 2). Сцены — `gl/hero.ts`: "globe-soft"
+ * (раздел 03) и "mission-soft" (раздел 07).
  *
- * Прежде здесь играла петля из Blender (30 fps, сцена «AtlasObjects»).
- * Владелец: «видео 30 fps — резко», «120 фпс анимации нужны». Теперь
- * кадр рисуется на частоте экрана, движение идёт по реальному времени.
+ * БЛОК. Нужны только размер и `position` (класс или `style`, обычно
+ * `{ position: "absolute", inset: 0 }` внутри обёртки с размером):
+ * постер и холст лежат в нём слоями, сцена меряет его сама.
  *
- * ПЕРВЫЙ КАДР — постер `<img>` из разметки сервера: он элемент LCP и не
- * ждёт ни скрипта, ни three.js. Сцена грузится отдельным чанком и
- * сменяет постер плавно, когда собран первый кадр (`data-mode="gl"`).
- * reduced-motion, ?static=1, экономия трафика, нет WebGL — остаётся
- * постер (`data-mode="poster"`).
+ * ПОСТЕР — `<img>` из разметки сервера. Он снят с этой же сцены в покое
+ * (t = 0) и вписан в блок так же, как кадр камеры (`object-fit: contain`,
+ * `object-position` из `--hx-ox/--hx-oy`, по умолчанию центр), поэтому
+ * смена постера на холст не видна: она мгновенная, в одном кадре
+ * (плавная смена удваивала тени). reduced-motion, ?static=1, экономия
+ * трафика, нет WebGL — только постер, three.js не грузится (`gl/stage.ts`).
  *
- * Жизнь: сцена сама идёт за рукой (сглаживание в `stage.ts`) и «ныряет»
- * при уходе первого экрана — камера подходит к формам (прогресс ухода
- * считает этот компонент, сцена сглаживает его по времени). Постер
- * делает то же в CSS: --px/--py от PointerDrift и шкала `view()`
- * (atlas.css, 6.6).
+ * ПРОКРУТКА. Пока любая часть блока в кадре, сцена непрозрачна и стоит
+ * на месте — растворения при уходе раздела нет (владелец, 14.09.2026:
+ * сцена на 16 % при почти целиком видимом блоке читалась «белой дырой»).
+ * Целиком вне кадра — цикл отрисовки встаёт (`gl/stage.ts`).
  */
-export const POSTER = "/media/hero-objects.jpg";
+export interface HeroPoster {
+  src: string;
+  srcSet: string;
+  sizes: string;
+  w: number;
+  h: number;
+}
 
-/** Кадр постера, px. Сцена `hero.ts` разложена в тех же пропорциях: 16 × 9 единиц. */
-const FRAME_W = 1600;
-const FRAME_H = 900;
-/** Единиц сцены на ширину кадра — `FRAME_UNITS` в `gl/hero.ts`. */
-const FRAME_UNITS = 16;
-/** Радиус описанной сферы сцены — `radius` в `gl/hero.ts`. */
-const RADIUS = 6;
-const FOV = 30;
+interface Props {
+  composition: Composition;
+  poster: HeroPoster;
+  className?: string;
+  style?: CSSProperties;
+}
 
-export default function HeroGL() {
+export default function HeroGL({ composition, poster, className, style }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const cvs = useRef<HTMLCanvasElement>(null);
-  const live = useRef<HeroLive>({ dive: 0 });
-
-  // Доля ухода первого экрана — та же шкала, что `animation-range: exit`
-  // у постера: 0, пока блок целиком в кадре, 1, когда ушёл за верх.
-  // Читается по событию прокрутки, не каждый кадр; сцена сглаживает.
-  useEffect(() => {
-    const h = host.current;
-    if (!h) return;
-    const read = () => {
-      const r = h.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const tall = r.height > vh;
-      const start = tall ? r.bottom - vh : r.top;
-      const len = tall ? vh : r.height;
-      live.current.dive = Math.min(1, Math.max(0, -start / Math.max(1, len)));
-    };
-    read();
-    window.addEventListener("scroll", read, { passive: true });
-    window.addEventListener("resize", read);
-    return () => {
-      window.removeEventListener("scroll", read);
-      window.removeEventListener("resize", read);
-    };
-  }, []);
 
   useEffect(() => {
     const h = host.current;
     const c = cvs.current;
     if (!h || !c) return;
-    const liveRef = live.current;
-    const wide = matchMedia("(min-width: 720px)").matches;
-    const half = (FOV * Math.PI) / 360;
-    return mountStage(h, c, {
-      scene: () => import("./gl/hero").then((m) => m.makeHero(liveRef)),
+    const readAlign = (): [number, number] => {
+      const cs = getComputedStyle(h);
+      const n = (v: string, d: number) => {
+        const x = parseFloat(v);
+        return Number.isFinite(x) ? x : d;
+      };
+      return [n(cs.getPropertyValue("--hx-ox"), 0.5), n(cs.getPropertyValue("--hx-oy"), 0.5)];
+    };
+    // Смена постера на холст — здесь, мгновенно, в одном кадре, без CSS
+    // страницы: stage.ts ставит data-mode="gl", когда собран первый кадр.
+    const poster = () => h.querySelector<HTMLImageElement>(".a-reel-poster");
+    const swap = () => {
+      if (h.dataset.mode !== "gl") return;
+      c.style.transition = "none";
+      c.style.opacity = "1";
+      const img = poster();
+      if (img) img.style.visibility = "hidden";
+    };
+    const mo = new MutationObserver(swap);
+    mo.observe(h, { attributes: true, attributeFilter: ["data-mode"] });
+    // Тот же object-position, что у постера: читается при каждой
+    // перекладке холста.
+    const live: HeroLive = { align: readAlign };
+    const unmount = mountStage(h, c, {
+      scene: () => import("./gl/hero").then((m) => m.makeHero(live, composition)),
       hasPoster: true,
       budget: 60_000,
-      fov: FOV,
-      // Холст во весь первый экран: на широком DPR не выше 1,5 — формы
-      // мягкие, а частота кадров важнее резкости (адаптивный DPR в
-      // stage.ts снижает дальше, если кадры пропускаются).
-      maxDpr: wide ? 1.5 : 2,
-      // Кадрирование как у постера (object-fit: cover): на широком кадр
-      // шире блока на 8 % (inset −4 % у .a-reel-move), на телефоне — вровень.
-      place: (w, hh) => {
-        const k = matchMedia("(max-width: 719px)").matches ? 1 : 1.08;
-        const scale = Math.max((w * k) / FRAME_W, (hh * k) / FRAME_H);
-        const unit = (scale * FRAME_W) / FRAME_UNITS; // px на единицу сцены в плоскости z = 0
-        const s = Math.min(0.95, (unit * RADIUS * Math.tan(half)) / (hh / 2));
-        return { cx: 0.5, cy: 0.5, r: ((hh / 2) * Math.tan(Math.asin(s))) / Math.tan(half) };
-      },
+      // Блок небольшой — резкость по DPR до 2 дешёвая; адаптивный DPR в
+      // stage.ts снижает, если кадры пропускаются.
+      maxDpr: 2,
+      // Кадрирование делает сама сцена (`frame` в gl/hero.ts).
+      place: () => ({ cx: 0.5, cy: 0.5, r: 1 }),
     });
-  }, []);
+    return () => {
+      mo.disconnect();
+      c.style.opacity = "";
+      const img = poster();
+      if (img) img.style.visibility = "";
+      unmount();
+    };
+  }, [composition]);
 
   return (
-    <div ref={host} className="a-reel" aria-hidden>
-      <div className="a-reel-move">
-        {/* Элемент LCP: обычный <img> из разметки сервера, высокий приоритет. */}
-        <img
-          className="a-reel-poster"
-          src={POSTER}
-          alt=""
-          width={FRAME_W}
-          height={FRAME_H}
-          fetchPriority="high"
-          draggable={false}
-        />
-      </div>
+    <div ref={host} className={className} style={style} aria-hidden>
+      {/* Обычный <img> из разметки сервера, высокий приоритет. */}
+      <img
+        className="a-reel-poster"
+        src={poster.src}
+        srcSet={poster.srcSet}
+        sizes={poster.sizes}
+        alt=""
+        width={poster.w}
+        height={poster.h}
+        fetchPriority="high"
+        draggable={false}
+      />
       <canvas ref={cvs} className="a-reel-canvas" />
     </div>
   );

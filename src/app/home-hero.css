@@ -1,0 +1,448 @@
+/* Главная, лист 01 — первый экран (владелец, 14.09.2026: утверждены
+   вариант лаборатории V6 режим E — раскладка и текст — и вариант 7
+   «Схема» — иллюстрация справа; стиль — Yandex Tech / Apple iOS).
+
+   Нейтральное поле #EDF0F6 со скруглённым низом и мягкими пятнами света
+   (кобальт и холодный голубой) — фиолетового нет. Слева фраза пользы
+   крупно, плоско и плотно, короткий лид, чёрная и стеклянная пилюли;
+   справа — «Схема» (HeroSchema, префикс a-hs-): огромный знак Atlas,
+   модули-плиты, пластина шлифованного металла, провода с клеммами;
+   внизу три стеклянные карточки стоят на краю поля.
+
+   Стекло «нарисовано»: слои полупрозрачного белого, блик по верхней
+   кромке, светлая волосяная рамка, мягкая тень. backdrop-filter нет —
+   размытие подложки пересчитывалось на каждом кадре прокрутки
+   (владелец: «прокрутка дёргающая»).
+
+   Движение — только transform, opacity, stroke-dashoffset и SMIL-пакеты
+   на проводах; тени и фильтры не анимируются. Буквы фразы поднимаются
+   при загрузке (.a-char, atlas.css 6.6), переключатель в лиде щёлкает
+   следом; лид, кнопки и карточки ложатся лесенкой; на уходе фраза чуть
+   отъезжает и гаснет, слои схемы уходят с разной скоростью. Зума нет.
+   Без скрипта и при reduced-motion — конечный кадр. */
+
+.a-hero, body:has(.a-hero) { --hero-field: #EDF0F6; }
+.a-hero {
+  --hero-glass: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.62));
+  --hero-edge: rgba(255, 255, 255, 0.9);
+  --hero-depth:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+    0 12px 32px rgba(14, 24, 56, 0.1),
+    0 1px 2px rgba(14, 24, 56, 0.06);
+  --hero-up: calc(var(--a-head-h) + 12px);   /* шапка-капсула лежит на поле */
+}
+
+/* Правила прежней обложки (.a-cover в atlas.css: афиша во весь экран,
+   space-between) раскладку нового экрана не задают. */
+.a-cover.a-hero {
+  display: block;
+  min-height: 0;
+  padding-block: 0 clamp(1.5rem, 4vh, 2.5rem);
+}
+
+/* ─── Поле ──────────────────────────────────────────────────────── */
+/* Поле уходит под шапку: шапка на главной — прозрачная полоса со
+   стеклянной капсулой, и над полем не остаётся белой щели. */
+.a-hero-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-top: calc(-1 * var(--hero-up));
+  padding: calc(var(--hero-up) + clamp(1rem, 3.4vh, 2.75rem)) 0 clamp(3.75rem, 8vh, 5.5rem);
+  border-radius: 0 0 clamp(28px, 3vw, 44px) clamp(28px, 3vw, 44px);
+  background:
+    radial-gradient(38% 52% at 76% 40%, rgba(19, 48, 200, 0.16), transparent 70%),
+    radial-gradient(30% 40% at 92% 86%, rgba(64, 150, 255, 0.14), transparent 72%),
+    radial-gradient(34% 44% at 10% 12%, rgba(255, 255, 255, 0.9), transparent 70%),
+    var(--hero-field);
+}
+.a-hero-grid {
+  display: grid;
+  grid-template-areas: "title" "stage" "text";
+  gap: clamp(0.75rem, 2vh, 1.5rem);
+}
+@media (min-width: 900px) {
+  .a-hero-grid {
+    grid-template-columns: minmax(0, 4.6fr) minmax(0, 6fr);
+    grid-template-rows: auto auto;
+    grid-template-areas: "title stage" "text stage";
+    column-gap: clamp(1.5rem, 3vw, 3.5rem);
+    row-gap: clamp(1rem, 2.6vh, 1.75rem);
+    align-items: end;
+  }
+  .a-hero-text { align-self: start; }
+}
+.a-hero-title { grid-area: title; }
+.a-hero-stage { grid-area: stage; }
+.a-hero-text { grid-area: text; }
+
+/* ─── Фраза: плоско, тяжело, плотно; «без тормозов.» кобальтом ────── */
+.a-hero-title {
+  margin: 0;
+  font-family: var(--a-wide);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 5.4vw, 5.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: var(--a-ink);
+  text-wrap: balance;
+}
+.a-hero-title em { font-style: normal; color: var(--a-cobalt); }
+
+/* ─── Сцена справа (на телефоне — полоса под фразой) ────────────── */
+.a-hero-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.25;
+  align-self: center;
+}
+@media (min-width: 900px) {
+  .a-hero-stage { max-height: calc(100svh - var(--a-head-h) - 12rem); justify-self: end; }
+}
+
+/* ─── Лид и действия ─────────────────────────────────────────────── */
+.a-cover .a-hero-lead {
+  margin: 0 0 1.25rem;
+  max-width: 34ch;
+  font-size: clamp(1rem, 0.92rem + 0.25vw, 1.125rem);
+  line-height: 1.5;
+  color: var(--a-ink-2);
+}
+.a-hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.a-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  font-family: var(--a-wide);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn);
+}
+.a-hero-btn-ink {
+  background: var(--a-ink);
+  color: #FFFFFF;
+  box-shadow: 0 8px 22px rgba(12, 16, 28, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.a-hero-btn-glass {
+  color: var(--a-ink);
+  background: var(--hero-glass);
+  border: 1px solid var(--hero-edge);
+  box-shadow: var(--hero-depth);
+}
+@media (hover: hover) {
+  .a-hero-btn-ink:hover { background: var(--a-cobalt); }
+  .a-hero-btn-glass:hover { background: #FFFFFF; }
+}
+.a-hero-btn:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 3px; }
+@media (max-width: 419px) {
+  .a-hero-btn { white-space: normal; text-align: center; padding: 0.6rem 1.25rem; }
+}
+
+/* ─── Три карточки на краю поля ─────────────────────────────────── */
+.a-cover.a-hero > .a-hero-cards {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  flex: none;
+  gap: 12px;
+  list-style: none;
+  margin-top: calc(-1 * clamp(3rem, 7vh, 4.5rem));
+}
+@media (min-width: 720px) { .a-cover.a-hero > .a-hero-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+.a-hero-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: clamp(88px, 11vh, 124px);
+  padding: clamp(1rem, 1.6vw, 1.5rem);
+  border: 1px solid var(--hero-edge);
+  border-radius: 28px;
+  background: var(--hero-glass);
+  box-shadow: var(--hero-depth);
+}
+.a-hero-card b { font-family: var(--a-wide); font-weight: 700; font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem); line-height: 1.1; letter-spacing: -0.03em; color: var(--a-ink); }
+.a-hero-card span { font-size: 0.9375rem; color: var(--a-ink-3); }
+.a-hero-card[data-dark] {
+  background: linear-gradient(150deg, rgba(16, 20, 34, 0.94), rgba(16, 20, 34, 0.82));
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 14px 34px rgba(12, 16, 28, 0.26);
+}
+.a-hero-card[data-dark] b { color: #FFFFFF; }
+.a-hero-card[data-dark] span { color: rgba(255, 255, 255, 0.7); }
+
+/* ─── Шапка на главной: стеклянная капсула над полем ───────────────
+   Только здесь (body:has(.a-hero)); на остальных страницах шапка
+   прежняя. Полоса шапки прозрачная — поле первого экрана уходит под
+   неё (.a-hero-panel выше), а ниже по странице листы едут под капсулой.
+   Капсула — нарисованное стекло без размытия подложки. */
+body:has(.a-hero) .a-head { background: transparent; padding-top: 12px; }
+body:has(.a-hero) .a-head-inner {
+  width: calc(100% - 2 * var(--a-gutter));
+  max-width: calc(var(--a-shell) - 2 * var(--a-gutter));
+  padding-inline: clamp(16px, 2vw, 28px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  /* Почти сплошная: при 0,82–0,94 над кобальтовыми листами сквозь
+     капсулу читался текст страницы под подписями меню. */
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 8px 24px rgba(14, 24, 56, 0.1);
+}
+
+/* ═══ «Схема» — иллюстрация справа (HeroSchema) ════════════════════
+   Рамка 1000 × 800 вписана в сцену (contain по контейнеру сцены);
+   кегли подписей — в долях ширины рамки (cqw). */
+.a-hs-host { container-type: size; }
+.a-hs-frame {
+  --lav: #C8D0E2;
+  --peach: #F0AE6C;
+  --lime: #CBF52A;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100cqw, 125cqh);
+  aspect-ratio: 1.25;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+}
+/* Слои глубины: сдвиг за рукой — transform (со сглаживанием), уход по
+   прокрутке — отдельное свойство translate: они складываются. */
+.a-hs-layer {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(calc(var(--px, 0) * var(--depth) * 1px), calc(var(--py, 0) * var(--depth) * 1px), 0);
+  transition: transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.a-hs-layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.a-hs-back { z-index: 0; }
+.a-hs-mid { z-index: 1; }
+.a-hs-front { z-index: 2; }
+.a-hs-wires { z-index: 2; pointer-events: none; }
+
+.a-hs-outlines { fill: none; stroke: var(--lav); stroke-width: 1.6; }
+.a-hs-mark { fill: var(--a-ink); }
+
+/* Модули-плиты: фаска, внутренняя тень, высверленные отверстия. */
+.a-hs-mod {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 15%;
+  height: 18.75%;
+  z-index: 1;
+}
+.a-hs-mod-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 2.2cqw;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -0.45cqw 0.9cqw rgba(0, 0, 0, 0.14),
+    0 2cqw 3cqw -1.6cqw rgba(14, 24, 56, 0.42),
+    0 0.2cqw 0.5cqw rgba(14, 24, 56, 0.1);
+}
+.a-hs-mod[data-tone="cobalt"] .a-hs-mod-body { background: linear-gradient(160deg, #4169FF 0%, #1D41D8 55%, #1432B8 100%); color: #FFFFFF; }
+.a-hs-mod[data-tone="peach"] .a-hs-mod-body { background: linear-gradient(160deg, #FFDDB3 0%, #F6C58F 60%, #EDB173 100%); color: var(--a-ink); }
+.a-hs-mod[data-tone="white"] .a-hs-mod-body { background: linear-gradient(160deg, #FFFFFF 0%, #F3F5F9 70%, #E6EAF1 100%); color: var(--a-ink); }
+.a-hs-mod[data-tone="line"] .a-hs-mod-body { background: transparent; border: 1.5px solid var(--lav); box-shadow: none; color: #7E89A8; }
+.a-hs-hole {
+  position: absolute;
+  width: 12%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: inset 0 0.15cqw 0.3cqw rgba(0, 0, 0, 0.28);
+}
+.a-hs-hole[data-h="tl"] { left: 6%; top: 6%; }
+.a-hs-hole[data-h="tr"] { right: 6%; top: 6%; }
+.a-hs-hole[data-h="bl"] { left: 6%; bottom: 6%; }
+.a-hs-hole[data-h="br"] { right: 6%; bottom: 6%; }
+.a-hs-mod[data-tone="white"] .a-hs-hole { background: #E3E7EF; }
+.a-hs-mod[data-tone="line"] .a-hs-hole { background: transparent; box-shadow: inset 0 0 0 1.5px var(--lav); }
+.a-hs-mod-label {
+  display: grid;
+  justify-items: center;
+  gap: 0.35cqw;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1;
+}
+.a-hs-mod-label b { font-weight: 700; font-size: clamp(12px, 3.1cqw, 34px); letter-spacing: -0.02em; }
+.a-hs-mod-label b[data-long] { font-size: clamp(10px, 1.75cqw, 20px); letter-spacing: 0.02em; }
+.a-hs-mod-label small { font-size: clamp(8px, 1.15cqw, 13px); letter-spacing: 0.1em; opacity: 0.82; }
+
+/* Провода, клеммы, лайм. Белый — только поверх чёрного знака. */
+.a-hs-wire { fill: none; stroke-width: 2.4; stroke-linecap: round; }
+.a-hs-wire[data-tone="peach"] { stroke: var(--peach); stroke-width: 2.8; }
+.a-hs-wire[data-tone="white"] { stroke: #FFFFFF; }
+.a-hs-wire[data-tone="graphite"] { stroke: #8E99B3; }
+.a-hs-term { fill: #FFFFFF; stroke-width: 2.6; }
+.a-hs-term[data-tone="peach"] { stroke: var(--peach); }
+.a-hs-term[data-tone="white"] { stroke: #B9C3DA; }
+.a-hs-term[data-tone="graphite"] { stroke: #8E99B3; }
+.a-hs-lime { fill: var(--lime); }
+.a-hs-lime-ring { fill: var(--lime); opacity: 0; transform-box: fill-box; transform-origin: center; }
+
+/* Пластина шлифованного металла: горизонтальные штрихи (feTurbulence,
+   частота по y много выше, чем по x) поверх холодного перелива, фаска,
+   четыре винта, гравировка. */
+.a-hs-plate {
+  position: absolute;
+  left: 54.8%;
+  top: 3.5%;
+  width: 24%;
+  height: 19%;
+  z-index: 3;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 1.4cqw;
+  border: 1px solid #A9B0BB;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='440' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.003 0.85' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.44 0 0 0 0 0.48 0.55 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") center / 100% 100%,
+    linear-gradient(172deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.35) 62%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, #EEF0F3 0%, #CDD1D8 46%, #DDE0E5 54%, #B7BCC5 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 1px 0 0 rgba(255, 255, 255, 0.55),
+    inset 0 -0.3cqw 0.45cqw rgba(0, 0, 0, 0.2),
+    0 2.2cqw 3.2cqw -1.8cqw rgba(14, 24, 56, 0.5),
+    0 0.25cqw 0.5cqw rgba(14, 24, 56, 0.14);
+}
+/* Блик: светлая полоса пробегает по металлу раз в ~6 с. */
+.a-hs-plate::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% 0;
+  width: 38%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  transform: translateX(-160%) skewX(-14deg);
+  pointer-events: none;
+}
+.a-hs-screw {
+  position: absolute;
+  width: 7.5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #C9CDD4 45%, #8C929C 100%);
+  box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 0 1px rgba(90, 98, 110, 0.25);
+}
+.a-hs-screw::before, .a-hs-screw::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 50%;
+  height: 13%;
+  margin-top: -6.5%;
+  border-radius: 2px;
+  background: #6F7682;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: rotate(18deg);
+}
+.a-hs-screw::after { transform: rotate(108deg); }
+.a-hs-screw[data-h="tl"] { left: 5%; top: 8%; }
+.a-hs-screw[data-h="tr"] { right: 5%; top: 8%; }
+.a-hs-screw[data-h="bl"] { left: 5%; bottom: 8%; }
+.a-hs-screw[data-h="br"] { right: 5%; bottom: 8%; }
+.a-hs-engrave {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(10px, 1.9cqw, 22px);
+  letter-spacing: 0.09em;
+  color: #7A808B;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85), 0 -1px 0 rgba(0, 0, 0, 0.22);
+}
+
+/* Телефон: схема крупнее, контурный модуль и его провод убраны. */
+@media (max-width: 719px) {
+  .a-hs-host { overflow: hidden; }
+  .a-hs-frame { width: min(112cqw, 140cqh); }
+  .a-hs-host [data-minor] { display: none; }
+  .a-hs-mod-label small { letter-spacing: 0.06em; }
+}
+
+/* ─── Движение ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Лид, действия и карточки поднимаются лесенкой сразу при загрузке —
+     чистым CSS, без ожидания скрипта. Лид и действия — только сдвигом,
+     без прозрачности: видны с первого кадра (LCP не ждёт анимации). */
+  .a-hero-lead,
+  .a-hero-actions { animation: a-hero-rise 800ms var(--m-settle) backwards; animation-delay: calc(220ms + var(--i, 0) * 70ms); }
+  .a-hero-card { animation: a-hero-rise-in 800ms var(--m-settle) backwards; animation-delay: calc(220ms + var(--i, 0) * 70ms); }
+
+  /* Схема, загрузка: знак проявляется с 0,96, контуры — следом; модули
+     садятся мягкой пружиной лесенкой; пластина опускается; провода
+     прочерчиваются; клеммы и лайм загораются. */
+  .a-hs-mark { animation: a-hs-mark-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms backwards; transform-origin: 54% 50%; }
+  .a-hs-outlines { animation: a-hs-fade 1400ms ease-out 300ms backwards; }
+  .a-hs-mod { animation: a-hs-mod-in 900ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards; animation-delay: calc(420ms + var(--k) * 110ms); }
+  .a-hs-plate { animation: a-hs-plate-in 1000ms cubic-bezier(0.22, 1, 0.36, 1) 700ms backwards; }
+  .a-hs-wire {
+    stroke-dasharray: 1;
+    animation: a-hs-draw 1000ms cubic-bezier(0.65, 0, 0.35, 1) backwards;
+    animation-delay: calc(1150ms + var(--k) * 140ms);
+  }
+  .a-hs-term, .a-hs-lime { animation: a-hs-fade 500ms ease-out backwards; animation-delay: calc(1900ms + var(--k, 0) * 80ms); }
+
+  /* Холостой слой: модули плавают на 3 px с долгим периодом, лайм
+     «дышит» кольцом, блик пробегает по пластине раз в ~6 с. */
+  .a-hs-mod-body { animation: a-hs-float 9s ease-in-out infinite; animation-delay: calc(var(--k) * -2.3s); }
+  .a-hs-mod:nth-child(2n) .a-hs-mod-body { animation-duration: 11s; }
+  .a-hs-lime-ring { animation: a-hs-pulse 3.2s ease-out 2.4s infinite; }
+  .a-hs-plate::after { animation: a-hs-sheen 6s ease-in-out 2.6s infinite; }
+
+  /* Прокрутка: слои схемы уходят с разной скоростью — мягкий параллакс. */
+  @supports (animation-timeline: view()) {
+    .a-hs-layer {
+      animation: a-hs-drift linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+@keyframes a-hero-rise { from { transform: translateY(14px); } }
+@keyframes a-hero-rise-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes a-hs-mark-in { from { opacity: 0; transform: scale(0.96); } }
+@keyframes a-hs-fade { from { opacity: 0; } }
+@keyframes a-hs-mod-in { from { opacity: 0; transform: translateY(26px) scale(0.9); } }
+@keyframes a-hs-plate-in { from { opacity: 0; transform: translateY(-22px) rotate(-3deg); } }
+@keyframes a-hs-draw { from { stroke-dashoffset: 1; } }
+@keyframes a-hs-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes a-hs-pulse { 0% { opacity: 0.55; transform: scale(0.5); } 100% { opacity: 0; transform: scale(1.35); } }
+@keyframes a-hs-sheen { 0%, 62% { transform: translateX(-160%) skewX(-14deg); } 100% { transform: translateX(360%) skewX(-14deg); } }
+@keyframes a-hs-drift { to { translate: 0 calc(var(--depth) * -2.5px); } }
+
+/* Уход первого экрана: фраза чуть отъезжает влево и гаснет (a-exit-l — 3 %). */
+@supports (animation-timeline: view()) {
+  .a-hero-title {
+    animation: a-exit-l linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+}
+
+/* Вне кадра — пауза; reduced-motion и ?static=1 — конечный кадр. */
+.a-hs-host[data-paused] *, .a-hs-host[data-paused] *::after { animation-play-state: paused !important; }
+.a-hs-host[data-still] .a-hs-dot { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .a-hs-dot { visibility: hidden; }
+  .a-hs-layer { transition: none; transform: none; }
+}
+html[data-static] .a-hero-title,
+html[data-static] .a-hero-lead,
+html[data-static] .a-hero-actions,
+html[data-static] .a-hero-card,
+html[data-static] .a-hs-host * { animation: none !important; }
+html[data-static] .a-hs-dot { visibility: hidden; }

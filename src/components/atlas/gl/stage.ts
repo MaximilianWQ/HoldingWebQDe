@@ -3,7 +3,7 @@
  *
  * Этот модуль лёгкий и живёт в основном бандле: он решает, рисовать ли
  * вообще, ждёт подхода блока к кадру и только тогда тянет three.js и
- * саму сцену отдельными чанками (`./core`, `./globe`, `./mission`).
+ * саму сцену отдельными чанками (`./core`, `./hero`, `./orb`).
  *
  * ПЛАВНОСТЬ. Кадр рисуется на частоте экрана (requestAnimationFrame —
  * 60, 120, 144 или 240 Гц, сколько даёт монитор), а всё движение
@@ -42,6 +42,12 @@ export interface SceneParts {
   update(f: Frame): void;
   /** Освободить то, что не висит на сцене (сцена чистится сама). */
   dispose(): void;
+  /**
+   * Своё кадрирование камеры под холст w × h (CSS px). Если задано,
+   * `place` и `radius` для камеры не используются: так сцена первого
+   * экрана держит тот же кадр, что постер с `object-fit: contain`.
+   */
+  frame?(w: number, h: number): void;
 }
 
 export interface BuildCtx {
@@ -176,6 +182,10 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
     h = nh;
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
+    if (parts.frame) {
+      parts.frame(w, h);
+      return true;
+    }
     const p = o.place(w, h);
     const half = (camera.fov * Math.PI) / 360;
     const ang = Math.atan((p.r / (h / 2)) * Math.tan(half));
@@ -302,7 +312,9 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
           draw();
         },
       });
-    } catch {
+    } catch (e) {
+      // В разработке причину видно в консоли; на проде — молча постер.
+      if (process.env.NODE_ENV !== "production") console.error("[gl] сцена не собралась", e);
       if (disposed) return;
       teardown();
       setMode("poster");

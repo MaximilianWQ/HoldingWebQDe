@@ -1,0 +1,280 @@
+/* Главная, раздел 03 — карта присутствия (PresenceSchema, префикс a-pm-).
+
+   Владелец, 14.09.2026: «глобус — говно полное… сделай адекватным,
+   красивым или другое». Вместо 3D-глобуса — графика в языке первого
+   экрана («Схема»): спокойная техническая панель с тонкой лавандовой
+   рамкой и скруглёнными углами, ровная точечная карта мира светлым
+   графитом, наши города — кобальтовыми узлами с мягким пульсом,
+   несколько дуг-проводов от одного узла с бегущими пакетами, регионы —
+   пилюлями (наведение и фокус подсвечивают страны региона).
+
+   Раскладка: широкий экран — текст слева, панель справа; телефон и
+   планшет — текст, под ним панель во всю ширину: ничто не ложится на
+   текст. На телефоне (≤ 720 px) — увеличенный кадр наших локаций
+   вместо всего мира (см. конец файла). Движение — только transform,
+   opacity, stroke-dashoffset и SMIL-пакеты; пульс — HTML поверх SVG
+   (композитор). Вне кадра — пауза, reduced-motion и ?static=1 —
+   конечный кадр. */
+
+.a-pm {
+  --pm-lav: #C8D0E2;
+  --pm-dot: #B4BDCD;
+  --pm-peach: #F0AE6C;
+  --pm-graphite: #8E99B3;
+  --pm-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+.a-pm-grid { display: grid; gap: clamp(1.5rem, 4vh, 2.5rem); }
+@media (min-width: 900px) {
+  .a-pm-grid { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); align-items: center; column-gap: clamp(2rem, 4vw, 4rem); }
+  .a-pm-copy .a-h2 { max-width: 11ch; }
+}
+.a-pm-copy .a-p { max-width: 34rem; margin-bottom: 0; }
+
+/* ─── Панель ────────────────────────────────────────────────────── */
+.a-pm-panel {
+  position: relative;
+  min-width: 0;
+  padding: clamp(14px, 1.6vw, 22px);
+  border: 1px solid var(--pm-lav);
+  border-radius: clamp(20px, 2vw, 28px);
+  background:
+    radial-gradient(60% 70% at 62% 38%, rgba(19, 48, 200, 0.07), transparent 70%),
+    linear-gradient(180deg, #F8FAFD, #F2F5FA);
+}
+.a-pm-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 clamp(8px, 1vw, 14px);
+  font-family: var(--pm-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7E89A8;
+}
+/* Сцена карты: окно карты + подпись ближайшего города. Положение города —
+   доли рамки --nxv/--nyv (сервер, затем часовой пояс в браузере). */
+.a-pm-stage {
+  position: relative;
+  --nx: calc(var(--nxv, 50) * 1%);
+  --ny: calc(var(--nyv, 50) * 1%);
+  --near-top: 1.5%;
+  --near-h: 30px;
+}
+.a-pm-map { position: relative; width: 100%; aspect-ratio: 2.5; }
+.a-pm-view { position: absolute; inset: 0; }
+.a-pm-view > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* Слои раздельно: суша рисуется один раз, провода и пакеты — в своём слое. */
+.a-pm-dots { fill: var(--pm-dot); will-change: transform; }
+.a-pm-net { will-change: transform; }
+.a-pm-edge { display: none; }
+
+/* ─── Провода, узлы, пакеты ─────────────────────────────────────── */
+.a-pm-arc { fill: none; stroke-width: 1.3; stroke-linecap: round; transition: opacity 300ms ease; }
+.a-pm-arc[data-tone="peach"] { stroke: var(--pm-peach); }
+.a-pm-arc[data-tone="graphite"] { stroke: var(--pm-graphite); }
+.a-pm-node { fill: var(--a-cobalt); stroke: #FFFFFF; stroke-width: 1.3; transition: opacity 300ms ease; }
+.a-pm-node[data-near] { stroke-width: 2; }
+.a-pm-hub { fill: #FFFFFF; stroke: var(--a-cobalt); stroke-width: 2.2; }
+.a-pm-packet[data-tone="peach"] { fill: var(--pm-peach); }
+.a-pm-packet[data-tone="graphite"] { fill: var(--a-cobalt); }
+
+.a-pm-pulses { position: absolute; inset: 0; pointer-events: none; }
+.a-pm-pulse {
+  position: absolute;
+  width: 1.1%;
+  aspect-ratio: 1;
+  margin: -0.55% 0 0 -0.55%;
+  border-radius: 50%;
+  background: var(--a-cobalt);
+  opacity: 0;
+  transition: visibility 0s linear 300ms;
+}
+.a-pm-pulse[data-near] { width: 1.6%; margin: -0.8% 0 0 -0.8%; }
+
+/* Ближайший город — стеклянная подпись у верхнего края карты (над ней нет
+   наших узлов) и тонкая линия-указатель к городу: над самим узлом подпись
+   закрывала соседние города Европы и начало проводов. */
+.a-pm-lead {
+  position: absolute;
+  z-index: 2;
+  left: var(--nx);
+  top: calc(var(--near-top) + var(--near-h));
+  width: 1px;
+  height: max(0px, calc(var(--ny) - var(--near-top) - var(--near-h) - 5px));
+  background: linear-gradient(180deg, rgba(20, 50, 184, 0.55), rgba(20, 50, 184, 0.15));
+  pointer-events: none;
+}
+.a-pm-near {
+  position: absolute;
+  z-index: 2;
+  left: var(--nx);
+  top: var(--near-top);
+  box-sizing: border-box;
+  height: var(--near-h);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.45rem 0.8rem 0.45rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  line-height: 1.15;
+  white-space: nowrap;
+  color: var(--a-ink);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.84));
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 8px 20px rgba(14, 24, 56, 0.12);
+  transform: translateX(-50%);
+}
+/* У края карты подпись держится своей стороной — не выходит за панель. */
+.a-pm-near[data-side="end"] { transform: translateX(calc(-100% + 16px)); }
+.a-pm-near[data-side="start"] { transform: translateX(-16px); }
+.a-pm-near i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--a-cobalt); box-shadow: 0 0 0 3px rgba(19, 48, 200, 0.16); }
+.a-pm-near b { font-weight: 700; }
+
+/* ─── Регионы-пилюли ────────────────────────────────────────────── */
+.a-pm-regions {
+  list-style: none;
+  margin: clamp(10px, 1.2vw, 16px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.a-pm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 1rem 0 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.8));
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 6px 16px rgba(14, 24, 56, 0.08);
+  font: 500 0.8125rem/1.1 var(--a-wide);
+  color: var(--a-ink);
+  cursor: pointer;
+  transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn), border-color var(--d-1) var(--m-turn);
+}
+.a-pm-pill span { color: var(--a-ink-3); }
+.a-pm-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--a-cobalt); }
+.a-pm-pill[aria-pressed="true"] { background: var(--a-ink); color: #FFFFFF; border-color: var(--a-ink); }
+.a-pm-pill[aria-pressed="true"] span { color: rgba(255, 255, 255, 0.7); }
+.a-pm-pill[aria-pressed="true"] i { background: var(--pm-peach); }
+.a-pm-pill:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 2px; }
+@media (hover: hover) { .a-pm-pill:not([aria-pressed="true"]):hover { background: #FFFFFF; border-color: var(--pm-lav); } }
+
+/* Подсветка региона: наведение, фокус (без скрипта) или закрепление
+   нажатием — страны региона остаются яркими, остальные гаснут. */
+.a-pm-panel:is(
+    :has([data-pill="eu"]:hover, [data-pill="eu"]:focus-visible),
+    [data-region="eu"]
+  ) :is(.a-pm-node, .a-pm-pulse):not([data-r="eu"]),
+.a-pm-panel:is(
+    :has([data-pill="me"]:hover, [data-pill="me"]:focus-visible),
+    [data-region="me"]
+  ) :is(.a-pm-node, .a-pm-pulse):not([data-r="me"]),
+.a-pm-panel:is(
+    :has([data-pill="as"]:hover, [data-pill="as"]:focus-visible),
+    [data-region="as"]
+  ) :is(.a-pm-node, .a-pm-pulse):not([data-r="as"]),
+.a-pm-panel:is(
+    :has([data-pill="am"]:hover, [data-pill="am"]:focus-visible),
+    [data-region="am"]
+  ) :is(.a-pm-node, .a-pm-pulse):not([data-r="am"]),
+.a-pm-panel:is(
+    :has([data-pill="etc"]:hover, [data-pill="etc"]:focus-visible),
+    [data-region="etc"]
+  ) :is(.a-pm-node, .a-pm-pulse):not([data-r="etc"]) { opacity: 0.18; visibility: visible; }
+.a-pm-panel:is(:has(.a-pm-pill:hover, .a-pm-pill:focus-visible), [data-region="eu"], [data-region="me"], [data-region="as"], [data-region="am"], [data-region="etc"]) .a-pm-arc { opacity: 0.25; }
+
+/* ─── Движение ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Провода прочерчиваются, когда панель впервые вошла в кадр. */
+  .a-pm-arc {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1200ms cubic-bezier(0.65, 0, 0.35, 1), opacity 300ms ease;
+    transition-delay: calc(var(--k) * 160ms), 0s;
+  }
+  .a-pm-panel[data-armed]:not([data-in]) .a-pm-arc { stroke-dashoffset: 1; transition: none; }
+  /* Пульс узлов: редкий мягкий «вдох» лесенкой по всей сети. */
+  .a-pm-pulse { animation: a-pm-pulse 4.8s ease-out infinite; animation-delay: calc(var(--k) * -0.43s); }
+  .a-pm-pulse[data-near] { animation-duration: 2.8s; }
+
+  /* Одно проявление на входе раздела (как у прежней сцены 03, 6.8). */
+  @supports (animation-timeline: view()) {
+    .a-pm { view-timeline: --a-pm block; }
+    .a-pm-copy { animation: a-pm-copy-in linear both; animation-timeline: --a-pm; animation-range: entry 25% entry 85%; }
+    .a-pm-panel { animation: a-pm-panel-in linear both; animation-timeline: --a-pm; animation-range: entry 10% entry 75%; }
+  }
+}
+@keyframes a-pm-pulse {
+  0% { opacity: 0.5; transform: scale(1); }
+  36% { opacity: 0; transform: scale(3.6); }
+  100% { opacity: 0; transform: scale(3.6); }
+}
+@keyframes a-pm-copy-in { from { transform: translate3d(0, 32px, 0); opacity: 0; } }
+@keyframes a-pm-panel-in { from { transform: translate3d(0, 24px, 0); opacity: 0; } }
+
+.a-pm-panel[data-paused] .a-pm-pulse { animation-play-state: paused; }
+.a-pm-panel[data-still] .a-pm-packet { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .a-pm-packet { visibility: hidden; } }
+html[data-static] .a-pm-packet { visibility: hidden; }
+html[data-static] .a-pm * , html[data-static] .a-pm-copy, html[data-static] .a-pm-panel { animation: none !important; }
+
+/* ─── Телефон (≤ 720 px): кадр наших локаций крупно ────────────────
+   Весь мир в ширину телефона — узлы и провода не читались, под картой
+   оставалась пустая полоса (окно 2,1 против кадра 2,48). Здесь окно
+   карты получает соотношение кадра наших локаций (--c-aspect), а слой
+   карты растянут на 1 / --c-w и сдвинут на --c-x0/--c-y0 — кадр
+   заполняет окно без полей. США — за левым краем, на их месте метка
+   «← США». Подпись ближайшего города — строкой под картой, узлы и
+   провода чуть крупнее. */
+@media (max-width: 720px) {
+  .a-pm-panel { padding: 10px 10px 12px; }
+  .a-pm-head { margin-bottom: 6px; font-size: 0.625rem; }
+  .a-pm-map { aspect-ratio: var(--c-aspect); overflow: hidden; border-radius: 12px; }
+  .a-pm-view {
+    inset: auto;
+    left: calc(var(--c-x0) * -100% / var(--c-w));
+    top: calc(var(--c-y0) * -100% / var(--c-h));
+    width: calc(100% / var(--c-w));
+    height: calc(100% / var(--c-h));
+  }
+  .a-pm-node { r: 4.2px; }
+  .a-pm-hub { r: 6.4px; }
+  .a-pm-arc { stroke-width: 1.8; }
+  .a-pm-packet { r: 3px; }
+  .a-pm-edge {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    left: 6px;
+    top: calc((var(--us-y) - var(--c-y0) * 100) / var(--c-h) * 1%);
+    transform: translateY(-50%);
+    padding: 4px 7px;
+    border-radius: 999px;
+    font: 600 0.625rem/1 var(--pm-mono);
+    letter-spacing: 0.08em;
+    color: var(--a-cobalt);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 8px rgba(14, 24, 56, 0.1);
+  }
+  .a-pm-lead { display: none; }
+  .a-pm-near {
+    position: static;
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0 0;
+    padding: 0.45rem 0.75rem 0.45rem 0.55rem;
+    font-size: 0.75rem;
+    white-space: normal;
+    transform: none !important;
+  }
+  .a-pm-regions { gap: 6px; margin-top: 8px; }
+  .a-pm-pill { padding: 0 0.85rem 0 0.7rem; font-size: 0.75rem; }
+}

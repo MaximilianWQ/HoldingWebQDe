@@ -304,5 +304,8 @@ html[data-static] .au *, html[data-static] .au *::before, html[data-static] .au 
 }
 .au-check input { flex: none; width: 20px; height: 20px; margin: 0.1rem 0 0; accent-color: var(--a-cobalt); cursor: pointer; }
 .au-check input:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 2px; }
-.au-check a { color: var(--a-ink); text-decoration: underline; text-underline-offset: 2px; }
+/* Ссылка в строке — зона нажатия ≥ 44px по высоте: вертикальный отступ у
+   строчного элемента расширяет область попадания, но не строку (раскладка
+   та же). 19px строки + 2 × 13px (визуальный аудит 14.09.2026). */
+.au-check a { padding-block: 13px; color: var(--a-ink); text-decoration: underline; text-underline-offset: 2px; }
 @media (hover: hover) { .au-check a:hover { color: var(--a-cobalt); } }

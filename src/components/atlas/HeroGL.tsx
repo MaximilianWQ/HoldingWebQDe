@@ -6,8 +6,8 @@ import type { Composition, HeroLive } from "./gl/hero";
 
 /**
  * Мягкая 3D-сцена реального времени в любом блоке главной (three.js,
- * WebGPU с уходом на WebGL 2). Сцены — `gl/hero.ts`: "globe-soft"
- * (раздел 03) и "mission-soft" (раздел 07).
+ * WebGPU с уходом на WebGL 2). Сцена — `gl/hero.ts`: "mission-soft"
+ * (раздел 07).
  *
  * БЛОК. Нужны только размер и `position` (класс или `style`, обычно
  * `{ position: "absolute", inset: 0 }` внутри обёртки с размером):

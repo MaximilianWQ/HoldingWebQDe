@@ -114,7 +114,7 @@
   gap: 0.9rem 2rem;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
 }
-.av-spec dt { font-size: 0.75rem; letter-spacing: 0.02em; color: var(--a-ink-3); }
+.av-spec dt { font-size: 0.8125rem; letter-spacing: 0.02em; color: var(--a-ink-3); }
 .av-spec dd { margin: 0.15rem 0 0; font-size: 0.9375rem; line-height: 1.45; color: var(--a-ink); }
 .av-confirm { margin: 1rem 0 0; font-size: 0.8125rem; color: var(--a-ink-3); }
 @media (max-width: 899px) {

@@ -109,7 +109,6 @@ body:has(.a) {
 }
 
 .a em { font-style: normal; font-weight: 500; }
-.a-fit-2,
 .a-city summary::after { font-style: normal; }
 .a-wide {
   font-family: var(--a-wide);
@@ -375,7 +374,7 @@ body:has(.a) {
 @media (min-width: 700px) { .a-foot-cols { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .a-foot-h {
   margin: 0 0 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.58);
 }
@@ -515,212 +514,7 @@ body:has(.a) {
   flex-direction: column;
   justify-content: space-between;
 }
-/* Две строки выключены по ширине колонки: кегль = 100cqw / k, где k —
-   отношение ширины строки к кеглю, измеренное в браузере на живом
-   шрифте. Второе слагаемое — потолок по высоте окна: кадр обязан
-   помещаться в экран целиком. Меняя текст или начертание — перемерить k. */
-/* Пара «широкий гротеск + курсив антиквы»: первая строка MTS Wide Bold,
-   вторая — Literata курсивом, кобальтом. Один смысл, два материала. */
-.a-display {
-  container-type: inline-size;
-  margin: 0;
-  font-family: var(--a-wide);
-  font-weight: 700;
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  color: var(--a-ink);
-}
-/* Общая ширина строк: колонка или потолок по высоте окна (25svh для
-   первой строки × её k). Кегль каждой строки = ширина / её k — поэтому
-   при потолке блок сужается, но остаётся выключенным: обе строки одной
-   ширины. k замерены в Chromium на Literata 300 opsz 72, 10.09.2026. */
-/* k замерены в Chromium 10.09.2026: MTS Wide Bold 700 со строчными —
-   6,452; Literata 300 курсив, opsz 72, трекинг −0,035em — 4,238.
-   Потолок 116svh: при окне 900 две строки вместе с подписью
-   помещаются в первый экран (замер: 914 при 150svh, 912 при 120svh). */
-/* Потолок по высоте окна был нужен Literata (k ≈ 5, строки высокие).
-   У MTS Wide k ≈ 10 и 7,5: две строки во всю колонку занимают около
-   трети окна, поэтому ширина — вся колонка. */
-.a-display { --fit-w: 100cqw; }
-.a-fit { display: block; white-space: nowrap; font-size: calc(var(--fit-w) / var(--k)); }
-/* k замерены в Chromium 10.09.2026 на MTS Wide: «всё открывается»
-   Bold 700 — 10,01; «и не тормозит» Medium 500, трекинг −0,035em — 7,50.
-   Меняя текст заголовка — перемерить (scratchpad shots.cjs). */
-/* Перемерено 11.09.2026 после разбивки на буквы (inline-block теряет
-   кернинг между знаками): 10,08 и 7,543. */
-.a-fit-1 { --k: 10.08; }
-/* Вторая строка — то же семейство, Medium и кобальт: один материал в
-   двух состояниях вместо пары гротеск/антиква. */
-.a-fit-2 {
-  --k: 7.543;
-  font-weight: 500;
-  letter-spacing: -0.035em;
-  color: var(--a-cobalt);
-  padding-bottom: 0.08em;
-}
-
-/* Имя вместо фразы (12.09.2026): «atlas secure» тем же набором, что в
-   подвале — MTS Wide Bold, трекинг −0,04em, строчные. «atlas» —
-   сплошной краской, «secure» — кобальтовым контуром: пара «залитое +
-   контурное», контур толще в крупном кегле (0,012em). На широком — одна
-   строка во всю колонку (k всей строки), на телефоне — два слова друг
-   под другом, каждое во всю ширину (свой k). k замерены в Chromium на
-   разбитом по буквам наборе — scratchpad wm-k.cjs; меняя текст или
-   трекинг — перемерить. */
-/* Кегль ставится словам, а не заголовку: `100cqw` в свойстве самого
-   h1 считается от контейнера ВЫШЕ него (всей обложки), и строка
-   вылезала за колонку (замер 12.09.2026: 1429 при колонке 1376). Пробел
-   между словами — отступом в em слова, у самого h1 кегль 0.
-   Замер на разбитом по буквам наборе: «atlas» — 2,641 кегля,
-   «secure» — 3,738, отступ 0,25 → вся строка 6,63. */
-/* Потолок по высоте окна (`min(100cqw, 100svh)` ниже) был для двух
-   строк; одна строка имени в любое окно встаёт во всю колонку.
-   Специфичность 0,2,0 — перебить `.a-fit-1/.a-fit-2 { --k }` прежнего
-   заголовка и потолок в медиазапросе. */
-.a-display.a-display-wm {
-  --fit-w: 100cqw;
-  font-size: 0;
-  line-height: 0.86;
-  white-space: nowrap;
-}
-.a-display-wm .sr-only { font-size: 1rem; }
-.a-display-wm .a-fit {
-  --k: 6.63;
-  display: inline-block;
-  font-size: calc(var(--fit-w) / var(--k));
-  letter-spacing: -0.04em;
-}
-.a-display-wm .a-fit-2 {
-  margin-left: 0.25em;
-  font-weight: 700;
-  color: var(--a-cobalt);
-  padding-bottom: 0.04em;
-}
-@supports (-webkit-text-stroke: 1px #000) {
-  .a-display-wm .a-fit-2 {
-    color: transparent;
-    -webkit-text-stroke: max(1.25px, 0.012em) var(--a-cobalt);
-  }
-}
-@media (max-width: 719px) {
-  .a-display-wm { line-height: 0.84; }
-  .a-display-wm .a-fit { display: block; width: fit-content; }
-  .a-display-wm .a-fit-1 { --k: 2.641; }
-  .a-display-wm .a-fit-2 { --k: 3.738; margin-left: 0; }
-}
-
-.a-cover-grid {
-  display: grid;
-  gap: 2rem;
-  margin-top: clamp(1.5rem, 4vh, 3rem);
-}
-@media (min-width: 900px) {
-  .a-cover-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; }
-}
-
-/* 01 — лицо сайта (разбор продажника, 12.09.2026). Имя одно не
-   объясняло, что это и зачем. Сверху — плашка «что это» с живой
-   точкой, под именем — обещание пользы крупным набором, внизу — четыре
-   доказательства одной полосой (не карточки: волосяная линия сверху,
-   иконка и две строки). Верх и низ — две группы, чтобы
-   space-between обложки не раздувал зазор между плашкой и именем. */
-.a-cover-top { display: flex; flex-direction: column; }
-.a-cover-kicker {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 0.55rem;
-  min-height: 2rem;
-  margin: 0 0 0.75rem;
-  padding: 0.3rem 0.85rem 0.3rem 0.7rem;
-  border: 1px solid var(--a-g200);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  color: var(--a-ink-2);
-}
-.a-cover-pulse {
-  position: relative;
-  flex: none;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: var(--a-cobalt);
-}
-.a-cover-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--a-cobalt);
-  animation: a-cover-pulse 2.4s var(--m-tide) infinite;
-}
-@keyframes a-cover-pulse {
-  0% { transform: scale(1); opacity: 0.55; }
-  70%, 100% { transform: scale(3.2); opacity: 0; }
-}
-.a-cover-bottom { position: relative; }
-/* Вуаль снята (14.09.2026): сцена первого экрана больше не лежит под
-   текстом — она стоит только в свободном месте (.a-reel ниже), и
-   белый градиент смывал бы низ форм. */
-.a-cover-veil { display: none; }
-/* На телефоне плашка — одной строкой: уточнение «для чего» уже есть в
-   обещании и доказательствах ниже. */
-@media (max-width: 559px) {
-  .a-cover-kicker-more { display: none; }
-}
-.a-cover-promise {
-  margin: 0 0 0.75rem;
-  max-width: 17ch;
-  font-family: var(--a-wide);
-  font-weight: 700;
-  font-size: clamp(1.625rem, 3vw, 2.875rem);
-  line-height: 1.06;
-  letter-spacing: -0.025em;
-  color: var(--a-ink);
-}
-.a-cover-promise em { font-style: normal; color: var(--a-cobalt); }
 .a-cover .a-lead { margin-bottom: 0; }
-.a-cover-proof {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem 1.25rem;
-  margin: clamp(1.25rem, 3.2vh, 2.25rem) 0 0;
-  padding: 1.1rem 0 0;
-  border-top: 1px solid var(--a-g200);
-}
-@media (min-width: 900px) {
-  .a-cover-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-.a-cover-proof li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 0.7rem;
-  align-items: center;
-}
-.a-cover-proof-ico {
-  grid-row: span 2;
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 12px;
-  background: var(--a-shoal);
-  color: var(--a-cobalt);
-  transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn), transform var(--d-2) var(--m-settle);
-}
-.a-cover-proof b { font-size: 0.9375rem; font-weight: 700; line-height: 1.25; color: var(--a-ink); }
-.a-cover-proof li > span:last-child { font-size: 0.8125rem; line-height: 1.3; color: var(--a-ink-3); }
-@media (hover: hover) {
-  .a-cover-proof li:hover .a-cover-proof-ico { background: var(--a-cobalt); color: #FFFFFF; transform: translateY(-2px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .a-cover-pulse::after { animation: none; }
-}
 .a-lead {
   margin: 0 0 1.5rem;
   max-width: 40ch;
@@ -759,15 +553,6 @@ body:has(.a) {
   transform: translateX(0.9em);
 }
 .a-fine { margin: 0.9rem 0 0; font-size: 0.875rem; color: var(--a-ink-3); }
-
-/* Кадр обязан помещаться в экран целиком (CLAUDE.md). Замер 10.09.2026
-   на восьми окнах: без правил ниже низ первого экрана уходил на
-   902/812 (телефон), 819/768 и 838/800 (невысокие ноутбуки).
-   Убирается то, что дублируется ниже: ближайшие серверы есть на листе
-   04, подпись-наблюдение — в финале и указателе. */
-@media (min-width: 900px) and (max-height: 860px) {
-  .a-display { --fit-w: min(100cqw, 100svh); }
-}
 
 /* ─── Плиты (разделы 02 и 06) ─────────────────────────────────────── */
 /* clip, а не hidden: hidden делает плиту контейнером прокрутки, и
@@ -927,7 +712,7 @@ body:has(.a) {
   align-items: center;
   gap: 0.35rem;
   font-family: var(--a-wide);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--a-cobalt);
 }
 .a-on::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--a-cobalt); }
@@ -949,50 +734,8 @@ body:has(.a) {
 
 .a-cover > .a-field { position: relative; z-index: 1; }
 
-/* 01 — натюрморт реального времени (HeroGL, сцена gl/hero.ts; редакция
-   6, 14.09.2026). Блок стоит ТОЛЬКО в свободном месте обложки: формы не
-   заходят ни на имя, ни на обещание, ни на пояснение, ни на кнопки.
-     ≥ 900 — правая колонка между низом имени и верхом кнопок;
-     720–899 — полоса во всю колонку между именем и обещанием;
-     < 720 — под именем (имя лежит поверх сцены — владелец, 12.09.2026:
-             «наложить текст на анимацию») и до обещания.
-   Границы — якоря (`anchor()` к имени, обещанию, кнопкам): место
-   считает раскладка, без JS, поэтому постер из разметки сервера сразу
-   стоит там же, где потом сцена. Без якорей — та же геометрия формулой
-   от окна (с запасом): кегль имени = колонка / 6,63, строка имени —
-   0,902 кегля; низ — поля обложки + доказательства + колонка кнопок.
-   Кадр 1,9 : 1 вписан в блок как contain: постер — object-fit, сцена —
-   своей камерой по тем же --hx-ox / --hx-oy. Постер снят с этой же
-   сцены в покое, поэтому смена постера на холст не видна. Фон сцены —
-   белый листа, маски нет. reduced-motion, экономия трафика, ?static=1,
-   нет WebGL — только постер (data-mode="poster"). */
-.a-cover .a-display-wm { anchor-name: --a-hero-wm; }
-.a-cover .a-cover-promise { anchor-name: --a-hero-say; }
-.a-cover .a-actions { anchor-name: --a-hero-act; }
-.a-reel {
-  --hx-g: clamp(16px, 2.4vw, 32px);
-  --hx-c: calc(min(100vw, 1560px) - 2 * var(--hx-g));
-  --hx-l: calc((100vw - min(100vw, 1560px)) / 2 + var(--hx-g));
-  --hx-wm: calc(clamp(1.25rem, 4vh, 3rem) + 2.75rem + var(--hx-c) * 0.1362);
-  --hx-low: calc(clamp(2rem, 6vh, 4rem) + clamp(1.25rem, 3.2vh, 2.25rem));
-  --hx-gap: clamp(12px, 2.2vh, 24px);
-  --hx-ox: 0.5;
-  --hx-oy: 0.5;
-  position: absolute;
-  z-index: 0;
-  top: calc(var(--hx-wm) + var(--hx-gap));
-  bottom: calc(var(--hx-low) + 150px + var(--hx-gap));
-  left: calc(var(--hx-l) + (var(--hx-c) - 2rem) * 7 / 12 + 2rem);
-  right: var(--hx-l);
-  pointer-events: none;
-}
-/* 900–1239: кнопки и сноска переносятся, колонка кнопок выше — запас. */
-@media (min-width: 900px) and (max-width: 1239px) {
-  .a-reel { bottom: calc(var(--hx-low) + 310px + var(--hx-gap)); }
-}
-@media (min-width: 720px) and (max-width: 899px) {
-  .a-reel { left: var(--hx-l); right: var(--hx-l); bottom: calc(var(--hx-low) + 400px + var(--hx-gap)); }
-}
+/* Слои HeroGL (разделы 03 и 07): постер и холст друг над другом в блоке
+   сцены; смена постера на холст — в HeroGL.tsx. */
 .a-reel-poster {
   position: absolute;
   inset: 0;
@@ -1004,156 +747,6 @@ body:has(.a) {
   user-select: none;
 }
 .a-reel-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; }
-.a-reel[data-mode="gl"] .a-reel-canvas { opacity: 1; }
-/* Под готовой сценой постер снимается со слоя, когда холст проявился. */
-.a-reel[data-mode="gl"] .a-reel-poster { visibility: hidden; transition: visibility 0s 1s; }
-
-/* Телефон: имя лежит ПОВЕРХ сцены. Блок от верха имени до обещания;
-   высота имени — 0,5685 колонки (две строки по своему k), дальше отступ
-   12vw под именем и верхнее поле сетки обложки. «secure» на формах
-   получает белую полупрозрачную заливку внутри кобальтового контура —
-   иначе тонкий контур терялся на бликах. */
-@media (max-width: 719px) {
-  /* 13.09.2026: разрыв под именем 26vw → 12vw — на 375 полоса из четырёх
-     доказательств уходила под сгиб. */
-  .a-display-wm { margin-bottom: 12vw; }
-  .a-reel {
-    --hx-oy: 0.62;
-    top: calc(clamp(1.25rem, 4vh, 3rem) + 2.75rem - 3vw);
-    bottom: auto;
-    height: calc((100vw - 32px) * 0.5685 + 15vw + clamp(1.5rem, 4vh, 3rem) - var(--hx-gap));
-    left: 0;
-    right: 0;
-  }
-  @supports (-webkit-text-stroke: 1px #000) {
-    .a-display-wm .a-fit-2 {
-      /* Почти сплошная: при 0,82 кобальтовый тор просвечивал сквозь
-         буквы и контур «secure» читался плохо (аудит 13.09.2026). */
-      color: rgba(255, 255, 255, 0.94);
-      -webkit-text-stroke-width: 1.5px;
-    }
-  }
-}
-/* Точная геометрия по якорям (Chromium 125+, Safari 26+, Firefox 147+).
-   Второй аргумент anchor() — формула выше, на случай если якорь не найден. */
-@supports (top: anchor(--a bottom)) {
-  .a-reel {
-    top: calc(anchor(--a-hero-wm bottom, var(--hx-wm)) + var(--hx-gap));
-    bottom: calc(anchor(--a-hero-act top, 40%) + var(--hx-gap));
-    left: anchor(--a-hero-act left, 60%);
-    right: anchor(--a-hero-act right, 3%);
-  }
-  @media (max-width: 899px) {
-    .a-reel {
-      bottom: calc(anchor(--a-hero-say top, 50%) + var(--hx-gap));
-      left: anchor(--a-hero-wm left, 3%);
-      right: anchor(--a-hero-wm right, 3%);
-    }
-  }
-  @media (max-width: 719px) {
-    .a-reel {
-      top: calc(anchor(--a-hero-wm top, 10%) - 3vw);
-      height: auto;
-      left: 0;
-      right: 0;
-    }
-  }
-}
-
-/* 03 — глобус серверов из Blender (Reel, сцена «AtlasGlobe»). Та же
-   бумага, что у первого экрана: край растворён овальной маской, фон
-   рендера уходит в белый листа. */
-.a-globe {
-  position: relative;
-  aspect-ratio: 1920 / 822;
-  margin: 1.75rem 0 0;
-  overflow: hidden;
-  opacity: 0;
-  /* Две полосы пересечением: каждый край уходит в ноль. Овал оставлял
-     верх и низ кадра полупрозрачными — читался серый прямоугольник. */
-  -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%),
-    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, transparent 0%, #000 22%, #000 72%, transparent 100%),
-    linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%);
-  mask-composite: intersect;
-}
-.a-globe .a-reel-move { inset: 0; }
-.a-globe .a-reel-video { object-fit: cover; }
-.a-globe[data-mode] { opacity: 1; }
-.a-globe[data-mode="poster"] { background: var(--poster) center / cover no-repeat; }
-.a-globe[data-mode="poster"] .a-reel-video { display: none; }
-@media (max-width: 720px) {
-  .a-globe { aspect-ratio: 4 / 3; }
-}
-
-/* 03 — глобус за текстом (14.09.2026, владелец: «кривая при прокрутке:
-   сначала большая, потом маленькая, и идёт зум — переделать в стиле
-   Yandex Tech»). Закрепления и зума больше нет: раздел высотой в экран
-   прокручивается как обычный, глобус постоянного размера медленно
-   вращается сам (HeroGL "globe-soft"); на входе —
-   одно мягкое проявление (6.8). Текст — на белой подложке слева. */
-.a-pin { padding-block: 0; }
-.a-pin-stage {
-  position: relative;
-  min-height: min(calc(100svh - var(--a-head-h)), 900px);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-}
-.a-pin-stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(90deg, var(--a-paper) 0%, rgba(255, 255, 255, 0.86) 30%, rgba(255, 255, 255, 0) 58%);
-}
-.a-pin .a-pin-art {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  aspect-ratio: auto;
-  margin: 0;
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-/* Глобус реального времени (HeroGL): холст во всю сцену, фон
-   прозрачный — маска краёв не нужна. */
-.a-pin .a-pin-art canvas { display: block; width: 100%; height: 100%; }
-/* Мягкий глобус (HeroGL "globe-soft", 14.09.2026): кадр 1 : 1 держит сама
-   сцена (contain), поэтому блок — правая часть сцены, а не вся ширина:
-   во всю ширину глобус вставал по центру, под текст. */
-.a-pin .a-pin-soft { left: 42%; right: var(--a-gutter); top: 5%; bottom: 5%; }
-/* Широкий экран: заголовок раздела — в левой колонке (три строки), глобус
-   правее: прежде строка «19 стран. выбирайте ближайшую» шла под глобусом
-   (замер по пикселям 14.09.2026: 56 тыс. px сцены на заголовке). */
-@media (min-width: 1100px) {
-  .a-pin-copy .a-h2 { max-width: 11ch; }
-  .a-pin .a-pin-soft { left: 46%; }
-}
-/* Планшет: текст сверху, глобус ниже — как на телефоне; в две колонки
-   текст шёл во всю ширину и ложился на глобус. */
-@media (min-width: 721px) and (max-width: 1099px) {
-  .a-pin-stage { align-items: flex-start; padding-top: clamp(2rem, 6vh, 4rem); }
-  .a-pin-stage::before { background: linear-gradient(180deg, var(--a-paper) 0%, rgba(255, 255, 255, 0.9) 30%, rgba(255, 255, 255, 0) 46%); }
-  .a-pin .a-pin-soft { left: 0; right: 0; top: 40%; bottom: 0; }
-}
-.a-pin-copy { position: relative; z-index: 2; }
-.a-pin-copy .a-p { max-width: 34rem; }
-@media (max-width: 720px) {
-  /* Телефон: текст сверху, глобус целиком ниже, подложка — сверху вниз. */
-  .a-pin-stage { align-items: flex-start; padding-top: 1.5rem; }
-  .a-pin-stage::before { background: linear-gradient(180deg, var(--a-paper) 0%, rgba(255, 255, 255, 0.9) 34%, rgba(255, 255, 255, 0) 52%); }
-  /* Глобус крупно — заполняет низ сцены, края срезаны маской. Ниже,
-     чем было (34%): при приближении сфера заходила на конец абзаца; и
-     сцена короче — после ухода глобуса оставалась пустая полоса ~330px
-     перед разделом 04 (QA 12.09.2026, 375). */
-  .a-pin .a-pin-art { top: 42%; }
-  .a-pin .a-pin-soft { left: 0; right: 0; bottom: 0; }
-}
 
 /* 03 — карта приближается внутри рамки, не выходя за неё. */
 .a-chart-fig { overflow: clip; }
@@ -1265,14 +858,13 @@ body:has(.a) {
   transition: background-color var(--d-1) var(--m-turn), color var(--d-1) var(--m-turn),
               border-color var(--d-1) var(--m-turn);
 }
-.a-nav a, .a-foot-index a { transition: background-size var(--d-1) var(--m-pen), color var(--d-1) var(--m-turn); }
+.a-nav a { transition: background-size var(--d-1) var(--m-pen), color var(--d-1) var(--m-turn); }
 
 @media (hover: hover) {
   .a-btn-quiet:hover, .a-head-cta:hover { color: var(--a-cobalt); }
   .a-btn-invert:hover { background: var(--a-shoal); }
   .a-btn-line:hover { color: var(--a-shoal-lume); }
   .a-nav a:hover { color: var(--a-ink); background-size: 100% 1px; }
-  .a-foot-index a:hover { background-size: 100% 1px; }
   .a-city summary:hover::after { opacity: 1; }
   .a-city summary:hover span { background: var(--a-cobalt); }
 }
@@ -1290,19 +882,7 @@ body:has(.a) {
 }
 @keyframes a-char { from { opacity: 0; transform: translateY(0.42em); } }
 
-/* 01 — сцена проявляется поверх постера, когда собран первый кадр (в
-   покое — тот же кадр, что постер). За рукой сцена наклоняется сама
-   (gl/hero.ts); постер неподвижен — он виден только до сцены.
-   Уход обложки: группа чуть поднимается, уменьшается и растворяется.
-   --leave (0…1) пишет HeroGL; при reduced-motion и ?static=1 не пишется.
-   Подъём −5 % и уменьшение на 10 % вокруг центра держат формы внутри
-   прежнего блока: верхний край стоит, нижний поднимается. Никакого
-   «нырка» к камере. */
 .a-reel-canvas { transition: opacity 0.9s var(--m-settle); }
-.a-reel {
-  transform: translate3d(0, calc(var(--leave, 0) * -5%), 0) scale(calc(1 - var(--leave, 0) * 0.1));
-  opacity: calc(1 - var(--leave, 0) * 1.3);
-}
 
 /* 04 — строки тарифов въезжают с разных сторон. */
 .a-js .a-sheet .a-slide {
@@ -1320,13 +900,6 @@ body:has(.a) {
 }
 .a-js .a-map[data-seen] .a-city summary span { transform: none; }
 
-/* 03 — глобус: проявляется, когда видео может играть; на наведение
-   мягко подходит ближе. Цикл — само видео, вне кадра оно на паузе. */
-.a-globe { transition: opacity 1.2s var(--m-settle); }
-.a-globe .a-reel-move { transform: none; transition: transform 1.4s var(--m-settle); }
-@media (hover: hover) {
-  .a-globe:hover .a-reel-move { transform: scale(1.04); }
-}
 
 /* 06 — кольцо расходится от главной кнопки. */
 .a-btn-invert::after { animation: a-ring-btn 2.8s var(--m-settle) infinite; }
@@ -1343,19 +916,6 @@ body:has(.a) {
     animation-range: entry 0% entry 60%;
   }
 
-  /* 01 — уход первого экрана: строки разъезжаются, поле ныряет. */
-  .a-cover .a-fit-1 { animation: a-exit-l linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
-  .a-cover .a-fit-2 { animation: a-exit-r linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
-
-  /* 03 — глобус поднимается из-под листа и подходит ближе, пока
-     читатель доходит до карты. */
-  .a-globe .a-reel-video {
-    transform-origin: 50% 70%;
-    animation: a-globe-in linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 45%;
-  }
-  @keyframes a-globe-in { from { transform: translateY(12%) scale(0.84); } }
 
   /* 03 — карта входит приближенной к Европе и отдаляется до мира. */
   .a-chart {
@@ -1385,19 +945,6 @@ body:has(.a) {
 }
 @keyframes a-h2-in { from { clip-path: inset(0 0 100% 0); transform: translateY(0.35em); } }
 
-/* 01 — по «и не тормозит» раз в несколько секунд пробегает волна:
-   сигнал проходит по строке. Одним списком с появлением буквы, иначе
-   холостое имя перебивает загрузочное. */
-.a-js .a-fit-2 .a-char {
-  animation: a-char 760ms var(--m-settle) both, a-wave 6s var(--m-tide) infinite;
-  animation-delay: calc(80ms + var(--i) * 26ms), calc(1.6s + (var(--i) - 6) * 70ms);
-}
-@keyframes a-wave {
-  0%, 12%, 100% { transform: none; }
-  6% { transform: translateY(-0.07em); }
-}
-.a-js .a-sheet:not([data-inview]) .a-fit-2 .a-char { animation-play-state: paused; }
-
 /* Главная кнопка: заливка набегает под рукой, а не щёлкает цветом. */
 .a-btn-primary {
   background: linear-gradient(var(--a-cobalt-deep), var(--a-cobalt-deep)) no-repeat left / 0 100%, var(--a-cobalt);
@@ -1408,10 +955,6 @@ body:has(.a) {
 }
 
 @keyframes a-curtain { from { clip-path: inset(0 3.5% 0 3.5%); } }
-/* Ход на уходе — 3 %, с затуханием: при 9 % строки уезжали за край и
-   «и не тормозит» обрезалась (кадр 01b, 11.09.2026). */
-@keyframes a-exit-l { to { transform: translateX(-3%); opacity: 0.3; } }
-@keyframes a-exit-r { to { transform: translateX(3%); opacity: 0.3; } }
 @keyframes a-word { from { opacity: 0.18; transform: translateY(0.22em); } }
 @keyframes a-zoom { from { transform: scale(1.85); } }
 /* Короткий ход: при 30–102 px цифры наезжали на заголовки шагов. */
@@ -1457,32 +1000,6 @@ body:has(.a) {
 }
 @keyframes a-foot-in { from { opacity: 0; transform: translateY(28px); } }
 @keyframes a-foot-word { from { opacity: 0; transform: translateY(45%); } }
-
-/* ─── 6.8 Раздел 03 — одно проявление на входе ──────────────────────
-   Зума нет (14.09.2026): масштаб глобуса по прокрутке читался как
-   «сначала большая, потом маленькая, потом зум». Глобус и текст один
-   раз проявляются, пока раздел входит в кадр, дальше неподвижны —
-   живость даёт вращение самого глобуса. Только opacity и сдвиг. */
-@supports (animation-timeline: view()) {
-  .a-pin { view-timeline: --a-pin block; }
-  .a-pin .a-pin-art canvas,
-  .a-pin .a-pin-art .a-reel-poster {
-    animation: a-pin-in linear both;
-    animation-timeline: --a-pin;
-    animation-range: entry 10% entry 75%;
-  }
-  .a-pin-copy {
-    animation: a-pin-copy-in linear both;
-    animation-timeline: --a-pin;
-    animation-range: entry 25% entry 85%;
-  }
-  @keyframes a-pin-in { from { opacity: 0; transform: translate3d(0, 4%, 0); } }
-  @keyframes a-pin-copy-in { from { transform: translate3d(0, 32px, 0); opacity: 0; } }
-}
-@media (prefers-reduced-motion: reduce) {
-  .a-pin-stage { min-height: min(80svh, 720px); }
-}
-html[data-static] .a-pin-stage { min-height: min(80svh, 720px); }
 
 /* ─── 6.5 Упрощение и стабильный кадр ───────────────────────────────
    Reduced-motion упрощает слой, а не ломает его: конечный кадр, без

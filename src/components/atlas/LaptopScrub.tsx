@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type CSSProperties } from "react";
+import { whenQuiet } from "./idle";
 
 /**
  * 06 — ноутбук открывается по прокрутке (владелец, 11.09.2026: «хочу,
@@ -19,18 +20,53 @@ import { useEffect, useRef, type CSSProperties } from "react";
  * в конце — свечение экрана и платформы. Доля открытия пишется в
  * `--open` (0…1) — от неё в CSS подъём ноутбука и свечение под экраном.
  *
- * СТОИМОСТЬ. Кадры грузятся за полтора экрана до блока и декодируются
- * заранее (img.decode); цикл rAF крутится только пока открытие догоняет
- * прокрутку. reduced-motion, экономия трафика и ?static=1 — только постер
+ * СТОИМОСТЬ (профиль 14.09.2026). Прежде все 120 кадров разом качались и
+ * декодировались за 0,6 экрана до блока — посреди прокрутки, кадр
+ * 125–142 мс на первом визите; а 120 декодированных кадров 1400 × 900
+ * (~600 МБ) не помещались в кеш браузера, он выбрасывал их и
+ * декодировал заново на отрисовке — кадры по 100 мс уже во время
+ * открытия. Теперь:
+ *   · сжатые кадры (~2 МБ) качаются пачками по BATCH в простое после
+ *     load и в паузах прокрутки (`./idle`); у блока — без пауз;
+ *   · декодированными (ImageBitmap, декод вне основного потока) держатся
+ *     только WINDOW кадров по обе стороны от показанного, плюс первый и
+ *     последний; остальные закрываются.
+ * reduced-motion, экономия трафика и ?static=1 — только постер
  * (открытый ноутбук).
  */
 const N = 120;
 const OPEN_FROM = 0.1;
 const OPEN_TO = 0.7;
+const BATCH = 8;
+const WINDOW = 8;
+const DECODING = 3;
 const frameSrc = (k: number) => `/media/laptop/f${String(k).padStart(3, "0")}.webp`;
 const POSTER = "/media/laptop/poster.jpg";
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+type Frame = ImageBitmap | HTMLImageElement;
+
+/** Декод вне основного потока; без createImageBitmap — картинкой. */
+function decodeBlob(blob: Blob): Promise<Frame> {
+  if (typeof createImageBitmap === "function") return createImageBitmap(blob);
+  const img = new Image();
+  const url = URL.createObjectURL(blob);
+  img.src = url;
+  return img.decode().then(
+    () => {
+      URL.revokeObjectURL(url);
+      return img;
+    },
+    (e) => {
+      URL.revokeObjectURL(url);
+      throw e;
+    },
+  );
+}
+const release = (f: Frame) => {
+  if ("close" in f) f.close();
+};
 
 export default function LaptopScrub({ className }: { className: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -52,13 +88,16 @@ export default function LaptopScrub({ className }: { className: string }) {
       return;
     }
 
-    const frames: (HTMLImageElement | undefined)[] = new Array(N);
+    const blobs: (Blob | undefined)[] = new Array(N);
+    const frames: (Frame | undefined)[] = new Array(N);
+    const decoding = new Set<number>();
     const pin = host.closest<HTMLElement>("[data-scrub]");
-    let started = false;
+    let disposed = false;
     let shown = -1; // показанная доля открытия; −1 — ещё не рисовали
     let dirty = true;
     let raf = 0;
     let last = 0;
+    let center = 0; // кадр, вокруг которого держится окно декода
 
     const target = () => {
       const vh = window.innerHeight;
@@ -73,7 +112,48 @@ export default function LaptopScrub({ className }: { className: string }) {
       // экрана — «появляется поздно, мелко и внизу» (аудит 13.09.2026).
       return clamp01((vh * 0.95 - r.top) / (vh * 0.45));
     };
-    // Ближайший уже загруженный кадр — чтобы на медленной сети не было дыр.
+
+    // ── Окно декода ──────────────────────────────────────────────────
+    const keep = (k: number) => k === 0 || k === N - 1 || Math.abs(k - center) <= WINDOW;
+    const decode = (k: number) => {
+      const blob = blobs[k];
+      if (!blob || frames[k] || decoding.has(k)) return;
+      decoding.add(k);
+      decodeBlob(blob)
+        .then((f) => {
+          decoding.delete(k);
+          if (disposed || !keep(k)) {
+            release(f);
+          } else {
+            frames[k] = f;
+            dirty = true;
+            tick();
+          }
+          fill();
+        })
+        .catch(() => {
+          decoding.delete(k);
+        });
+    };
+    /** Закрыть кадры вне окна и декодировать недостающие — ближние первыми. */
+    const fill = () => {
+      if (disposed) return;
+      for (let k = 0; k < N; k++) {
+        const f = frames[k];
+        if (f && !keep(k)) {
+          release(f);
+          frames[k] = undefined;
+        }
+      }
+      for (let d = 0; d <= WINDOW && decoding.size < DECODING; d++) {
+        decode(center + d);
+        if (d && center - d >= 0 && decoding.size < DECODING) decode(center - d);
+      }
+      if (decoding.size < DECODING) decode(0);
+      if (decoding.size < DECODING) decode(N - 1);
+    };
+
+    // Ближайший уже готовый кадр — чтобы на медленной сети не было дыр.
     const nearest = (k: number) => {
       for (let d = 0; d < N; d++) {
         if (frames[k - d]) return k - d;
@@ -83,6 +163,11 @@ export default function LaptopScrub({ className }: { className: string }) {
     };
     const paint = (p: number) => {
       const f = p * (N - 1);
+      const c = Math.round(f);
+      if (c !== center) {
+        center = c;
+        fill();
+      }
       const a = nearest(Math.floor(f));
       if (a < 0) return;
       const b = nearest(Math.min(N - 1, Math.ceil(f)));
@@ -91,10 +176,10 @@ export default function LaptopScrub({ className }: { className: string }) {
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
       ctx.globalAlpha = 1;
-      ctx.drawImage(frames[a] as HTMLImageElement, 0, 0, w, h);
+      ctx.drawImage(frames[a] as Frame, 0, 0, w, h);
       if (b >= 0 && b !== a && mix > 0.02) {
         ctx.globalAlpha = mix;
-        ctx.drawImage(frames[b] as HTMLImageElement, 0, 0, w, h);
+        ctx.drawImage(frames[b] as Frame, 0, 0, w, h);
         ctx.globalAlpha = 1;
       }
       host.style.setProperty("--open", p.toFixed(4));
@@ -130,29 +215,51 @@ export default function LaptopScrub({ className }: { className: string }) {
       dirty = true;
       tick();
     };
-    const load = () => {
-      if (started) return;
-      started = true;
-      // Первый и последний кадры — вперёд: есть что показать сразу.
-      const order = [0, N - 1, ...Array.from({ length: N - 2 }, (_, i) => i + 1)];
-      for (const k of order) {
-        const img = new Image();
-        img.decoding = "async";
-        img.src = frameSrc(k);
-        img
-          .decode()
-          .then(() => {
-            frames[k] = img;
-            dirty = true;
-            tick();
-          })
-          .catch(() => {});
-      }
-    };
 
-    // 0,6 экрана до блока, а не полтора: 120 кадров (~1,6 МБ) иначе
-    // забирали канал у первого экрана на медленной сети (замер 13.09.2026).
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && load(), { rootMargin: "60% 0px" });
+    // ── Загрузка пачками ─────────────────────────────────────────────
+    // Первый и последний кадры — вперёд: есть что показать сразу.
+    const order = [0, N - 1, ...Array.from({ length: N - 2 }, (_, i) => i + 1)];
+    let next = 0;
+    let busy = false;
+    let near = false;
+    let cancelQuiet = () => {};
+    const batch = () => {
+      if (disposed || busy || next >= order.length) return;
+      busy = true;
+      const ks = order.slice(next, next + BATCH);
+      next += ks.length;
+      Promise.all(
+        ks.map((k) =>
+          fetch(frameSrc(k), { priority: "low" } as RequestInit)
+            .then((r) => (r.ok ? r.blob() : undefined))
+            .then((b) => {
+              if (b) blobs[k] = b;
+            })
+            .catch(() => {}),
+        ),
+      ).then(() => {
+        busy = false;
+        if (disposed) return;
+        fill();
+        if (next >= order.length) return;
+        // У блока — без пауз, иначе в тихом окне.
+        if (near) window.setTimeout(batch, 0);
+        else cancelQuiet = whenQuiet(batch);
+      });
+    };
+    cancelQuiet = whenQuiet(batch);
+
+    // 0,6 экрана до блока: если очередь не успела, догружаем без пауз.
+    const io = new IntersectionObserver(
+      ([e]) => {
+        near = e.isIntersecting;
+        if (near && !busy) {
+          cancelQuiet();
+          batch();
+        }
+      },
+      { rootMargin: "60% 0px" },
+    );
     io.observe(host);
     const ro = new ResizeObserver(size);
     ro.observe(host);
@@ -160,10 +267,13 @@ export default function LaptopScrub({ className }: { className: string }) {
     size();
 
     return () => {
+      disposed = true;
+      cancelQuiet();
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("scroll", tick);
       if (raf) cancelAnimationFrame(raf);
+      frames.forEach((f) => f && release(f));
     };
   }, []);
 

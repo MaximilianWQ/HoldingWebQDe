@@ -2,8 +2,9 @@
  * Сцена реального времени для объектов главной — общий рантайм.
  *
  * Этот модуль лёгкий и живёт в основном бандле: он решает, рисовать ли
- * вообще, ждёт подхода блока к кадру и только тогда тянет three.js и
- * саму сцену отдельными чанками (`./core`, `./hero`, `./orb`).
+ * вообще, и тянет three.js и саму сцену отдельными чанками (`./core`,
+ * `./hero`, `./orb`) — в простое после load по одной сцене (`../idle`)
+ * или при подходе блока к кадру, что раньше.
  *
  * ПЛАВНОСТЬ. Кадр рисуется на частоте экрана (requestAnimationFrame —
  * 60, 120, 144 или 240 Гц, сколько даёт монитор), а всё движение
@@ -21,6 +22,7 @@
  *     three.js не скачивается вовсе.
  */
 import type { PerspectiveCamera, RenderTarget, Scene, WebGPURenderer } from "three/webgpu";
+import { enqueueQuiet } from "../idle";
 
 export type Tier = 0 | 1 | 2;
 
@@ -321,6 +323,12 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
     }
   };
 
+  // Сборка — заранее, в простое после load и в паузе прокрутки, по одной
+  // сцене за раз (`../idle`): чанк three (~85 мс разбора), рендерер и
+  // шейдеры при подходе к блоку давали кадры 60–600 мс посреди прокрутки
+  // (профиль 14.09.2026). Подход к блоку — запасной путь, если читатель
+  // долистал раньше, чем очередь дошла до сцены.
+  const cancelPre = enqueueQuiet(() => (started || disposed ? Promise.resolve() : init()));
   const near = new IntersectionObserver(
     (es) => {
       if (!started && es.some((e) => e.isIntersecting)) void init();
@@ -351,6 +359,7 @@ export function mountStage(host: HTMLElement, canvas: HTMLCanvasElement, o: Stag
 
   return () => {
     disposed = true;
+    cancelPre();
     near.disconnect();
     seen.disconnect();
     ro.disconnect();

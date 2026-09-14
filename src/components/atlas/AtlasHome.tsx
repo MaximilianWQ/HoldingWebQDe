@@ -4,12 +4,14 @@ import AtlasDefs from "./AtlasDefs";
 import HeroGL, { type HeroPoster } from "./HeroGL";
 import LaptopScrub from "./LaptopScrub";
 import HeroSchema from "./HeroSchema";
+import PresenceSchema from "./PresenceSchema";
 import Corner from "./Corner";
 import Chars from "./Chars";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import type { ReactNode } from "react";
 import "@/app/home-v5.css";
 import "@/app/home-hero.css";
+import "@/app/home-map.css";
 import {
   PLANS, PLAN_SPEED, PLAN_CONTENT, DEVICE_LIMIT, formatRub, pricePerMonth, type PlanId,
 } from "@/lib/plans";
@@ -66,7 +68,6 @@ const softPoster = (name: string, w: number, h: number, sizes: string): HeroPost
   w,
   h,
 });
-const GLOBE_POSTER = softPoster("globe-soft", 1000, 1000, "(min-width: 721px) 55vw, 100vw");
 const MISSION_POSTER = softPoster("mission-soft", 1000, 1000, "(min-width: 900px) 60vw, 100vw");
 
 /** Изобаты под плитой: линии глубины, светлее плиты. */
@@ -324,21 +325,16 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
         </section>
 
         {/* ── 03 · Страны ───────────────────────────────────────── */}
-        {/* 14.09.2026 (владелец: «кривая при прокрутке — сначала большая,
-            потом маленькая, и идёт зум»): закрепления и зума нет. Раздел
-            высотой в экран, глобус постоянного размера вращается за
-            текстом; на входе — одно мягкое проявление (atlas.css, 6.8). */}
-        <section className="a-sheet a-map a-pin" data-sheet="03" data-title="Страны" aria-labelledby="a-map-title">
-          <div className="a-pin-stage">
-            {/* Мягкий глобус реального времени (HeroGL "globe-soft",
-                14.09.2026): белая керамика, кобальтовые точки суши, города
-                наших локаций, дуги с огнями. Кадр на частоте экрана; без
-                WebGL, при reduced-motion и экономии трафика — постер той
-                же сцены. Стоит в правой части сцены — не под текстом. */}
-            <HeroGL className="a-pin-art a-pin-soft" composition="globe-soft" poster={GLOBE_POSTER} />
-            <div className="a-field a-pin-copy">
-              {/* Без a-settle: текст сцены проявляет шкала раздела (6.8),
-                  второе скрытие оставляло его пустым (аудит 13.09.2026). */}
+        {/* 14.09.2026 (владелец: «глобус — говно полное… сделай адекватным,
+            красивым или другое»): вместо 3D-глобуса — графическая карта
+            присутствия в языке первого экрана (PresenceSchema): ровная
+            точечная карта мира, наши города кобальтовыми узлами, несколько
+            проводов с бегущими пакетами, регионы пилюлями. Текст слева,
+            панель справа (на телефоне — под текстом). Одно проявление на
+            входе раздела; стили — src/app/home-map.css. */}
+        <section className="a-sheet a-map a-pm" data-sheet="03" data-title="Страны" aria-labelledby="a-map-title">
+          <div className="a-field a-pm-grid">
+            <div className="a-pm-copy">
               <h2 id="a-map-title" className="a-h2">
                 <span className="a-no">03</span>{COUNTRY_COUNT} {COUNTRY_WORD}. выбирайте ближайшую
               </h2>
@@ -347,20 +343,21 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
                 {COUNTRY_COUNT} {COUNTRY_WORD} входят в каждый тариф — доплачивать за страну не нужно.
               </p>
             </div>
+            <PresenceSchema />
           </div>
           <div className="a-field">
-            {/* Всё, что есть на глобусе, — словами, для чтеца экрана. */}
+            {/* Всё, что есть на карте, — словами, для чтеца экрана. Задержек
+                нет: они не подтверждены замером. */}
             <table className="b-sr">
-              <caption>Серверы Atlas Secure и примерный отклик из Москвы</caption>
+              <caption>Страны и города с серверами Atlas Secure</caption>
               <thead>
-                <tr><th scope="col">страна</th><th scope="col">город</th><th scope="col">отклик, мс</th></tr>
+                <tr><th scope="col">страна</th><th scope="col">город</th></tr>
               </thead>
               <tbody>
-                {[...LOCATIONS].sort((a, b) => a.latencyMs - b.latencyMs).map((l) => (
+                {LOCATIONS.map((l) => (
                   <tr key={l.code}>
                     <td>{l.country}</td>
                     <td>{l.cities.join(", ")}</td>
-                    <td>примерно {l.latencyMs}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,10 +1,6 @@
 /**
- * Мягкие сцены главной (14.09.2026) — рисует `HeroGL`.
- *
- * "globe-soft" — раздел 03: большой мягкий глобус. Белая керамика,
- * кобальтовые точки суши (src/lib/world-map.ts), глянцевые бусины
- * городов наших локаций (src/lib/locations.ts), низкие дуги от Москвы,
- * по которым бегут кометы; медленное вращение.
+ * Мягкая сцена главной (14.09.2026) — рисует `HeroGL`. Глобус раздела 03
+ * ("globe-soft") снят 14.09.2026: раздел 03 — SVG-схема присутствия.
  *
  * "mission-soft" — раздел 07: мягкая сеть. Икосфера из белых и
  * кобальтовых узлов на хромированных стержнях вокруг матового стеклянного
@@ -28,8 +24,8 @@
  * размытое кобальтовое сердце за собой само (преломлённый луч по полю
  * расстояний сферы) — одинаково на WebGPU и WebGL 2, без копии кадра.
  *
- * БЮДЖЕТ (треугольники, уровень 2, замер 14.09.2026): globe-soft —
- * 30 448, mission-soft — 34 708 при потолке 60k (`budget` в HeroGL).
+ * БЮДЖЕТ (треугольники, уровень 2, замер 14.09.2026): mission-soft —
+ * 34 708 при потолке 60k (`budget` в HeroGL).
  * Ни копии кадра, ни карты теней, ни постобработки.
  */
 import * as THREE from "three/webgpu";
@@ -56,8 +52,6 @@ import {
   vec3,
 } from "three/tsl";
 import type { Builder, Tier } from "./stage";
-import { LOCATIONS } from "../../../lib/locations";
-import { CELL_DEG, LAT_TOP, LON_LEFT, WORLD_ROWS } from "../../../lib/world-map";
 
 /** Живые параметры от HeroGL. */
 export interface HeroLive {
@@ -67,7 +61,7 @@ export interface HeroLive {
 
 const COBALT = 0x1432b8;
 
-export type Composition = "globe-soft" | "mission-soft";
+export type Composition = "mission-soft";
 
 type P3 = readonly [number, number, number];
 /** Раскладка сцены: кадр (пропорция, высота в единицах, угол камеры), пол, форма, подложка-тень. */
@@ -79,23 +73,13 @@ interface Layout {
   floor: number;
   /** Общая подложка-тень: центр по x, размер, сила. */
   under: { x: number; sx: number; sz: number; k: number };
-  /** Мягкий глобус: радиус, центр, наклон оси; прореживание точек суши по уровням устройства. */
-  softGlobe?: { r: number; at: P3; tilt: number; density: readonly [number, number, number] };
   /** Мягкая решётка: узлы-сферы белые и кобальтовые на хромированных стержнях, внутри — матовое стеклянное ядро. */
-  softLattice?: { r: number; at: P3; tilt: number };
+  softLattice: { r: number; at: P3; tilt: number };
   /** Загрузка «форма садится»: лёгкий подъём и посадка (от позы постера). */
   settle?: boolean;
 }
 
 const LAYOUTS: Record<Composition, Layout> = {
-  "globe-soft": {
-    aspect: 1,
-    frameH: 6.4,
-    fov: 20,
-    floor: -3.0,
-    softGlobe: { r: 2.3, at: [0, 0.15, 0], tilt: 0.36, density: [2, 1, 1] },
-    under: { x: 0, sx: 5.5, sz: 3.2, k: 0.05 },
-  },
   "mission-soft": {
     aspect: 1,
     frameH: 6.4,
@@ -280,105 +264,6 @@ export function makeHero(live: HeroLive, composition: Composition): Builder {
     const TRAIL = 5;
     const cometPaths: { curve: THREE.Curve<THREE.Vector3>; dir: 1 | -1; phase: number; period: number; size: number }[] = [];
 
-    // ── Мягкий глобус ───────────────────────────────────────────────
-    /** Дуги глобуса: прочерчивание светом при загрузке. */
-    const softArcProg: ReturnType<typeof uniform>[] = [];
-    const softArcAmp: ReturnType<typeof uniform>[] = [];
-    let cityNodes: THREE.InstancedMesh | null = null;
-    const cityPos: THREE.Vector3[] = [];
-    const cityPhase: number[] = [];
-    /** Масштаб узлов-городов — по радиусу глобуса. */
-    let citySize = 1;
-    const SG = L.softGlobe;
-    if (SG) {
-      const R0 = SG.r;
-      const gg = new THREE.Group();
-      const inner = new THREE.Group(); // вращение вокруг оси; наклон оси — на gg
-      gg.add(inner);
-      const ball = new THREE.Mesh(hiSphere, techWhite);
-      ball.scale.setScalar(R0);
-      inner.add(ball);
-      // Точки суши — плоские кобальтовые диски на поверхности (8–10
-      // треугольников на точку вместо сферы).
-      const stepG = pick(tier, SG.density);
-      const disc = new THREE.CircleGeometry(1, 10);
-      const dotMat = lacquer();
-      const pts: THREE.Vector3[] = [];
-      WORLD_ROWS.forEach((row, ri) => {
-        for (let ci = 0; ci < row.length; ci++) {
-          if (row[ci] !== "#" || (ri + ci) % stepG !== 0) continue;
-          const fl = THREE.MathUtils.degToRad(LAT_TOP - ri * CELL_DEG);
-          const lo = THREE.MathUtils.degToRad(LON_LEFT + ci * CELL_DEG);
-          pts.push(new THREE.Vector3(Math.cos(fl) * Math.sin(lo), Math.sin(fl), Math.cos(fl) * Math.cos(lo)));
-        }
-      });
-      const dots = new THREE.InstancedMesh(disc, dotMat, pts.length);
-      const discAxis = new THREE.Vector3(0, 0, 1);
-      pts.forEach((n, i) => {
-        tq.setFromUnitVectors(discAxis, n);
-        // Размер точки не больше доли шага сетки — при полной плотности точки не слипаются.
-        const rDot = Math.min(0.03 * R0 * (stepG === 3 ? 1.15 : 1), 0.38 * stepG * THREE.MathUtils.degToRad(CELL_DEG) * R0);
-        dots.setMatrixAt(i, tm.compose(tp.copy(n).multiplyScalar(R0 * 1.004), tq, tsc.setScalar(rDot)));
-      });
-      inner.add(dots);
-      // Города наших локаций — глянцевые кобальтовые бусины (пульсируют
-      // после загрузки); дуги от Москвы — невысокие, чтобы не выходить из
-      // кадра; по дугам бегут кометы.
-      const onS = (lat: number, lon: number, rr: number) => {
-        const fl = THREE.MathUtils.degToRad(lat);
-        const lo = THREE.MathUtils.degToRad(lon);
-        return new THREE.Vector3(rr * Math.cos(fl) * Math.sin(lo), rr * Math.sin(fl), rr * Math.cos(fl) * Math.cos(lo));
-      };
-      citySize = R0 / 1.05;
-      for (const loc of LOCATIONS) {
-        cityPos.push(onS(loc.lat, loc.lon, R0 * 1.012));
-        cityPhase.push(hash(cityPos.length * 5.3));
-      }
-      cityNodes = new THREE.InstancedMesh(pipLo, lacquer(), cityPos.length);
-      cityNodes.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      inner.add(cityNodes);
-      const hub = onS(55.75, 37.62, R0);
-      const byLat = [...LOCATIONS].sort((p1, p2) => p1.latencyMs - p2.latencyMs);
-      const targets = [byLat[3], byLat[5], byLat[8], byLat[12], byLat[16]].filter(Boolean);
-      targets.forEach((tl, k) => {
-        const va = hub.clone().normalize();
-        const vb = onS(tl.lat, tl.lon, R0).normalize();
-        const ang = va.angleTo(vb);
-        const ptsA: THREE.Vector3[] = [];
-        for (let j = 0; j <= 24; j++) {
-          const f = j / 24;
-          const v = va.clone().multiplyScalar(Math.sin((1 - f) * ang)).addScaledVector(vb, Math.sin(f * ang)).divideScalar(Math.sin(ang) || 1);
-          ptsA.push(v.multiplyScalar(R0 * (1.01 + 0.12 * ang * Math.sin(Math.PI * f))));
-        }
-        const arcCurve = new THREE.CatmullRomCurve3(ptsA);
-        const prog = uniform(0);
-        const amp = uniform(0);
-        softArcProg.push(prog);
-        softArcAmp.push(amp);
-        const am = lacquer();
-        {
-          const ux = uv().x;
-          const dh = ux.sub(prog).div(0.05);
-          const head = exp(dh.mul(dh).negate());
-          const trail = float(1).sub(smoothstep(prog.sub(0.004), prog, ux));
-          am.emissiveNode = color(0xa9bcff).mul(head.mul(1.4).add(trail.mul(0.6)).mul(amp));
-        }
-        inner.add(new THREE.Mesh(new THREE.TubeGeometry(arcCurve, 40, 0.012 * (R0 / 1.35), 6, false), am));
-        cometPaths.push({ curve: new LocalCurve(arcCurve, inner), dir: 1, phase: k * 0.23, period: 3.4, size: 0.05 * (R0 / 1.35) });
-      });
-      // Европа — к зрителю в кадре покоя.
-      const lon0 = -THREE.MathUtils.degToRad(30);
-      add(gg, SG.at, [SG.tilt, 0, 0.1], {
-        order: 0,
-        low: R0, sx: 1.9 * R0, sz: 1.9 * R0, k: 0.24,
-        drive: (t) => {
-          gg.position.set(SG.at[0], SG.at[1] + wake(t, 0) * 0.08 * Math.sin((TAU * t) / 11 + 0.4), SG.at[2]);
-          gg.rotation.set(SG.tilt, 0, 0.1);
-          inner.rotation.set(0, lon0 + (TAU / 60) * run(t), 0);
-        },
-      });
-    }
-
     // ── Мягкая сеть: икосфера из узлов на стержнях вокруг матового ядра ──
     const SL = L.softLattice;
     if (SL) {
@@ -546,21 +431,6 @@ export function makeHero(live: HeroLive, composition: Composition): Builder {
 
         // ЗАГРУЗКА (после кадра постера, ~2 с) и холостой ход. В t = 0 всё
         // в позе постера: дуги не прочерчены, комет нет.
-        if (softArcProg.length) {
-          const drawAmpS = sm(0.85, 0.95, t) * (1 - sm(1.9, 2.5, t));
-          softArcProg.forEach((u, i) => {
-            u.value = sm(0, 1, (t - 0.9 - i * 0.12) / 0.8);
-            softArcAmp[i].value = drawAmpS;
-          });
-        }
-        if (cityNodes) {
-          for (let i = 0; i < cityPos.length; i++) {
-            const pulse = 0.5 + 0.5 * Math.sin(TAU * (t / 2.6 + cityPhase[i]));
-            const sz = (0.022 + 0.014 * pulse * sm(1.4, 2.0, t)) * citySize;
-            cityNodes.setMatrixAt(i, m4.compose(cityPos[i], q.identity(), s.setScalar(sz)));
-          }
-          cityNodes.instanceMatrix.needsUpdate = true;
-        }
         if (comets && cometK) {
           // Кометы начинают течь после загрузки.
           const flow = sm(1.6, 2.2, t);

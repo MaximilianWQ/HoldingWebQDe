@@ -1053,14 +1053,16 @@ body:has(.a) {
   .a-globe { aspect-ratio: 4 / 3; }
 }
 
-/* 03 — сцена «зум с остановкой»: раздел в несколько экранов, сцена
-   закреплена под шапкой, глобус — во всю ширину за текстом. Текст
-   читается на белой подложке-растворе слева. Движение — 6.8. */
-.a-pin { height: 240svh; padding-block: 0; }
+/* 03 — глобус за текстом (14.09.2026, владелец: «кривая при прокрутке:
+   сначала большая, потом маленькая, и идёт зум — переделать в стиле
+   Yandex Tech»). Закрепления и зума больше нет: раздел высотой в экран
+   прокручивается как обычный, глобус постоянного размера медленно
+   вращается сам (gl/globe.ts) и поворачивается за рукой; на входе —
+   одно мягкое проявление (6.8). Текст — на белой подложке слева. */
+.a-pin { padding-block: 0; }
 .a-pin-stage {
-  position: sticky;
-  top: var(--a-head-h);
-  height: calc(100svh - var(--a-head-h));
+  position: relative;
+  min-height: min(calc(100svh - var(--a-head-h)), 900px);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1096,7 +1098,6 @@ body:has(.a) {
      сцена короче — после ухода глобуса оставалась пустая полоса ~330px
      перед разделом 04 (QA 12.09.2026, 375). */
   .a-pin .a-pin-art { top: 42%; }
-  .a-pin { height: 190svh; }
 }
 
 /* 03 — карта приближается внутри рамки, не выходя за неё. */
@@ -1409,54 +1410,30 @@ body:has(.a) {
 @keyframes a-foot-in { from { opacity: 0; transform: translateY(28px); } }
 @keyframes a-foot-word { from { opacity: 0; transform: translateY(45%); } }
 
-/* ─── 6.8 Зум с остановкой — раздел 03 ─────────────────────────────
-   Шкала — собственная прокрутка раздела (view-timeline), диапазон
-   contain: ровно те экраны, пока сцена закреплена. Глобус подъезжает
-   издалека, на середине держится (остановка — время прочитать), в
-   конце уходит вперёд и растворяется; текст входит снизу и уходит
-   вверх. Правило сильнее прежнего «a-globe-in»: сцена его заменяет. */
+/* ─── 6.8 Раздел 03 — одно проявление на входе ──────────────────────
+   Зума нет (14.09.2026): масштаб глобуса по прокрутке читался как
+   «сначала большая, потом маленькая, потом зум». Глобус и текст один
+   раз проявляются, пока раздел входит в кадр, дальше неподвижны —
+   живость даёт вращение самого глобуса. Только opacity и сдвиг. */
 @supports (animation-timeline: view()) {
   .a-pin { view-timeline: --a-pin block; }
   .a-pin .a-pin-art canvas {
-    transform-origin: 62% 50%;
-    animation: a-pin-zoom linear both;
+    animation: a-pin-in linear both;
     animation-timeline: --a-pin;
-    animation-range: contain 0% contain 100%;
+    animation-range: entry 10% entry 75%;
   }
-  /* Текст проявляется, пока раздел ВХОДИТ в кадр, и дальше не гаснет.
-     Прежде вход и уход были внутри contain: до начала закрепления текст
-     стоял на opacity 0, к концу гас и он, и глобус — закреплённая сцена
-     целый экран оставалась белой на входе и на уходе (аудит 13.09.2026,
-     Chromium и WebKit, 1440 и 375). */
   .a-pin-copy {
     animation: a-pin-copy-in linear both;
     animation-timeline: --a-pin;
-    animation-range: entry 35% contain 6%;
+    animation-range: entry 25% entry 85%;
   }
-  @keyframes a-pin-zoom {
-    0%   { transform: scale(0.72); opacity: 0.6; }
-    34%  { transform: scale(1); opacity: 1; }
-    66%  { transform: scale(1.06); opacity: 1; }
-    100% { transform: scale(1.22); opacity: 0.85; }
-  }
-  @keyframes a-pin-copy-in { from { transform: translate3d(0, 48px, 0); opacity: 0; } }
-  @media (max-width: 720px) {
-    .a-pin .a-pin-art canvas { animation-name: a-pin-zoom-m; }
-  }
-  @keyframes a-pin-zoom-m {
-    0%   { transform: scale(0.7); opacity: 0.6; }
-    34%  { transform: scale(1); opacity: 1; }
-    70%  { transform: scale(1.04); opacity: 1; }
-    100% { transform: scale(1.14); opacity: 0.85; }
-  }
+  @keyframes a-pin-in { from { opacity: 0; transform: translate3d(0, 4%, 0); } }
+  @keyframes a-pin-copy-in { from { transform: translate3d(0, 32px, 0); opacity: 0; } }
 }
-/* Упрощение: обычный раздел — глобус за текстом, без закрепления. */
 @media (prefers-reduced-motion: reduce) {
-  .a-pin { height: auto; }
-  .a-pin-stage { position: relative; top: auto; height: auto; min-height: min(80svh, 720px); }
+  .a-pin-stage { min-height: min(80svh, 720px); }
 }
-html[data-static] .a-pin { height: auto; }
-html[data-static] .a-pin-stage { position: relative; top: auto; height: auto; min-height: min(80svh, 720px); }
+html[data-static] .a-pin-stage { min-height: min(80svh, 720px); }
 
 /* ─── 6.5 Упрощение и стабильный кадр ───────────────────────────────
    Reduced-motion упрощает слой, а не ломает его: конечный кадр, без

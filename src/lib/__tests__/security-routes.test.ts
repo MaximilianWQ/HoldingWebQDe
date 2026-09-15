@@ -187,9 +187,25 @@ describe("bot/register", () => {
 describe("client IP and limits", () => {
   const h = (o: Record<string, string>) => new Headers(o);
 
-  it("prefers cf-connecting-ip (set by Cloudflare) over a client-supplied x-forwarded-for", () => {
-    expect(clientIpFrom(h({ "cf-connecting-ip": "203.0.113.7", "x-forwarded-for": "1.1.1.1" }))).toBe("203.0.113.7");
-    expect(clientIpFrom(h({ "x-forwarded-for": "198.51.100.2, 10.0.0.1" }))).toBe("198.51.100.2");
+  // 15.09.2026: the site is behind Railway's edge, not Cloudflare. A prod test
+  // showed forged cf-connecting-ip values bypassing the send-code IP limit.
+  it("ignores a client-supplied cf-connecting-ip (no Cloudflare in front)", () => {
+    expect(clientIpFrom(h({ "cf-connecting-ip": "203.0.113.7", "x-forwarded-for": "1.1.1.1" }))).toBe("1.1.1.1");
+    expect(clientIpFrom(h({ "cf-connecting-ip": "203.0.113.7" }))).toBeNull();
+  });
+
+  it("takes the RIGHTMOST public x-forwarded-for entry (the one the proxy appended)", () => {
+    // client prepended a fake address; the proxy appended the real one
+    expect(clientIpFrom(h({ "x-forwarded-for": "198.51.100.99, 203.0.113.50" }))).toBe("203.0.113.50");
+    // internal platform hops after the real client are skipped
+    expect(clientIpFrom(h({ "x-forwarded-for": "203.0.113.50, 10.0.0.1, 100.64.3.2" }))).toBe("203.0.113.50");
+    // a single entry (proxy overwrote the header) works the same
+    expect(clientIpFrom(h({ "x-forwarded-for": "198.51.100.2" }))).toBe("198.51.100.2");
+  });
+
+  it("falls back to x-real-ip, then to a private hop, and rejects junk", () => {
+    expect(clientIpFrom(h({ "x-real-ip": "203.0.113.9" }))).toBe("203.0.113.9");
+    expect(clientIpFrom(h({ "x-forwarded-for": "10.0.0.5" }))).toBe("10.0.0.5");
     expect(clientIpFrom(h({ "x-forwarded-for": "<script>" }))).toBeNull();
     expect(clientIpFrom(h({}))).toBeNull();
   });

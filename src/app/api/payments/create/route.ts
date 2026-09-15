@@ -9,17 +9,14 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const PAYMENT_LIFETIME_MS = 15 * 60 * 1000; // 15 minutes
 
-let warnedNoBaseUrl = false;
+/** Боевой адрес сайта — умолчание в коде (как в payments.ts), env только переопределяет. */
+const DEFAULT_SITE_URL = "https://qodev.dev";
 
-/** Where YooKassa sends the buyer back. Env first; the request origin is a logged fallback. */
-function siteBaseUrl(request: NextRequest): string {
+/** Where YooKassa sends the buyer back. Env first, then the production address —
+ *  never the request Origin (it's client-controlled). Local runs set SITE_BASE_URL. */
+function siteBaseUrl(_request: NextRequest): string {
   const env = (process.env.SITE_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/+$/, "");
-  if (env) return env;
-  if (!warnedNoBaseUrl) {
-    warnedNoBaseUrl = true;
-    console.warn("[PAYMENTS] SITE_BASE_URL is not set — building returnUrl from the request origin");
-  }
-  return (request.headers.get("origin") || request.nextUrl.origin).replace(/\/+$/, "");
+  return env || DEFAULT_SITE_URL;
 }
 
 /**

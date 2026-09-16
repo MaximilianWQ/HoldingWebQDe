@@ -73,7 +73,7 @@
   }
   .a-hero-text { align-self: start; }
 }
-.a-hero-title { grid-area: title; }
+.a-hero-head { grid-area: title; }
 .a-hero-stage { grid-area: stage; }
 .a-hero-text { grid-area: text; }
 
@@ -89,6 +89,35 @@
   text-wrap: balance;
 }
 .a-hero-title em { font-style: normal; color: var(--a-cobalt); }
+
+/* Плашка над фразой — что это за продукт (владелец, 16.09.2026). Стекло
+   первого экрана, кобальтовая точка — «включено». */
+.a-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 34px;
+  margin: 0 0 clamp(0.75rem, 1.8vh, 1.25rem);
+  padding: 0 0.9rem 0 0.75rem;
+  border: 1px solid var(--hero-edge);
+  border-radius: 999px;
+  background: var(--hero-glass);
+  box-shadow: var(--hero-depth);
+  font-family: var(--a-wide);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--a-ink);
+  white-space: nowrap;
+}
+.a-hero-kicker i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--a-cobalt);
+  box-shadow: 0 0 0 3px rgba(20, 50, 184, 0.16);
+}
 
 /* ─── Сцена справа (на телефоне — полоса под фразой) ────────────── */
 .a-hero-stage {

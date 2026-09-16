@@ -56,8 +56,9 @@ const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройство", "устрой�
 /* 01 — первый экран (владелец, 14.09.2026: утверждён вариант лаборатории
    V6, режим E): фраза пользы крупно, плоско и плотно вместо имени;
    справа — «Схема» (HeroSchema: огромный знак, модули-плиты, пластина
-   шлифованного металла, провода; вариант лаборатории 7). Имя и позиция
-   «VPS-ускоритель» — в скрытой части заголовка для читалок и поиска. */
+   шлифованного металла, провода; вариант лаборатории 7). Над фразой —
+   плашка «VPS-ускоритель интернета» (владелец, 16.09.2026: «написать
+   ускоритель интернета VPS корректно»): что это за продукт, видно сразу. */
 const HERO_A = "Видео, сайты и игры —";
 const HERO_B = "без тормозов.";
 
@@ -117,7 +118,7 @@ function FillTitle({ id, no, children }: { id: string; no: string; children: Rea
  *  «отмена в один клик»: оплата разовая (COMPLIANCE-CHECK.md). */
 const HERO_CARDS: { t: string; d: string; dark?: boolean }[] = [
   { t: `${TRIAL} бесплатно`, d: "без карты", dark: true },
-  { t: `${COUNTRY_COUNT} ${COUNTRY_WORD}`, d: "смена страны в один тап" },
+  { t: `${COUNTRY_COUNT} ${COUNTRY_WORD}`, d: "ускоряющий сервер на выбор" },
   { t: `от ${formatRub(PLANS.basic[1])} ₽ в месяц`, d: "без автосписаний" },
 ];
 
@@ -236,13 +237,18 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
         <section className="a-sheet a-cover a-hero" data-sheet="01" data-title="Главная" aria-labelledby="a-cover-title">
           <div className="a-hero-panel">
             <div className="a-field a-hero-grid">
+              <div className="a-hero-head">
+              <p className="a-hero-kicker" aria-hidden>
+                <i />VPS-ускоритель интернета
+              </p>
               <h1 id="a-cover-title" className="a-hero-title">
-                <span className="sr-only">Atlas Secure — VPS-ускоритель: видео, сайты и игры без тормозов</span>
+                <span className="sr-only">Atlas Secure — VPS-ускоритель интернета: видео, сайты и игры без тормозов</span>
                 <span aria-hidden>
                   <Chars text={HERO_A} />{" "}
                   <em><Chars text={HERO_B} start={HERO_A.length + 1} /></em>
                 </span>
               </h1>
+              </div>
 
               {/* «Схема» — только в правой колонке (на телефоне — полосой
                   под фразой): формы не заходят на текст. Декоративная
@@ -255,9 +261,10 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
                 <p className="a-lead a-hero-lead" style={{ ["--i" as string]: 3 }}>
                   Включаете{" "}
                   <span style={{ whiteSpace: "nowrap" }}>
-                    Atlas <span className="a-switch" aria-hidden><i /></span>
+                    ускоритель <span className="a-switch" aria-hidden><i /></span>
                   </span>{" "}
-                  — и&nbsp;всё открывается сразу, на&nbsp;полной скорости.
+                  — интернет идёт через наш быстрый сервер, и&nbsp;всё открывается сразу,
+                  на&nbsp;полной скорости.
                 </p>
                 <div className="a-hero-actions" style={{ ["--i" as string]: 4 }}>
                   <Link href={enter} className="a-hero-btn a-hero-btn-ink">Попробовать {TRIAL} бесплатно</Link>
@@ -291,16 +298,18 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
               <div className="a-field h5-diff-grid">
                 <div className="h5-diff-head">
                   <h2 id="h5-diff-title" className="a-h2">
-                    <span className="a-no">02</span>что меняется, когда Atlas включён
+                    <span className="a-no">02</span>что меняется, когда ускоритель включён
                   </h2>
                   <p className="a-p">
-                    Одна кнопка в приложении. Дальше Atlas работает сам — вот что вы заметите в первый же вечер.
+                    VPS-ускоритель ведёт ваш интернет через наш сервер с широким каналом. Включается
+                    одной кнопкой в приложении, дальше работает сам — вот что вы заметите в первый же
+                    вечер.
                   </p>
                   <div className="h5-toggle" aria-hidden>
                     <span className="h5-toggle-sw"><i /></span>
                     <span className="h5-toggle-label">
-                      <b className="h5-toggle-off">Atlas выключен</b>
-                      <b className="h5-toggle-on">Atlas включён</b>
+                      <b className="h5-toggle-off">Ускоритель выключен</b>
+                      <b className="h5-toggle-on">Ускоритель включён</b>
                     </span>
                   </div>
                 </div>
@@ -309,12 +318,12 @@ export default function AtlasHome({ referralCode }: { referralCode?: string }) {
                     <li key={r.what} className="h5-diff-row" style={{ ["--k" as string]: k }}>
                       <span className="h5-diff-what">{r.what}</span>
                       <span className="h5-diff-was">
-                        <span className="b-sr">Без Atlas: </span>
+                        <span className="b-sr">Без ускорителя: </span>
                         <span className="h5-strike">{r.was}</span>
                       </span>
                       <span className="h5-diff-arrow" aria-hidden><i /></span>
                       <span className="h5-diff-now">
-                        <span className="b-sr">С Atlas: </span>
+                        <span className="b-sr">С ускорителем: </span>
                         {r.now}
                       </span>
                     </li>

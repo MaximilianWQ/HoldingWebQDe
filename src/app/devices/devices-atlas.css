@@ -337,6 +337,145 @@
 /* ─── 03 · Финал ────────────────────────────────────────────────── */
 .ad-final .a-p { max-width: 46ch; }
 
+/* ─── Телефон (≤899px) — карточный язык (владелец 16.09.2026) ──────
+   Степпер — пилюля-переключатель. Устройства — сетка 2×N плиток
+   вместо плоских строк на линиях. Лесенка настройки — карточки, как
+   в приложении: круглый номер-бейдж, поле ключа и QR залиты мягким
+   тоном поля внутри карточки шага (без второй тени), кнопки ключа —
+   главная во всю ширину и пара «копия / QR» в ряд. Токены
+   `--m-radius*` / `--m-field` / `--m-lift` — atlas-mobile.css. */
+@media (max-width: 899px) {
+  /* Степпер. */
+  .ad-progress { gap: 0; padding: 4px; border-radius: 999px; background: var(--m-field); }
+  .ad-progress li:not(.ad-progress-line) {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding-inline: 0.4rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    text-align: center;
+  }
+  .ad-progress [aria-current] { background: #FFFFFF; box-shadow: var(--m-lift); color: var(--a-ink); font-weight: 700; }
+  .ad-progress-line { display: none; }
+
+  /* Устройства — сетка 2×N плиток. */
+  .ad-platforms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border-top: 0; }
+  .ad-platform {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "icon go" "name name" "detail detail";
+    align-content: start;
+    gap: 0.2rem 0.5rem;
+    min-height: 150px;
+    padding: 1.1rem 1rem 1.15rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ad-platform-no { display: none; }
+  .ad-platform-icon { width: 30px; height: 30px; }
+  .ad-platform-name { align-self: end; margin-top: 0.65rem; font-size: 1.0625rem; line-height: 1.2; letter-spacing: -0.01em; }
+  .ad-platform-detail { font-size: 0.8125rem; white-space: normal; }
+  .ad-platform-go {
+    align-self: start;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--m-field);
+  }
+  .ad-platform[aria-pressed="true"] { background: var(--a-shoal); box-shadow: none; }
+  .ad-platform[aria-pressed="true"] .ad-platform-go { background: rgba(255, 255, 255, 0.65); }
+
+  /* Строка выбранного устройства над настройкой — карточка. */
+  .ad-device-line {
+    padding: 0.9rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+
+  /* Выбор приложения — мягкие плашки. */
+  .ad-app { border: 0; border-radius: 14px; background: var(--m-field); min-height: 58px; }
+  .ad-app[aria-pressed="true"] { background: var(--a-shoal); border-color: transparent; }
+
+  /* Лесенка настройки — карточки вместо издательских цифр во всю полосу. */
+  .ad-ladder { gap: 12px; }
+  .ad-step {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 0 0.85rem;
+    max-width: none;
+    padding: 1.3rem 1.1rem 1.45rem;
+    border-radius: var(--m-radius);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ad-step-n {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    background: var(--a-shoal);
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--a-cobalt);
+  }
+
+  /* Ключ — поле внутри карточки шага, без второй тени. */
+  .ad-key { border-radius: 14px; background: var(--m-field); }
+
+  /* Действия ключа: главная — во всю ширину, копия/QR — в ряд.
+     Специфичность поднята намеренно (`.ad .a-actions.ad-key-actions…»):
+     общий слой телефона держит строку `.a .a-actions > .a-btn` на трёх
+     классах — ниже эту строку не перебить. */
+  .ad .a-actions.ad-key-actions { flex-direction: row; flex-wrap: wrap; }
+  .ad .a-actions.ad-key-actions .a-btn {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    font-size: 0.8125rem;
+    padding-inline: 0.75rem;
+  }
+  .ad .a-actions.ad-key-actions .a-btn:first-child:not(:nth-last-child(-n+2)) {
+    flex: 1 1 100%;
+    font-size: 0.9375rem;
+    padding-inline: 1.5rem;
+  }
+
+  /* QR — тот же тон поля, без отдельной рамки. */
+  .ad-qr { border: 0; border-radius: 14px; background: var(--m-field); padding: 1.1rem; }
+
+  /* Шаги вручную — мягкая плашка внутри карточки шага «Включите». */
+  .ad-manual { border: 0; border-radius: 14px; background: var(--m-field); padding: 0.2rem 1rem; }
+  .ad-manual summary { padding-inline: 0.15rem; }
+  .ad-manual li { padding-inline: 0.15rem; }
+  .ad-manual li:last-child { border-bottom: 0; }
+
+  /* Готово — отдельная карточка. */
+  .ad-done {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding: 1.3rem 1.1rem 1.4rem;
+    border: 0;
+    border-radius: var(--m-radius);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ad-done .a-actions { width: 100%; }
+}
+
 /* ═══ Движение ═════════════════════════════════════════════════════
    Базовое состояние выше — конечный кадр. Прячущие состояния только
    под `.a-js`, пишутся только transform, opacity и прозрачность.

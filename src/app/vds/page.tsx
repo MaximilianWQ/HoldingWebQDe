@@ -167,6 +167,7 @@ export default function VdsPage() {
               Чем шире порт, тем больше данных сервер отдаёт одновременно. Поэтому конфигурации
               растут по скорости порта, а не по числу ядер.
             </p>
+            <p className="av-swipe-hint a-settle" style={v({ "--i": 2 })} aria-hidden>Листайте карточки →</p>
 
             <ol className="av-rows">
               {SERVERS.map((s, i) => (

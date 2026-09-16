@@ -1,0 +1,122 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ГЛАВНАЯ НА ТЕЛЕФОНЕ (16.09.2026, «на мобильной версии всё выглядит
+   ужасно… чтобы было шик»). Общий слой телефона — atlas-mobile.css;
+   здесь только разделы главной. Только ≤ 899 px.
+
+   Разбор 375×812:
+   • 01 — две кнопки разной ширины, три карточки столбиком занимали
+     ещё экран → кнопки во всю ширину, карточки — лентой вбок;
+   • 03 — пилюли регионов по одной в строке → лента вбок;
+   • 04 — кружок угла торчал за карточку, кнопки по содержимому,
+     кольцо у кнопки Plus читалось двойной рамкой;
+   • 06–07 — ~300 px пустоты между ноутбуком и сетью;
+   • 07 — три числа в колонках по 100 px переносились в три строки
+     → плитки на поле;
+   • кнопка «наверх» — квадрат старого корпуса → круг.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 899px) {
+  /* ─── 01 · первый экран ───────────────────────────────────────── */
+  .a-hero .a-hero-actions { flex-direction: column; gap: 10px; }
+  .a-hero .a-hero-btn { width: 100%; min-height: 54px; }
+  .a-cover .a-hero-lead { margin-bottom: 1.1rem; }
+
+  /* Карточки — лента со scroll-snap во всю ширину окна. */
+  .a-cover.a-hero > .a-hero-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    max-width: none;
+    margin-top: calc(-1 * clamp(2.25rem, 9vw, 3rem));
+    padding: 4px 16px 18px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+  }
+  .a-cover.a-hero > .a-hero-cards::-webkit-scrollbar { display: none; }
+  .a-hero .a-hero-card {
+    flex: 0 0 min(68%, 260px);
+    min-height: 104px;
+    padding: 1rem 1.1rem;
+    border-radius: 24px;
+    scroll-snap-align: start;
+  }
+  .a-hero .a-hero-card b { font-size: 1.25rem; }
+  .a-hero .a-hero-card span { font-size: 0.875rem; }
+
+  /* ─── 03 · регионы — лента ────────────────────────────────────── */
+  .h5-home .a-pm-regions {
+    flex-wrap: nowrap;
+    margin-inline: -10px;
+    padding: 2px 10px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .h5-home .a-pm-regions::-webkit-scrollbar { display: none; }
+  .h5-home .a-pm-regions > li { flex: none; scroll-snap-align: start; }
+  .h5-home .a-pm-pill { white-space: nowrap; }
+
+  /* ─── 04 · тарифы ─────────────────────────────────────────────── */
+  .h5-home .h5-plan { padding: 1.4rem 1.25rem 1.25rem; border-radius: 26px; }
+  .h5-home .h5-plan .ak-corner {
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    box-shadow: none;
+  }
+  .h5-home .h5-plan[data-plan="plus"] .ak-corner { background: rgba(255, 255, 255, 0.12); }
+  .h5-home .h5-plan[data-plan="basic"] .ak-corner { background: #F1F3F7; color: var(--a-ink); }
+  .h5-home .h5-plan-mid { grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: end; gap: 1rem; }
+  .h5-home .h5-speed { grid-column: 1 / -1; }
+  .h5-home .h5-feats { gap: 0.4rem; margin: 1.1rem 0 1.25rem; padding-top: 1rem; }
+  .h5-home .h5-feats li { font-size: 0.875rem; }
+  .h5-home .h5-plan .a-btn { align-self: stretch; width: 100%; }
+  .h5-home .h5-plan .a-btn-invert::after { content: none; }
+  .h5-home .h5-vds { padding: 1rem 4rem 1rem 1.25rem; }
+  .h5-home .h5-vds .ak-corner { top: 50%; right: 12px; margin-top: -22px; width: 44px; height: 44px; box-shadow: none; }
+
+  .h5-home > .a-sheet.h5-plans-sec:not(.a-cover):not(.a-pin) { padding-bottom: 1.5rem; }
+
+  /* ─── 05 · шаги ───────────────────────────────────────────────── */
+  .h5-home > .a-sheet.h5-steps:not(.a-cover):not(.a-pin) { padding-bottom: 2.5rem; }
+
+  /* ─── 06 · устройства ─────────────────────────────────────────── */
+  .h5-home .h5-os { gap: 8px; }
+  .h5-home .h5-os li {
+    min-height: 44px;
+    padding-inline: 0.8rem 0.95rem;
+    border-color: transparent;
+    background: #F1F3F7;
+  }
+  .h5-home .h5-os li::before { border-color: transparent; }
+  .h5-home > .a-sheet.h5-dev:not(.a-cover):not(.a-pin) { padding-bottom: 0.5rem; }
+  .h5-home .h5-laptop { margin-block: -0.25rem -0.75rem; }
+
+  /* ─── 07 · компания ───────────────────────────────────────────── */
+  .h5-home > .a-sheet.h5-mission:not(.a-cover):not(.a-pin) { padding-top: 1rem; }
+  .h5-home .h5-mission-art { width: min(58vw, 300px); margin: 0 auto -0.5rem; }
+  .h5-home .h5-facts {
+    gap: 8px;
+    margin-top: 1.5rem;
+  }
+  .h5-home .h5-facts li {
+    padding: 0.9rem 0.75rem 0.85rem;
+    border-radius: 20px;
+    background: #F1F3F7;
+  }
+  .h5-home .h5-facts li::before { content: none; }
+  .h5-home .h5-facts b { font-size: clamp(1.5rem, 7.2vw, 2.1rem); }
+  .h5-home .h5-facts span { margin-top: 0.35rem; font-size: 0.75rem; }
+  .h5-home .h5-values { margin-top: 1.25rem; gap: 8px; }
+  .h5-home .h5-value { border-color: transparent; background: #FFFFFF; box-shadow: var(--m-lift); }
+
+  .h5-home > .a-sheet.h5-mission:not(.a-cover):not(.a-pin) { padding-bottom: 2.5rem; }
+
+  /* ─── 09 · финал ──────────────────────────────────────────────── */
+  .h5-home .a-final .h5-days { margin: 1.5rem auto 0; width: min(58vw, 240px); }
+}

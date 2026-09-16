@@ -4,6 +4,7 @@ import MotionController from "./MotionController";
 import SmoothScroll from "./SmoothScroll";
 import Unfold from "./Unfold";
 import "@/app/atlas.css";
+import "@/app/atlas-mobile.css";
 
 /**
  * Оболочка листа атласа: корпус, поле, шапка на рамке, выходные данные.

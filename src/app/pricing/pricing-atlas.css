@@ -10,7 +10,10 @@
      3. Что входит
      3б. Пакеты трафика
      4. Вопросы
-     5. ДВИЖЕНИЕ — весь моушн страницы, и только здесь
+     5. ТЕЛЕФОН (≤899px) — карточки тарифов, лента пакетов, аккордеон-
+        карточки; общий язык телефона (шапка, кнопки, плиты, ритм) —
+        src/app/atlas-mobile.css, здесь не трогается
+     6. ДВИЖЕНИЕ — весь моушн страницы, и только здесь
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ 1. Первый экран ═══════════════════════════════════════════════ */
@@ -330,7 +333,181 @@
 .ap-q[open] .ap-q-sign::after { transform: rotate(0deg); }
 .ap-q p { margin: 0; padding: 0 0.75rem 1.5rem; max-width: 62ch; color: var(--a-ink-2); line-height: 1.65; }
 
-/* ═══ 5. ДВИЖЕНИЕ ═══════════════════════════════════════════════════
+/* ═══ 5. ТЕЛЕФОН (≤899px) ═══════════════════════════════════════════
+   Карточки вместо плоских строк на линиях (разбор владельца: первый
+   экран — «сломанная графика» у пунктирных знаков канала, переключатель
+   срока — «квадратная таблица», карточки тарифов — «плоский текст на
+   линиях», кнопка выбора тарифа не читается главным действием, пакеты
+   трафика — восемь одинаковых строк подряд). Токены карточки — общие
+   (`--m-radius`, `--m-radius-sm`, `--m-lift`) из atlas-mobile.css,
+   значения не переопределяются, только используются. */
+@media (max-width: 899px) {
+  /* ─── 5.1 Первый экран: без пустот, знак канала — не пунктир ─────── */
+  .ap-cover { min-height: auto; }
+  .ap-cover > .a-field { justify-content: flex-start; gap: 1.5rem; }
+  .ap-display { font-size: clamp(2.3rem, 10.6vw, 3.4rem); }
+
+  /* Две карточки скорости рядом — короткий факт читается сравнением,
+     не строкой с пунктирной полосой во всю ширину. */
+  .ap-lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .ap-lane {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 1.1rem 1.1rem 1.25rem;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ap-lane-name { order: 1; font-size: 0.75rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--a-ink-3); }
+  .ap-lane-val { order: 2; }
+  .ap-lane-val b { font-size: 1.7rem; }
+  .ap-lane .a-sym {
+    order: 3;
+    align-self: stretch;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--a-g100);
+  }
+  /* Полоса — сплошная заливка, не бегущий пунктир: на маленьком экране
+     штрихи читались обрывками, а не потоком. */
+  .ap-lane .a-sym-flow {
+    position: static;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--a-cobalt);
+    animation: none;
+  }
+
+  /* ─── 5.2 Срок: сегментированная пилюля, не таблица ───────────────── */
+  .ap-period {
+    border: 0;
+    border-radius: 999px;
+    background: var(--m-field);
+    padding: 4px;
+  }
+  .ap-period-mark {
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--n));
+    border-radius: 999px;
+  }
+  .ap-period-btn { min-height: 46px; font-size: 0.8125rem; }
+
+  /* ─── 5.3 Тарифы: две карточки, Plus — тёмная акцентная ───────────── */
+  .ap-plan-list { margin-top: 2rem; padding-top: 0; border-top: 0; display: grid; gap: 1rem; }
+  .ap-plan {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "speed" "price" "cta";
+    gap: 1.1rem;
+    padding: 1.5rem 1.35rem 1.65rem;
+    border: 0;
+    border-radius: var(--m-radius);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ap-plan-speed { gap: 0.5rem; }
+  .ap-plan .a-sym { height: 6px; border-radius: 999px; }
+  .ap-plan .a-sym-flow { position: static; display: block; width: 100%; height: 100%; background: var(--a-cobalt); animation: none; }
+  .ap-plan-name { font-size: 1.75rem; }
+  .ap-price { font-size: clamp(2.5rem, 11vw, 3rem); }
+  .a .ap-plan .ap-plan-cta {
+    width: 100%;
+    min-height: 54px;
+    padding-inline: 1.5rem;
+    border-radius: 999px;
+    background: var(--a-cobalt);
+    background-image: none;
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  /* Plus — кобальтовая плита-акцент, как финал и плиты страницы. */
+  .ap-plan-plus { background: var(--a-cobalt); }
+  .ap-plan-plus .ap-plan-name,
+  .ap-plan-plus .ap-price { color: #FFFFFF; }
+  .ap-plan-plus .ap-plan-tag,
+  .ap-plan-plus .ap-unit { color: var(--a-shoal-lume); }
+  .ap-plan-plus .ap-plan-val { color: var(--a-shoal-lume); }
+  .ap-plan-plus .ap-plan-val b { color: #FFFFFF; }
+  .ap-plan-plus .ap-total { color: rgba(255, 255, 255, 0.68); }
+  .ap-plan-plus .ap-save { color: #FFFFFF; font-weight: 600; }
+  .ap-plan-plus .a-sym { background: rgba(255, 255, 255, 0.22); }
+  .ap-plan-plus .a-sym-flow { background: #FFFFFF; }
+  .a .ap-plan-plus .ap-plan-cta { background: #FFFFFF; color: var(--a-cobalt); }
+
+  /* ─── 5.4 Что входит: карточка вместо линий ───────────────────────── */
+  .ap-inc-grid { gap: 2rem; }
+  .ap-inc-name { padding-inline: 0.25rem; font-size: 1.375rem; }
+  .ap-list {
+    margin-top: 0.85rem;
+    padding-inline: 0.35rem;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ap-row { min-height: 50px; padding-block: 0.65rem; font-size: 0.9375rem; }
+  .ap-list li:last-child .ap-row { border-bottom: 0; }
+  .ap-both-head { padding-inline: 0.25rem; }
+  .ap-both { margin-top: 0.85rem; border-radius: var(--m-radius-sm); background: #FFFFFF; box-shadow: var(--m-lift); padding-inline: 0.35rem; }
+  .ap-both li:last-child .ap-row { border-bottom: 0; }
+
+  /* ─── 5.5 Пакеты трафика: лента со scroll-snap, не восемь строк ───── */
+  .ap-traffic-facts {
+    margin-top: 0.5rem;
+    padding-inline: 0.35rem;
+    border-top: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ap-traffic-facts li:last-child { border-bottom: 0; }
+
+  .ap-pack-list {
+    margin-top: 1.5rem;
+    padding: 0.25rem 6vw 0.75rem 1.25rem;
+    border-top: 0;
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1.25rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .ap-pack-list::-webkit-scrollbar { display: none; }
+  .ap-pack-list > li { flex: 0 0 auto; width: min(76vw, 300px); scroll-snap-align: start; }
+  .ap-pack {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "vol price" "bar bar" "per cta";
+    min-height: 0;
+    height: 100%;
+    padding: 1.1rem 1.1rem 1.25rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ap-pack-cta { align-self: end; }
+
+  /* ─── 5.6 Вопросы: карточки-аккордеоны ────────────────────────────── */
+  .ap-faq-list { display: grid; gap: 0.75rem; border-top: 0; }
+  .ap-q {
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+    overflow: clip;
+  }
+  .ap-q summary { min-height: 58px; padding: 1rem 1.1rem; font-size: 1rem; }
+  .ap-q p { padding: 0 1.1rem 1.25rem; }
+}
+
+/* ═══ 6. ДВИЖЕНИЕ ═══════════════════════════════════════════════════
    Базовое состояние выше — конечный кадр. Только transform, opacity и
    цвет на наведении. Входы (a-settle, a-slide, a-print), буквы
    заголовка (a-char), поток по знаку канала (a-idle) и шторка плиты —

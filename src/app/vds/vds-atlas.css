@@ -9,8 +9,13 @@
      2. Конфигурации
      3. Что обещаем
      4. Сервер или ускоритель
-     5. ДВИЖЕНИЕ — весь моушн страницы, и только здесь
+     5. ТЕЛЕФОН (≤899px) — карточный язык редакции 5
+     6. ДВИЖЕНИЕ — весь моушн страницы, и только здесь
    ═══════════════════════════════════════════════════════════════════ */
+
+/* Подсказка «Листайте карточки →» — видна только над лентой конфигураций
+   на телефоне, десктоп ленту не листает и подсказку не показывает. */
+.av-swipe-hint { display: none; }
 
 /* ═══ 1. Первый экран ═══════════════════════════════════════════════ */
 .av-cover {
@@ -196,7 +201,133 @@
   .av-pick-price { text-align: left; }
 }
 
-/* ═══ 5. ДВИЖЕНИЕ ═══════════════════════════════════════════════════
+/* ═══ 5. ТЕЛЕФОН ════════════════════════════════════════════════════
+   Язык редакции 5 (owner, 16.09.2026): белые скруглённые карточки с
+   мягкой тенью на сером поле вместо плоских строк на линиях — токены
+   --m-radius/--m-radius-sm/--m-lift/--m-field из atlas-mobile.css. */
+@media (max-width: 899px) {
+  /* 5.1 Первый экран: полосы порта — карточка, а не голая графика на
+     белом. Дорожка со сплошной заливкой вместо бегущего пунктира —
+     на маленькой длине штрих читался как сломанная вёрстка. */
+  .av-lanes {
+    padding: 1.1rem 1.1rem 0.9rem;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .av-lanes-head { margin-bottom: 0.4rem; font-size: 0.75rem; }
+  .av-lane { grid-template-columns: 5.25rem minmax(0, 1fr) 2rem; gap: 0.75rem; min-height: 44px; border-bottom-color: var(--m-field); }
+  .av-lane:last-child { border-bottom: 0; }
+  .av-lane .a-sym { border-radius: 999px; background: var(--m-field); }
+  .av-lane .a-sym-flow { background: var(--a-cobalt); animation: none; }
+  .av-lane-name { font-size: 0.8125rem; color: var(--a-ink-2); }
+  .av-lane-val { font-size: 1rem; }
+
+  /* 5.2 Конфигурации: лента карточек со scroll-snap вместо строк на
+     полтора экрана каждая. Порядок внутри карточки — имя и роль, цена
+     крупно, полоса порта, характеристики сеткой 2×N. */
+  .av-swipe-hint {
+    display: block;
+    margin: 0.75rem 0 0;
+    color: var(--a-ink-3);
+    font-size: 0.8125rem;
+  }
+  .av-rows {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    margin: 1rem -4px 0;
+    padding: 4px 4px 6px;
+    border-top: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .av-rows::-webkit-scrollbar { display: none; }
+  .av-rows > li {
+    flex: 0 0 83vw;
+    max-width: 21rem;
+    scroll-snap-align: start;
+  }
+  .av-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "price" "port" "more";
+    align-items: start;
+    align-content: start;
+    gap: 1rem;
+    height: 100%;
+    padding: 1.5rem 1.25rem 1.75rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+    transition: transform var(--d-1) var(--m-turn), box-shadow var(--d-1) var(--m-turn);
+  }
+  .av-card:active { transform: scale(0.98); box-shadow: 0 1px 2px rgba(14, 24, 56, 0.06); }
+  .av-name { font-size: 1.65rem; }
+  .av-role { font-size: 0.875rem; }
+  .av-port { gap: 0.4rem; }
+  .av-track { height: 8px; border-radius: 999px; overflow: hidden; }
+  .av-fill { border-radius: 999px; }
+  .av-price { text-align: left; }
+  .av-price b { font-size: 2.35rem; }
+  .av-more { padding-top: 0.9rem; }
+  .av-spec {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem 0.75rem;
+  }
+  .av-spec dt { font-size: 0.6875rem; }
+  .av-spec dd { font-size: 0.8125rem; }
+  .av-confirm { margin-top: 0.85rem; font-size: 0.75rem; }
+  /* Карточки едут горизонтально — вертикальная шкала прокрутки листа
+     для отдельной карточки больше не источник правды (лента сама стала
+     осью прокрутки). Три покадровых входа (5.2 atlas.css) отключены —
+     базовое состояние уже конечный кадр, содержимое видно сразу. */
+  .av-more, .av-fill, .av-price b { animation: none !important; }
+
+  /* 5.3 Что обещаем: каждая группа — своя карточка вместо строк во
+     всю ширину; тесные ряды внутри вместо строк на 52px пустоты. */
+  .av-groups { margin-top: 1.5rem; border-bottom: 0; display: grid; gap: 12px; }
+  .av-group {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 1.25rem 1.25rem 0.5rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .av-group-head { padding: 0 0 0.6rem; font-size: 1.25rem; }
+  .av-list { margin: 0; }
+  .av-row { min-height: 44px; padding: 0.65rem 0; border-bottom-color: var(--m-field); font-size: 0.9375rem; }
+
+  /* 5.4 Сервер или ускоритель: две карточки вместо двух строк. */
+  .av-pick-list { border-top: 0; display: grid; gap: 12px; }
+  .av-pick-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    min-height: 0;
+    padding: 1.5rem 1.25rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+    transition: transform var(--d-1) var(--m-turn);
+  }
+  .av-pick-row:active { transform: scale(0.98); }
+  .av-pick-name { font-size: 1.6rem; }
+  .av-pick-price { text-align: left; }
+  .av-pick-price b { font-size: 1.65rem; }
+}
+@media (max-width: 899px) and (prefers-reduced-motion: reduce) {
+  .av-card, .av-pick-row { transition: none !important; }
+}
+
+/* ═══ 6. ДВИЖЕНИЕ ═══════════════════════════════════════════════════
    Базовое состояние выше — конечный кадр. Только transform, opacity,
    clip-path шторки и цвет на наведении. Входы (a-settle, a-slide),
    буквы заголовка (a-char), поток по дорожкам (a-idle) и шторка плиты

@@ -328,3 +328,28 @@
 }
 html[data-static] .aa-why { height: auto; }
 html[data-static] .aa-why-stick { position: relative; }
+
+/* ═══ ТЕЛЕФОН ════════════════════════════════════════════════════════
+   Приведение плоских списков к языку карточек (владелец, 16.09.2026):
+   факты — плотная сетка 2×N, «что мы делаем» — две приподнятые
+   карточки (это вход в тарифы и в /vds, а не строка таблицы). Токены
+   карточки — общий мобильный слой atlas-mobile.css. */
+@media (max-width: 899px) {
+  .aa-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; border-bottom: 0; }
+  .aa-fact {
+    border-radius: var(--m-radius-sm);
+    background: var(--m-field);
+    padding: 1.1rem 1rem 1.25rem;
+  }
+  .aa-rule { display: none; }
+  .aa-flow { left: 1rem; right: 1rem; }
+
+  .aa-make-list { border-top: 0; display: grid; gap: 10px; }
+  .aa-make-row {
+    border-bottom: 0;
+    border-radius: var(--m-radius);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+    padding: 1.4rem 1.15rem 1.25rem;
+  }
+}

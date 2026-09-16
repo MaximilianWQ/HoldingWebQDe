@@ -6,7 +6,7 @@ import "@/app/px-forms.css";
 import Chars from "@/components/atlas/Chars";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import Icon from "@/components/pixel/Icon";
+import Icon, { type IconName } from "@/components/pixel/Icon";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
 import "./contact-atlas.css";
@@ -41,11 +41,11 @@ const INTERESTS: Array<{ value: string; label: string; sym: string }> = [
   { value: "other",      label: "Другое",             sym: "dot" },
 ];
 
-const CHANNELS = [
-  { label: "Поддержка в Telegram", value: "@atlas_suppbot",        href: "https://t.me/atlas_suppbot",   sla: "менее 30 минут", external: true },
-  { label: "Продажи",              value: "sales@atlas.secure",    href: "mailto:sales@atlas.secure",    sla: "менее 4 часов",  external: false },
-  { label: "Безопасность",         value: "security@atlas.secure", href: "mailto:security@atlas.secure", sla: "менее 24 часов", external: false },
-  { label: "Приватность",          value: "privacy@atlas.secure",  href: "mailto:privacy@atlas.secure",  sla: "менее 48 часов", external: false },
+const CHANNELS: { label: string; value: string; href: string; sla: string; external: boolean; icon: IconName }[] = [
+  { label: "Поддержка в Telegram", value: "@atlas_suppbot",        href: "https://t.me/atlas_suppbot",   sla: "менее 30 минут", external: true,  icon: "chat" },
+  { label: "Продажи",              value: "sales@atlas.secure",    href: "mailto:sales@atlas.secure",    sla: "менее 4 часов",  external: false, icon: "send" },
+  { label: "Безопасность",         value: "security@atlas.secure", href: "mailto:security@atlas.secure", sla: "менее 24 часов", external: false, icon: "lock" },
+  { label: "Приватность",          value: "privacy@atlas.secure",  href: "mailto:privacy@atlas.secure",  sla: "менее 48 часов", external: false, icon: "shield" },
 ];
 
 const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
@@ -80,6 +80,23 @@ const CONTOURS = Array.from({ length: 6 }, (_, k) => {
 const H1_A = "напишите";
 const H1_B = "нам";
 
+
+/** Переносит длинные адреса только по «@» и «.» — никогда не рвёт слово
+ *  посередине («secur|e»), как это делал `overflow-wrap: anywhere» на
+ *  узкой карточке телефона (QA 16.09.2026). */
+function Breakable({ text }: { text: string }) {
+  const parts = text.split(/(?<=[@./])/);
+  return (
+    <>
+      {parts.map((p, i) => (
+        <span key={i}>
+          {p}
+          {i < parts.length - 1 ? <wbr /> : null}
+        </span>
+      ))}
+    </>
+  );
+}
 
 function Words({ text }: { text: string }) {
   const words = text.split(" ");
@@ -188,8 +205,9 @@ export default function ContactView() {
                   rel={c.external ? "noopener noreferrer" : undefined}
                   className="ac-ch"
                 >
+                  <span className="ac-ch-icon" aria-hidden><Icon name={c.icon} size={20} /></span>
                   <span className="ac-ch-label a-wide">{c.label}</span>
-                  <span className="ac-ch-value">{c.value}</span>
+                  <span className="ac-ch-value"><Breakable text={c.value} /></span>
                   <span className="ac-ch-sla">ответ {c.sla}</span>
                   <span className="ac-ch-go" aria-hidden><Icon name="arrow-right" size={22} /></span>
                   {c.external ? <span className="b-sr"> (откроется в новой вкладке)</span> : null}

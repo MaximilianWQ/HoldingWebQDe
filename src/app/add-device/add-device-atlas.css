@@ -25,6 +25,16 @@
   .aad .aad-tools .a-btn { width: auto; padding: 0.6rem 1.1rem; align-self: flex-start; }
   .aad .aad-bar { display: flex; }
   .aad .ak-kicker { white-space: normal; }
+
+  /* Владелец, 16.09.2026 («чтобы было шик»): тот же язык, что на входе,
+     в кабинете и в оплате — пилюли вместо кнопок с рамкой, лёгкая тень
+     и щедрее скругление на плитках выбора (--m-radius-sm/--m-lift/
+     --m-field, atlas-mobile.css). */
+  .aad .a-btn { border-radius: 999px; }
+  .aad .ak-btn-soft { background: var(--m-field); border-color: transparent; }
+  .aad .ak-board .ak-card { box-shadow: var(--m-lift); }
+  .aad-tile, .aad-app { border-radius: var(--m-radius-sm); }
+  .aad-hint { border-radius: var(--m-radius-sm); }
 }
 
 /* ─── Полоса шагов ──────────────────────────────────────────────── */

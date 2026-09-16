@@ -110,6 +110,17 @@ const TILES = Array.from({ length: 10 }, (_, i) => {
 const HERO_1 = "интернет и серверы";
 const HERO_2 = "для команды";
 
+/** Полоса доказательств первого экрана — только на телефоне (ab-proof):
+ *  там, где на широком экране места сотрудников читаются волной, на
+ *  узком экране это была решётка едва заметных квадратиков в пустоте.
+ *  Числа — те же, что ниже на странице (plans.ts, locations.ts) и в
+ *  самом обещании («в течение четырёх рабочих часов»), не новые. */
+const HERO_PROOF: Array<{ value: string; label: string }> = [
+  { value: `${DEVICE_LIMIT}`, label: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на человека` },
+  { value: `${COUNTRY_COUNT}`, label: `${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор` },
+  { value: "4 ч", label: "срок расчёта" },
+];
+
 
 function Words({ text, start = 0 }: { text: string; start?: number }) {
   const words = text.split(" ");
@@ -138,7 +149,9 @@ export default function BusinessView() {
               <span className="ab-line ab-line-2" aria-hidden><Chars text={HERO_2} start={HERO_1.length} /></span>
             </h1>
 
-            {/* Места команды: волна проходит по рядам, как подключения. */}
+            {/* Места команды: волна проходит по рядам, как подключения.
+                На телефоне решётка нечитаема (72 квадратика по 14px) —
+                там вместо неё полоса доказательств ab-proof. */}
             <div className="ab-seats" aria-hidden>
               <div className="ab-seats-move">
                 {Array.from({ length: 72 }, (_, i) => (
@@ -150,6 +163,14 @@ export default function BusinessView() {
                 ))}
               </div>
             </div>
+            <ul className="ab-proof">
+              {HERO_PROOF.map((p, i) => (
+                <li key={p.label} className="a-settle" style={{ ["--i" as string]: i + 1 }}>
+                  <b className="a-num">{p.value}</b>
+                  <span>{p.label}</span>
+                </li>
+              ))}
+            </ul>
 
             <div className="ab-cover-grid">
               <p className="a-lead">
@@ -171,6 +192,7 @@ export default function BusinessView() {
             <h2 id="ab-cases-title" className="a-h2 a-settle">
               <span className="a-no">02</span>с чем приходят команды
             </h2>
+            <p className="ab-cases-hint a-settle" style={{ ["--i" as string]: 2 }} aria-hidden>Листайте карточки →</p>
             <ol className="ab-cases">
               {CASES.map((c, i) => (
                 <li

@@ -815,6 +815,21 @@ html:has(.ak) { scroll-behavior: smooth; }
   .ak-board .ak-card { border-radius: 20px; scroll-margin-top: calc(var(--a-head-h) + 12px); }
   .ak-corner { top: -4px; right: -4px; box-shadow: 0 0 0 4px var(--a-g100); }
 
+  /* Владелец, 16.09.2026 («чтобы было шик»): тот же премиальный язык,
+     что и на входе — крупные пилюли вместо рамок, лёгкая тень на белых
+     панелях (--m-lift/--m-field, atlas-mobile.css). Класс .dv — только
+     кабинет (DashboardView): admin делит .ak-tabbar и work-atlas.css,
+     но своих кнопок отсюда получать не должен. */
+  .ak.dv .a-btn { border-radius: 999px; }
+  .ak.dv .ak-btn-soft { background: var(--m-field); border-color: transparent; }
+  .ak.dv .ak-dark .ak-btn-soft { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+  .ak.dv .ak-board .ak-card { box-shadow: var(--m-lift); }
+  .ak.dv .ak-kblock { border-radius: var(--m-radius-sm); }
+  /* Ключ на телефоне — одна колонка кнопок во всю ширину: три действия
+     («Открыть», «Скопировать», «QR-код») читаются и нажимаются одной
+     рукой без прицеливания в узкую половину ряда. */
+  .ak.dv .ak-kactions .a-btn { flex: 1 1 100%; }
+
   /* Самое нужное — первым. */
   .ak-sub, .ak-first { order: 1; } .ak-key { order: 2; } .ak-quick { order: 3; } .ak-bal { order: 4; }
   .ak-friends { order: 5; } .ak-tg { order: 6; } .ak-set { order: 7; } .ak-net { order: 8; }

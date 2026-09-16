@@ -2,7 +2,7 @@ import Chars from "@/components/atlas/Chars";
 import type { Metadata } from "next";
 import Link from "next/link";
 import AtlasShell from "@/components/atlas/AtlasShell";
-import Icon from "@/components/pixel/Icon";
+import Icon, { type IconName } from "@/components/pixel/Icon";
 import { DEVICE_LIMIT, PLANS, formatRub } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
@@ -43,10 +43,10 @@ const COUNTRY_WORD = plural(COUNTRY_COUNT, ["страна", "страны", "с�
 const H1_A = "поможем";
 const H1_B = "разобраться";
 
-const CHANNELS: { name: string; value: string; note: string; href: string; external: boolean }[] = [
-  { name: "Telegram", value: "@atlas_suppbot", note: "Быстрее всего. Пишите в любое время", href: TELEGRAM, external: true },
-  { name: "ВКонтакте", value: "vk.com/atlassecure", note: "Сообщество Atlas Secure", href: "https://vk.com/atlassecure", external: true },
-  { name: "Письмом", value: "форма обратной связи", note: "Если удобнее почта", href: "/contact", external: false },
+const CHANNELS: { name: string; value: string; note: string; href: string; external: boolean; icon: IconName }[] = [
+  { name: "Telegram", value: "@atlas_suppbot", note: "Быстрее всего. Пишите в любое время", href: TELEGRAM, external: true, icon: "chat" },
+  { name: "ВКонтакте", value: "vk.com/atlassecure", note: "Сообщество Atlas Secure", href: "https://vk.com/atlassecure", external: true, icon: "users" },
+  { name: "Письмом", value: "форма обратной связи", note: "Если удобнее почта", href: "/contact", external: false, icon: "send" },
 ];
 
 const FAQ: { q: string; a: React.ReactNode }[] = [
@@ -105,6 +105,23 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
   },
 ];
 
+/** Переносит длинные адреса только по «@», «.» и «/» — никогда не рвёт
+ *  слово посередине («secur|e»), как это делал `overflow-wrap: anywhere»
+ *  на узкой карточке телефона (QA 16.09.2026). */
+function Breakable({ text }: { text: string }) {
+  const parts = text.split(/(?<=[@./])/);
+  return (
+    <>
+      {parts.map((p, i) => (
+        <span key={i}>
+          {p}
+          {i < parts.length - 1 ? <wbr /> : null}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function Words({ text }: { text: string }) {
   const words = text.split(" ");
   return (
@@ -161,8 +178,9 @@ export default function SupportPage() {
               {CHANNELS.map((c, i) => {
                 const inner = (
                   <>
+                    <span className="as-ch-icon" aria-hidden><Icon name={c.icon} size={20} /></span>
                     <span className="as-ch-name a-wide">{c.name}</span>
-                    <span className="as-ch-value">{c.value}</span>
+                    <span className="as-ch-value"><Breakable text={c.value} /></span>
                     <span className="as-ch-note">{c.note}</span>
                     <span className="as-ch-go" aria-hidden><Icon name="arrow-right" size={22} /></span>
                   </>

@@ -259,7 +259,7 @@ export default function DashboardView() {
 
   if (loading || !data) {
     return (
-      <main id="main" className="a-main ak" aria-busy="true">
+      <main id="main" className="a-main ak dv" aria-busy="true">
         <div className="a-field">
           <p className="b-sr" aria-live="polite">Загружаем кабинет…</p>
           <div className="ak-grid" aria-hidden>
@@ -364,7 +364,7 @@ export default function DashboardView() {
 
   return (
     <>
-      <main id="main" className="a-main ak">
+      <main id="main" className="a-main ak dv">
         <div className="a-field">
           {/* ── Верх: кто вы и действия кабинета ───────────────────── */}
           <section className="ak-top" data-sheet="20" style={at(0)} aria-label="Аккаунт">

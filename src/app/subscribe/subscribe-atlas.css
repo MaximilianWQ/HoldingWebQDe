@@ -339,6 +339,27 @@
   .asb .ak-actions .a-btn { flex: 1 1 100%; }
 }
 
+/* Владелец, 16.09.2026 («чтобы было шик»): тот же язык, что на входе и
+   в кабинете — пилюли вместо кнопок с рамкой, щедрее скругление и лёгкая
+   тень на карточках выбора (--m-radius-sm/--m-lift/--m-field,
+   atlas-mobile.css), плавающая нижняя панель вместо линии на весь край. */
+@media (max-width: 719px) {
+  .asb .a-btn { border-radius: 999px; }
+  .asb .ak-btn-soft { background: var(--m-field); border-color: transparent; }
+  .asb .ak-board .ak-card { box-shadow: var(--m-lift); }
+  .asb-choice, .asb-method { border-radius: var(--m-radius-sm); }
+  .asb-mark { border-radius: var(--m-radius-sm); }
+  .asb-dock {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 0;
+    border-radius: var(--m-radius);
+    box-shadow: var(--m-lift);
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Заглушка до разбора параметров адреса. */
 .asb-skel { display: grid; gap: 8px; }
 .asb-skel .ak-skel { min-height: 280px; }

@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import "@/app/home-v5.css";
 import "@/app/home-hero.css";
 import "@/app/home-map.css";
+import "@/app/home-mobile.css";
 import {
   PLANS, PLAN_SPEED, PLAN_CONTENT, DEVICE_LIMIT, formatRub, pricePerMonth, type PlanId,
 } from "@/lib/plans";

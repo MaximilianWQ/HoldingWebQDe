@@ -260,7 +260,7 @@ export default function PricingView() {
               const month = formatRub(pricePerMonth(id, period));
               return (
                 <div key={id} className="a-slide" style={v({ "--i": i + 3, "--dir": i ? 1 : -1 })}>
-                  <article className="ap-plan" aria-labelledby={`ap-plan-${id}`}>
+                  <article className={`ap-plan ap-plan-${id}`} aria-labelledby={`ap-plan-${id}`}>
                     <div className="ap-plan-head">
                       <h3 id={`ap-plan-${id}`} className="ap-plan-name">{PLAN_CONTENT[id].name}</h3>
                       <p className="ap-plan-tag">{PLAN_CONTENT[id].tagline}</p>

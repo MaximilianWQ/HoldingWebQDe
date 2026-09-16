@@ -276,3 +276,29 @@
 /* Всё движение гасит общее правило atlas.css (.a * — animation: none),
    прячущих состояний под .a-js на этом листе нет, кроме анимаций с
    заполнением both: без анимации они в конечном кадре. */
+
+/* ═══ ТЕЛЕФОН ════════════════════════════════════════════════════════
+   Приведение плоских списков к языку карточек (владелец, 16.09.2026).
+   Токены карточки — общий мобильный слой atlas-mobile.css. */
+@media (max-width: 899px) {
+  /* Уход маршрута со сцены масштабом выводил div.ai-route за край
+     экрана (−5..380 на 375 — геометрия, не просто визуальный клип):
+     на телефоне сцена и так короткая, приём снят. */
+  .ai-route { animation: none; }
+
+  .ai-places { grid-template-columns: 1fr; gap: 8px; border-top: 0; }
+  .ai-place {
+    border-bottom: 0;
+    border-radius: var(--m-radius-sm);
+    background: var(--m-field);
+    padding: 0.85rem 1rem;
+  }
+
+  .ai-honest-list { border-top: 0; display: grid; gap: 8px; }
+  .ai-honest-list li {
+    border-bottom: 0;
+    border-radius: var(--m-radius-sm);
+    background: var(--m-field);
+  }
+  .ai-honest-cols { gap: 1.75rem; }
+}

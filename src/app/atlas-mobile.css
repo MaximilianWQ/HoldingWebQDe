@@ -1,0 +1,268 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ТЕЛЕФОН — общий слой корпуса (владелец, 16.09.2026: «на мобильной
+   версии всё выглядит ужасно… чтобы было шик»).
+
+   Разбор 375×812 по всем страницам: у главной — мягкий язык редакции 5
+   (капсула шапки, скруглённые карточки, пилюли), у остальных страниц —
+   плоская полоса 2026 года: подчёркнутые ссылки вместо кнопок, дыры по
+   120–150 px между листами, шапка-линейка. Телефон собран в одну
+   систему по языку главной — как у Yandex Cloud и Apple на телефоне:
+
+     • шапка везде — капсула над страницей; «Войти» — пилюля,
+       меню — круглая кнопка; высота полосы та же (--a-head-h);
+     • меню — лист на всё окно: пункты в скруглённой группе, внизу
+       главное действие и вход;
+     • кнопки — пилюли во всю ширину; второе действие — мягкая
+       пилюля, а не текст на линии (на телефоне линия читалась как
+       ссылка в абзаце, и два действия не выглядели выбором);
+     • ритм — плотнее: лист 56 px сверху и снизу вместо 72–97;
+     • кобальтовые плиты и подвал — скруглённые карточки на поле;
+     • нижние карточки (cookie, установка) — плавающие, со скруглением.
+
+   Только ≤ 899 px. Широкий экран этот файл не трогает.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 899px) {
+  :root {
+    --m-radius: 28px;
+    --m-radius-sm: 20px;
+    --m-field: #EEF1F6;
+    --m-lift: 0 1px 2px rgba(14, 24, 56, 0.05), 0 10px 28px rgba(14, 24, 56, 0.08);
+  }
+
+  /* ─── Шапка-капсула ─────────────────────────────────────────────── */
+  html body .a-head {
+    background: transparent;
+    padding-top: 8px;
+    pointer-events: none;
+  }
+  html body .a-head-inner {
+    pointer-events: auto;
+    width: calc(100% - 2 * 10px);
+    max-width: none;
+    min-height: calc(var(--a-head-h) - 8px);
+    gap: 0.5rem;
+    padding-inline: 14px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.99), rgba(255, 255, 255, 0.96));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 6px 22px rgba(14, 24, 56, 0.1), 0 0 0 1px rgba(14, 24, 56, 0.04);
+  }
+  html body .a-head-sheet { display: none; }
+  html body .a-head-cta {
+    margin-left: auto;
+    min-height: 44px;
+    padding-inline: 1rem;
+    border-radius: 999px;
+    background: #F1F3F7;
+    font-size: 0.8125rem;
+  }
+  /* Кабинет: справа только меню. */
+  html body .a-head-inner:not(:has(.a-head-cta)) .a-index { margin-left: auto; }
+
+  /* Меню — круглая кнопка, подпись уходит чтецу экрана. */
+  html body .a-index summary {
+    position: relative;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--a-ink);
+    color: #FFFFFF;
+  }
+  html body .a-index-ico { width: 16px; height: 10px; }
+  html body .a-index-ico::before { top: 1px; }
+  html body .a-index-ico::after { bottom: 1px; }
+  html body .a-index[open] .a-index-ico::before { transform: translateY(3.25px) rotate(45deg); }
+  html body .a-index[open] .a-index-ico::after { transform: translateY(-3.25px) rotate(-45deg); }
+  html body .a-index-open,
+  html body .a-index-shut {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ─── Меню — лист на всё окно ────────────────────────────────────── */
+  html body .a-index-panel {
+    top: 0;
+    z-index: -1;
+    padding: calc(var(--a-head-h) + 16px) 10px calc(12px + env(safe-area-inset-bottom));
+    background: var(--m-field);
+  }
+  html body .a-index-panel ul {
+    padding: 6px 0;
+    border-radius: var(--m-radius);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  html body .a-index-panel li + li a::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: var(--a-g100);
+  }
+  html body .a-index-panel li a {
+    position: relative;
+    justify-content: space-between;
+    min-height: 54px;
+    padding: 0.5rem 20px;
+    border-bottom: 0;
+    font-size: 1.0625rem;
+    letter-spacing: -0.01em;
+  }
+  html body .a-index-panel li a .a-wide { display: none; }
+  html body .a-index-panel li a::after {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-right: 4px;
+    border-top: 1.5px solid var(--a-g400);
+    border-right: 1.5px solid var(--a-g400);
+    transform: rotate(45deg);
+  }
+  html body .a-index-panel li a[aria-current="page"]::after { border-color: var(--a-cobalt); }
+  html body .a-index-foot { gap: 8px; padding-top: 16px; }
+  html body .a-index-legal { justify-content: center; }
+  html body .a-index-legal a { color: var(--a-ink-3); font-size: 0.875rem; }
+
+  /* ─── Кнопки ─────────────────────────────────────────────────────── */
+  .a .a-btn {
+    min-height: 54px;
+    padding: 0.85rem 1.5rem;
+    border-radius: 999px;
+    font-size: 0.9375rem;
+    text-align: center;
+  }
+  .a .a-btn-quiet {
+    background: #F1F3F7;
+    color: var(--a-ink);
+  }
+  .a .a-btn-line {
+    background: rgba(255, 255, 255, 0.14);
+    color: #FFFFFF;
+  }
+  .a .a-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+  .a .a-actions > .a-btn { width: 100%; }
+  .a .a-plate .a-btn-quiet { background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }
+
+  /* ─── Ритм листов ────────────────────────────────────────────────── */
+  .a .a-sheet { padding-block: 3.5rem; }
+  .a .a-h2 {
+    margin-bottom: 1.25rem;
+    font-size: clamp(1.875rem, 8.4vw, 2.5rem);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+  }
+  .a .a-no {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    min-height: 26px;
+    margin-bottom: 0.9rem;
+    padding: 0 0.7rem;
+    border-radius: 999px;
+    background: #F1F3F7;
+    font-size: 0.75rem;
+    color: var(--a-ink-2);
+  }
+  .a .a-plate .a-no { background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }
+  .a .a-p { font-size: 1rem; line-height: 1.6; }
+
+  /* ─── Плиты — карточки на поле ───────────────────────────────────── */
+  .a .a-plate {
+    margin-inline: 8px;
+    border-radius: var(--m-radius);
+  }
+  @keyframes a-curtain { from { clip-path: inset(0 3.5% 0 3.5% round var(--m-radius)); } }
+
+  /* ─── Подвал ─────────────────────────────────────────────────────── */
+  .a .a-foot {
+    margin: 8px 8px 0;
+    padding-block: 2.5rem 0.5rem;
+    border-radius: var(--m-radius) var(--m-radius) 0 0;
+  }
+  .a .a-foot-top { gap: 2.25rem; }
+  .a .a-foot-pitch { margin: 1rem 0 1.25rem; font-size: 1.25rem; }
+  .a .a-foot-cols { gap: 1.5rem 1rem; padding: 1.25rem 1.25rem 0.5rem; border-radius: var(--m-radius-sm); background: rgba(255, 255, 255, 0.05); }
+  .a .a-foot-h { margin-bottom: 0.1rem; font-size: 0.75rem; }
+  .a .a-foot-cols a { min-height: 44px; font-size: 0.9375rem; }
+  .a .a-foot-word { margin-top: 2.25rem; }
+  .a .a-foot-base { padding-right: 56px; font-size: 0.75rem; line-height: 1.5; }
+  .a .a-foot-compact { margin: 0; border-radius: 0; }
+}
+
+/* Обложки внутренних страниц. На широком экране это афиша во весь
+   экран: заголовок у верха, действие у низа (space-between). На
+   телефоне между ними оставалась дыра 70–90 px, а следующий раздел
+   начинался только со второго экрана. */
+@media (max-width: 899px) {
+  .a :is(.av-cover, .ab-cover, .asec-cover, .aa-cover, .ai-cover) {
+    min-height: 0;
+    padding-block: 1.75rem 2.5rem;
+  }
+  .a :is(.av-cover, .ab-cover, .asec-cover, .aa-cover, .ai-cover) > .a-field {
+    justify-content: flex-start;
+    gap: 1.5rem;
+  }
+}
+
+/* Узкий телефон: знак, «Войти» и меню в одной капсуле. */
+@media (max-width: 359px) {
+  html body .a-mark span { font-size: 0.8125rem; }
+  html body .a-head-cta { padding-inline: 0.8rem; }
+}
+
+/* ─── Нижние карточки: cookie и установка ──────────────────────────── */
+@media (max-width: 559px) {
+  html body .ov-card,
+  html body .ov-card.ov-card-cookie {
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: auto;
+    padding: 14px 14px 12px 16px;
+    border: 1px solid rgba(14, 24, 56, 0.06);
+    border-radius: 24px;
+    box-shadow: 0 18px 48px rgba(14, 24, 56, 0.18), 0 2px 6px rgba(14, 24, 56, 0.06);
+  }
+  html body .ov-card .ov-mark { border-radius: 12px; }
+  html body .ov-card .ov-actions { gap: 8px; margin-top: 12px; }
+  html body .ov-card .ov-btn { flex: 1 1 auto; min-height: 44px; border-radius: 999px; white-space: nowrap; }
+  html body .ov-card .ov-btn-text { flex: 1 1 auto; background: #F1F3F7; padding-inline: 0.9rem; }
+  html body .ov-card-cookie .ov-btn-text:last-child { flex: 0 0 100%; min-height: 36px; background: none; color: var(--ov-ink-3); }
+}
+@media (max-width: 559px) and (prefers-reduced-motion: no-preference) {
+  html body .ov-card.ov-card-cookie { animation-name: ov-in; }
+}
+
+/* Кнопка «наверх» — круг, как кнопка меню (все страницы корпуса). */
+@media (max-width: 899px) {
+  html body:has(.a) .b-top {
+    right: 14px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: 44px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--a-ink);
+    color: #FFFFFF;
+    box-shadow: 0 8px 22px rgba(12, 16, 28, 0.24);
+  }
+}
+
+/* Заголовок шага получает фокус программно (tabindex="-1"), чтобы чтец
+   экрана объявил новый шаг. Рамка фокуса вокруг заголовка читалась
+   ошибкой вёрстки (/add-device, 375). Заголовок не нажимается —
+   кольцо ему не нужно. */
+.a :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }

@@ -308,3 +308,52 @@
   .al-toc a:focus-visible .al-toc-t::after { transform: scaleX(1); }
   .al-text a:hover { color: var(--a-cobalt-deep); }
 }
+
+/* ═══ ТЕЛЕФОН ════════════════════════════════════════════════════════
+   Оглавление из 9 пунктов вертикальным списком на узкой колонке было
+   простынёй ссылок (владелец, 16.09.2026). На телефоне — горизонтальная
+   лента чипов со scroll-snap, вместо левой полосы «здесь читаем» —
+   точка, которая наливается кобальтом по той же переменной --al-lit.
+   Токены чипа — общий мобильный слой atlas-mobile.css. */
+@media (max-width: 899px) {
+  /* Грид-элемент по умолчанию не сжимается меньше max-content: без
+     min-width ряд чипов раздвигал .al-body на всю свою внутреннюю
+     ширину вместо того, чтобы прокручиваться внутри себя. */
+  .al-toc { padding-top: 0; min-width: 0; }
+  .al-toc-head { margin-bottom: 0.6rem; }
+  .al-toc ol {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 0;
+    margin-inline: -1px;
+    padding: 2px 1px 6px;
+  }
+  .al-toc ol::-webkit-scrollbar { display: none; }
+  .al-toc li { flex: none; scroll-snap-align: start; }
+  .al-toc a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 1rem;
+    border-bottom: 0;
+    border-radius: 999px;
+    background: var(--m-field);
+  }
+  .al-toc a::before { display: none; }
+  .al-toc-t { white-space: nowrap; }
+  .al-toc a::after {
+    content: "";
+    width: 5px;
+    height: 5px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--a-cobalt);
+    opacity: var(--al-lit, 0);
+  }
+}

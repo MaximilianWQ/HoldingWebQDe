@@ -328,3 +328,33 @@
 }
 html[data-static] .asec-see { height: auto; }
 html[data-static] .asec-stick { position: relative; }
+
+/* ═══ ТЕЛЕФОН ════════════════════════════════════════════════════════
+   Приведение плоских списков к языку карточек (владелец, 16.09.2026):
+   на узкой колонке волосяные линии между пунктами читались как таблица
+   2020 года. Токены карточки — общий мобильный слой atlas-mobile.css. */
+@media (max-width: 899px) {
+  .asec-list { border-top: 0; display: grid; gap: 10px; }
+  .asec-item {
+    border-bottom: 0;
+    border-radius: var(--m-radius-sm);
+    background: var(--m-field);
+    padding: 0.9rem 1rem;
+  }
+  .asec-count { margin-top: 1.25rem; }
+
+  .asec-nums {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    border-top: 0;
+  }
+  .asec-num {
+    border-bottom: 0;
+    border-radius: var(--m-radius-sm);
+    background: var(--m-field);
+    padding: 1.1rem 1rem 1.25rem;
+  }
+
+  .asec-chip { border-radius: var(--m-radius-sm); }
+  .asec-row { padding-block: 1rem; }
+}

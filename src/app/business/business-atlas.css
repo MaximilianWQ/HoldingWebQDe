@@ -252,6 +252,96 @@
 .a-plate .ab-card .px-input:focus-visible,
 .a-plate .ab-card .px-choice:focus-visible { outline: 2px solid var(--a-cobalt); outline-offset: 2px; }
 
+/* ═══ 06 · ТЕЛЕФОН ══════════════════════════════════════════════════
+   Язык редакции 5 (owner, 16.09.2026): белые скруглённые карточки на
+   сером поле вместо решётки квадратиков и плоских строк на линии.
+   Токены --m-radius-sm/--m-lift/--m-field — atlas-mobile.css. */
+.ab-proof { display: none; }
+.ab-cases-hint { display: none; }
+@media (max-width: 899px) {
+  /* 01 — решётка на 72 квадратика по ~14px нечитаема на узком экране
+     и висела в пустоте; вместо неё три карточки с числами, которые
+     подтверждены ниже на этой же странице (DEVICE_LIMIT, locations.ts)
+     и в самом тексте обещания («четыре рабочих часа»). */
+  .ab-seats { display: none; }
+  .ab-proof {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ab-proof li {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.85rem 0.5rem;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+    text-align: center;
+  }
+  .ab-proof b { font-weight: 700; font-size: 1.3rem; line-height: 1; letter-spacing: -0.02em; color: var(--a-cobalt); }
+  .ab-proof span { font-size: 0.6875rem; line-height: 1.25; color: var(--a-ink-3); }
+
+  /* 02 — задачи: лента карточек со scroll-snap вместо нумерованного
+     списка на линиях, где каждый пункт растягивался на полтора экрана
+     пустого поля вокруг короткого текста. */
+  .ab-cases-hint { display: block; margin: 0.75rem 0 0; color: var(--a-ink-3); font-size: 0.8125rem; }
+  .ab-cases {
+    display: flex;
+    gap: 12px;
+    margin: 1rem -4px 0;
+    padding: 4px 4px 6px;
+    border-top: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .ab-cases::-webkit-scrollbar { display: none; }
+  .ab-case {
+    flex: 0 0 78vw;
+    max-width: 20rem;
+    scroll-snap-align: start;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+    padding: 1.5rem 1.25rem 1.75rem;
+    border: 0;
+    border-radius: var(--m-radius-sm);
+    background: #FFFFFF;
+    box-shadow: var(--m-lift);
+  }
+  .ab-case-n {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding-top: 0;
+    border-radius: 999px;
+    background: var(--m-field);
+    color: var(--a-ink-2);
+    font-size: 0.875rem;
+  }
+  .ab-case p { grid-column: 1; max-width: none; }
+
+  /* 04 — что входит: строки собраны в отдельные карточки на сером поле
+     вместо строк во всю ширину на общей линии. */
+  .ab-inc { border-top: 0; display: grid; gap: 10px; }
+  .ab-inc-row { padding: 1.1rem 1.1rem; border: 0; border-radius: var(--m-radius-sm); background: #FFFFFF; box-shadow: var(--m-lift); }
+
+  /* 05 — бланк заявки: у формы на кобальтовой плите теперь свой край и
+     тень, а не плоский белый блок без границы; поля и пилюли выбора —
+     мягкое скругление в языке карточек вместо прямого угла редакции. */
+  .ab-form { --px-r-btn: var(--a-radius-lg); --px-r-chip: 999px; }
+  .ab-form .ab-card { border-radius: var(--m-radius-sm); box-shadow: 0 1px 2px rgba(14, 24, 56, 0.05), 0 16px 40px rgba(6, 12, 32, 0.28); }
+  .ab-done { border-radius: var(--m-radius-sm); box-shadow: 0 1px 2px rgba(14, 24, 56, 0.05), 0 16px 40px rgba(6, 12, 32, 0.28); }
+  .ab-done-mark { border-radius: var(--a-radius-lg); }
+}
+
 /* ═══ ДВИЖЕНИЕ ═══════════════════════════════════════════════════════
    Базовое состояние выше — конечный кадр. Прячущие состояния — только
    под .a-js; шкалы прокрутки — внутри @supports; холостое — .a-idle.

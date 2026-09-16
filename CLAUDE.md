@@ -503,6 +503,26 @@ Lenis; возврат по «Назад» — своя позиция в session
 (подписка), кластер пилюль-разделов сверху, кружки со стрелкой в
 вырезе угла панели (`Corner.tsx`, кольцо цвета рамы).
 
+**Телефон (16.09.2026, «на мобильной версии всё выглядит ужасно… чтобы было
+шик»)** — одна система по языку главной (Yandex Cloud / Apple на телефоне),
+только ≤ 899 px, широкий экран не трогается:
+- Общий слой — `src/app/atlas-mobile.css` (подключён в `AtlasShell`): шапка —
+  капсула (`--a-head-h` прежний), «Войти» — пилюля, меню — круглая кнопка и
+  лист на всё окно; `.a-btn` — пилюли 54 px, `.a-btn-quiet` — мягкая серая
+  пилюля, `.a-actions` — колонкой во всю ширину; `.a-sheet` 3,5rem; `.a-no` —
+  пилюля с номером; `.a-plate` и подвал — скруглённые карточки на поле;
+  обложки внутренних страниц без афиши на весь экран; cookie и установка —
+  плавающие карточки снизу; «наверх» — круг. Токены `--m-radius` 28,
+  `--m-radius-sm` 20, `--m-field`, `--m-lift` — ими пользуются страницы.
+- Главная — `src/app/home-mobile.css`: карточки первого экрана и регионы
+  карты — ленты со scroll-snap, кнопки во всю ширину, тарифы без торчащего
+  кружка, числа компании плитками.
+- Страницы — свой блок «Телефон» в своём CSS: однотипные длинные списки —
+  карточки или горизонтальная лента (пакеты трафика, конфигурации VDS,
+  задачи бизнеса, оглавление документов), FAQ — карточки-аккордеоны.
+- Проверка кабинета без БД — подмена ответов `/api/**` в Playwright
+  (боевую панель не трогать).
+
 **Что осталось на старом корпусе** и ждёт перевода — рабочие экраны:
 `/auth`, `/subscribe`, `/add-device`, админка.
 Нижние карточки (cookie, установка, быстрый вход) уже общие для всего
@@ -667,3 +687,13 @@ Lenis; возврат по «Назад» — своя позиция в session
   `telegram_<id>@tg.…` — без письма, но с начислением и уведомлением.
   Отписка — `/unsubscribe?t=` + one-click `POST /api/unsubscribe`
   (заголовки `List-Unsubscribe`), токен `users.unsubscribe_token`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

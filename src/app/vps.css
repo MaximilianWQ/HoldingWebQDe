@@ -62,7 +62,7 @@
 
   --v-shell: 1180px;
   --v-gutter: clamp(20px, 4vw, 40px);
-  --v-head-h: 72px;
+  --v-head-h: 84px;
 
   --v-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -280,29 +280,57 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   font-size: 17px;
 }
 
-/* ═══ 5. Шапка и меню ══════════════════════════════════════════════ */
+/* ═══ 5. Шапка-островок и меню ═════════════════════════════════════
+   Владелец, 17.09.2026: «как ранее — отдельный скруглённый островок,
+   современно, в стиле Apple». Капсула висит над страницей с отступом,
+   стекло с размытием; при прокрутке уплотняется (data-scrolled).
+   Активный пункт — белая пилюля, которая плавно переезжает (v-nav-pill). */
 .v-head {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.82);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+  padding: 12px var(--v-gutter) 0;
+  pointer-events: none;
 }
 .v-head-in {
+  pointer-events: auto;
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 24px;
-  min-height: var(--v-head-h);
+  gap: 12px;
+  width: 100%;
+  max-width: 1120px;
+  min-height: 60px;
+  margin-inline: auto;
+  padding: 6px 6px 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    0 0 0 1px rgba(16, 24, 40, 0.06),
+    0 8px 28px rgba(16, 24, 40, 0.08);
+  transition: max-width 420ms var(--v-ease), min-height 420ms var(--v-ease), box-shadow 420ms var(--v-ease), background-color 420ms var(--v-ease);
+}
+.v-head[data-scrolled] .v-head-in {
+  max-width: 1040px;
+  min-height: 56px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(16, 24, 40, 0.07),
+    0 14px 40px rgba(16, 24, 40, 0.12);
 }
 .v-logo {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   min-height: 44px;
+  padding-right: 6px;
   color: var(--v-ink);
   text-decoration: none;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -310,39 +338,76 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
 .v-logo-mark {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(145deg, #4C93F5, #2566D8);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #5AA0F7, #2566D8);
   color: #FFFFFF;
-  box-shadow: 0 4px 10px rgba(58, 133, 240, 0.35);
+  box-shadow: 0 4px 12px rgba(58, 133, 240, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 500ms var(--v-ease);
 }
-.v-nav { display: none; align-items: center; gap: 28px; margin-left: auto; }
-.v-nav a {
+@media (hover: hover) { .v-logo:hover .v-logo-mark { transform: rotate(-8deg) scale(1.06); } }
+
+.v-nav {
+  position: relative;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(16, 24, 40, 0.04);
+}
+.v-nav a:not(.v-btn) {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
   color: var(--v-ink-2);
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
+  transition: color 240ms var(--v-ease);
 }
 .v-nav a[aria-current="page"] { color: var(--v-ink); }
-@media (hover: hover) { .v-nav a:hover { color: var(--v-blue); } }
-.v-head-login { display: none; }
+@media (hover: hover) { .v-nav a:not(.v-btn):hover { color: var(--v-ink); } }
+.v-nav-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 0;
+  border-radius: 999px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08), 0 4px 12px rgba(16, 24, 40, 0.08);
+  opacity: 0;
+  transition: transform 420ms var(--v-ease), width 420ms var(--v-ease), opacity 240ms var(--v-ease);
+  pointer-events: none;
+}
+.v-head-cta {
+  display: none;
+  margin-left: 8px;
+}
+.v-head-cta .v-btn { min-height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; }
 .v-burger {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   margin-left: auto;
   border: 0;
   border-radius: 50%;
-  background: var(--v-soft);
-  color: var(--v-ink-2);
+  background: rgba(16, 24, 40, 0.06);
+  color: var(--v-ink);
   cursor: pointer;
+  transition: background-color 240ms var(--v-ease), transform 240ms var(--v-ease);
 }
-.v-burger i { position: relative; display: block; width: 20px; height: 14px; }
+.v-burger:active { transform: scale(0.94); }
+.v-burger i { position: relative; display: block; width: 18px; height: 12px; }
 .v-burger i::before, .v-burger i::after, .v-burger i span {
   content: "";
   position: absolute;
@@ -351,49 +416,86 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   height: 2px;
   border-radius: 2px;
   background: currentColor;
-  transition: transform 260ms var(--v-ease), opacity 200ms var(--v-ease);
+  transition: transform 320ms var(--v-ease), opacity 200ms var(--v-ease);
 }
 .v-burger i::before { top: 0; }
-.v-burger i span { top: 6px; }
+.v-burger i span { top: 5px; }
 .v-burger i::after { bottom: 0; }
-.v-burger[aria-expanded="true"] i::before { transform: translateY(6px) rotate(45deg); }
-.v-burger[aria-expanded="true"] i span { opacity: 0; }
-.v-burger[aria-expanded="true"] i::after { transform: translateY(-6px) rotate(-45deg); }
+.v-burger[aria-expanded="true"] { background: var(--v-ink); color: #FFFFFF; }
+.v-burger[aria-expanded="true"] i::before { transform: translateY(5px) rotate(45deg); }
+.v-burger[aria-expanded="true"] i span { opacity: 0; transform: scaleX(0); }
+.v-burger[aria-expanded="true"] i::after { transform: translateY(-5px) rotate(-45deg); }
 @media (min-width: 1000px) {
-  .v-nav { display: flex; }
-  .v-head-login { display: inline-flex; }
+  .v-nav, .v-head-cta { display: flex; }
   .v-burger { display: none; }
 }
+/* Узкая капсула на 1000–1120: подписи короче. */
+@media (min-width: 1000px) and (max-width: 1119px) {
+  .v-nav a:not(.v-btn) { padding: 0 12px; font-size: 14px; }
+}
 
+/* Меню на телефоне — скруглённая карточка под капсулой. */
 .v-menu {
   position: fixed;
-  inset: var(--v-head-h) 0 0 0;
+  top: calc(12px + 60px + 10px);
+  left: var(--v-gutter);
+  right: var(--v-gutter);
   z-index: 59;
   display: flex;
   flex-direction: column;
+  max-height: calc(100svh - 100px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px var(--v-gutter) calc(24px + env(safe-area-inset-bottom));
-  background: var(--v-bg);
-  animation: v-menu-in 320ms var(--v-ease) both;
+  padding: 10px;
+  border-radius: var(--v-r-lg);
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.06), 0 24px 64px rgba(16, 24, 40, 0.18);
+  transform-origin: top right;
+  animation: v-menu-in 420ms var(--v-ease) both;
 }
 .v-menu[hidden] { display: none; }
-@keyframes v-menu-in { from { opacity: 0; transform: translateY(-8px); } }
-.v-menu ul { list-style: none; margin: 0; padding: 0; }
+@keyframes v-menu-in { from { opacity: 0; transform: translateY(-10px) scale(0.97); } }
+.v-menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  background: rgba(10, 12, 20, 0.18);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: v-fade 320ms var(--v-ease) both;
+}
+.v-menu-scrim[hidden] { display: none; }
+@keyframes v-fade { from { opacity: 0; } }
+.v-menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.v-menu li { animation: v-menu-item 460ms var(--v-ease) both; animation-delay: calc(var(--i, 0) * 28ms + 60ms); }
+@keyframes v-menu-item { from { opacity: 0; transform: translateY(8px); } }
 .v-menu li a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 60px;
-  border-bottom: 1px solid var(--v-line);
+  min-height: 54px;
+  padding: 0 16px;
+  border-radius: 16px;
   color: var(--v-ink);
   text-decoration: none;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  transition: background-color 200ms var(--v-ease);
 }
+.v-menu li a::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--v-ink-4);
+  border-right: 2px solid var(--v-ink-4);
+  transform: rotate(45deg);
+}
+.v-menu li a:active, .v-menu li a[aria-current="page"] { background: var(--v-soft); }
 .v-menu li a[aria-current="page"] { color: var(--v-blue); }
-.v-menu-foot { display: grid; gap: 12px; margin-top: auto; padding-top: 28px; }
+.v-menu-foot { display: grid; gap: 8px; padding: 12px 6px 6px; }
 html:has(.v-menu:not([hidden])) { overflow: hidden; }
 
 /* ═══ 6. Подвал ════════════════════════════════════════════════════ */
@@ -870,6 +972,141 @@ body:has(.v) :is(.ov-card, .ov-dialog, .ov-sheet-wrap) { --ov-font: var(--v-font
 body:has(.v) .ov-card { border: 0; border-radius: var(--v-r-lg); box-shadow: var(--v-shadow-lift); }
 body:has(.v) .ov-btn { border-radius: var(--v-r-sm); }
 body:has(.v) .ov-mark { border-radius: 12px; }
+
+/* ═══ 13a. Живые элементы ═══════════════════════════════════════════
+   Общие приёмы плавности (владелец, 17.09.2026: «более плавным, больше
+   элементов»). Только transform/opacity; reduced-motion — конечный кадр. */
+
+/* Карточки приподнимаются под рукой. */
+.v-lift { transition: transform 420ms var(--v-ease), box-shadow 420ms var(--v-ease); }
+@media (hover: hover) {
+  .v-lift:hover { transform: translateY(-4px); box-shadow: var(--v-shadow-lift); }
+}
+.v-press { transition: transform 200ms var(--v-ease); }
+.v-press:active { transform: scale(0.98); }
+
+/* Появление содержимого вкладки/экрана. */
+.v-fade-in { animation: v-fade-up 560ms var(--v-ease) both; }
+@keyframes v-fade-up { from { opacity: 0; transform: translateY(12px); } }
+
+/* Дети появляются лесенкой при загрузке. */
+.v-stagger > * { animation: v-fade-up 640ms var(--v-ease) both; }
+.v-stagger > *:nth-child(1) { animation-delay: 40ms; }
+.v-stagger > *:nth-child(2) { animation-delay: 100ms; }
+.v-stagger > *:nth-child(3) { animation-delay: 160ms; }
+.v-stagger > *:nth-child(4) { animation-delay: 220ms; }
+.v-stagger > *:nth-child(5) { animation-delay: 280ms; }
+.v-stagger > *:nth-child(6) { animation-delay: 340ms; }
+.v-stagger > *:nth-child(n+7) { animation-delay: 400ms; }
+
+/* Мягкое свечение за первым экраном. */
+.v-glow { position: relative; isolation: isolate; }
+.v-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: -12%;
+  width: min(1100px, 140vw);
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(40% 50% at 35% 45%, rgba(58, 133, 240, 0.18), transparent 70%),
+    radial-gradient(35% 45% at 68% 40%, rgba(124, 92, 231, 0.12), transparent 70%);
+  filter: blur(8px);
+  animation: v-glow 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes v-glow { to { transform: translateX(-50%) translateY(3%) scale(1.06); } }
+
+/* Бегущая строка (страны, приложения). */
+.v-marquee {
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.v-marquee-track { display: flex; gap: 12px; width: max-content; padding-right: 12px; animation: v-marquee 48s linear infinite; }
+.v-marquee:hover .v-marquee-track { animation-play-state: paused; }
+@keyframes v-marquee { to { transform: translateX(-50%); } }
+
+/* Живая точка «на связи». */
+.v-live { position: relative; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #34C759; }
+.v-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: v-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes v-ping { 75%, 100% { transform: scale(2.4); opacity: 0; } }
+
+/* Бенто-сетка. */
+.v-bento { display: grid; gap: 14px; }
+@media (min-width: 760px) { .v-bento { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.v-bento > * { min-width: 0; }
+@media (min-width: 760px) {
+  .v-span-2 { grid-column: span 2; }
+  .v-span-3 { grid-column: span 3; }
+  .v-span-4 { grid-column: span 4; }
+  .v-span-6 { grid-column: span 6; }
+}
+.v-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 200px;
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+  overflow: hidden;
+  text-align: left;
+}
+.v-tile-dark { background: var(--v-black); color: #FFFFFF; }
+.v-tile-blue { background: linear-gradient(150deg, #4C93F5, #2566D8); color: #FFFFFF; }
+.v-tile h3 { margin: 0; font-size: clamp(20px, 2.2vw, 24px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.v-tile p { margin: 0; color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
+.v-tile-dark p, .v-tile-blue p { color: rgba(255, 255, 255, 0.72); }
+.v-tile-num { margin-top: auto; font-size: clamp(40px, 5vw, 56px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.v-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: var(--v-blue);
+  box-shadow: var(--v-shadow);
+}
+.v-tile-dark .v-tile-icon { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; box-shadow: none; }
+.v-tile-blue .v-tile-icon { background: rgba(255, 255, 255, 0.18); color: #FFFFFF; box-shadow: none; }
+
+/* Кольцо прогресса (дни подписки). */
+.v-ring { --p: 0.5; --size: 132px; position: relative; width: var(--size); height: var(--size); }
+.v-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.v-ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+.v-ring .v-ring-track { stroke: rgba(255, 255, 255, 0.14); }
+.v-ring .v-ring-bar {
+  stroke: var(--v-blue);
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--p) * 100);
+  transition: stroke-dashoffset 1200ms var(--v-ease);
+  animation: v-ring-in 1200ms var(--v-ease) both;
+}
+@keyframes v-ring-in { from { stroke-dashoffset: 100; } }
+.v-ring-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.v-ring-center b { font-size: 34px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.v-ring-center span { margin-top: 4px; font-size: 13px; opacity: 0.7; }
+
+/* Скелетон загрузки. */
+.v-skel {
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--v-soft) 0%, #F7F9FB 50%, var(--v-soft) 100%) 0 0 / 200% 100%;
+  animation: v-skel 1.4s ease-in-out infinite;
+}
+@keyframes v-skel { to { background-position: -200% 0; } }
 
 /* ═══ 14. Движение ═════════════════════════════════════════════════ */
 @supports (animation-timeline: view()) {

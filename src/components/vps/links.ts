@@ -4,6 +4,7 @@
  */
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
+import { STORE as APP_STORE } from "@/lib/apps";
 
 export const BRAND = "Atlas Secure VPS";
 export const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
@@ -12,6 +13,7 @@ export interface VLink { label: string; href: string }
 
 /** Шапка на широком экране. */
 export const HEAD_LINKS: VLink[] = [
+  { label: "Главная", href: "/" },
   { label: "Тарифы", href: "/pricing" },
   { label: "Устройства", href: "/devices" },
   { label: "Выделенные серверы", href: "/vds" },
@@ -45,9 +47,9 @@ export const FOOT_LINKS: VLink[] = [
   { label: "Пользовательское соглашение", href: "/terms" },
 ];
 
-/** Приложение Happ — те же ссылки, что в инструкциях (DevicesView.tsx). */
+/** Значки магазинов на витрине (Happ) — из единого списка src/lib/apps.ts. */
 export const STORE = {
-  appStore: "https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973",
-  googlePlay: "https://play.google.com/store/apps/details?id=com.happproxy",
-  windows: "https://www.happ.su/main",
+  appStore: APP_STORE.happIosRu,
+  googlePlay: APP_STORE.happAndroid,
+  windows: APP_STORE.happWindowsX64,
 };

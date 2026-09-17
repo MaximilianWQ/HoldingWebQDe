@@ -16,7 +16,21 @@ import "@/app/vps-info.css";
  * Цен на странице нет — корпоративный расчёт зависит от числа мест.
  * Форма и есть финальное действие страницы.
  */
-const POINTS: Array<{ icon: IconName; title: string; text: string }> = [
+const POINTS: Array<{ icon: IconName; title: string; text: string; tile?: "dark" | "blue"; num?: string }> = [
+  {
+    icon: "globe",
+    title: "Стран на выбор",
+    text: "Страну выбирает сотрудник или назначает администратор — в зависимости от нужных сервисов.",
+    tile: "blue",
+    num: String(COUNTRY_COUNT),
+  },
+  {
+    icon: "devices",
+    title: "Устройств на человека",
+    text: "Ноутбук, телефон, планшет, рабочий компьютер — одно место закрывает все устройства сотрудника.",
+    tile: "dark",
+    num: String(DEVICE_LIMIT),
+  },
   {
     icon: "receipt",
     title: "Один счёт на всю команду",
@@ -27,23 +41,13 @@ const POINTS: Array<{ icon: IconName; title: string; text: string }> = [
     title: "Управление доступами",
     text: "Администратор компании выдаёт и отзывает доступ сам — в тот же день, вместе со всеми устройствами.",
   },
-  {
-    icon: "devices",
-    title: `До ${DEVICE_LIMIT} ${plural(DEVICE_LIMIT, ["устройства", "устройств", "устройств"])} на человека`,
-    text: "Ноутбук, телефон, планшет, рабочий компьютер — одно место закрывает все устройства сотрудника.",
-  },
-  {
-    icon: "globe",
-    title: `${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор`,
-    text: "Страну выбирает сотрудник или назначает администратор — в зависимости от нужных сервисов.",
-  },
 ];
 
 export default function BusinessView() {
   return (
     <>
-      <section className="v-section v-center" aria-labelledby="v-business-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="v-business-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-business-title" className="v-h1">
             Интернет и серверы <span className="v-accent">для команды</span>
           </h1>
@@ -58,23 +62,22 @@ export default function BusinessView() {
         </div>
       </section>
 
-      <section className="v-section" style={{ paddingTop: 0 }} aria-label="Что входит">
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label="Что входит">
         <div className="v-wrap v-narrow">
-          <div className="vp-points">
+          <div className="v-bento">
             {POINTS.map((p) => (
-              <div key={p.title} className="vp-point">
-                <span className="vp-point-mark" aria-hidden><Icon name={p.icon} size={20} /></span>
-                <div>
-                  <b>{p.title}</b>
-                  <p>{p.text}</p>
-                </div>
+              <div key={p.title} className={`v-tile v-span-3${p.tile ? ` v-tile-${p.tile}` : ""}`}>
+                <span className="v-tile-icon" aria-hidden><Icon name={p.icon} size={22} /></span>
+                <h3>{p.title}</h3>
+                <p>{p.text}</p>
+                {p.num && <b className="v-tile-num">{p.num}</b>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="v-section v-center" id="request" aria-labelledby="request-title">
+      <section className="v-section v-center v-reveal" id="request" aria-labelledby="request-title">
         <div className="v-wrap v-narrow">
           <h2 id="request-title" className="v-h2">Расскажите про команду</h2>
           <p className="v-lead" style={{ marginBottom: 8 }}>Ответим письмом с расчётом и проектом договора.</p>

@@ -42,8 +42,45 @@
 
 .vd-note { margin: 20px 0 0; text-align: center; }
 
-/* ─── Шаги: приложение, если их несколько ─────────────────────── */
-.vd-apps { max-width: 360px; margin: 0 0 18px; }
+/* ─── Приложение: карточки-переключатели (Happ / Incy / V2RayTun) ── */
+.vd-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.vd-app-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 44px;
+  padding: 16px 18px;
+  border: 0;
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+  color: var(--v-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 200ms var(--v-ease), color 200ms var(--v-ease), transform 200ms var(--v-ease), box-shadow 200ms var(--v-ease);
+}
+.vd-app-card:active { transform: scale(0.98); }
+@media (hover: hover) {
+  .vd-app-card:not([aria-pressed="true"]):hover { background: var(--v-soft-2); }
+}
+.vd-app-card[aria-pressed="true"] { background: var(--v-blue); color: #FFFFFF; transform: scale(1.02); box-shadow: var(--v-shadow); }
+.vd-app-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+.vd-app-note { font-size: 13px; color: var(--v-ink-3); line-height: 1.4; }
+.vd-app-card[aria-pressed="true"] .vd-app-note { color: rgba(255, 255, 255, 0.75); }
+.vd-app-badge { position: absolute; top: 10px; right: 10px; min-height: auto; padding: 2px 10px; font-size: 11px; }
+
+/* ─── Установка: главная ссылка + вторичные пилюли ───────────────── */
+.vd-install { margin-top: 4px; display: grid; gap: 12px; }
+/* Длинные подписи («App Store · Россия») переносятся, а не режут кнопку. */
+.vd-install .v-btn { white-space: normal; text-align: center; line-height: 1.3; }
+.vd-install-more { display: flex; flex-wrap: wrap; gap: 8px; }
+.vd-install-more .v-btn { white-space: normal; text-align: center; }
 
 /* ─── Строка ключа ──────────────────────────────────────────────── */
 .vd-kicker { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--v-ink-3); }
@@ -84,37 +121,24 @@
 
 .vd-switch { margin: 18px 0 0; color: var(--v-ink-3); font-size: 15px; }
 
-/* ─── Шаги вручную ──────────────────────────────────────────────── */
-.vd-manual { margin-top: 18px; }
-.vd-manual summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  color: var(--v-blue);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  list-style: none;
-}
-.vd-manual summary::-webkit-details-marker { display: none; }
-.vd-manual ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
-.vd-manual li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: var(--v-ink-2); }
-.vd-manual li b {
+/* ─── «Подключитесь»: пронумерованные шаги app.steps ─────────────── */
+.vd-connect { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 14px; }
+.vd-connect li { display: flex; gap: 14px; align-items: flex-start; font-size: 16px; line-height: 1.5; color: var(--v-ink-2); }
+.vd-connect-num {
   flex: none;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   margin-top: 1px;
   border-radius: 50%;
-  background: var(--v-soft);
-  color: var(--v-ink-2);
-  font-size: 12px;
-  font-weight: 600;
+  background: var(--v-blue-soft);
+  color: var(--v-blue-ink);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 /* ─── Движение ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .vd-tile, .vd-key { transition: none; }
+  .vd-tile, .vd-app-card, .vd-key { transition: none; }
 }

@@ -15,7 +15,6 @@ import type { SubscriptionData } from "@/types";
 import CabinetKey from "./CabinetKey";
 import CabinetPayments from "./CabinetPayments";
 import CabinetFriends from "./CabinetFriends";
-import CabinetNetwork from "./CabinetNetwork";
 import CabinetSettings from "./CabinetSettings";
 import "./cabinet-vps.css";
 
@@ -36,7 +35,7 @@ import "./cabinet-vps.css";
 
 type TabId = "subs" | "payments" | "buy" | "profile";
 const TABS: { id: TabId; label: string; icon: IconName }[] = [
-  { id: "subs", label: "Подписки", icon: "bag" },
+  { id: "subs", label: "Главная", icon: "bag" },
   { id: "payments", label: "Платежи", icon: "receipt" },
   { id: "buy", label: "Купить", icon: "grid" },
   { id: "profile", label: "Профиль", icon: "user" },
@@ -80,8 +79,17 @@ function DashboardViewInner() {
 
   const activeParam = searchParams.get("tab");
   const active: TabId = TABS.some((t) => t.id === activeParam) ? (activeParam as TabId) : "subs";
+  const kindParam = searchParams.get("kind") === "traffic" ? "traffic" : "plan";
+  // extra — доп. параметры запроса (например ?tab=buy&kind=traffic для
+  // «Купить ГБ» с плитки быстрых действий).
   const setActive = useCallback(
-    (id: TabId) => router.push(id === "subs" ? pathname : `${pathname}?tab=${id}`, { scroll: false }),
+    (id: TabId, extra?: Record<string, string>) => {
+      const qs = new URLSearchParams();
+      if (id !== "subs") qs.set("tab", id);
+      if (extra) for (const [k, v] of Object.entries(extra)) qs.set(k, v);
+      const s = qs.toString();
+      router.push(s ? `${pathname}?${s}` : pathname, { scroll: false });
+    },
     [router, pathname]
   );
 
@@ -280,29 +288,38 @@ function DashboardViewInner() {
         </button>
         <hr className="v-divider vc-hr" />
 
-        {/* ── Содержимое активной вкладки ──────────────────────────── */}
-        {active === "subs" && (
-          <CabinetKey data={data} resyncing={resyncing} resyncStatus={resyncStatus} onResync={handleForceResync} />
-        )}
+        {/* ── Содержимое активной вкладки (key — переигрывает появление) */}
+        <div key={active} className="v-fade-in">
+          {active === "subs" && (
+            <CabinetKey
+              data={data}
+              resyncing={resyncing}
+              resyncStatus={resyncStatus}
+              onResync={handleForceResync}
+              onBuyTraffic={() => setActive("buy", { kind: "traffic" })}
+              onGoProfile={() => setActive("profile")}
+            />
+          )}
 
-        {active === "payments" && <CabinetPayments />}
+          {active === "payments" && <CabinetPayments />}
 
-        {active === "buy" && <BuyPanel />}
+          {active === "buy" && <BuyPanel data={data} initialKind={kindParam} />}
 
-        {active === "profile" && (
-          <ProfilePanel
-            data={data}
-            tgLink={tgLink}
-            unlinkStep={unlinkStep}
-            unlinking={unlinking}
-            onStartTelegramLink={startTelegramLink}
-            onUnlinkStepChange={setUnlinkStep}
-            onUnlinkTelegram={handleUnlinkTelegram}
-            isAdmin={!!data.isAdmin}
-            onOpenNotifications={() => setShowNotifications(true)}
-            unreadCount={unreadCount}
-          />
-        )}
+          {active === "profile" && (
+            <ProfilePanel
+              data={data}
+              tgLink={tgLink}
+              unlinkStep={unlinkStep}
+              unlinking={unlinking}
+              onStartTelegramLink={startTelegramLink}
+              onUnlinkStepChange={setUnlinkStep}
+              onUnlinkTelegram={handleUnlinkTelegram}
+              isAdmin={!!data.isAdmin}
+              onOpenNotifications={() => setShowNotifications(true)}
+              unreadCount={unreadCount}
+            />
+          )}
+        </div>
       </div>
 
       {showLogoutConfirm && (
@@ -334,19 +351,27 @@ function DashboardViewInner() {
 }
 
 /** «Купить»: вкладки «Подписка» / «Трафик» над готовыми каруселями. */
-function BuyPanel() {
-  const [kind, setKind] = useState<"plan" | "traffic">("plan");
+function BuyPanel({ data, initialKind }: { data: SubscriptionData; initialKind: "plan" | "traffic" }) {
+  const [kind, setKind] = useState<"plan" | "traffic">(initialKind);
+  const plan = data.subscriptionPlan || "trial";
+  const end = new Date(data.subscriptionEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+  const offer = data.isExpired
+    ? "Подписка не активна — выберите тариф, чтобы включить доступ снова."
+    : plan === "trial"
+      ? `Сейчас пробный период, осталось ${data.daysLeft} дн. — оформите тариф, чтобы не потерять доступ.`
+      : `Сейчас тариф ${plan === "plus" ? "Plus" : "Basic"}, действует до ${end} — продлите или смените тариф.`;
   return (
     <div className="vc-panel" aria-labelledby="vc-buy-h">
       <h2 id="vc-buy-h" className="vc-cab-title">
         <Icon name="grid" size={26} />
         Купить
       </h2>
+      <p className="vc-lead">{offer}</p>
       <div className="v-tabs-line vc-buy-tabs" role="tablist" aria-label="Что купить">
         <button type="button" role="tab" aria-selected={kind === "plan"} onClick={() => setKind("plan")}>Подписка</button>
         <button type="button" role="tab" aria-selected={kind === "traffic"} onClick={() => setKind("traffic")}>Трафик</button>
       </div>
-      <div style={{ marginTop: 24 }}>
+      <div key={kind} className="v-fade-in" style={{ marginTop: 24 }}>
         {kind === "plan" ? (
           <PlanCards href={(plan, period) => `/subscribe?plan=${plan}&period=${period}`} />
         ) : (
@@ -389,31 +414,7 @@ function ProfilePanel({
         Профиль
       </h2>
 
-      <div className="v-card v-card-pad" style={{ marginBottom: 16 }}>
-        <div className="v-rows">
-          <button type="button" className="v-row vc-row-btn" onClick={onOpenNotifications}>
-            <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
-            <span className="v-row-main">
-              <b>Уведомления</b>
-              <span className="v-small">{unreadCount > 0 ? `Новых: ${unreadLabel}` : "Новых нет"}</span>
-            </span>
-            <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
-          </button>
-          {isAdmin && (
-            <Link href="/admin" className="v-row">
-              <span className="v-row-icon" aria-hidden><Icon name="shield" size={20} /></span>
-              <span className="v-row-main"><b>Админ-панель</b></span>
-              <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="v-card v-card-pad" style={{ marginBottom: 16 }}>
-        <CabinetSettings />
-      </div>
-
-      <div className="v-card v-card-pad" style={{ marginBottom: 16 }} aria-labelledby="vc-tg-h">
+      <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }} aria-labelledby="vc-tg-h">
         <div className="vc-kblock-head">
           <h3 id="vc-tg-h">Telegram</h3>
           {data.telegramLinked && <span className="v-badge v-badge-green">Привязан</span>}
@@ -466,7 +467,7 @@ function ProfilePanel({
         )}
       </div>
 
-      <div className="v-card v-card-pad" style={{ marginBottom: 16 }}>
+      <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }} id="vc-friends-card">
         <CabinetFriends
           referralCode={data.referralCode}
           cashbackPercent={data.cashbackPercent}
@@ -476,8 +477,28 @@ function ProfilePanel({
         />
       </div>
 
-      <div className="v-card v-card-pad">
-        <CabinetNetwork />
+      <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }}>
+        <CabinetSettings />
+      </div>
+
+      <div className="v-card v-card-pad v-lift">
+        <div className="v-rows">
+          <button type="button" className="v-row vc-row-btn" onClick={onOpenNotifications}>
+            <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
+            <span className="v-row-main">
+              <b>Уведомления</b>
+              <span className="v-small">{unreadCount > 0 ? `Новых: ${unreadLabel}` : "Новых нет"}</span>
+            </span>
+            <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
+          </button>
+          {isAdmin && (
+            <Link href="/admin" className="v-row">
+              <span className="v-row-icon" aria-hidden><Icon name="shield" size={20} /></span>
+              <span className="v-row-main"><b>Админ-панель</b></span>
+              <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

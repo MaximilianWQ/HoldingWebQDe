@@ -300,7 +300,7 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   gap: 12px;
   width: 100%;
   max-width: 1120px;
-  min-height: 60px;
+  min-height: 64px;
   margin-inline: auto;
   padding: 6px 6px 6px 14px;
   border-radius: 999px;
@@ -363,7 +363,7 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
   color: var(--v-ink-2);
@@ -506,25 +506,47 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   color: #FFFFFF;
 }
 .v-foot .v-logo { color: #FFFFFF; font-size: 24px; }
-.v-foot-grid { display: grid; gap: 40px; }
-@media (min-width: 900px) { .v-foot-grid { grid-template-columns: 1.2fr 1fr; align-items: start; } }
-.v-foot-about { margin: 20px 0 0; max-width: 460px; color: rgba(255, 255, 255, 0.58); font-size: 17px; line-height: 1.55; }
+
+/* Богаче: знак и о продукте слева, три колонки ссылок справа. На
+   планшете — знак сверху, три колонки ссылок в ряд ниже; на телефоне —
+   всё стопкой, каждая группа отдельно (владелец, 17.09.2026). */
+.v-foot-grid { display: grid; gap: 40px 32px; }
+.v-foot-brand { grid-column: 1 / -1; max-width: 460px; }
+@media (min-width: 640px) { .v-foot-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 1024px) {
+  .v-foot-grid { grid-template-columns: 1.3fr repeat(3, 1fr); align-items: start; }
+  .v-foot-brand { grid-column: auto; }
+}
+.v-foot-about { margin: 20px 0 0; color: rgba(255, 255, 255, 0.58); font-size: 17px; line-height: 1.55; }
+.v-foot-apps { margin: 16px 0 0; font-size: 14px; color: rgba(255, 255, 255, 0.4); }
+.v-foot-apps b { color: rgba(255, 255, 255, 0.74); font-weight: 500; }
 .v-foot-org { margin: 32px 0 0; font-size: 15px; line-height: 1.8; color: rgba(255, 255, 255, 0.58); }
 .v-foot-org b { display: block; color: #FFFFFF; font-size: 17px; font-weight: 600; }
-.v-foot-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-@media (min-width: 560px) { .v-foot-links { grid-template-columns: 1fr 1fr; column-gap: 32px; } }
+
+.v-foot-group-title {
+  margin: 0 0 16px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.v-foot-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .v-foot-links a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   color: #6FA6F6;
-  font-size: 17px;
+  font-size: 16px;
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: rgba(111, 166, 246, 0.45);
+  text-decoration-color: rgba(111, 166, 246, 0.4);
+  transition: color 220ms var(--v-ease), transform 220ms var(--v-ease), text-decoration-color 220ms var(--v-ease);
 }
-@media (hover: hover) { .v-foot-links a:hover { color: #FFFFFF; } }
-.v-foot-copy { margin: 40px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.4); }
+@media (hover: hover) {
+  .v-foot-links a:hover { color: #FFFFFF; text-decoration-color: rgba(255, 255, 255, 0.5); transform: translateX(3px); }
+}
+.v-foot-copy { margin: 48px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.4); }
 .v-foot-slim { margin-top: 48px; padding-block: 28px calc(28px + env(safe-area-inset-bottom)); }
 
 /* ═══ 7. Карточки ══════════════════════════════════════════════════ */
@@ -1067,8 +1089,8 @@ body:has(.v) .ov-mark { border-radius: 12px; }
 .v-tile-dark { background: var(--v-black); color: #FFFFFF; }
 .v-tile-blue { background: linear-gradient(150deg, #4C93F5, #2566D8); color: #FFFFFF; }
 .v-tile h3 { margin: 0; font-size: clamp(20px, 2.2vw, 24px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
-.v-tile p { margin: 0; color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
-.v-tile-dark p, .v-tile-blue p { color: rgba(255, 255, 255, 0.72); }
+:where(.v-tile) p { margin: 0; color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
+:where(.v-tile-dark, .v-tile-blue) p { color: rgba(255, 255, 255, 0.72); }
 .v-tile-num { margin-top: auto; font-size: clamp(40px, 5vw, 56px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
 .v-tile-icon {
   display: grid;

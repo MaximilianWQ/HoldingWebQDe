@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <VShell>
-      <section className="v-section v-center" aria-labelledby="v-404-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="v-404-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-404-title" className="v-h1">
             Страница <span className="v-accent">не найдена</span>
           </h1>

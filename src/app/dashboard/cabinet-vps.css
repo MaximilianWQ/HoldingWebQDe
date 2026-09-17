@@ -17,13 +17,24 @@
 /* ── Профиль ────────────────────────────────────────────────────── */
 .vc-profile-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px 20px;
-  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 22px;
+  padding: 16px;
+  border-radius: var(--v-r-lg);
+  background: #FFFFFF;
+  box-shadow: var(--v-shadow);
+  animation: v-fade-up 560ms var(--v-ease) both;
 }
-.vc-profile-id { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.vc-profile-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.vc-profile-id .v-avatar { width: 60px; height: 60px; font-size: 24px; box-shadow: 0 8px 20px rgba(58, 133, 240, 0.28); }
+.vc-profile-text { min-width: 0; }
+.vc-profile-row > .v-btn { flex: none; width: 44px; padding: 0; }
+@media (max-width: 480px) {
+  .vc-name-row .vc-chip { font-size: 13px; }
+  .vc-balance { min-height: 40px; }
+}
 .vc-profile-text { display: grid; gap: 8px; }
 .vc-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .vc-name { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.015em; overflow-wrap: anywhere; }
@@ -78,33 +89,120 @@
   .vc-panel-head .vc-cab-title { font-size: 22px; }
 }
 
-/* ── Первые шаги (пробный, компактно) ─────────────────────────── */
-.vc-first {
+/* ── Главная: верхняя строка («Обновить») ─────────────────────── */
+.vc-home-top { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-height: 24px; margin-bottom: 14px; }
+.vc-home-top p:empty { display: none; }
+
+/* ── Тёмная плита подписки (`.v-tile-dark.v-span-4`) ──────────── */
+.vc-sub-tile { justify-content: flex-start; }
+.vc-sub-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.vc-sub-head h3 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: rgba(255, 255, 255, 0.86); }
+.vc-sub-body { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 8px; }
+.vc-sub-ring { --size: 104px; flex: none; }
+.vc-sub-info { min-width: 0; }
+.vc-sub-big { margin: 0; font-size: clamp(24px, 3vw, 30px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+.vc-sub-info-cap { margin: 4px 0 0; color: var(--v-on-black-2); font-size: 14px; }
+.vc-sub-end { margin: 10px 0 0; color: var(--v-on-black-2); font-size: 14px; }
+.vc-sub-actions { justify-content: flex-start; margin-top: auto; padding-top: 24px; }
+.vc-btn-on-dark { background: transparent; color: #FFFFFF; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.32); }
+@media (hover: hover) { .vc-btn-on-dark:hover { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.6); } }
+@media (max-width: 420px) { .vc-sub-ring { --size: 88px; } .vc-sub-body { gap: 16px; } }
+
+/* ── Плитка «Сеть сейчас» (`.v-span-2`, CabinetNetwork.tsx) ────── */
+.vc-net-tile { justify-content: flex-start; }
+.vc-net-live { width: 40px; height: 40px; border-radius: 12px; }
+.vc-net-tile h3 { margin: 2px 0 0; font-size: 15px; font-weight: 600; color: var(--v-ink-3); }
+.vc-net-num { margin: 2px 0 0; color: var(--v-ink); font-size: clamp(30px, 3.4vw, 36px); font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.vc-net-spark { display: block; width: 100%; height: 44px; margin-top: 2px; }
+.vc-net-spark-line { fill: none; stroke: var(--v-blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.vc-net-spark-area { fill: color-mix(in srgb, var(--v-blue) 12%, transparent); stroke: none; }
+.vc-net-cap { margin: 6px 0 0; font-size: 13px; color: var(--v-ink-3); }
+
+/* ── Быстрые действия: 2×2 на телефоне, ряд из 4 от 760px ──────── */
+.vc-quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (min-width: 760px) { .vc-quick { grid-template-columns: repeat(4, 1fr); } }
+.vc-qtile {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  padding: 14px 18px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 112px;
+  padding: 18px;
+  border: 0;
   border-radius: var(--v-r-lg);
-  background: var(--v-blue-soft);
+  background: var(--v-field);
+  color: var(--v-ink);
+  text-align: left;
+  text-decoration: none;
+  font: 600 15px/1.25 var(--v-font);
+  cursor: pointer;
 }
-.vc-first-text { margin: 0; color: var(--v-blue-ink); font-size: 14px; font-weight: 600; }
-.vc-first-list { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.vc-first-list li {
+.vc-qtile .v-tile-icon { width: 40px; height: 40px; border-radius: 12px; }
+@media (hover: hover) { .vc-qtile:hover { background: var(--v-soft-2); } }
+
+/* ── Первые шаги (пробный): шаги-кружки + подсказка следующего ─── */
+.vc-first { padding: clamp(20px, 3vw, 28px); border-radius: var(--v-r-lg); background: var(--v-blue-soft); }
+.vc-first-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.vc-first-head h3 { margin: 0; font-size: 17px; font-weight: 600; color: var(--v-blue-ink); }
+.vc-stepper { position: relative; display: flex; justify-content: space-between; margin: 22px 4px 22px; }
+.vc-stepper::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  height: 2px;
+  background: rgba(58, 133, 240, 0.22);
+}
+.vc-stepper-fill { position: absolute; top: 15px; left: 15px; height: 2px; background: var(--v-blue); transition: width 600ms var(--v-ease); }
+.vc-stepper-item { position: relative; z-index: 1; display: grid; justify-items: center; gap: 8px; }
+.vc-step-dot {
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
   border-radius: 50%;
   background: #FFFFFF;
-  color: var(--v-ink-4);
+  box-shadow: inset 0 0 0 2px rgba(58, 133, 240, 0.35);
+  color: var(--v-blue-ink);
   font-size: 13px;
   font-weight: 700;
 }
-.vc-first-list li[data-state="done"] { background: var(--v-blue); color: #FFFFFF; }
-.vc-first-list li[data-state="now"] { box-shadow: inset 0 0 0 2px var(--v-blue); color: var(--v-blue-ink); }
+.vc-stepper-item[data-state="done"] .vc-step-dot { background: var(--v-blue); box-shadow: none; color: #FFFFFF; }
+.vc-stepper-item[data-state="now"] .vc-step-dot { box-shadow: inset 0 0 0 2px var(--v-blue); animation: vc-pulse 1.8s ease-in-out infinite; }
+@keyframes vc-pulse { 50% { box-shadow: 0 0 0 6px rgba(58, 133, 240, 0.14); } }
+.vc-step-label { font-size: 12px; font-weight: 600; color: var(--v-blue-ink); white-space: nowrap; }
+.vc-first-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(58, 133, 240, 0.16);
+}
+.vc-first-cta p { margin: 0; font-size: 15px; color: var(--v-ink-2); }
+.vc-first-cta-text { color: var(--v-ink-3); font-weight: 400; }
+.vc-first-done { display: flex; align-items: center; gap: 8px; margin: 0; padding-top: 18px; color: var(--v-blue-ink); font-weight: 600; }
+
+/* ── Ключи: приложение и ссылки скачивания ──────────────────────── */
+.vc-keys-title { justify-content: flex-start; font-size: clamp(20px, 2.6vw, 24px); margin-bottom: 14px; }
+.vc-app-seg { margin: 6px 0 12px; max-width: 260px; }
+.vc-app-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.vc-app-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.vc-app-link-sec { background: transparent; box-shadow: inset 0 0 0 1px var(--v-line); color: var(--v-ink-3); }
+@media (hover: hover) { .vc-app-link:hover { background: var(--v-soft-2); } }
 
 /* ── Ряды: расширение по «Подробнее» ──────────────────────────── */
 .vc-row-btn { width: 100%; border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
@@ -171,13 +269,6 @@
 .vc-stat { display: grid; gap: 4px; padding: 14px 8px; border-radius: var(--v-r-md); background: var(--v-field); text-align: center; }
 .vc-stat span { font-size: 12px; color: var(--v-ink-3); }
 .vc-stat b { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
-
-/* ── Сеть сейчас (компактно) ───────────────────────────────────── */
-.vc-net-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-.vc-net-count { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-.vc-net-codes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-.vc-code { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: var(--v-field); color: var(--v-ink-3); font-size: 12px; }
-.vc-code i { width: 6px; height: 6px; border-radius: 50%; background: var(--v-blue); }
 
 /* ── Диалог выхода ─────────────────────────────────────────────── */
 .vc-dialog { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; }

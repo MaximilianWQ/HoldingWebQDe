@@ -160,7 +160,7 @@ export default function CabinetSettings() {
         <h3 id="vc-set-h">Уведомления и вход</h3>
       </div>
 
-      <div className="v-rows">
+      <div className="v-rows v-stagger">
         <div className="v-row">
           <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
           <span className="v-row-main">

@@ -43,8 +43,8 @@ export default function InfrastructurePage() {
   return (
     <VShell>
       {/* 01 · маршрут */}
-      <section className="v-section v-center" aria-labelledby="pi-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="pi-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="pi-title" className="v-h1">
             Где проходит <span className="v-accent">ваш трафик</span>
           </h1>
@@ -55,6 +55,14 @@ export default function InfrastructurePage() {
           <div className="v-actions">
             <Link href="/auth" prefetch={false} className="v-btn v-btn-primary">Попробовать {TRIAL} бесплатно</Link>
             <Link href="#map" className="v-btn v-btn-soft">Смотреть страны</Link>
+          </div>
+        </div>
+
+        <div className="v-marquee pi-marquee" aria-hidden="true">
+          <div className="v-marquee-track">
+            {[...byLatency, ...byLatency].map((l, i) => (
+              <span key={`${l.code}-${i}`} className="pi-marquee-item">{l.country}</span>
+            ))}
           </div>
         </div>
       </section>
@@ -85,7 +93,7 @@ export default function InfrastructurePage() {
         <div className="v-wrap">
           <h2 id="pi-path-title" className="v-h2">Три участка пути</h2>
           <ol className="pi-path">
-            <li className="pi-stage">
+            <li className="pi-stage v-lift">
               <span className="pi-stage-n" aria-hidden>1</span>
               <div>
                 <h3>Шифрование начинается у вас</h3>
@@ -95,14 +103,14 @@ export default function InfrastructurePage() {
                 </p>
               </div>
             </li>
-            <li className="pi-stage">
+            <li className="pi-stage v-lift">
               <span className="pi-stage-n" aria-hidden>2</span>
               <div>
                 <h3>Страну выбираете вы</h3>
                 <p>Сервер в выбранной стране передаёт запрос дальше. Что вы открывали, у нас не записывается.</p>
               </div>
             </li>
-            <li className="pi-stage">
+            <li className="pi-stage v-lift">
               <span className="pi-stage-n" aria-hidden>3</span>
               <div>
                 <h3>Ширина канала, а не обещание</h3>

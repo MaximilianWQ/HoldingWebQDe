@@ -20,10 +20,6 @@
   padding: 20px 22px;
   text-decoration: none;
   color: inherit;
-  transition: transform 200ms var(--v-ease), box-shadow 200ms var(--v-ease);
-}
-@media (hover: hover) {
-  .vp-channel:hover { transform: translateY(-2px); box-shadow: var(--v-shadow-lift); }
 }
 .vp-channel-icon {
   flex: none;
@@ -40,7 +36,12 @@
 .vp-channel-main span { display: block; color: var(--v-ink-3); font-size: 15px; overflow-wrap: anywhere; }
 .vp-channel-go { flex: none; color: var(--v-ink-4); }
 
-/* Раскрывающиеся карточки вопрос-ответ (details/summary). */
+/* Раскрывающиеся карточки вопрос-ответ (details/summary). Содержимое
+   раскрывается плавно по высоте (приём grid-template-rows 0fr → 1fr):
+   без него `<details>` переключает contents мгновенно, а бриф просит
+   «плавное раскрытие» (владелец, 17.09.2026). Текст ответа обёрнут во
+   внутренний `<span>` — с несколькими детьми `<p>` стал бы grid-контейнером
+   с несколькими автоматическими ячейками, и 0fr перестал бы схлопывать всё. */
 .vp-faq { display: grid; gap: 12px; margin-top: clamp(24px, 4vw, 36px); text-align: left; }
 .vp-faq-item { padding: 0; }
 .vp-faq-item summary {
@@ -70,26 +71,18 @@
   transition: transform 240ms var(--v-ease), background-color 240ms var(--v-ease), color 240ms var(--v-ease);
 }
 .vp-faq-item[open] .vp-faq-mark { background: var(--v-blue); color: #FFFFFF; transform: rotate(180deg); }
-.vp-faq-a { margin: 0; padding: 0 clamp(18px, 3vw, 26px) 22px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
-
-/* Короткие пункты пользы, 3–4 штуки (/business). */
-.vp-points { display: grid; gap: 18px; margin-top: clamp(28px, 4vw, 40px); text-align: left; }
-@media (min-width: 640px) {
-  .vp-points { grid-template-columns: repeat(2, 1fr); }
-}
-.vp-point { display: flex; gap: 14px; align-items: flex-start; }
-.vp-point-mark {
-  flex: none;
+.vp-faq-a {
   display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--v-blue-soft);
-  color: var(--v-blue-ink);
+  grid-template-rows: 1fr;
+  margin: 0;
+  color: var(--v-ink-3);
+  font-size: 16px;
+  line-height: 1.55;
+  opacity: 1;
+  transition: grid-template-rows 340ms var(--v-ease), opacity 280ms var(--v-ease);
 }
-.vp-point b { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-.vp-point p { margin: 4px 0 0; color: var(--v-ink-3); font-size: 15px; line-height: 1.5; }
+.vp-faq-item:not([open]) > .vp-faq-a { grid-template-rows: 0fr; opacity: 0; }
+.vp-faq-a > span { overflow: hidden; padding: 0 clamp(18px, 3vw, 26px) 22px; }
 
 /* Готово-состояние формы (заявка/письмо отправлены). */
 .vp-done { text-align: center; padding: clamp(28px, 4vw, 40px); }
@@ -130,3 +123,53 @@ select.v-input {
   background-position: right 16px center;
   padding-right: 44px;
 }
+
+/* Живая точка «отвечаем сейчас» рядом с каналом связи (/support). Без
+   выдуманного срока ответа — только факт «на линии», сама точка живая
+   через общий `.v-live`. */
+.vp-live-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: clamp(16px, 2.4vw, 22px);
+  color: var(--v-ink-3);
+  font-size: 14px;
+}
+.vp-live-row b { color: var(--v-ink-2); font-weight: 500; }
+
+/* Две/три колонки-карточки со списком (храним/не храним, гарантируем/
+   нет) — общий приём для /security и /vds, собственный префикс `vp-`,
+   кандидат на перенос в vps.css вместе с остальными живыми элементами. */
+.vp-cols { display: grid; gap: 16px; margin-top: clamp(28px, 4vw, 40px); text-align: left; }
+@media (min-width: 720px) {
+  .vp-cols-2 { grid-template-columns: 1fr 1fr; align-items: start; }
+  .vp-cols-3 { grid-template-columns: repeat(3, 1fr); align-items: start; }
+}
+.vp-col-h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.vp-col-h b { color: var(--v-ink); }
+.vp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.vp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+  font-size: 15px;
+  line-height: 1.4;
+}
+.vp-item-no {
+  color: var(--v-ink-4);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
+}
+.vp-item-mark { flex: none; width: 20px; height: 20px; margin-top: 1px; color: var(--v-blue); }
+.vp-item-mark-off { color: var(--v-ink-4); }

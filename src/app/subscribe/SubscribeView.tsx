@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Icon from "@/components/pixel/Icon";
@@ -436,7 +436,7 @@ function SubscribeContent() {
     return (
       <section className="v-section v-center">
         <div className="v-wrap v-narrow">
-          <Result step={step} paid={paid} onRestart={restart} />
+          <Result key={step} step={step} paid={paid} onRestart={restart} />
         </div>
       </section>
     );
@@ -481,6 +481,9 @@ function SubscribeContent() {
               );
             })}
           </nav>
+          <div className="vs-progress" aria-hidden="true">
+            <span className="vs-progress-bar" style={{ "--p": stepNum / steps.length } as CSSProperties} />
+          </div>
         </div>
       </section>
 
@@ -490,7 +493,7 @@ function SubscribeContent() {
             <div className="vs-flow">
               {/* ── Шаг 1 · Тариф ───────────────────────────────────── */}
               {step === "plans" && (
-                <div className="v-card v-card-pad vs-panel" aria-labelledby="vs-plans-h">
+                <div key="plans" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-plans-h">
                   <h2 id="vs-plans-h" className="vs-eyebrow">Шаг 1 · Тариф</h2>
                   <p className="v-text">Два тарифа на одной инфраструктуре — отличаются только скоростью канала.</p>
                   <div className="v-seg vs-pick" role="tablist" aria-label="Тариф">
@@ -500,7 +503,7 @@ function SubscribeContent() {
                       </button>
                     ))}
                   </div>
-                  <div className="vs-detail">
+                  <div key={draftPlan} className="vs-detail vs-detail-pick v-fade-in">
                     <h3 className="vs-detail-name">{PLAN_CONTENT[draftPlan].name}</h3>
                     <p className="v-text">{PLAN_CONTENT[draftPlan].tagline}.</p>
                     <ul className="v-checks v-checks-light">
@@ -518,7 +521,7 @@ function SubscribeContent() {
 
               {/* ── Шаг 2 · Срок ────────────────────────────────────── */}
               {step === "periods" && selectedPlan && (
-                <div className="v-card v-card-pad vs-panel" aria-labelledby="vs-periods-h">
+                <div key="periods" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-periods-h">
                   <h2 id="vs-periods-h" className="vs-eyebrow">
                     Шаг 2 · Срок <span className="v-badge v-badge-blue">{PLAN_CONTENT[selectedPlan].name}</span>
                   </h2>
@@ -531,7 +534,7 @@ function SubscribeContent() {
                       </button>
                     ))}
                   </div>
-                  <div className="vs-detail">
+                  <div key={draftMonths} className="vs-detail vs-detail-pick v-fade-in">
                     <p className="vs-detail-price"><b>{formatRub(order.perMonth)}</b> ₽ в месяц</p>
                     <p className="v-text">
                       {formatRub(order.price)} ₽ за {PERIOD_LABEL[order.months as Period].accusative}
@@ -548,7 +551,7 @@ function SubscribeContent() {
 
               {/* ── Пакет трафика · Шаг 1 · Пакет ───────────────────── */}
               {step === "packs" && (
-                <div className="v-card v-card-pad vs-panel" aria-labelledby="vs-packs-h">
+                <div key="packs" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-packs-h">
                   <h2 id="vs-packs-h" className="vs-eyebrow">Шаг 1 · Пакет</h2>
                   <p className="v-text">
                     Гигабайты для отдельного ключа «Обход» — без срока действия. Новый пакет прибавится к остатку.
@@ -574,7 +577,7 @@ function SubscribeContent() {
 
               {/* ── Шаг 3 · Оплата (у пакета — шаг 2) ─────────────── */}
               {step === "payment-methods" && (isTraffic ? !!selectedPack : !!(selectedPlan && selectedPeriod)) && (
-                <div className="v-card v-card-pad vs-panel" aria-labelledby="vs-pay-h">
+                <div key="payment-methods" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-pay-h">
                   <h2 id="vs-pay-h" className="vs-eyebrow">
                     Шаг {isTraffic ? 2 : 3} · Способ оплаты
                     {isTraffic && <span className="v-badge v-badge-blue">{gbLabel(pack)}</span>}
@@ -584,6 +587,12 @@ function SubscribeContent() {
                     <span className="vs-method-copy">
                       <b>Карта или СБП</b>
                       <span>Visa, Mastercard, МИР, СБП</span>
+                    </span>
+                    <span className="vs-method-badges" aria-hidden="true">
+                      <i>VISA</i>
+                      <i>Mastercard</i>
+                      <i>МИР</i>
+                      <i className="vs-mbadge-accent">СБП</i>
                     </span>
                   </div>
                   <ol className="vs-next">
@@ -601,17 +610,17 @@ function SubscribeContent() {
             </div>
 
             {/* ── Сводка заказа ─────────────────────────────────────── */}
-            <aside className="v-card v-card-pad vs-summary" aria-labelledby="vs-sum-h">
+            <aside className="v-card v-card-pad vs-summary v-lift" aria-labelledby="vs-sum-h">
               <h2 id="vs-sum-h" className="vs-eyebrow">Ваш заказ</h2>
 
               {isTraffic ? (
-                <dl className="vs-sum-list">
+                <dl key={pack.id} className="vs-sum-list v-fade-in">
                   <div className="vs-sum-row"><dt>Пакет трафика</dt><dd>{formatRub(pack.gb)} ГБ</dd></div>
                   <div className="vs-sum-row"><dt>Срок</dt><dd>без срока действия</dd></div>
                   <div className="vs-sum-row"><dt>За гигабайт</dt><dd>{formatPricePerGb(pack)} ₽</dd></div>
                 </dl>
               ) : (
-                <dl className="vs-sum-list">
+                <dl key={`${plan}-${order.months}`} className="vs-sum-list v-fade-in">
                   <div className="vs-sum-row"><dt>Тариф</dt><dd>{PLAN_CONTENT[plan].name} · {PLAN_SPEED[plan]} Гбит/с</dd></div>
                   <div className="vs-sum-row"><dt>Срок</dt><dd>{order.label}</dd></div>
                   <div className="vs-sum-row"><dt>В месяц</dt><dd>{formatRub(order.perMonth)} ₽</dd></div>
@@ -671,7 +680,7 @@ function trafficSuccessText(paid: PaidInfo): string {
 function Result({ step, paid, onRestart }: { step: PageStep; paid: PaidInfo; onRestart: () => void }) {
   if (step === "processing") {
     return (
-      <div className="v-card v-card-pad vs-result" aria-labelledby="vs-res-h" aria-busy="true">
+      <div className="v-card v-card-pad vs-result v-fade-in" aria-labelledby="vs-res-h" aria-busy="true">
         <span className="vs-result-ico vs-result-ico-wait" aria-hidden><span className="vs-spin" /></span>
         <span className="v-badge">Ждём ответ платёжной системы</span>
         <h2 id="vs-res-h" className="v-h3">Проверяем оплату</h2>
@@ -688,8 +697,8 @@ function Result({ step, paid, onRestart }: { step: PageStep; paid: PaidInfo; onR
 
   if (step === "success") {
     return (
-      <div className="v-card v-card-pad vs-result" aria-labelledby="vs-res-h">
-        <span className="vs-result-ico vs-result-ico-ok" aria-hidden><Icon name="check" size={28} /></span>
+      <div className="v-card v-card-pad vs-result v-fade-in" aria-labelledby="vs-res-h">
+        <span className="vs-result-ico vs-result-ico-ok vs-pop" aria-hidden><Icon name="check" size={28} /></span>
         <span className="v-badge v-badge-green">Оплачено</span>
         <h2 id="vs-res-h" className="v-h3" role="status">Оплата принята</h2>
         <p className="v-text" aria-live="polite">
@@ -704,7 +713,7 @@ function Result({ step, paid, onRestart }: { step: PageStep; paid: PaidInfo; onR
 
   const failed = step === "failed";
   return (
-    <div className="v-card v-card-pad vs-result" aria-labelledby="vs-res-h">
+    <div className="v-card v-card-pad vs-result v-fade-in" aria-labelledby="vs-res-h">
       <span className={`vs-result-ico vs-result-ico-${failed ? "bad" : "warn"}`} aria-hidden>
         <Icon name={failed ? "close" : "clock"} size={26} />
       </span>

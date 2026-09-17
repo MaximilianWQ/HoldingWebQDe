@@ -46,6 +46,24 @@
 .vs-off { color: var(--v-blue); font-size: 13px; font-weight: 700; }
 .v-seg [aria-selected="true"] .vs-off { color: var(--v-blue-ink); }
 
+/* Прогресс шагов — тонкая полоса под сегментом «Тариф / Срок / Оплата». */
+.vs-progress {
+  max-width: 460px;
+  height: 3px;
+  margin-top: 16px;
+  border-radius: 999px;
+  background: var(--v-line);
+  overflow: hidden;
+}
+.vs-progress-bar {
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: inherit;
+  background: var(--v-blue);
+  transition: width 420ms var(--v-ease);
+}
+
 .vs-safe {
   display: flex;
   align-items: center;
@@ -90,6 +108,8 @@
 .vs-detail-name { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 .vs-detail-price { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 .vs-detail-price b { font-size: 26px; }
+/* Мягкая подсветка выбранного тарифа/срока — тонкое синее кольцо. */
+.vs-detail-pick { box-shadow: inset 0 0 0 1.5px var(--v-blue-soft); }
 
 /* Пакеты трафика — чёрные карточки-кнопки в карусели. */
 .vs-carousel-wrap { margin-top: 4px; }
@@ -112,6 +132,7 @@ button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(-
 
 .vs-method {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   padding: 18px 20px;
@@ -129,8 +150,35 @@ button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(-
   background: var(--v-blue);
   color: #FFFFFF;
 }
-.vs-method-copy { display: grid; gap: 2px; font-size: 15px; color: var(--v-ink-3); }
+.vs-method-copy { display: grid; gap: 2px; font-size: 15px; color: var(--v-ink-3); min-width: 0; }
 .vs-method-copy b { font-size: 17px; font-weight: 600; color: var(--v-ink); }
+
+/* Иконки способов оплаты — монограммы, не чужие логотипы. */
+.vs-method-badges {
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.vs-method-badges i {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: #FFFFFF;
+  box-shadow: inset 0 0 0 1px var(--v-line);
+  color: var(--v-ink-2);
+  font: 700 11px/1 var(--v-font);
+  font-style: normal;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.vs-method-badges i.vs-mbadge-accent { background: var(--v-blue-soft); color: var(--v-blue-ink); box-shadow: none; }
+@media (min-width: 520px) {
+  .vs-method-badges { flex: none; margin-top: 0; margin-left: auto; }
+}
 
 .vs-next { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 .vs-next li {
@@ -178,27 +226,31 @@ button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(-
 .vs-summary-cta { margin-top: 18px; }
 .vs-summary .v-small { margin-top: 14px; }
 
-/* Нижняя панель телефона — итог и оплата всегда под рукой. */
+/* Нижняя панель телефона — плавающая стеклянная капсула, итог и оплата
+   всегда под рукой (владелец, 17.09.2026: «скруглённая, стеклянная»). */
 .vs-dock {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: var(--v-gutter);
+  right: var(--v-gutter);
+  bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 50;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px var(--v-gutter) calc(12px + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.92);
-  border-top: 1px solid var(--v-line);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  padding: 10px 10px 10px 20px;
+  border-radius: var(--v-r-lg);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--v-shadow-lift), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  animation: vs-dock-in 480ms var(--v-ease) both;
 }
+@keyframes vs-dock-in { from { opacity: 0; transform: translateY(14px); } }
 .vs-dock-sum { flex: 1; min-width: 0; display: grid; gap: 2px; font-size: 13px; color: var(--v-ink-3); }
 .vs-dock-sum span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vs-dock-sum b { font-size: 19px; font-weight: 600; color: var(--v-ink); letter-spacing: -0.01em; }
 .vs-dock .v-btn { flex: none; padding-inline: 22px; }
-.vs-body { padding-bottom: 96px; }
+.vs-body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
 @media (min-width: 960px) {
   .vs-dock { display: none; }
   .vs-body { padding-bottom: clamp(40px, 6vw, 72px); }
@@ -220,6 +272,12 @@ button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(-
 .vs-result-ico-bad { background: var(--v-red-soft); color: var(--v-red); }
 .vs-result-ico-warn { background: var(--v-amber-soft); color: var(--v-amber); }
 .vs-result-ico-wait { background: var(--v-blue-soft); color: var(--v-blue); }
+.vs-pop { animation: vs-pop 560ms var(--v-ease) both; }
+@keyframes vs-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  65% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
 .vs-spin {
   width: 26px;
   height: 26px;
@@ -256,6 +314,7 @@ button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(-
 @keyframes vs-skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .vs-spin, .vs-skel { animation: none; }
+  .vs-spin, .vs-skel, .vs-pop, .vs-dock { animation: none; }
   button.vs-pack { transition: none; }
+  .vs-progress-bar { transition: none; }
 }

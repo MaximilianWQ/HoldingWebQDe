@@ -30,8 +30,8 @@ const TELEGRAM = "https://t.me/atlas_suppbot";
 const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
 const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройстве", "устройствах", "устройствах"]);
 
-const CHANNELS: { name: string; note: string; href: string; external: boolean; icon: IconName }[] = [
-  { name: "Telegram", note: "Отвечаем быстрее всего", href: TELEGRAM, external: true, icon: "chat" },
+const CHANNELS: { name: string; note: string; href: string; external: boolean; icon: IconName; live?: boolean }[] = [
+  { name: "Telegram", note: "Отвечаем быстрее всего", href: TELEGRAM, external: true, icon: "chat", live: true },
   { name: "ВКонтакте", note: "Сообщество Atlas Secure", href: "https://vk.com/atlassecure", external: true, icon: "users" },
   { name: "Письмом", note: "Форма обратной связи", href: "/contact", external: false, icon: "send" },
 ];
@@ -86,8 +86,8 @@ const FAQ: { q: string; a: React.ReactNode }[] = [
 export default function SupportPage() {
   return (
     <VShell>
-      <section className="v-section v-center" aria-labelledby="v-support-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="v-support-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-support-title" className="v-h1">
             Чем <span className="v-accent">помочь?</span>
           </h1>
@@ -99,34 +99,38 @@ export default function SupportPage() {
             </a>
             <Link href="#faq" className="v-btn v-btn-soft">Частые вопросы</Link>
           </div>
+          <p className="vp-live-row"><span className="v-live" aria-hidden /> <b>Отвечаем сейчас</b> в Telegram</p>
         </div>
       </section>
 
-      <section className="v-section" style={{ paddingTop: 0 }} aria-label="Способы связи">
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label="Способы связи">
         <div className="v-wrap v-narrow">
           <div className="vp-channels">
             {CHANNELS.map((c) => {
               const inner = (
                 <>
                   <span className="vp-channel-icon" aria-hidden><Icon name={c.icon} size={22} /></span>
-                  <span className="vp-channel-main"><b>{c.name}</b><span>{c.note}</span></span>
+                  <span className="vp-channel-main">
+                    <b>{c.name}</b>
+                    <span>{c.live ? <><span className="v-live" aria-hidden style={{ marginRight: 6 }} />{c.note}</> : c.note}</span>
+                  </span>
                   <span className="vp-channel-go" aria-hidden><Icon name="arrow-right" size={20} /></span>
                 </>
               );
               return c.external ? (
-                <a key={c.name} href={c.href} target="_blank" rel="noopener noreferrer" className="v-card v-card-field vp-channel">
+                <a key={c.name} href={c.href} target="_blank" rel="noopener noreferrer" className="v-card v-card-field vp-channel v-lift">
                   {inner}
                   <span className="v-sr"> (откроется в новой вкладке)</span>
                 </a>
               ) : (
-                <Link key={c.name} href={c.href} className="v-card v-card-field vp-channel">{inner}</Link>
+                <Link key={c.name} href={c.href} className="v-card v-card-field vp-channel v-lift">{inner}</Link>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section className="v-section v-center" id="faq" aria-labelledby="v-faq-title">
+      <section className="v-section v-center v-reveal" id="faq" aria-labelledby="v-faq-title">
         <div className="v-wrap v-narrow">
           <h2 id="v-faq-title" className="v-h2">Частые вопросы</h2>
           <div className="vp-faq">
@@ -136,7 +140,7 @@ export default function SupportPage() {
                   <span className="vp-faq-q">{f.q}</span>
                   <span className="vp-faq-mark" aria-hidden><Icon name="chevron-down" size={16} /></span>
                 </summary>
-                <p className="vp-faq-a">{f.a}</p>
+                <p className="vp-faq-a"><span>{f.a}</span></p>
               </details>
             ))}
           </div>

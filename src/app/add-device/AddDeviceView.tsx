@@ -10,6 +10,7 @@ import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT } from "@/lib/key-n
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import type { SubscriptionData } from "@/types";
 import VShell from "@/components/vps/VShell";
+import { APPS, PLATFORMS, detectPlatform, type Platform } from "@/lib/apps";
 import "./add-device-vps.css";
 
 /**
@@ -18,6 +19,12 @@ import "./add-device-vps.css";
  * отдельных экранов мастера. Экран только для вошедших — слова «VPN»
  * и «Обход» уместны (MAIN_KEY.member / BYPASS_KEY.member).
  *
+ * Приложения, платформы и все ссылки — единственный источник
+ * `src/lib/apps.ts` (17.09.2026), как на /devices: карточки Happ/Incy/
+ * V2RayTun, установка — первая ссылка кнопкой + остальные пилюлями,
+ * «Добавьте подписку» — открытие через `app.openUrl`, «Подключитесь» —
+ * пронумерованные `app.steps`.
+ *
  * Логика перенесена без изменений: platform → app (если их несколько)
  * → ключ 1 «Основной VPN» + ключ 2 «Обход» с остатком гигабайт, QR,
  * копирование с запасным путём через textarea, ручные шаги, «Готово» —
@@ -25,135 +32,50 @@ import "./add-device-vps.css";
  * остаток ключа 2 — /api/user/bypass после первой отрисовки.
  *
  * Что убрано (декоративное/повтор, не логика):
- *   · подсказка платформы по userAgent — гость сам находит свою
- *     плитку среди пяти, как на /devices;
+ *   · подсказка платформы по userAgent — теперь есть предвыбор по
+ *     userAgent (как на /devices), гость по-прежнему может переключить
+ *     платформу сам;
  *   · отдельная всегда открытая QR-плитка — QR теперь за кнопкой
  *     «Показать QR-код» у каждого ключа, как на /devices (тот же
  *     код, без второй копии на странице).
  */
 
-// ─── Types ──────────────────────────────────────────────────
-
-type Platform = "ios" | "android" | "macos" | "windows" | "tv";
-
-interface AppConfig {
-  id: string;
-  name: string;
-  jsonFormat?: boolean;
-  storeLabel: string;
-  downloadUrl: string;
-  qrHint: string;
-  steps: string[];
-}
-
-const APPS: Record<Platform, AppConfig[]> = {
-  ios: [
-    {
-      id: "happ-ios",
-      name: "Happ",
-      jsonFormat: true,
-      storeLabel: "App Store",
-      downloadUrl: "https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973",
-      qrHint: "Откройте Happ → «+» → «Сканировать QR-код» → наведите камеру на код",
-      steps: [
-        "Откройте приложение Happ на iPhone или iPad",
-        "Нажмите «+» в нижней панели",
-        "Выберите «Сканировать QR-код» или «Из буфера обмена»",
-        "Конфигурация импортируется автоматически",
-        "Нажмите кнопку подключения и разрешите системное подключение при запросе",
-      ],
-    },
-  ],
-  android: [
-    {
-      id: "happ-android",
-      name: "Happ",
-      jsonFormat: true,
-      storeLabel: "Google Play",
-      downloadUrl: "https://play.google.com/store/apps/details?id=com.happproxy",
-      qrHint: "Откройте Happ → «+» → «Сканировать QR-код» → наведите камеру на код",
-      steps: [
-        "Откройте приложение Happ на Android",
-        "Нажмите «+» в нижней панели",
-        "Выберите «Сканировать QR-код» или «Из буфера обмена»",
-        "Конфигурация импортируется автоматически",
-        "Нажмите кнопку подключения и разрешите системное подключение при запросе",
-      ],
-    },
-    {
-      id: "v2raytun-android",
-      name: "V2RayTun",
-      storeLabel: "Google Play",
-      downloadUrl: "https://play.google.com/store/apps/details?id=com.v2raytun.android",
-      qrHint: "Откройте V2RayTun → «+» → «Сканировать QR» → наведите камеру на код",
-      steps: [
-        "Откройте приложение V2RayTun на Android",
-        "Нажмите «+» в верхней панели",
-        "Выберите «Сканировать QR-код» или «Импорт из буфера обмена»",
-        "Сервер добавится автоматически",
-        "Выберите сервер и нажмите кнопку подключения",
-      ],
-    },
-  ],
-  macos: [
-    {
-      id: "happ-macos",
-      name: "Happ",
-      jsonFormat: true,
-      storeLabel: "App Store",
-      downloadUrl: "https://apps.apple.com/ru/app/happ-proxy-utility-plus/id6746188973",
-      qrHint: "Откройте Happ → «+» → «Сканировать QR-код с экрана» → выделите код мышкой",
-      steps: [
-        "Откройте Happ на Mac",
-        "Нажмите «+» → «Сканировать QR-код с экрана» или «Добавить подписку»",
-        "Конфигурация импортируется автоматически",
-        "Нажмите подключиться, введите пароль Mac при запросе",
-      ],
-    },
-  ],
-  windows: [
-    {
-      id: "happ-windows",
-      name: "Happ",
-      jsonFormat: true,
-      storeLabel: "Скачать с сайта",
-      downloadUrl: "https://www.happ.su/main",
-      qrHint: "Откройте Happ → «+» → «Сканировать QR с экрана» → выделите код мышкой",
-      steps: [
-        "Откройте Happ на компьютере",
-        "Нажмите «+» → «Добавить подписку» или «Сканировать QR-код с экрана»",
-        "Конфигурация импортируется автоматически",
-        "Нажмите подключиться, разрешите доступ в брандмауэре при запросе",
-      ],
-    },
-  ],
-  tv: [
-    {
-      id: "v2raytun-tv",
-      name: "V2RayTun",
-      storeLabel: "Google Play на TV",
-      downloadUrl: "https://play.google.com/store/apps/details?id=com.v2raytun.android",
-      qrHint: "Откройте V2RayTun на TV → «+» → «Сканировать QR» → покажите код камере телефона",
-      steps: [
-        "Откройте V2RayTun на Android TV",
-        "Нажмите «+» → «Сканировать QR-код»",
-        "Покажите QR-код с этой страницы перед камерой TV (или телефоном)",
-        "Сервер добавится автоматически",
-        "Выберите сервер и нажмите подключиться пультом",
-      ],
-    },
-  ],
+const PLATFORM_ICON: Record<Platform, IconName> = {
+  ios: "iphone",
+  android: "android",
+  macos: "macos",
+  windows: "windows",
+  tv: "tv",
 };
 
-const PLATFORMS: { id: Platform; name: string; detail: string; icon: IconName }[] = [
-  { id: "ios",     name: "iPhone / iPad", detail: "iOS 16+",    icon: "iphone" },
-  { id: "android", name: "Android",       detail: "10+",        icon: "android" },
-  { id: "macos",   name: "macOS",         detail: "M1 / Intel", icon: "macos" },
-  { id: "windows", name: "Windows",       detail: "10 / 11",    icon: "windows" },
-  { id: "tv",      name: "Android TV",    detail: "Google TV",  icon: "tv" },
-];
-
 const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройстве", "устройствах", "устройствах"]);
+
+/** Подпись кнопки магазина: «Скачать…» уже глагол, остальные — «Открыть …». */
+function storeAction(label: string): string {
+  return /^скачать/i.test(label) ? label : `Открыть ${label}`;
+}
+
+/** Значок магазина перед подписью — Apple/Google, для установщиков — стрелка загрузки. */
+function StoreGlyph({ label }: { label: string }) {
+  if (/app store/i.test(label)) {
+    return (
+      <svg width="16" height="18" viewBox="0 0 28 34" fill="currentColor" aria-hidden focusable="false">
+        <path d="M23.3 18.1c0-4.3 3.5-6.4 3.7-6.5-2-2.9-5.2-3.4-6.3-3.4-2.7-.3-5.2 1.6-6.6 1.6-1.4 0-3.5-1.5-5.7-1.5-2.9 0-5.6 1.7-7.1 4.4-3 5.3-.8 13.1 2.2 17.4 1.4 2.1 3.1 4.4 5.4 4.3 2.2-.1 3-1.4 5.6-1.4s3.4 1.4 5.7 1.4c2.4 0 3.9-2.1 5.3-4.2 1.7-2.4 2.4-4.8 2.4-4.9-.1 0-4.6-1.8-4.6-7.2zM19 5.4c1.2-1.4 2-3.4 1.8-5.4-1.7.1-3.8 1.2-5 2.6-1.1 1.3-2.1 3.3-1.8 5.3 1.9.1 3.8-1 5-2.5z" />
+      </svg>
+    );
+  }
+  if (/google play/i.test(label)) {
+    return (
+      <svg width="16" height="18" viewBox="0 0 30 32" aria-hidden focusable="false">
+        <path d="M1.2 1.1 16.8 16 1.2 30.9c-.5-.3-.8-.9-.8-1.6V2.7c0-.7.3-1.3.8-1.6z" fill="#00D7FE" />
+        <path d="M21.9 11.1 16.8 16 1.2 1.1c.3-.2.8-.3 1.2-.2.3 0 .5.1.8.3z" fill="#00F076" />
+        <path d="M21.9 20.9 3.2 31.3c-.3.2-.6.3-.8.3-.4 0-.8-.1-1.2-.3L16.8 16z" fill="#FF3A44" />
+        <path d="m28.2 14.4-6.3-3.3-5.1 4.9 5.1 4.9 6.3-3.3c1.3-.7 1.3-2.5 0-3.2z" fill="#FFD400" />
+      </svg>
+    );
+  }
+  return <Icon name="download" size={16} />;
+}
 
 function prefersStill(): boolean {
   return (
@@ -167,6 +89,12 @@ function prefersStill(): boolean {
 export default function AddDeviceView() {
   const [platform, setPlatform] = useState<Platform>("ios");
   const [appIndex, setAppIndex] = useState(0);
+
+  // Предвыбор платформы по userAgent — гость может переключить сам.
+  useEffect(() => {
+    const detected = detectPlatform(navigator.userAgent);
+    if (detected) setPlatform(detected);
+  }, []);
 
   const [vpnKey, setVpnKey] = useState<string | null>(null);
   const [keyLoaded, setKeyLoaded] = useState(false);
@@ -235,6 +163,11 @@ export default function AddDeviceView() {
     setTimeout(() => setCopied(0), 2500);
   };
 
+  const handleOpenInApp = (key: string | null) => {
+    if (!key || !currentApp?.openUrl) return;
+    window.location.href = currentApp.openUrl(key);
+  };
+
   const keyUrl = forApp(vpnKey);
   const key2Url = forApp(live?.subscriptionUrl ?? bk?.subscriptionUrl ?? null);
   const owedNow = live ? live.owedBytes : owed;
@@ -242,11 +175,21 @@ export default function AddDeviceView() {
   const keyActions = (n: 1 | 2, url: string | null, what: string) => (
     <>
       <div className="vad-actions">
+        {currentApp.openUrl && (
+          <button
+            type="button"
+            onClick={() => handleOpenInApp(url)}
+            disabled={!url}
+            className={`v-btn v-btn-sm ${n === 1 ? "v-btn-primary" : "v-btn-outline"}`}
+          >
+            Открыть в {currentApp.name}<span className="v-sr"> — {what}</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => handleCopy(n, url)}
           disabled={!url}
-          className={`v-btn v-btn-sm ${n === 1 ? "v-btn-primary" : "v-btn-outline"}`}
+          className="v-btn v-btn-sm v-btn-outline"
         >
           <Icon name={copied === n ? "check" : "copy"} size={16} />
           {copied === n ? "Скопировано" : "Скопировать ссылку"}
@@ -267,7 +210,7 @@ export default function AddDeviceView() {
       {showQR === n && url && (
         <figure className="vad-qr">
           <QRCodeSVG value={url} size={192} bgColor="#ffffff" fgColor="#0B0B0F" level="M" />
-          <figcaption>{currentApp.qrHint}</figcaption>
+          <figcaption>Наведите камеру приложения на код — ключ добавится сам.</figcaption>
         </figure>
       )}
     </>
@@ -286,16 +229,16 @@ export default function AddDeviceView() {
           </p>
 
           {/* ── Плитки устройств ─────────────────────────────────── */}
-          <div className="vad-grid" role="group" aria-label="Устройство">
+          <div className="vad-grid v-stagger" role="group" aria-label="Устройство">
             {PLATFORMS.map((p) => (
               <button
                 key={p.id}
                 type="button"
-                className="vad-tile"
+                className="vad-tile v-lift"
                 aria-pressed={platform === p.id}
                 onClick={() => handleSelectPlatform(p.id)}
               >
-                <Icon name={p.icon} size={26} className="vad-tile-icon" />
+                <Icon name={PLATFORM_ICON[p.id]} size={26} className="vad-tile-icon" />
                 <span>
                   <span className="vad-tile-name" style={{ display: "block" }}>{p.name}</span>
                   <span className="vad-tile-detail">{p.detail}</span>
@@ -306,31 +249,62 @@ export default function AddDeviceView() {
 
           {/* ── Шаги для выбранной платформы ─────────────────────── */}
           <div ref={stepsRef} style={{ scrollMarginTop: "var(--v-head-h)" }}>
-            <ol className="v-steps" key={platform}>
+            <ol className="v-steps v-fade-in" key={`${platform}:${currentApp?.id}`}>
               <li className="v-step">
                 <div className="v-step-head">
                   <span className="v-step-check" aria-hidden><Icon name="check" size={18} /></span>
                   <h3>Установите приложение</h3>
                 </div>
-                <p>Бесплатное приложение для {PLATFORMS.find((p) => p.id === platform)!.name}.</p>
+                <p>{currentApp.note}</p>
+
                 {selectedApps.length > 1 && (
-                  <div className="v-seg vad-apps" role="tablist" aria-label="Приложение">
+                  <div className="vad-apps-grid" role="group" aria-label="Приложение">
                     {selectedApps.map((a, i) => (
-                      <button key={a.id} type="button" role="tab" aria-selected={i === appIndex} onClick={() => handleSelectApp(i)}>
-                        {a.name}
+                      <button
+                        key={a.id}
+                        type="button"
+                        className="vad-app-card v-lift"
+                        aria-pressed={i === appIndex}
+                        onClick={() => handleSelectApp(i)}
+                      >
+                        {i === 0 && (
+                          <span className="v-badge v-badge-blue vad-app-badge">Рекомендуем</span>
+                        )}
+                        <span className="vad-app-name">{a.name}</span>
+                        <span className="vad-app-note">{a.note}</span>
                       </button>
                     ))}
                   </div>
                 )}
-                <a
-                  href={currentApp.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="v-btn v-btn-outline v-btn-block"
-                >
-                  {/^скачать/i.test(currentApp.storeLabel) ? currentApp.storeLabel : `Открыть ${currentApp.storeLabel}`}
-                  <span className="v-sr"> (откроется в новой вкладке)</span>
-                </a>
+
+                <div className="vad-install">
+                  <a
+                    href={currentApp.links[0].href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="v-btn v-btn-outline v-btn-block"
+                  >
+                    <StoreGlyph label={currentApp.links[0].label} />
+                    {storeAction(currentApp.links[0].label)}
+                    <span className="v-sr"> (откроется в новой вкладке)</span>
+                  </a>
+                  {currentApp.links.length > 1 && (
+                    <div className="vad-install-more">
+                      {currentApp.links.slice(1).map((l) => (
+                        <a
+                          key={l.label}
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="v-btn v-btn-outline v-btn-sm"
+                        >
+                          <StoreGlyph label={l.label} />
+                          {l.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </li>
 
               <li className="v-step">
@@ -389,20 +363,15 @@ export default function AddDeviceView() {
                   <span className="v-step-check" aria-hidden><Icon name="check" size={18} /></span>
                   <h3>Подключитесь</h3>
                 </div>
-                <p>Нажмите кнопку подключения в {currentApp.name}. Выберите страну из списка — дальше всё работает само.</p>
+                <ol className="vad-connect">
+                  {currentApp.steps.map((s, i) => (
+                    <li key={i}>
+                      <span className="vad-connect-num" aria-hidden>{i + 1}</span>
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ol>
                 <p className="vad-switch">{SWITCH_HINT.member}</p>
-
-                <details className="vad-manual">
-                  <summary>Не сработало? Шаги вручную</summary>
-                  <ol>
-                    {currentApp.steps.map((s, i) => (
-                      <li key={i}>
-                        <b aria-hidden>{i + 1}</b>
-                        <span>{s}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </details>
 
                 <Link href="/dashboard" className="v-btn v-btn-primary v-btn-block" style={{ marginTop: 20 }}>
                   <Icon name="check" size={18} /> Готово — в кабинет

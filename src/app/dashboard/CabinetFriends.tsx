@@ -109,16 +109,16 @@ export default function CabinetFriends({
         ))}
       </div>
 
-      <div className="vc-stats">
-        <div className="vc-stat">
+      <div className="vc-stats v-stagger">
+        <div className="vc-stat v-lift">
           <span>Пригласили</span>
           <b>{referrals}</b>
         </div>
-        <div className="vc-stat">
+        <div className="vc-stat v-lift">
           <span>Оплатили</span>
           <b>{paidReferrals}</b>
         </div>
-        <div className="vc-stat">
+        <div className="vc-stat v-lift">
           <span>{next ? `До ${next.percent}%` : "Уровень"}</span>
           <b>{next ? toNext : "макс."}</b>
         </div>

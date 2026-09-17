@@ -28,7 +28,7 @@ export default function LegalDoc({
     <VShell>
       {/* 01 · заголовок */}
       <section className="v-section v-center" aria-labelledby="vl-title">
-        <div className="v-wrap v-narrow">
+        <div className="v-wrap v-narrow v-stagger">
           <span className="v-chip" style={{ marginBottom: 20 }}>{sheetTitle}</span>
           <h1 id="vl-title" className="v-h1" style={{ fontSize: "clamp(32px, 5.4vw, 52px)" }}>{title}</h1>
           <ul className="vl-meta">
@@ -55,7 +55,7 @@ export default function LegalDoc({
 
           <div className="vl-text">
             {sections.map((s) => (
-              <section key={s.n} id={`s-${s.n}`} className="vl-sec" aria-labelledby={`s-${s.n}-t`}>
+              <section key={s.n} id={`s-${s.n}`} className="vl-sec v-reveal" aria-labelledby={`s-${s.n}-t`}>
                 <span className="vl-no" aria-hidden>{s.n}</span>
                 <h2 id={`s-${s.n}-t`} className="vl-h2">{s.t}</h2>
                 {s.body}

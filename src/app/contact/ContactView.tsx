@@ -95,8 +95,8 @@ export default function ContactView() {
 
   return (
     <>
-      <section className="v-section v-center" aria-labelledby="v-contact-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="v-contact-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-contact-title" className="v-h1">
             Напишите <span className="v-accent">нам</span>
           </h1>
@@ -107,7 +107,7 @@ export default function ContactView() {
       <section className="v-section" style={{ paddingTop: 0 }} aria-label="Форма обращения">
         <div className="v-wrap v-narrow">
           {sent ? (
-            <div className="v-card v-card-field vp-done" role="status">
+            <div className="v-card v-card-field vp-done v-fade-in" role="status">
               <span className="vp-done-mark" aria-hidden><Icon name="check" size={26} /></span>
               <h2 ref={doneRef} tabIndex={-1} className="v-h3">Письмо получено</h2>
               <p>

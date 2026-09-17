@@ -4,7 +4,7 @@
  */
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
-import { STORE as APP_STORE } from "@/lib/apps";
+import { APPS, STORE as APP_STORE } from "@/lib/apps";
 
 export const BRAND = "Atlas Secure VPS";
 export const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
@@ -32,20 +32,41 @@ export const MENU_LINKS: VLink[] = [
   { label: "Контакты", href: "/contact" },
 ];
 
-/** Подвал. */
-export const FOOT_LINKS: VLink[] = [
-  { label: "Поддержка", href: "/support" },
-  { label: "Инструкции", href: "/devices" },
-  { label: "Тарифы", href: "/pricing" },
-  { label: "Часто задаваемые вопросы", href: "/support#faq" },
-  { label: "Выделенные серверы", href: "/vds" },
-  { label: "Для бизнеса", href: "/business" },
-  { label: "О компании", href: "/about" },
-  { label: "Безопасность", href: "/security" },
-  { label: "Контакты", href: "/contact" },
-  { label: "Политика конфиденциальности", href: "/privacy" },
-  { label: "Пользовательское соглашение", href: "/terms" },
+export interface VLinkGroup { title: string; links: VLink[] }
+
+/** Подвал — три группы ссылок (владелец, 17.09.2026: «богаче»). */
+export const FOOT_LINKS: VLinkGroup[] = [
+  {
+    title: "Продукт",
+    links: [
+      { label: "Тарифы", href: "/pricing" },
+      { label: "Пакеты трафика", href: "/pricing#traffic" },
+      { label: "Инструкции", href: "/devices" },
+      { label: "Выделенные серверы", href: "/vds" },
+      { label: "Для бизнеса", href: "/business" },
+    ],
+  },
+  {
+    title: "Помощь",
+    links: [
+      { label: "Поддержка", href: "/support" },
+      { label: "Частые вопросы", href: "/support#faq" },
+      { label: "Контакты", href: "/contact" },
+    ],
+  },
+  {
+    title: "Компания",
+    links: [
+      { label: "О компании", href: "/about" },
+      { label: "Безопасность", href: "/security" },
+      { label: "Политика конфиденциальности", href: "/privacy" },
+      { label: "Пользовательское соглашение", href: "/terms" },
+    ],
+  },
 ];
+
+/** Имена клиентов для подписи в подвале — из единого источника приложений. */
+export const FOOT_APPS = APPS.ios.map((a) => a.name).join(", ");
 
 /** Значки магазинов на витрине (Happ) — из единого списка src/lib/apps.ts. */
 export const STORE = {

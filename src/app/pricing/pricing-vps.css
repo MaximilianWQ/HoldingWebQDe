@@ -1,7 +1,13 @@
 /* /pricing — сравнение тарифов и вопросы до оплаты.
    Общий слой — src/app/vps.css (токены --v-*). Свой префикс — vp-. */
 
-/* Сравнение тарифов: две карточки, не таблица. */
+/* Первый экран: заголовок лесенкой — вторая строка (акцент) сдвинута
+   вправо, как ступень; появление — общий v-stagger (дети лесенкой). */
+.vp-hero-h { display: grid; gap: 4px; }
+.vp-hero-line { display: block; }
+.vp-hero-line-2 { margin-left: clamp(16px, 7vw, 68px); }
+
+/* Сравнение тарифов: две карточки, не таблица — Plus тёмная, с бейджем. */
 .vp-compare {
   display: grid;
   gap: 20px;
@@ -11,9 +17,29 @@
 @media (min-width: 720px) {
   .vp-compare { grid-template-columns: 1fr 1fr; }
 }
+.vp-compare-card { display: flex; flex-direction: column; }
 .vp-compare-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .vp-compare-name { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
 .vp-compare-speed { color: var(--v-ink-3); font-size: 15px; white-space: nowrap; }
+.vp-compare-speed-dark { color: var(--v-on-black-2); }
+.vp-compare-price { margin-top: auto; padding-top: 24px; }
+.vp-compare-card .v-btn { margin-top: 22px; }
+
+/* Бенто «в каждом тарифе» — большое число с короткой единицей рядом. */
+.vp-bento { margin-top: clamp(28px, 4vw, 44px); text-align: left; }
+.vp-tile-unit {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  opacity: 0.6;
+  vertical-align: middle;
+}
+.v-tile-dark .vp-tile-unit, .v-tile-blue .vp-tile-unit { opacity: 0.72; }
+
+/* Финальная плита — заголовок и кнопка по центру. */
+.vp-final p { margin-inline: auto; }
 
 /* Вопросы до оплаты: раскрывающиеся карточки, один ответ открыт разом. */
 .vp-faq {
@@ -47,6 +73,21 @@
 .vp-q[open] summary svg { transform: rotate(180deg); }
 .vp-q p { margin: 0; padding: 0 22px 20px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
 
+/* Плавное раскрытие ответа (Chrome/Edge): ::details-content можно
+   анимировать по высоте, где браузер это умеет — иначе раскрывается
+   мгновенно, семантика <details>/<summary> не меняется ни там, ни там. */
+@supports (interpolate-size: allow-keywords) {
+  .vp-q { interpolate-size: allow-keywords; }
+  .vp-q::details-content {
+    overflow: hidden;
+    height: 0;
+    opacity: 0;
+    transition: height 320ms var(--v-ease), opacity 220ms var(--v-ease), content-visibility 320ms allow-discrete;
+  }
+  .vp-q[open]::details-content { height: auto; opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .vp-q summary svg { transition: none; }
+  .vp-q::details-content { transition: none; }
 }

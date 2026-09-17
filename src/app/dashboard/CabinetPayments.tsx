@@ -98,11 +98,11 @@ export default function CabinetPayments() {
       ) : rows.length === 0 ? (
         <p className="v-empty">Платежей пока нет — здесь появится история после первой оплаты.</p>
       ) : (
-        <div className="v-rows">
+        <div className="v-rows v-stagger">
           {rows.map((p) => {
             const date = new Date(p.paidAt ?? p.createdAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
             return (
-              <div className="v-row" key={p.id}>
+              <div className="v-row v-lift" key={p.id}>
                 <span className={`v-row-icon ${p.product === "traffic" ? "v-row-icon-green" : ""}`} aria-hidden>
                   <Icon name={p.product === "traffic" ? "coins" : "bag"} size={22} />
                 </span>

@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ГЛАВНАЯ ATLAS SECURE VPS — доработка (владелец, 17.09.2026: «сделай
+   более плавным, больше элементов»). Только эта страница подключает
+   файл; префикс `vh-`. Токены и приёмы — из src/app/vps.css, ничего
+   не хардкодится заново (цвета, радиусы, easing — переменные `--v-*`).
+
+   Устройство файла:
+     1. Первый экран (парение устройств, приложения)
+     2. Бегущая строка стран
+     3. Бенто «Почему»
+     4. «Что меняется, когда включено»
+     5. Шаги подключения (сегмент приложения)
+     6. Короткий FAQ
+     7. Финальная плита
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ 1. Первый экран ══════════════════════════════════════════════ */
+
+/* Лесенка: кикер → заголовок → лид появляются по очереди при загрузке. */
+.vh-hero-in > * { animation: v-fade-up 640ms var(--v-ease) both; }
+.vh-hero-in > *:nth-child(1) { animation-delay: 40ms; }
+.vh-hero-in > *:nth-child(2) { animation-delay: 140ms; }
+.vh-hero-in > *:nth-child(3) { animation-delay: 240ms; }
+
+/* Парение устройств: собственный неспешный ход + отклик на прокрутку
+   страницы (глубже едет ноутбук, чуть меньше — телефон, для ощущения
+   объёма). Раздельные силы — на разных элементах, поэтому список
+   animation-name можно оставить простым на каждом. */
+@media (prefers-reduced-motion: no-preference) {
+  .vh-devices-laptop { animation: vh-bob-laptop 7s var(--v-ease) infinite; }
+  .vh-devices-phone { animation: vh-bob-phone 6s var(--v-ease) infinite; animation-delay: -1.4s; }
+  @supports (animation-timeline: scroll()) {
+    .vh-devices-laptop {
+      animation: vh-bob-laptop 7s var(--v-ease) infinite, vh-scroll-laptop linear both;
+      animation-timeline: auto, scroll(root block);
+      animation-range: normal, 0% 60vh;
+    }
+    .vh-devices-phone {
+      animation: vh-bob-phone 6s var(--v-ease) infinite, vh-scroll-phone linear both;
+      animation-delay: -1.4s, 0s;
+      animation-timeline: auto, scroll(root block);
+      animation-range: normal, 0% 60vh;
+    }
+  }
+}
+@keyframes vh-bob-laptop { 50% { transform: translateY(-7px); } }
+@keyframes vh-bob-phone { 50% { transform: translateY(-11px); } }
+@keyframes vh-scroll-laptop { to { transform: translateY(30px) scale(0.985); } }
+@keyframes vh-scroll-phone { to { transform: translateY(54px); } }
+
+/* «Работает в приложениях Happ и Incy» — текстовые логотипы-пилюли. */
+.vh-apps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: clamp(28px, 4vw, 40px);
+}
+.vh-apps-label { margin: 0; color: var(--v-ink-4); font-size: 14px; }
+.vh-apps-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.vh-apps-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: transform 240ms var(--v-ease), background-color 240ms var(--v-ease);
+}
+.vh-apps-pill i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--v-blue);
+}
+@media (hover: hover) { .vh-apps-pill:hover { background: var(--v-soft-2); transform: translateY(-1px); } }
+
+/* ═══ 2. Бегущая строка стран ══════════════════════════════════════ */
+.vh-countries { margin-top: clamp(48px, 7vw, 72px); }
+.vh-countries-label {
+  margin: 0 0 16px;
+  text-align: center;
+  color: var(--v-ink-4);
+  font-size: 14px;
+}
+.vh-country-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--v-field);
+  color: var(--v-ink-2);
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ═══ 3. Бенто «Почему» ════════════════════════════════════════════ */
+.vh-why-lead { margin-top: 16px; }
+.vh-bento { margin-top: clamp(32px, 5vw, 48px); text-align: left; }
+.vh-tile-fig { display: flex; align-items: baseline; gap: 8px; margin-top: auto; }
+.vh-tile-fig b { font-size: clamp(36px, 4.6vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.vh-tile-fig span { color: var(--v-ink-3); font-size: 16px; }
+.v-tile-dark .vh-tile-fig span, .v-tile-blue .vh-tile-fig span { color: rgba(255, 255, 255, 0.72); }
+
+/* ═══ 4. «Что меняется, когда включено» ═══════════════════════════ */
+.vh-diff { margin-top: clamp(32px, 5vw, 48px); text-align: left; }
+.vh-diff-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  margin-inline: auto;
+  cursor: pointer;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.vh-diff-head { display: flex; justify-content: center; }
+.vh-switch-track {
+  position: relative;
+  width: 64px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--v-line);
+  transition: background-color 360ms var(--v-ease);
+}
+.vh-diff[data-on] .vh-switch-track { background: var(--v-blue); }
+.vh-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.2);
+  transition: transform 360ms var(--v-ease);
+}
+.vh-diff[data-on] .vh-switch-thumb { transform: translateX(28px); }
+.vh-switch-label { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+
+.vh-diff-list { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 2px; }
+.vh-diff-row {
+  position: relative;
+  display: grid;
+  gap: 4px 20px;
+  padding: 20px 4px 20px 24px;
+  border-top: 1px solid var(--v-line);
+}
+@media (min-width: 640px) { .vh-diff-row { grid-template-columns: 220px 1fr; align-items: center; } }
+.vh-diff-row:last-child { border-bottom: 1px solid var(--v-line); }
+.vh-diff-row b { font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
+.vh-diff-row::before {
+  content: "";
+  position: absolute;
+  top: 27px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--v-line-dash);
+  transition: background-color 420ms var(--v-ease);
+}
+.vh-diff[data-on] .vh-diff-row::before { background: var(--v-blue); }
+.vh-diff-state { position: relative; display: grid; min-height: 26px; }
+.vh-diff-state span {
+  grid-area: 1 / 1;
+  color: var(--v-ink-3);
+  font-size: 17px;
+  line-height: 1.4;
+  transition: opacity 420ms var(--v-ease), transform 420ms var(--v-ease);
+}
+.vh-diff-now { opacity: 0; transform: translateY(6px); color: var(--v-ink) !important; }
+.vh-diff-was { opacity: 1; transform: translateY(0); }
+.vh-diff[data-on] .vh-diff-now { opacity: 1; transform: translateY(0); }
+.vh-diff[data-on] .vh-diff-was { opacity: 0; transform: translateY(-6px); }
+
+/* ═══ 5. Шаги подключения — сегмент приложения ═════════════════════ */
+.vh-app-seg { max-width: 260px; margin-top: 16px; }
+.vh-app-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.vh-step-note { margin: 14px 0 0; }
+
+/* ═══ 6. FAQ ════════════════════════════════════════════════════════ */
+.vh-faq { display: grid; gap: 10px; margin-top: clamp(28px, 4vw, 40px); text-align: left; }
+.vh-faq-item {
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+  overflow: hidden;
+}
+.vh-faq-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 18px clamp(18px, 3vw, 26px);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: 600 17px/1.35 var(--v-font);
+  letter-spacing: -0.01em;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vh-faq-btn span:first-child { flex: 1; }
+.vh-faq-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--v-soft-2);
+  color: var(--v-ink-2);
+  transition: transform 320ms var(--v-ease), background-color 320ms var(--v-ease), color 320ms var(--v-ease);
+}
+.vh-faq-item[data-open] .vh-faq-mark { background: var(--v-blue); color: #FFFFFF; transform: rotate(180deg); }
+.vh-faq-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 380ms var(--v-ease);
+}
+.vh-faq-item[data-open] .vh-faq-panel { grid-template-rows: 1fr; }
+.vh-faq-panel-in { overflow: hidden; min-height: 0; }
+.vh-faq-panel p { margin: 0; padding: 0 clamp(18px, 3vw, 26px) 22px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
+
+/* ═══ 7. Финальная плита ═══════════════════════════════════════════ */
+.v-panel.vh-cta {
+  text-align: center;
+  padding: clamp(48px, 8vw, 88px) clamp(24px, 5vw, 56px);
+}
+.v-panel.vh-cta .v-h2 { color: #FFFFFF; }
+.v-panel.vh-cta p { margin: 16px auto 0; max-width: 480px; color: var(--v-on-black-2); font-size: clamp(17px, 2vw, 20px); }
+.v-panel.vh-cta .v-actions { margin-top: 32px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vh-diff-state span, .vh-switch-thumb, .vh-switch-track, .vh-diff-row::before { transition: none !important; }
+}

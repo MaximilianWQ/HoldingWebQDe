@@ -641,12 +641,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
   );
 
   return (
-    <div className="v-section av-section">
+    <div className="v-section av-section v-glow">
       <div className="v-wrap av-wrap">
         <div className="av-card">
           {/* ── Почта, пароль, код, passkey, Telegram ─────────────── */}
           {step === "start" && (
-            <>
+            <div key="start" className="av-step v-fade-in">
               {showRef && (
                 <p className="av-badge-row"><span className="v-badge v-badge-blue">По приглашению</span></p>
               )}
@@ -749,12 +749,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                 </button>
               </div>
               {passkeyError && <FieldError id="au-pk-err" text={passkeyError} />}
-            </>
+            </div>
           )}
 
           {/* ── Код ───────────────────────────────────────────────── */}
           {step === "code" && (
-            <>
+            <div key="code" className="av-step v-fade-in">
               <BackButton onClick={() => setStep("start")} />
               <h1 className="av-h1">Введите код</h1>
               <p className="av-lead">
@@ -797,12 +797,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   </button>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {/* ── Пароль для новых ────────────────────────────────────── */}
           {step === "set-password" && (
-            <>
+            <div key="set-password" className="av-step v-fade-in">
               <h1 className="av-h1">Придумайте пароль</h1>
               <p className="av-lead">В следующий раз войдёте по почте и паролю — без ожидания письма. Шаг можно пропустить.</p>
 
@@ -844,12 +844,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   Пропустить
                 </button>
               </form>
-            </>
+            </div>
           )}
 
           {/* ── Восстановление · 1 · почта ──────────────────────────── */}
           {step === "reset-email" && (
-            <>
+            <div key="reset-email" className="av-step v-fade-in">
               <BackButton onClick={() => setStep("start")} />
               <h1 className="av-h1">Восстановим доступ</h1>
               <p className="av-lead">Укажите почту аккаунта — пришлём код для нового пароля.</p>
@@ -880,12 +880,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   {resetLoading ? <Busy>Отправляем…</Busy> : "Получить код"}
                 </button>
               </form>
-            </>
+            </div>
           )}
 
           {/* ── Восстановление · 2 · код ────────────────────────────── */}
           {step === "reset-code" && (
-            <>
+            <div key="reset-code" className="av-step v-fade-in">
               <BackButton onClick={() => setStep("reset-email")} />
               <h1 className="av-h1">Введите код</h1>
               <p className="av-lead">
@@ -924,12 +924,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   </button>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {/* ── Восстановление · 3 · новый пароль ───────────────────── */}
           {step === "reset-password" && (
-            <>
+            <div key="reset-password" className="av-step v-fade-in">
               <BackButton onClick={() => setStep("reset-code")} />
               <h1 className="av-h1">Новый пароль</h1>
               <p className="av-lead">С ним и почтой вы будете входить дальше.</p>
@@ -969,12 +969,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   {resetLoading ? <Busy>Сохраняем…</Busy> : "Сохранить пароль"}
                 </button>
               </form>
-            </>
+            </div>
           )}
 
           {/* ── Восстановление · готово ──────────────────────────────── */}
           {step === "reset-success" && (
-            <>
+            <div key="reset-success" className="av-step v-fade-in">
               <span className="av-done" aria-hidden><Icon name="check" size={26} /></span>
               <h1 className="av-h1">Пароль изменён</h1>
               <p className="av-lead">Теперь войдите с новым паролем.</p>
@@ -993,7 +993,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   Войти
                 </button>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

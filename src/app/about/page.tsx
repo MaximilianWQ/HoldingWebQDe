@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import VShell from "@/components/vps/VShell";
-import Icon from "@/components/pixel/Icon";
+import Icon, { type IconName } from "@/components/pixel/Icon";
 import { BRAND, TRIAL } from "@/components/vps/links";
 import { CITY_COUNT, COUNTRY_COUNT } from "@/lib/locations";
 import { DEVICE_LIMIT, PLANS, PLAN_SPEED, formatRub } from "@/lib/plans";
@@ -32,12 +32,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-const FACTS: Array<{ v: string; label: string }> = [
-  { v: String(COUNTRY_COUNT), label: `${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор` },
-  { v: String(CITY_COUNT), label: `${plural(CITY_COUNT, ["город", "города", "городов"])} с серверами` },
-  { v: String(DEVICE_LIMIT), label: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на подписке` },
-  { v: String(PLAN_SPEED.plus), label: "Гбит/с на тарифе Plus" },
-  { v: String(TRIAL_DAYS), label: `${plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно` },
+const FACTS: Array<{ v: string; label: string; icon: IconName; tile?: "dark" | "blue"; span?: 2 | 3 }> = [
+  { v: String(COUNTRY_COUNT), label: `${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор`, icon: "globe", tile: "blue", span: 3 },
+  { v: String(DEVICE_LIMIT), label: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на подписке`, icon: "devices", tile: "dark", span: 3 },
+  { v: String(CITY_COUNT), label: `${plural(CITY_COUNT, ["город", "города", "городов"])} с серверами`, icon: "grid", span: 2 },
+  { v: String(PLAN_SPEED.plus), label: "Гбит/с на тарифе Plus", icon: "bolt", span: 2 },
+  { v: String(TRIAL_DAYS), label: `${plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно`, icon: "clock", span: 2 },
 ];
 
 const RULES: Array<{ t: string; d: string }> = [
@@ -50,8 +50,8 @@ export default function AboutPage() {
   return (
     <VShell>
       {/* 01 · обещание */}
-      <section className="v-section v-center" aria-labelledby="pa-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="pa-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="pa-title" className="v-h1">
             Интернет, который <span className="v-accent">просто работает</span>
           </h1>
@@ -62,15 +62,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 02 · в цифрах */}
+      {/* 02 · в цифрах — бенто */}
       <section className="v-section v-reveal" aria-labelledby="pa-facts-title">
         <div className="v-wrap">
           <h2 id="pa-facts-title" className="v-sr">Atlas в цифрах</h2>
-          <div className="pa-facts">
+          <div className="v-bento">
             {FACTS.map((f) => (
-              <div key={f.label} className="pa-fact">
-                <b className="pa-fact-v">{f.v}</b>
-                <span className="pa-fact-label">{f.label}</span>
+              <div key={f.label} className={`v-tile v-span-${f.span ?? 2}${f.tile ? ` v-tile-${f.tile}` : ""}`}>
+                <span className="v-tile-icon" aria-hidden><Icon name={f.icon} size={22} /></span>
+                <h3>{f.label}</h3>
+                <b className="v-tile-num">{f.v}</b>
               </div>
             ))}
           </div>
@@ -101,7 +102,7 @@ export default function AboutPage() {
         <div className="v-wrap">
           <h2 id="pa-make-title" className="v-h2">Что мы делаем</h2>
           <div className="pa-make">
-            <Link href="/pricing" className="v-card v-card-pad pa-make-card">
+            <Link href="/pricing" className="v-card v-card-pad pa-make-card v-lift">
               <span className="pa-make-icon" aria-hidden><Icon name="bolt" size={24} /></span>
               <h3 className="pa-make-title">VPS-ускоритель</h3>
               <p className="v-text">
@@ -109,7 +110,7 @@ export default function AboutPage() {
               </p>
               <p className="pa-make-price">от <b>{formatRub(PLANS.basic[1])} ₽</b> в месяц</p>
             </Link>
-            <Link href="/vds" className="v-card v-card-pad pa-make-card">
+            <Link href="/vds" className="v-card v-card-pad pa-make-card v-lift">
               <span className="pa-make-icon" aria-hidden><Icon name="grid" size={24} /></span>
               <h3 className="pa-make-title">Выделенные серверы</h3>
               <p className="v-text">

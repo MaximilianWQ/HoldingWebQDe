@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import VShell from "@/components/vps/VShell";
-import Icon from "@/components/pixel/Icon";
+import Icon, { type IconName } from "@/components/pixel/Icon";
 import { BRAND, TRIAL } from "@/components/vps/links";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
-import "./security-vps.css";
+import "@/app/vps-info.css";
 
 /**
  * /security — корпус Atlas Secure VPS (владелец, 17.09.2026).
@@ -55,20 +55,19 @@ const NOT_STORED = [
 const SEEN = ["Какой сайт вы открыли", "Что вы на нём запросили"];
 
 export default function SecurityPage() {
-  const facts: Array<{ v: string; label: string }> = [
-    { v: String(STORED.length), label: `${plural(STORED.length, ["поле", "поля", "полей"])} о вас в базе` },
-    { v: String(NOT_STORED.length), label: `${plural(NOT_STORED.length, ["пункт", "пункта", "пунктов"])}, которых нет` },
-    { v: "1", label: "поле нужно для входа — почта" },
-    { v: String(TRIAL_DAYS), label: `${plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно, без карты` },
-    { v: String(DEVICE_LIMIT), label: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на подписке` },
-    { v: String(COUNTRY_COUNT), label: `${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор` },
+  const facts: Array<{ v: string; label: string; icon: IconName; tile?: "dark" | "blue" }> = [
+    { v: String(STORED.length), label: "поля о вас в базе", icon: "user", tile: "dark" },
+    { v: String(NOT_STORED.length), label: "пунктов, которых нет", icon: "shield", tile: "blue" },
+    { v: String(TRIAL_DAYS), label: `${plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно, без карты`, icon: "clock" },
+    { v: String(DEVICE_LIMIT), label: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на подписке`, icon: "devices" },
+    { v: String(COUNTRY_COUNT), label: `${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])} на выбор`, icon: "globe" },
   ];
 
   return (
     <VShell>
       {/* 01 · ответ */}
-      <section className="v-section v-center" aria-labelledby="ps-title">
-        <div className="v-wrap v-narrow">
+      <section className="v-section v-center v-glow" aria-labelledby="ps-title">
+        <div className="v-wrap v-narrow v-stagger">
           <h1 id="ps-title" className="v-h1">
             Что мы знаем о вас? <span className="v-accent">Почту. И всё.</span>
           </h1>
@@ -79,28 +78,28 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      {/* 02 · храним и не храним */}
+      {/* 02 · храним и не храним — две карточки */}
       <section className="v-section v-reveal" id="lists" aria-labelledby="ps-lists-title">
         <div className="v-wrap">
           <h2 id="ps-lists-title" className="v-sr">Храним и не храним</h2>
-          <div className="ps-cols">
-            <div>
-              <h3 className="ps-col-h">Храним <b>{STORED.length}</b></h3>
-              <ul className="ps-list">
+          <div className="vp-cols vp-cols-2">
+            <div className="v-card v-card-pad vp-col-card v-lift">
+              <h3 className="vp-col-h">Храним <b>{STORED.length}</b></h3>
+              <ul className="vp-list">
                 {STORED.map((t) => (
-                  <li key={t} className="ps-item">
-                    <Icon name="check" size={18} className="ps-mark" />
+                  <li key={t} className="vp-item">
+                    <Icon name="check" size={18} className="vp-item-mark" />
                     <span>{t}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div>
-              <h3 className="ps-col-h">Не храним <b>{NOT_STORED.length}</b></h3>
-              <ul className="ps-list">
+            <div className="v-card v-card-pad vp-col-card v-lift">
+              <h3 className="vp-col-h">Не храним <b>{NOT_STORED.length}</b></h3>
+              <ul className="vp-list">
                 {NOT_STORED.map((t) => (
-                  <li key={t} className="ps-item ps-item-no">
-                    <Icon name="close" size={18} className="ps-mark ps-mark-off" />
+                  <li key={t} className="vp-item vp-item-no">
+                    <Icon name="close" size={18} className="vp-item-mark vp-item-mark-off" />
                     <span>{t}</span>
                   </li>
                 ))}
@@ -131,15 +130,16 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      {/* 04 · в цифрах */}
+      {/* 04 · в цифрах — бенто */}
       <section className="v-section v-reveal" aria-labelledby="ps-facts-title">
         <div className="v-wrap">
           <h2 id="ps-facts-title" className="v-sr">В цифрах</h2>
-          <div className="ps-facts">
+          <div className="v-bento">
             {facts.map((f) => (
-              <div key={f.label} className="ps-fact">
-                <b className="ps-fact-v">{f.v}</b>
-                <span className="ps-fact-label">{f.label}</span>
+              <div key={f.label} className={`v-tile v-span-2${f.tile ? ` v-tile-${f.tile}` : ""}`}>
+                <span className="v-tile-icon" aria-hidden><Icon name={f.icon} size={22} /></span>
+                <h3>{f.label}</h3>
+                <b className="v-tile-num">{f.v}</b>
               </div>
             ))}
           </div>

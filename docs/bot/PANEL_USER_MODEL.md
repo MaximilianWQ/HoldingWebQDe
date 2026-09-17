@@ -5,6 +5,14 @@
 (bypass)». Составлено по коду (`app/services/remnawave_api.py`,
 `remnawave_premium.py`, `remnawave_bypass.py`, `purchase_flow.py`).
 
+> **Сверено с кодом бота `ATCbot main @ 4b00e79a` (17.09.2026).** Поправки к
+> тексту ниже: (1) бот ставит один тег — премиуму тарифный (`BASIC`, `PLUS`,
+> `TRIAL`, `COMBO_BASIC`, `COMBO_PLUS`, `app/services/tariffs.py`), обходу —
+> `BYPASS`; (2) в тело создания уходит только `hwidDeviceLimit`, поля
+> `deviceLimit` панель 3.x не принимает (`remnawave_api.py`); (3) лимит
+> устройств премиума зависит от тарифа — Basic 10, Plus 14
+> (`config.PREMIUM_DEVICE_LIMITS`), 5 — только запасное значение; обход — 5.
+
 ---
 
 ## 1. Идентификатор пользователя в панели

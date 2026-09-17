@@ -1,12 +1,12 @@
 {
-  "name": "Atlas Secure",
+  "name": "Atlas Secure VPS",
   "short_name": "Atlas Secure",
-  "description": "Безопасный доступ в интернет",
+  "description": "Быстрый и приватный интернет",
   "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F6F5F2",
-  "theme_color": "#F6F5F2",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
   "categories": ["utilities", "security"],
   "icons": [
     {

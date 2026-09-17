@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import AtlasShell from "@/components/atlas/AtlasShell";
 import DevicesView from "./DevicesView";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
@@ -9,14 +8,14 @@ import { getSessionUser } from "@/lib/session";
 /**
  * /devices — серверная обёртка.
  *
- * Нужна ради трёх вещей. Первая: собственные метаданные — до этого
+ * Нужна ради двух вещей. Первая: собственные метаданные — до этого
  * страница отдавалась поиску под общим заголовком сайта. Вторая: факт
  * наличия сессии. Куку сессии нельзя прочитать из браузера (она
  * httpOnly), поэтому клиент спрашивал подписку у всех подряд и
  * получал 401 — обработанный, но всё равно записанный браузером в
- * консоль как ошибка на каждом открытии страницы гостем. Третья:
- * оболочка «Атлас-издания» (лист 12) остаётся серверной — клиентское
- * здесь только тело страницы.
+ * консоль как ошибка на каждом открытии страницы гостем. Оболочка
+ * (VShell) собирается внутри клиентского DevicesView — корпус Atlas
+ * Secure VPS.
  */
 export const metadata: Metadata = {
   title: "Как подключить на iPhone, Android, Windows, Mac и ТВ",
@@ -28,9 +27,5 @@ export const metadata: Metadata = {
 
 export default async function DevicesRoute() {
   const hasSession = Boolean(await getSessionUser());
-  return (
-    <AtlasShell sheetNo="12" sheetTitle="Устройства">
-      <DevicesView hasSession={hasSession} />
-    </AtlasShell>
-  );
+  return <DevicesView hasSession={hasSession} />;
 }

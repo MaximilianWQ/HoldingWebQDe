@@ -1,0 +1,65 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /infrastructure — корпус Atlas Secure VPS (v-), префикс `pi-`.
+   Токены и базовые классы — src/app/vps.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Компактная сетка чипов стран — плотнее общего .v-chip (тот рассчитан
+   на одну-две пилюли в действии, не на список из 19). */
+.pi-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: clamp(28px, 4vw, 40px);
+}
+.pi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--v-field);
+  color: var(--v-ink-2);
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.pi-chip b { color: var(--v-ink); font-weight: 600; }
+.pi-chip span { color: var(--v-ink-4); }
+
+.pi-note { max-width: 640px; margin: 20px auto 0; text-align: center; }
+
+.pi-path { display: grid; gap: 12px; max-width: 720px; margin: clamp(28px, 4vw, 40px) auto 0; }
+.pi-stage {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+  text-align: left;
+}
+.pi-stage-n {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--v-blue);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.pi-stage h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
+.pi-stage p { margin: 6px 0 0; color: var(--v-ink-3); font-size: 15px; line-height: 1.5; }
+
+.pi-honest {
+  display: grid;
+  gap: 20px;
+  margin-top: clamp(28px, 4vw, 40px);
+  text-align: left;
+}
+@media (min-width: 720px) { .pi-honest { grid-template-columns: 1fr 1fr; } }
+.pi-honest h3 { margin: 0 0 12px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.pi-honest ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pi-honest li { padding: 12px 14px; border-radius: var(--v-r-sm); background: var(--v-field); font-size: 14px; line-height: 1.4; color: var(--v-ink-2); }

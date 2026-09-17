@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /terms и /privacy — общий каркас правовых документов, корпус Atlas
+   Secure VPS (v-), собственный префикс `vl-`. Токены — src/app/vps.css.
+
+   Требование брифа: удобное чтение — заголовок, дата, компактное
+   оглавление горизонтальными чипами, колонка текста ~720px, кегль 17px.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vl-meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  color: var(--v-ink-3);
+  font-size: 14px;
+}
+.vl-meta li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--v-soft);
+}
+
+/* Оглавление — горизонтальный ряд компактных чипов, переносится по
+   ширине; на телефоне занимает несколько строк, не карусель. */
+.vl-toc {
+  max-width: 720px;
+  margin: 0 auto clamp(32px, 5vw, 48px);
+}
+.vl-toc-head { margin: 0 0 12px; color: var(--v-ink-3); }
+.vl-toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.vl-toc a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--v-field);
+  color: var(--v-ink-2);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 200ms var(--v-ease), color 200ms var(--v-ease);
+}
+.vl-toc a b { color: var(--v-ink-4); font-weight: 600; }
+@media (hover: hover) {
+  .vl-toc a:hover { background: var(--v-blue-soft); color: var(--v-blue-ink); }
+  .vl-toc a:hover b { color: var(--v-blue-ink); }
+}
+
+.vl-text { max-width: 720px; margin: 0 auto; }
+.vl-sec { padding-block: 28px; border-top: 1px solid var(--v-line); }
+.vl-sec:first-child { border-top: 0; padding-top: 0; }
+.vl-no { display: block; margin-bottom: 8px; color: var(--v-ink-4); font-size: 14px; font-weight: 600; }
+.vl-h2 { margin: 0 0 12px; font-size: 21px; font-weight: 600; letter-spacing: -0.015em; }
+.vl-text p { margin: 0 0 0; font-size: 17px; line-height: 1.6; color: var(--v-ink-2); }
+.vl-text p + p { margin-top: 14px; }
+.vl-text a { color: var(--v-blue-ink); text-decoration: underline; text-underline-offset: 3px; }
+.al-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.al-list li {
+  position: relative;
+  padding: 12px 16px 12px 34px;
+  border-radius: var(--v-r-sm);
+  background: var(--v-field);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--v-ink-2);
+}
+.al-list li::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--v-blue);
+}

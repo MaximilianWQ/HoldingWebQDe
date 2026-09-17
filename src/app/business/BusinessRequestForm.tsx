@@ -5,44 +5,21 @@ import { useRef, useState } from "react";
 import Icon from "@/components/pixel/Icon";
 
 /**
- * Форма корпоративной заявки.
+ * Форма корпоративной заявки — корпус Atlas Secure VPS (владелец,
+ * 17.09.2026). Логика и контракт запроса не менялись, поменялась
+ * только разметка (поля `.v-input`, одна синяя кнопка).
  *
  * Проверка на клиенте — до отправки и по каждому полю отдельно:
- * общая строка «заполните все поля» заставляет человека искать, какое
- * именно поле не устроило форму. Ошибка живёт рядом со своим полем,
- * связана с ним через aria-describedby, поле помечается aria-invalid,
- * и фокус переводится на первое неверное — иначе на телефоне ошибка
- * оказывается за пределами экрана.
+ * ошибка живёт рядом со своим полем, связана с ним через
+ * aria-describedby, поле помечается aria-invalid, фокус переводится
+ * на первое неверное. Браузерная проверка отключена (noValidate)
+ * намеренно.
  *
- * Браузерная проверка отключена (noValidate) намеренно: нативные
- * подсказки не переводятся, не стилизуются и исчезают по таймеру.
- * Атрибуты type/inputMode при этом оставлены — они поднимают нужную
- * клавиатуру на телефоне.
- *
- * ОФОРМЛЕНИЕ. Корпус «Атлас-издание» (business-atlas.css): поля —
- * общий слой .px-field/.px-input/.px-choice из globals.css, его токены
- * --px-* переопределены внутри .ab-form на палитру «Лоция». Логика,
- * тексты полей и контракт запроса не менялись.
- *
- * КУДА ПОДКЛЮЧИТЬ БЭКЕНД И CRM
- * ────────────────────────────
- * Сейчас заявка уходит в POST /api/contact (src/app/api/contact/route.ts):
- * запись в таблицу contact_requests и уведомление администратору.
- * Контракт запроса — { name, email, interest, message } — не менялся,
- * поэтому корпоративные поля (компания, размер команды, что нужно)
- * складываются в message структурированными строками: см. buildMessage
- * ниже.
- *
- * Когда появится CRM (amoCRM, Битрикс24, HubSpot), правильное место
- * для интеграции — обработчик /api/contact, а не этот компонент:
- * ключ интеграции не должен попасть в браузер. Порядок работ:
- *   1. Добавить в contact_requests колонки company, team_size, needs
- *      (миграция), чтобы не разбирать message строками.
- *   2. Расширить контракт API этими полями и передавать их здесь
- *      вместо склейки в message.
- *   3. В обработчике после INSERT отправить лид в CRM — из ключа в
- *      переменной окружения, с ретраем: отказ CRM не должен ронять
- *      ответ посетителю, заявка уже сохранена в базе.
+ * Заявка уходит в POST /api/contact (src/app/api/contact/route.ts):
+ * запись в contact_requests и уведомление администратору. Контракт —
+ * { name, email, interest, message } — не менялся, поэтому
+ * корпоративные поля (компания, размер команды, что нужно)
+ * складываются в message структурированными строками (buildMessage).
  */
 const NEEDS: Array<{ value: string; label: string }> = [
   { value: "access", label: "Подключения для сотрудников" },
@@ -52,14 +29,13 @@ const NEEDS: Array<{ value: string; label: string }> = [
 
 const SIZES: Array<{ value: string; label: string }> = [
   { value: "5-20", label: "5–20 человек" },
-  { value: "21-100", label: "21–100" },
-  { value: "101-500", label: "101–500" },
-  { value: "500+", label: "Больше 500" },
+  { value: "21-100", label: "21–100 человек" },
+  { value: "101-500", label: "101–500 человек" },
+  { value: "500+", label: "Больше 500 человек" },
 ];
 
 /** Почта проверяется тем же выражением, что и на сервере
- *  (src/app/api/contact/route.ts): расхождение между проверками даёт
- *  адрес, который форма принимает, а API отклоняет. */
+ *  (src/app/api/contact/route.ts). */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type FieldName = "name" | "email" | "company" | "size" | "need";
@@ -88,8 +64,7 @@ function validate(v: FormState): Errors {
 }
 
 /** Корпоративные поля складываются в message: контракт /api/contact
- *  их пока не знает. Формат — строки «ключ: значение», чтобы письмо
- *  читалось человеком и разбиралось скриптом. */
+ *  их пока не знает. Формат — строки «ключ: значение». */
 function buildMessage(v: FormState): string {
   const need = NEEDS.find((n) => n.value === v.need)?.label ?? v.need;
   const size = SIZES.find((s) => s.value === v.size)?.label ?? v.size;
@@ -110,12 +85,11 @@ export default function BusinessRequestForm() {
   const [sent, setSent] = useState(false);
   const [failure, setFailure] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const doneRef = useRef<HTMLHeadingElement>(null);
 
   const set = (field: keyof FormState) => (value: string) => {
     setV((prev) => ({ ...prev, [field]: value }));
-    // Ошибка снимается по мере исправления, а не по повторной
-    // отправке: иначе поле остаётся красным, пока человек не нажмёт
-    // кнопку ещё раз.
+    // Ошибка снимается по мере исправления, а не по повторной отправке.
     setErrors((prev) => (prev[field as FieldName] ? { ...prev, [field]: undefined } : prev));
   };
 
@@ -127,8 +101,7 @@ export default function BusinessRequestForm() {
     setErrors(found);
     const first = (Object.keys(found) as FieldName[])[0];
     if (first) {
-      const node = formRef.current?.querySelector<HTMLElement>(`[data-field="${first}"]`);
-      node?.focus();
+      formRef.current?.querySelector<HTMLElement>(`[data-field="${first}"]`)?.focus();
       return;
     }
 
@@ -145,14 +118,14 @@ export default function BusinessRequestForm() {
         }),
       });
       const data = await res.json();
-      // Текст ошибки от API наружу не показываем: там служебные
-      // английские строки («Server error», «Invalid email format»),
-      // написанные для журнала, а не для человека на сайте.
-      if (data.success) setSent(true);
-      else
-        setFailure(
-          "Заявка не ушла — сбой на нашей стороне. Попробуйте ещё раз или напишите на sales@atlas.secure",
-        );
+      // Текст ошибки от API наружу не показываем — там служебный
+      // английский для журнала, а не для человека на сайте.
+      if (data.success) {
+        setSent(true);
+        setTimeout(() => doneRef.current?.focus(), 30);
+      } else {
+        setFailure("Заявка не ушла — сбой на нашей стороне. Попробуйте ещё раз или напишите на sales@atlas.secure");
+      }
     } catch {
       setFailure("Нет связи с сервером. Проверьте соединение или напишите на sales@atlas.secure");
     } finally {
@@ -162,194 +135,135 @@ export default function BusinessRequestForm() {
 
   if (sent) {
     return (
-      <div className="ab-form ab-card ab-done" role="status">
-        <span className="ab-done-mark" aria-hidden>
-          <Icon name="check" size={22} />
-        </span>
-        <h3 className="ab-card-h">Заявка принята</h3>
-        <p className="ab-card-p">
-          Вернёмся в течение четырёх рабочих часов на указанную почту — с расчётом и
-          проектом договора. Если задача срочная, напишите на{" "}
-          <a href="mailto:sales@atlas.secure" className="px-link-inline">sales@atlas.secure</a>.
+      <div className="v-card v-card-field vp-done" role="status">
+        <span className="vp-done-mark" aria-hidden><Icon name="check" size={26} /></span>
+        <h3 ref={doneRef} tabIndex={-1} className="v-h3">Заявка принята</h3>
+        <p>
+          Вернёмся в течение четырёх рабочих часов на указанную почту — с расчётом и проектом
+          договора. Если задача срочная, напишите на{" "}
+          <a href="mailto:sales@atlas.secure" className="v-link">sales@atlas.secure</a>.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="px-form-grid ab-form">
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        noValidate
-        className="px-form-card ab-card a-settle"
-        style={{ ["--i" as string]: 6 }}
-        aria-labelledby="request-title"
-      >
-        <div className="px-field">
-          <label className="px-label" htmlFor="rq-name">
-            Как к вам обращаться <span className="px-req" aria-hidden>*</span>
-          </label>
-          <input
-            id="rq-name"
-            data-field="name"
-            className="px-input"
-            type="text"
-            autoComplete="name"
-            value={v.name}
-            onChange={(e) => set("name")(e.target.value)}
-            aria-invalid={errors.name ? true : undefined}
-            aria-describedby={errors.name ? "rq-name-err" : undefined}
-            aria-required="true"
-          />
-          {errors.name && (
-            <p className="px-field-error" id="rq-name-err">{errors.name}</p>
-          )}
-        </div>
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="v-form" aria-labelledby="request-title">
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-name">Как к вам обращаться</label>
+        <input
+          id="rq-name"
+          data-field="name"
+          className="v-input"
+          type="text"
+          autoComplete="name"
+          value={v.name}
+          onChange={(e) => set("name")(e.target.value)}
+          aria-invalid={errors.name ? true : undefined}
+          aria-describedby={errors.name ? "rq-name-err" : undefined}
+          aria-required="true"
+        />
+        {errors.name && <p className="v-error" id="rq-name-err">{errors.name}</p>}
+      </div>
 
-        <div className="px-field">
-          <label className="px-label" htmlFor="rq-email">
-            Рабочая почта <span className="px-req" aria-hidden>*</span>
-          </label>
-          <input
-            id="rq-email"
-            data-field="email"
-            className="px-input"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            value={v.email}
-            onChange={(e) => set("email")(e.target.value)}
-            aria-invalid={errors.email ? true : undefined}
-            aria-describedby={errors.email ? "rq-email-err" : undefined}
-            aria-required="true"
-          />
-          {errors.email && (
-            <p className="px-field-error" id="rq-email-err">{errors.email}</p>
-          )}
-        </div>
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-email">Рабочая почта</label>
+        <input
+          id="rq-email"
+          data-field="email"
+          className="v-input"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          value={v.email}
+          onChange={(e) => set("email")(e.target.value)}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? "rq-email-err" : undefined}
+          aria-required="true"
+        />
+        {errors.email && <p className="v-error" id="rq-email-err">{errors.email}</p>}
+      </div>
 
-        <div className="px-field">
-          <label className="px-label" htmlFor="rq-company">
-            Компания <span className="px-req" aria-hidden>*</span>
-          </label>
-          <input
-            id="rq-company"
-            data-field="company"
-            className="px-input"
-            type="text"
-            autoComplete="organization"
-            value={v.company}
-            onChange={(e) => set("company")(e.target.value)}
-            aria-invalid={errors.company ? true : undefined}
-            aria-describedby={errors.company ? "rq-company-err" : undefined}
-            aria-required="true"
-          />
-          {errors.company && (
-            <p className="px-field-error" id="rq-company-err">{errors.company}</p>
-          )}
-        </div>
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-company">Компания</label>
+        <input
+          id="rq-company"
+          data-field="company"
+          className="v-input"
+          type="text"
+          autoComplete="organization"
+          value={v.company}
+          onChange={(e) => set("company")(e.target.value)}
+          aria-invalid={errors.company ? true : undefined}
+          aria-describedby={errors.company ? "rq-company-err" : undefined}
+          aria-required="true"
+        />
+        {errors.company && <p className="v-error" id="rq-company-err">{errors.company}</p>}
+      </div>
 
-        {/* Размер команды и состав — группы переключателей, а не
-            выпадающие списки: вариантов мало, и на телефоне список
-            открывает системное колесо ради четырёх строк. */}
-        <fieldset className="px-field" aria-describedby={errors.size ? "rq-size-err" : undefined}>
-          <legend className="px-label">
-            Размер команды <span className="px-req" aria-hidden>*</span>
-          </legend>
-          <div className="px-choice-row">
-            {SIZES.map((s, i) => (
-              <button
-                key={s.value}
-                type="button"
-                data-field={i === 0 ? "size" : undefined}
-                className={`px-choice${v.size === s.value ? " px-choice-on" : ""}`}
-                aria-pressed={v.size === s.value}
-                onClick={() => set("size")(s.value)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-          {errors.size && <p className="px-field-error" id="rq-size-err">{errors.size}</p>}
-        </fieldset>
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-size">Размер команды</label>
+        <select
+          id="rq-size"
+          data-field="size"
+          className="v-input"
+          value={v.size}
+          onChange={(e) => set("size")(e.target.value)}
+          aria-invalid={errors.size ? true : undefined}
+          aria-describedby={errors.size ? "rq-size-err" : undefined}
+          aria-required="true"
+        >
+          <option value="" disabled>Выберите размер</option>
+          {SIZES.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+        {errors.size && <p className="v-error" id="rq-size-err">{errors.size}</p>}
+      </div>
 
-        <fieldset className="px-field" aria-describedby={errors.need ? "rq-need-err" : undefined}>
-          <legend className="px-label">
-            Что нужно <span className="px-req" aria-hidden>*</span>
-          </legend>
-          <div className="px-choice-row">
-            {NEEDS.map((n, i) => (
-              <button
-                key={n.value}
-                type="button"
-                data-field={i === 0 ? "need" : undefined}
-                className={`px-choice${v.need === n.value ? " px-choice-on" : ""}`}
-                aria-pressed={v.need === n.value}
-                onClick={() => set("need")(n.value)}
-              >
-                {n.label}
-              </button>
-            ))}
-          </div>
-          {errors.need && <p className="px-field-error" id="rq-need-err">{errors.need}</p>}
-        </fieldset>
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-need">Что нужно</label>
+        <select
+          id="rq-need"
+          data-field="need"
+          className="v-input"
+          value={v.need}
+          onChange={(e) => set("need")(e.target.value)}
+          aria-invalid={errors.need ? true : undefined}
+          aria-describedby={errors.need ? "rq-need-err" : undefined}
+          aria-required="true"
+        >
+          <option value="" disabled>Выберите вариант</option>
+          {NEEDS.map((n) => (
+            <option key={n.value} value={n.value}>{n.label}</option>
+          ))}
+        </select>
+        {errors.need && <p className="v-error" id="rq-need-err">{errors.need}</p>}
+      </div>
 
-        <div className="px-field">
-          <label className="px-label" htmlFor="rq-message">
-            Задача <span className="ab-optional">(необязательно)</span>
-          </label>
-          <textarea
-            id="rq-message"
-            className="px-input px-textarea"
-            rows={4}
-            value={v.message}
-            onChange={(e) => set("message")(e.target.value)}
-            placeholder="Сколько сотрудников и где работают, какие сервисы должны открываться, есть ли сроки"
-          />
-        </div>
+      <div className="v-field">
+        <label className="v-label" htmlFor="rq-message">Задача (необязательно)</label>
+        <textarea
+          id="rq-message"
+          className="v-input"
+          rows={4}
+          style={{ minHeight: 120, paddingBlock: 14, resize: "vertical" }}
+          value={v.message}
+          onChange={(e) => set("message")(e.target.value)}
+          placeholder="Сколько сотрудников и где работают, какие сервисы должны открываться, есть ли сроки"
+        />
+      </div>
 
-        {/* Сообщение об отказе объявлено живой областью: без неё
-            экранный диктор не узнает, что после нажатия что-то
-            изменилось. */}
-        <p className="px-form-status" role="alert" aria-live="assertive">
-          {failure}
-        </p>
+      {/* Живая область: без неё экранный диктор не узнает об отказе. */}
+      <p role="alert" aria-live="assertive" style={{ margin: 0, color: "var(--v-red)", fontSize: 14 }}>{failure}</p>
 
-        <div className="px-form-foot">
-          <button type="submit" className="a-btn a-btn-primary ab-submit" disabled={sending}>
-            {sending ? "Отправляем…" : "Получить расчёт"}
-            {!sending && <Icon name="arrow-right" size={16} />}
-          </button>
-          <p className="px-caption">
-            Отправляя заявку, вы соглашаетесь с{" "}
-            <Link href="/privacy" className="px-link-inline">политикой конфиденциальности</Link>.
-          </p>
-        </div>
-      </form>
-
-      <aside className="px-form-aside ab-aside a-settle" style={{ ["--i" as string]: 9 }}>
-        <p className="a-wide ab-aside-h">что дальше</p>
-        <ol className="px-form-steps">
-          <li>
-            <span className="a-num px-form-step-n">1</span>
-            Читаем заявку и уточняем недостающее письмом — обычно это один вопрос.
-          </li>
-          <li>
-            <span className="a-num px-form-step-n">2</span>
-            Присылаем расчёт по числу мест и состав подключения.
-          </li>
-          <li>
-            <span className="a-num px-form-step-n">3</span>
-            Проект договора и счёт. Тестовый доступ на время согласования — по запросу.
-          </li>
-        </ol>
-        <p className="px-caption">
-          Заявка попадает менеджеру продаж. Срок ответа — четыре рабочих часа, тот же,
-          что указан на странице{" "}
-          <Link href="/contact" className="px-link-inline">контактов</Link>.
-        </p>
-      </aside>
-    </div>
+      <button type="submit" className="v-btn v-btn-primary v-btn-block" disabled={sending}>
+        {sending ? "Отправляем…" : "Получить расчёт"}
+      </button>
+      <p className="v-small" style={{ textAlign: "center" }}>
+        Отправляя заявку, вы соглашаетесь с{" "}
+        <Link href="/privacy" className="v-link">политикой конфиденциальности</Link>.
+      </p>
+    </form>
   );
 }

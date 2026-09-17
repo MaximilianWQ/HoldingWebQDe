@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import LegalDoc, { type LegalSection } from "./LegalDoc";
-import "./legal-atlas.css";
 
 export const metadata: Metadata = {
   title: "Пользовательское соглашение",
@@ -123,7 +122,6 @@ export default function TermsPage() {
     <LegalDoc
       sheetTitle="Условия"
       title="Пользовательское соглашение"
-      k={11.6}
       meta={[
         <time key="u" dateTime="2026-03-23">Обновлено 23 марта 2026</time>,
         <time key="e" dateTime="2026-04-01">Действует с 1 апреля 2026</time>,

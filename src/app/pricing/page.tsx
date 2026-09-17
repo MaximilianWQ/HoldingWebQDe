@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
-import AtlasShell from "@/components/atlas/AtlasShell";
-import PricingView from "./PricingView";
+import PricingView, { PRICING_FAQ } from "./PricingView";
 import { DEVICE_LIMIT, PLANS, formatRub } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { COUNTRY_COUNT } from "@/lib/locations";
-import { FAQ } from "@/lib/faq";
 
 /**
- * /pricing — серверная обёртка: метаданные страницы и оболочка листа 10.
+ * /pricing — серверная обёртка: метаданные страницы.
  *
  * Числа в описании берутся из кода, а не пишутся руками: иначе
  * поисковая выдача обещает одну цену, а касса берёт другую.
  *
- * Оболочка «Атлас-издания» (шапка, футер, наблюдатель движения) живёт
- * здесь, на сервере; тело со стейтом срока — клиентский PricingView.
+ * Оболочка корпуса Atlas Secure VPS (шапка, футер) живёт в PricingView
+ * (VShell) — страница простая и не требует наблюдателя движения.
  */
 export const metadata: Metadata = {
   title: `Тарифы VPS-ускорителя от ${formatRub(PLANS.basic[1])} ₽ в месяц`,
@@ -35,13 +33,13 @@ export const metadata: Metadata = {
  *
  * Практика 2026: ИИ-поиск отвечает пользователю напрямую, и явно
  * размеченные пары «вопрос — ответ» он извлекает и цитирует охотнее
- * всего. Вопросы берутся из того же массива, что показан на
- * странице, — текст в выдаче не может разойтись с текстом на сайте.
+ * всего. Вопросы берутся из того же набора, что показан на странице
+ * (PRICING_FAQ), — текст в выдаче не может разойтись с текстом на сайте.
  */
 const FAQ_LD = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: FAQ.map((item) => ({
+  mainEntity: PRICING_FAQ.map((item) => ({
     "@type": "Question",
     name: item.q,
     acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -57,9 +55,7 @@ export default function PricingRoute() {
         // пользовательских данных в ней нет.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }}
       />
-      <AtlasShell sheetNo="10" sheetTitle="Тарифы">
-        <PricingView />
-      </AtlasShell>
+      <PricingView />
     </>
   );
 }

@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import Link from "next/link";
 import Icon from "@/components/pixel/Icon";
 import { isIosBrowser } from "@/components/IosInstallSheet";
 
 /**
- * Кабинет · уведомления и вход. Push — логика PushToggleButton, быстрый
- * вход (passkey) — логика SettingsCard, обе один в один. Раньше passkey
- * прятался за кнопкой «Настройки», и статус грузился только после её
- * нажатия; теперь обе строки видны сразу, статус грузится при открытии
- * кабинета.
+ * Профиль · уведомления и вход. Push — логика PushToggleButton, быстрый
+ * вход (passkey) — логика SettingsCard, обе один в один. Строки — общий
+ * `.v-row` (иконка, заголовок и подпись, переключатель/кнопка справа).
  */
 const urlB64 = (b: string) => {
   const p = "=".repeat((4 - (b.length % 4)) % 4);
@@ -21,7 +19,7 @@ const urlB64 = (b: string) => {
   return a;
 };
 
-export default function CabinetSettings({ i }: { i: number }) {
+export default function CabinetSettings() {
   const [pushSupported, setPushSupported] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
@@ -31,14 +29,10 @@ export default function CabinetSettings({ i }: { i: number }) {
   const [passkeyStatus, setPasskeyStatus] = useState<"" | "success" | "error">("");
   const [confirmRemove, setConfirmRemove] = useState(false);
 
-  // Новости и предложения — согласие на рекламные письма (владелец,
-  // 13.09.2026). null — ещё не знаем состояние.
   const [newsOn, setNewsOn] = useState<boolean | null>(null);
   const [newsSaving, setNewsSaving] = useState(false);
   const [newsError, setNewsError] = useState(false);
 
-  // iPhone/iPad в браузере — постоянная строка установки: нижний лист
-  // после «Не сейчас» молчит 3 дня, а путь к инструкции нужен всегда.
   const [iosInstall, setIosInstall] = useState(false);
   useEffect(() => setIosInstall(isIosBrowser()), []);
 
@@ -161,88 +155,94 @@ export default function CabinetSettings({ i }: { i: number }) {
   };
 
   return (
-    <section id="ak-set" className="ak-card ak-set" data-sheet="20" style={{ "--i": i } as CSSProperties} aria-labelledby="ak-set-h">
-      <div className="ak-card-head" style={{ marginBottom: "0.25rem" }}>
-        <h2 id="ak-set-h" className="ak-eyebrow">Уведомления и вход</h2>
+    <section aria-labelledby="vc-set-h">
+      <div className="vc-kblock-head">
+        <h3 id="vc-set-h">Уведомления и вход</h3>
       </div>
 
-      <div className="ak-set-row">
-        <span className="ak-set-ico"><Icon name="bell" size={16} /></span>
-        <div className="ak-set-copy">
-          <p className="ak-row-title" id="ak-push-l">Push-уведомления</p>
-          <p className="ak-row-text">
-            {!pushSupported ? "Этот браузер их не поддерживает" : pushEnabled ? "Включены — напомним о продлении" : "Выключены"}
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={pushEnabled}
-          aria-labelledby="ak-push-l"
-          className="ak-switch"
-          onClick={togglePush}
-          disabled={!pushSupported || pushLoading}
-        />
-      </div>
-
-      <div className="ak-set-row">
-        <span className="ak-set-ico"><Icon name="send" size={16} /></span>
-        <div className="ak-set-copy">
-          <p className="ak-row-title" id="ak-news-l">Новости и предложения</p>
-          <p className="ak-row-text">
-            {newsOn === null
-              ? "Загружаем…"
-              : newsOn
-                ? "Присылаем акции и новости на почту"
-                : "Выключено — приходят только письма о подписке"}
-          </p>
-          {newsError && <p className="ak-err">Не удалось сохранить. Попробуйте ещё раз.</p>}
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={!!newsOn}
-          aria-labelledby="ak-news-l"
-          className="ak-switch"
-          onClick={toggleNews}
-          disabled={newsOn === null || newsSaving}
-        />
-      </div>
-
-      {iosInstall && (
-        <div className="ak-set-row">
-          <span className="ak-set-ico"><Icon name="iphone" size={16} /></span>
-          <div className="ak-set-copy">
-            <p className="ak-row-title">Atlas на экран «Домой»</p>
-            <p className="ak-row-text">Кабинет как приложение и уведомления о продлении</p>
-          </div>
-          <Link href="/install-ios" className="a-btn a-btn-primary">Как установить</Link>
-        </div>
-      )}
-
-      <div className="ak-set-row">
-        <span className="ak-set-ico"><Icon name="lock" size={16} /></span>
-        <div className="ak-set-copy">
-          <p className="ak-row-title">Быстрый вход</p>
-          <p className="ak-row-text">
-            {passkeyStatus === "success" ? "Настроен" : hasPasskey ? "Face ID или Touch ID вместо кода" : "Вход без кода из письма"}
-          </p>
-          {passkeyStatus === "error" && <p className="ak-err">Не удалось. Попробуйте позже.</p>}
-        </div>
-        {passkeyLoading ? (
-          <span className="ak-row-text" aria-live="polite">…</span>
-        ) : hasPasskey ? (
-          confirmRemove ? (
-            <span style={{ display: "flex", gap: "0.4rem" }}>
-              <button type="button" className="a-btn ak-btn-soft" onClick={() => setConfirmRemove(false)}>Нет</button>
-              <button type="button" className="a-btn ak-btn-danger" onClick={removePasskey}>Отвязать</button>
+      <div className="v-rows">
+        <div className="v-row">
+          <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
+          <span className="v-row-main">
+            <b id="vc-push-l">Push-уведомления</b>
+            <span className="v-small">
+              {!pushSupported ? "Этот браузер их не поддерживает" : pushEnabled ? "Включены — напомним о продлении" : "Выключены"}
             </span>
-          ) : (
-            <button type="button" className="a-btn ak-btn-soft" onClick={() => setConfirmRemove(true)}>Отвязать</button>
-          )
-        ) : (
-          <button type="button" className="a-btn a-btn-primary" onClick={setupPasskey}>Настроить</button>
+          </span>
+          <span className="v-row-side">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={pushEnabled}
+              aria-labelledby="vc-push-l"
+              className="vc-switch"
+              onClick={togglePush}
+              disabled={!pushSupported || pushLoading}
+            />
+          </span>
+        </div>
+
+        <div className="v-row">
+          <span className="v-row-icon" aria-hidden><Icon name="send" size={20} /></span>
+          <span className="v-row-main">
+            <b id="vc-news-l">Новости и предложения</b>
+            <span className="v-small">
+              {newsOn === null ? "Загружаем…" : newsOn ? "Присылаем акции и новости на почту" : "Выключено — приходят только письма о подписке"}
+            </span>
+            {newsError && <span className="v-error">Не удалось сохранить. Попробуйте ещё раз.</span>}
+          </span>
+          <span className="v-row-side">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!!newsOn}
+              aria-labelledby="vc-news-l"
+              className="vc-switch"
+              onClick={toggleNews}
+              disabled={newsOn === null || newsSaving}
+            />
+          </span>
+        </div>
+
+        {iosInstall && (
+          <div className="v-row">
+            <span className="v-row-icon" aria-hidden><Icon name="iphone" size={20} /></span>
+            <span className="v-row-main">
+              <b>Atlas на экран «Домой»</b>
+              <span className="v-small">Кабинет как приложение и уведомления о продлении</span>
+            </span>
+            <span className="v-row-side">
+              <Link href="/install-ios" className="v-btn v-btn-primary v-btn-sm">Установить</Link>
+            </span>
+          </div>
         )}
+
+        <div className="v-row">
+          <span className="v-row-icon" aria-hidden><Icon name="lock" size={20} /></span>
+          <span className="v-row-main">
+            <b>Быстрый вход</b>
+            <span className="v-small">
+              {passkeyStatus === "success" ? "Настроен" : hasPasskey ? "Face ID или Touch ID вместо кода" : "Вход без кода из письма"}
+            </span>
+            {passkeyStatus === "error" && <span className="v-error">Не удалось. Попробуйте позже.</span>}
+          </span>
+          <span className="v-row-side">
+            {passkeyLoading ? (
+              <span className="v-small" aria-live="polite">…</span>
+            ) : hasPasskey ? (
+              confirmRemove ? (
+                <span style={{ display: "flex", gap: 8 }}>
+                  <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(false)}>Нет</button>
+                  <button type="button" className="v-btn vc-btn-danger v-btn-sm" onClick={removePasskey}>Отвязать</button>
+                </span>
+              ) : (
+                <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(true)}>Отвязать</button>
+              )
+            ) : (
+              <button type="button" className="v-btn v-btn-primary v-btn-sm" onClick={setupPasskey}>Настроить</button>
+            )}
+          </span>
+        </div>
       </div>
     </section>
   );

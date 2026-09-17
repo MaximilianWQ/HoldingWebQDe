@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import AtlasShell from "@/components/atlas/AtlasShell";
+import VShell from "@/components/vps/VShell";
 import AuthPage from "../auth-page";
 
 /**
- * /auth — серверная обёртка входа: метаданные и оболочка «Атлас-издания».
- * Тело со всеми шагами (почта → код → пароль, вход по паролю,
- * восстановление, passkey) — клиентский AuthPage.
+ * /auth — серверная обёртка входа: метаданные и оболочка корпуса VPS.
+ * Тело со всеми шагами (почта + пароль, код письма, восстановление,
+ * passkey) — клиентский AuthPage.
  *
- * Экран входа из поиска закрыт. «Войти» в шапке не нужна — человек уже
- * на входе.
+ * Экран входа из поиска закрыт.
  */
 export const metadata: Metadata = {
   title: "Вход",
@@ -46,13 +45,13 @@ export default async function Auth({ searchParams }: PageProps) {
   const initialStep = params.step === "code" && pendingEmail ? "code" : "email";
 
   return (
-    <AtlasShell sheetNo="21" sheetTitle="Вход" headCta={null} footer="compact">
+    <VShell work>
       <AuthPage
         initialStep={initialStep}
         initialEmail={pendingEmail}
         referralCode={params.ref}
         next={safeNext(params.next)}
       />
-    </AtlasShell>
+    </VShell>
   );
 }

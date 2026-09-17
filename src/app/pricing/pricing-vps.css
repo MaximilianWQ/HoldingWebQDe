@@ -1,0 +1,52 @@
+/* /pricing — сравнение тарифов и вопросы до оплаты.
+   Общий слой — src/app/vps.css (токены --v-*). Свой префикс — vp-. */
+
+/* Сравнение тарифов: две карточки, не таблица. */
+.vp-compare {
+  display: grid;
+  gap: 20px;
+  margin-top: clamp(28px, 4vw, 44px);
+  text-align: left;
+}
+@media (min-width: 720px) {
+  .vp-compare { grid-template-columns: 1fr 1fr; }
+}
+.vp-compare-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.vp-compare-name { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.vp-compare-speed { color: var(--v-ink-3); font-size: 15px; white-space: nowrap; }
+
+/* Вопросы до оплаты: раскрывающиеся карточки, один ответ открыт разом. */
+.vp-faq {
+  display: grid;
+  gap: 12px;
+  margin-top: clamp(24px, 4vw, 36px);
+  text-align: left;
+}
+.vp-q {
+  border-radius: var(--v-r-lg);
+  background: #FFFFFF;
+  box-shadow: var(--v-shadow);
+  overflow: hidden;
+}
+.vp-q summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 16px 22px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--v-ink);
+}
+.vp-q summary::-webkit-details-marker { display: none; }
+.vp-q summary svg { flex: none; color: var(--v-ink-3); transition: transform 240ms var(--v-ease); }
+.vp-q[open] summary svg { transform: rotate(180deg); }
+.vp-q p { margin: 0; padding: 0 22px 20px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-q summary svg { transition: none; }
+}

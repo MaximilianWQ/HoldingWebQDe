@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import LegalDoc, { type LegalSection } from "../terms/LegalDoc";
-import "../terms/legal-atlas.css";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
@@ -138,7 +137,6 @@ export default function PrivacyPage() {
     <LegalDoc
       sheetTitle="Приватность"
       title="Политика конфиденциальности"
-      k={13}
       meta={[
         <time key="u" dateTime="2026-03-23">Обновлено 23 марта 2026</time>,
         <time key="e" dateTime="2026-04-01">Действует с 1 апреля 2026</time>,

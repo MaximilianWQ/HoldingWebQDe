@@ -561,7 +561,9 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 .v-stat span { grid-column: 2; color: var(--v-ink-3); font-size: 16px; }
 
 /* ═══ 8. Карусель ══════════════════════════════════════════════════ */
-.v-carousel { position: relative; margin-top: clamp(28px, 4vw, 44px); }
+/* contain: inline-size — лента не распирает родителя своей шириной
+   (карусель внутри карточки или колонки сетки на телефоне). */
+.v-carousel { position: relative; min-width: 0; contain: inline-size; margin-top: clamp(28px, 4vw, 44px); }
 .v-track {
   display: grid;
   grid-auto-flow: column;
@@ -605,12 +607,10 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   .v-car-next { right: -22px; }
 }
 .v-dots { display: flex; justify-content: center; margin-top: 12px; }
-.v-dots { gap: 4px; }
 .v-dots button {
-  width: 36px;
+  width: 44px;
   height: 44px;
-  flex: 0 1 36px;
-  min-width: 14px;
+  flex: none;
   padding: 0;
   border: 0;
   background: transparent;
@@ -624,7 +624,20 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   background: #BFD6F8;
   transition: background-color 240ms var(--v-ease), transform 240ms var(--v-ease);
 }
-.v-dots button[aria-current="true"] { width: 48px; }
+.v-dots button[aria-current="true"] { width: 56px; }
+.v-dots button::before { margin-inline: 4px; }
+.v-car-count {
+  width: fit-content;
+  min-height: 36px;
+  margin: 18px auto 0;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
 .v-dots button[aria-current="true"]::before { background: var(--v-blue); }
 .v-car-note { margin: 28px auto 0; max-width: 720px; text-align: center; color: var(--v-ink-3); font-size: 15px; line-height: 1.5; }
 
@@ -744,6 +757,7 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 .v-divider { height: 1px; margin-block: 28px; background: var(--v-line); border: 0; }
 
 .v-rows { display: grid; gap: 14px; }
+.v-rows > * { min-width: 0; }
 .v-row {
   display: flex;
   align-items: center;
@@ -773,6 +787,14 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 .v-row-amount { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; white-space: nowrap; }
 
 .v-empty { padding: 36px 20px; text-align: center; color: var(--v-ink-3); }
+/* Узкий телефон: действие строки — под текстом во всю ширину, иначе
+   кнопка «Подробнее» не помещалась и уезжала за край (375 px). */
+@media (max-width: 480px) {
+  .v-row:has(.v-row-side .v-btn) { flex-wrap: wrap; }
+  .v-row:has(.v-row-side .v-btn) .v-row-main { flex: 1 1 calc(100% - 70px); }
+  .v-row-side:has(.v-btn) { flex: 1 1 100%; justify-items: stretch; }
+  .v-row-side .v-btn { width: 100%; }
+}
 
 /* ═══ 12. Формы ════════════════════════════════════════════════════ */
 .v-form { display: grid; gap: 16px; }
@@ -841,6 +863,13 @@ body:has(.v) .b-top {
   box-shadow: var(--v-shadow-lift);
 }
 body:has(.v) .b-top-label { display: none; }
+
+/* Нижние карточки и диалоги корневого layout (cookie, установка,
+   быстрый вход) — системный шрифт и скругления корпуса. */
+body:has(.v) :is(.ov-card, .ov-dialog, .ov-sheet-wrap) { --ov-font: var(--v-font); --ov-cobalt: var(--v-blue); --ov-cobalt-deep: var(--v-blue-press); }
+body:has(.v) .ov-card { border: 0; border-radius: var(--v-r-lg); box-shadow: var(--v-shadow-lift); }
+body:has(.v) .ov-btn { border-radius: var(--v-r-sm); }
+body:has(.v) .ov-mark { border-radius: 12px; }
 
 /* ═══ 14. Движение ═════════════════════════════════════════════════ */
 @supports (animation-timeline: view()) {

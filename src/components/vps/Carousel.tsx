@@ -62,7 +62,9 @@ export default function Carousel({ children, label, initial = 0 }: { children: R
       <button type="button" className="v-car-arrow v-car-next" aria-label="Вперёд" disabled={edges.end} onClick={() => go(Math.min(items.length - 1, active + 1))}>
         <Icon name="chevron-right" size={28} />
       </button>
-      {items.length > 1 ? (
+      {items.length > 6 ? (
+        <p className="v-car-count" aria-live="polite">{active + 1} / {items.length}</p>
+      ) : items.length > 1 ? (
         <div className="v-dots">
           {items.map((_, i) => (
             <button key={i} type="button" aria-label={`Карточка ${i + 1} из ${items.length}`} aria-current={i === active} onClick={() => go(i)} />

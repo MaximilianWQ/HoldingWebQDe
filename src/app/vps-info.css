@@ -1,0 +1,132 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Atlas Secure VPS — приёмы, которых не хватало в vps.css для
+   /support, /contact, /business, /vds. Префикс `vp-`. Кандидаты на
+   перенос в общий слой перечислены в отчёте исполнителя (17.09.2026).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Крупные карточки способов связи (/support, /contact). */
+.vp-channels {
+  display: grid;
+  gap: 14px;
+  margin-top: clamp(28px, 4vw, 40px);
+}
+/* Колонка страницы узкая (~760 px): три канала в ряд сжимали подписи в
+   три строки — один канал на строку читается спокойнее. */
+.vp-channel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 88px;
+  padding: 20px 22px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 200ms var(--v-ease), box-shadow 200ms var(--v-ease);
+}
+@media (hover: hover) {
+  .vp-channel:hover { transform: translateY(-2px); box-shadow: var(--v-shadow-lift); }
+}
+.vp-channel-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--v-blue-soft);
+  color: var(--v-blue-ink);
+}
+.vp-channel-main { flex: 1; min-width: 0; display: grid; gap: 4px; text-align: left; }
+.vp-channel-main b { font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
+.vp-channel-main span { display: block; color: var(--v-ink-3); font-size: 15px; overflow-wrap: anywhere; }
+.vp-channel-go { flex: none; color: var(--v-ink-4); }
+
+/* Раскрывающиеся карточки вопрос-ответ (details/summary). */
+.vp-faq { display: grid; gap: 12px; margin-top: clamp(24px, 4vw, 36px); text-align: left; }
+.vp-faq-item { padding: 0; }
+.vp-faq-item summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 18px clamp(18px, 3vw, 26px);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+}
+.vp-faq-item summary::-webkit-details-marker { display: none; }
+.vp-faq-item summary::marker { content: ""; }
+.vp-faq-q { flex: 1; }
+.vp-faq-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  transition: transform 240ms var(--v-ease), background-color 240ms var(--v-ease), color 240ms var(--v-ease);
+}
+.vp-faq-item[open] .vp-faq-mark { background: var(--v-blue); color: #FFFFFF; transform: rotate(180deg); }
+.vp-faq-a { margin: 0; padding: 0 clamp(18px, 3vw, 26px) 22px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
+
+/* Короткие пункты пользы, 3–4 штуки (/business). */
+.vp-points { display: grid; gap: 18px; margin-top: clamp(28px, 4vw, 40px); text-align: left; }
+@media (min-width: 640px) {
+  .vp-points { grid-template-columns: repeat(2, 1fr); }
+}
+.vp-point { display: flex; gap: 14px; align-items: flex-start; }
+.vp-point-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--v-blue-soft);
+  color: var(--v-blue-ink);
+}
+.vp-point b { display: block; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.vp-point p { margin: 4px 0 0; color: var(--v-ink-3); font-size: 15px; line-height: 1.5; }
+
+/* Готово-состояние формы (заявка/письмо отправлены). */
+.vp-done { text-align: center; padding: clamp(28px, 4vw, 40px); }
+.vp-done-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--v-blue);
+  color: #FFFFFF;
+}
+.vp-done h3 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.vp-done p { margin: 12px auto 0; max-width: 440px; color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
+
+/* Спецификации сервера внутри чёрной карточки (/vds). */
+.vp-specs { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 10px; }
+.vp-specs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 15px;
+}
+.vp-specs li:last-child { border-bottom: 0; padding-bottom: 0; }
+.vp-specs-k { color: var(--v-on-black-2); }
+.vp-specs-v { font-weight: 500; text-align: right; }
+.vp-confirm { margin: 16px 0 0; color: rgba(255, 255, 255, 0.4); font-size: 13px; line-height: 1.5; }
+
+/* Селект темы письма — тот же корпус, что .v-input, но со стрелкой. */
+select.v-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4.5 9 12 16.5 19.5 9' fill='none' stroke='%237D8390' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 44px;
+}

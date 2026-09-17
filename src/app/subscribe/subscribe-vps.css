@@ -1,0 +1,261 @@
+/* /subscribe — оплата подписки и пакетов трафика.
+   Общий слой — src/app/vps.css (токены --v-*, .v-seg, .v-card, .v-dcard).
+   Свой префикс — vs-. Рабочий экран: без входных анимаций. */
+
+.vs-top { padding-block: 28px clamp(24px, 4vw, 40px); text-align: left; }
+.vs-body { padding-block: 0 clamp(40px, 6vw, 72px); }
+
+.vs-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-inline: -10px 0;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--v-ink-3);
+  font: 500 16px/1.2 var(--v-font);
+  cursor: pointer;
+}
+.vs-back svg { transform: rotate(180deg); }
+@media (hover: hover) { .vs-back:hover { color: var(--v-ink); } }
+
+.vs-title { margin: 14px 0 0; }
+.vs-title:focus-visible { outline: none; }
+
+/* Сегменты выбора: продукт, шаги, тариф, срок — все на .v-seg. */
+.vs-pick { margin-top: 20px; }
+.vs-product { max-width: 380px; }
+.vs-steps { max-width: 460px; }
+.vs-steps button { flex-direction: column; gap: 4px; min-height: 60px; font-size: 13px; }
+.vs-steps button[disabled] { opacity: 0.42; cursor: default; }
+.vs-step-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--v-soft-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.v-seg [aria-selected="true"] .vs-step-n { background: var(--v-blue); color: #FFFFFF; }
+.vs-pick-4 button { flex-direction: column; gap: 2px; }
+.vs-off { color: var(--v-blue); font-size: 13px; font-weight: 700; }
+.v-seg [aria-selected="true"] .vs-off { color: var(--v-blue-ink); }
+
+.vs-safe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  color: var(--v-ink-3);
+  font-size: 14px;
+}
+.vs-safe svg { flex: none; color: var(--v-ink-4); }
+
+/* Раскладка: карточка шага + сводка заказа. */
+.vs-grid { display: grid; gap: 20px; align-items: start; }
+/* Дочерние ячейки грида по умолчанию не сжимаются меньше содержимого
+   (min-width: auto) — широкая карусель пакетов внутри распирала
+   колонку и вместе с ней всю страницу вбок. Явный ноль возвращает им
+   ширину трека. */
+.vs-grid > * { min-width: 0; }
+@media (min-width: 960px) {
+  .vs-grid { grid-template-columns: 1.35fr 0.95fr; gap: 28px; }
+  .vs-summary { position: sticky; top: calc(var(--v-head-h) + 20px); }
+}
+
+.vs-panel { display: grid; gap: 18px; text-align: left; }
+.vs-eyebrow {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--v-ink-2);
+}
+
+.vs-detail {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+}
+.vs-detail-name { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.vs-detail-price { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.vs-detail-price b { font-size: 26px; }
+
+/* Пакеты трафика — чёрные карточки-кнопки в карусели. */
+.vs-carousel-wrap { margin-top: 4px; }
+button.vs-pack {
+  appearance: none;
+  width: 100%;
+  min-height: 260px;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: #FFFFFF;
+  transition: box-shadow 200ms var(--v-ease), transform 200ms var(--v-ease);
+}
+button.vs-pack:active { transform: scale(0.99); }
+button.vs-pack[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--v-blue), var(--v-shadow-lift); }
+@media (hover: hover) {
+  button.vs-pack:not([aria-pressed="true"]):hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28), var(--v-shadow-lift); }
+}
+
+.vs-method {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+  box-shadow: inset 0 0 0 2px var(--v-blue);
+}
+.vs-method-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--v-blue);
+  color: #FFFFFF;
+}
+.vs-method-copy { display: grid; gap: 2px; font-size: 15px; color: var(--v-ink-3); }
+.vs-method-copy b { font-size: 17px; font-weight: 600; color: var(--v-ink); }
+
+.vs-next { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.vs-next li {
+  position: relative;
+  padding-left: 34px;
+  color: var(--v-ink-3);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.vs-next li::before {
+  counter-increment: vs-step;
+  content: counter(vs-step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.vs-next { counter-reset: vs-step; }
+
+/* Сводка заказа. */
+.vs-sum-list { display: grid; gap: 12px; margin: 4px 0 0; }
+.vs-sum-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.vs-sum-row dt { margin: 0; color: var(--v-ink-3); font-size: 15px; }
+.vs-sum-row dd { margin: 0; color: var(--v-ink); font-size: 15px; font-weight: 600; text-align: right; }
+.vs-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--v-line);
+  font-size: 17px;
+  color: var(--v-ink-3);
+}
+.vs-total b { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--v-ink); }
+.vs-summary-cta { margin-top: 18px; }
+.vs-summary .v-small { margin-top: 14px; }
+
+/* Нижняя панель телефона — итог и оплата всегда под рукой. */
+.vs-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px var(--v-gutter) calc(12px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1px solid var(--v-line);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+.vs-dock-sum { flex: 1; min-width: 0; display: grid; gap: 2px; font-size: 13px; color: var(--v-ink-3); }
+.vs-dock-sum span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vs-dock-sum b { font-size: 19px; font-weight: 600; color: var(--v-ink); letter-spacing: -0.01em; }
+.vs-dock .v-btn { flex: none; padding-inline: 22px; }
+.vs-body { padding-bottom: 96px; }
+@media (min-width: 960px) {
+  .vs-dock { display: none; }
+  .vs-body { padding-bottom: clamp(40px, 6vw, 72px); }
+}
+
+/* Результат после кассы. */
+.vs-result { display: grid; justify-items: center; gap: 12px; padding: clamp(32px, 5vw, 48px) clamp(24px, 4vw, 36px); text-align: center; }
+.vs-result-ico {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+}
+.vs-result-ico-ok { background: var(--v-green-soft); color: var(--v-green); }
+.vs-result-ico-bad { background: var(--v-red-soft); color: var(--v-red); }
+.vs-result-ico-warn { background: var(--v-amber-soft); color: var(--v-amber); }
+.vs-result-ico-wait { background: var(--v-blue-soft); color: var(--v-blue); }
+.vs-spin {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--v-blue) 30%, transparent);
+  border-top-color: var(--v-blue);
+  animation: vs-spin 900ms linear infinite;
+}
+@keyframes vs-spin { to { transform: rotate(360deg); } }
+.vs-result .v-h3 { margin-top: 2px; }
+.vs-result .v-text { max-width: 440px; }
+.vs-result .v-actions-col { width: 100%; max-width: 360px; margin-top: 8px; }
+
+.vs-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--v-red);
+  font-size: 15px;
+  line-height: 1.4;
+}
+.vs-error svg { flex: none; margin-top: 1px; }
+
+.vs-skel {
+  width: 240px;
+  height: 14px;
+  margin: 24px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--v-soft) 25%, var(--v-soft-2) 37%, var(--v-soft) 63%);
+  background-size: 400% 100%;
+  animation: vs-skel 1400ms ease infinite;
+}
+@keyframes vs-skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .vs-spin, .vs-skel { animation: none; }
+  button.vs-pack { transition: none; }
+}

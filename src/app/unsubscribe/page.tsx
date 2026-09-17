@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AtlasShell from "@/components/atlas/AtlasShell";
+import VShell from "@/components/vps/VShell";
 import { waitForDb } from "@/lib/db";
 import { findByUnsubscribeToken, isUnsubscribeTokenShape, maskEmail } from "@/lib/unsubscribe";
 import UnsubscribeView, { type UnsubscribeState } from "./UnsubscribeView";
@@ -41,8 +41,8 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
     }
   }
   return (
-    <AtlasShell sheetNo="26" sheetTitle="Отписка" headCta={{ href: "/", label: "На главную" }} footer="compact">
+    <VShell work>
       <UnsubscribeView token={state === "invalid" ? "" : token} initial={state} email={email} />
-    </AtlasShell>
+    </VShell>
   );
 }

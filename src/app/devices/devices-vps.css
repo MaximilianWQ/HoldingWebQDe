@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /devices — корпус Atlas Secure VPS (17.09.2026). Префикс `vd-`.
+   Устройство экрана — образец «Инструкция по использованию нашего
+   сервиса»: заголовок с синим словом, короткий лид, плитки устройств,
+   пунктирные шаги (.v-steps из vps.css) для выбранной платформы.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Плитки устройств ─────────────────────────────────────────── */
+.vd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 32px 0 0;
+}
+@media (min-width: 560px) { .vd-grid { grid-template-columns: repeat(5, 1fr); } }
+.vd-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 116px;
+  padding: 18px 16px;
+  border: 0;
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+  color: var(--v-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 200ms var(--v-ease), color 200ms var(--v-ease), transform 200ms var(--v-ease);
+}
+.vd-tile:active { transform: scale(0.98); }
+@media (hover: hover) {
+  .vd-tile:not([aria-pressed="true"]):hover { background: var(--v-soft-2); }
+}
+.vd-tile[aria-pressed="true"] { background: var(--v-blue); color: #FFFFFF; }
+.vd-tile-icon { color: var(--v-blue); }
+.vd-tile[aria-pressed="true"] .vd-tile-icon { color: #FFFFFF; }
+.vd-tile-copy { display: grid; gap: 2px; }
+.vd-tile-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; }
+.vd-tile-detail { font-size: 13px; color: var(--v-ink-3); }
+.vd-tile[aria-pressed="true"] .vd-tile-detail { color: rgba(255, 255, 255, 0.75); }
+
+.vd-note { margin: 20px 0 0; text-align: center; }
+
+/* ─── Шаги: приложение, если их несколько ─────────────────────── */
+.vd-apps { max-width: 360px; margin: 0 0 18px; }
+
+/* ─── Строка ключа ──────────────────────────────────────────────── */
+.vd-kicker { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--v-ink-3); }
+.vd-key {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--v-r-sm);
+  background: var(--v-field);
+  color: var(--v-ink-2);
+  font: 400 14px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.vd-key[aria-busy="true"] { color: var(--v-ink-3); font-family: var(--v-font); }
+.vd-left { margin: 10px 0 0; font-size: 15px; color: var(--v-ink-2); }
+.vd-left b { color: var(--v-ink); font-weight: 600; }
+
+.vd-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.vd-guest { margin-top: 4px; }
+.vd-guest p { margin: 0 0 14px; color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
+
+.vd-qr {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 240px;
+  margin: 16px 0 0;
+  padding: 18px;
+  border-radius: var(--v-r-md);
+  background: #FFFFFF;
+  box-shadow: var(--v-shadow);
+  text-align: center;
+}
+.vd-qr figcaption { margin: 0; font-size: 13px; color: var(--v-ink-3); }
+
+.vd-switch { margin: 18px 0 0; color: var(--v-ink-3); font-size: 15px; }
+
+/* ─── Шаги вручную ──────────────────────────────────────────────── */
+.vd-manual { margin-top: 18px; }
+.vd-manual summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--v-blue);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.vd-manual summary::-webkit-details-marker { display: none; }
+.vd-manual ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.vd-manual li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: var(--v-ink-2); }
+.vd-manual li b {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--v-soft);
+  color: var(--v-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── Движение ──────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .vd-tile, .vd-key { transition: none; }
+}

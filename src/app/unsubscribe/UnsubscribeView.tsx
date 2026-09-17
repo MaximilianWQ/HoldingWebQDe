@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import "@/app/work-atlas.css";
 import "./unsubscribe.css";
 
 export type UnsubscribeState = "ready" | "already" | "invalid" | "error";
@@ -51,51 +50,51 @@ export default function UnsubscribeView({ token, initial, email }: { token: stri
 
   const c = COPY[state];
   return (
-    <main id="main" className="ak unsub">
-      <div className="a-field">
-        <section className="ak-card unsub-card" aria-labelledby="unsub-h" aria-live="polite">
-          <p className="ak-eyebrow">Рассылка Atlas Secure</p>
-          <h1 id="unsub-h" className="unsub-h1">
+    <section className="v-section v-center">
+      <div className="v-wrap v-narrow">
+        <div className="v-card v-card-pad unsub-card" aria-labelledby="unsub-h" aria-live="polite">
+          <span className="v-badge">Рассылка</span>
+          <h1 id="unsub-h" className="v-h3 unsub-h1">
             {c.title}
           </h1>
-          <p className="ak-text unsub-text">{c.text(shown)}</p>
+          <p className="v-text unsub-text">{c.text(shown)}</p>
           {err && (
-            <p className="ak-err" role="alert">
+            <p className="v-error" role="alert">
               {err}
             </p>
           )}
-          <div className="ak-actions">
+          <div className="v-actions">
             {(state === "ready" || state === "busy") && (
               <>
-                <button type="button" className="a-btn a-btn-primary" onClick={confirm} disabled={state === "busy"}>
+                <button type="button" className="v-btn v-btn-primary" onClick={confirm} disabled={state === "busy"}>
                   {state === "busy" ? "Отписываем…" : "Отписаться"}
                 </button>
-                <Link href="/" className="a-btn ak-btn-soft">
+                <Link href="/" className="v-btn v-btn-soft">
                   Остаться
                 </Link>
               </>
             )}
             {state === "error" && (
-              <button type="button" className="a-btn a-btn-primary" onClick={() => location.reload()}>
+              <button type="button" className="v-btn v-btn-primary" onClick={() => location.reload()}>
                 Попробовать ещё раз
               </button>
             )}
             {(state === "done" || state === "already" || state === "invalid") && (
               <>
-                <Link href="/" className="a-btn a-btn-primary">
+                <Link href="/" className="v-btn v-btn-primary">
                   На главную
                 </Link>
-                <Link href="/support" className="a-btn ak-btn-soft">
+                <Link href="/support" className="v-btn v-btn-soft">
                   Поддержка
                 </Link>
               </>
             )}
           </div>
-          <p className="ak-fine unsub-fine">
+          <p className="v-small unsub-fine">
             Служебные письма — о начислениях, оплате и изменениях условий сервиса — приходят всем: отписка на них не действует.
           </p>
-        </section>
+        </div>
       </div>
-    </main>
+    </section>
   );
 }

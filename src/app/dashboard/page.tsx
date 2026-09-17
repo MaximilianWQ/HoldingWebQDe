@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import AtlasShell from "@/components/atlas/AtlasShell";
+import VShell from "@/components/vps/VShell";
 import DashboardView from "./DashboardView";
 
 /**
  * /dashboard — серверная обёртка кабинета: метаданные и оболочка
- * «Атлас-издания». Тело со стейтом подписки — клиентский DashboardView.
+ * корпуса Atlas Secure VPS (`VShell`). Тело со стейтом подписки —
+ * клиентский DashboardView.
  *
  * Кабинет из поиска закрыт: страница личная и без сессии уводит на вход.
- * «Войти» в шапке не нужна — человек уже внутри.
  */
 export const metadata: Metadata = {
   title: "Кабинет",
-  description: "Подписка, ключ подключения, баланс и приглашения Atlas Secure.",
+  description: "Подписка, ключи подключения, платежи и профиль Atlas Secure VPS.",
   robots: { index: false, follow: false },
 };
 
 export default function DashboardPage() {
   return (
-    <AtlasShell sheetNo="20" sheetTitle="Кабинет" headCta={null} footer="compact">
+    <VShell work account="member">
       <DashboardView />
-    </AtlasShell>
+    </VShell>
   );
 }

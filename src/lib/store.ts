@@ -564,18 +564,46 @@ export async function botExtendSubscription(
 }
 
 /** Bot overwrite of the subscription end (action=overwrite_site). */
-export async function botOverwriteSubscription(userId: string, end: Date, plan: string | null, telegramId: string): Promise<UserRecord | null> {
-  await withTransaction((c) =>
-    applySubscriptionEvent(c, {
+export type BotOverwriteResult =
+  | { ok: true; user: UserRecord | null }
+  | { ok: false; reason: "would_shorten"; currentEnd: Date };
+
+/**
+ * `POST /api/bot/sync` (overwrite_site). Для связанного человека срок —
+ * ОБЩИЙ ключ бота и сайта (docs/bot/TZ_BOT_EMAIL_LINK.md, 4.3): перезапись
+ * датой из БД бота укоротила бы его. Поэтому раньше текущего срока дату
+ * можно поставить только явным отзывом (`revocation`); всё остальное —
+ * отказ `would_shorten`. Проверка и запись — в одной транзакции под
+ * блокировкой строки, чтобы параллельный `extend` не проскочил между ними.
+ */
+export async function botOverwriteSubscription(
+  userId: string,
+  end: Date,
+  plan: string | null,
+  telegramId: string,
+  opts: { revocation?: boolean } = {}
+): Promise<BotOverwriteResult> {
+  const rejected = await withTransaction(async (c) => {
+    if (!opts.revocation) {
+      const cur = await c.query<{ subscription_end: Date; subscription_plan: string | null }>(
+        "SELECT subscription_end, subscription_plan FROM users WHERE id = $1 FOR UPDATE",
+        [userId]
+      );
+      const currentEnd = cur.rows[0] ? new Date(cur.rows[0].subscription_end) : null;
+      if (currentEnd && end.getTime() < currentEnd.getTime()) return currentEnd;
+    }
+    await applySubscriptionEvent(c, {
       userId,
       kind: "bot_overwrite",
       sourceId: `bot:${uuidv4()}`,
       setEnd: end,
       plan,
       actor: `bot:${telegramId}`,
-    })
-  );
-  return getUserById(userId);
+    });
+    return null;
+  });
+  if (rejected) return { ok: false, reason: "would_shorten", currentEnd: rejected };
+  return { ok: true, user: await getUserById(userId) };
 }
 
 // ─── Payment Management ─────────────────────────────────────────
@@ -757,12 +785,42 @@ export async function getUnsyncedCashback(userId: string): Promise<Array<{
 }
 
 /** Mark cashback transactions as synced to bot */
-export async function markCashbackSynced(transactionIds: string[]): Promise<void> {
-  if (transactionIds.length === 0) return;
-  await pool.query(
-    `UPDATE balance_transactions SET synced_to_bot = TRUE WHERE id = ANY($1)`,
-    [transactionIds]
-  );
+/**
+ * `POST /api/bot/sync-balance`: забрать неотданный боту кешбэк и выставить
+ * баланс сайта = баланс бота + забранное — одной транзакцией.
+ *
+ * Раньше чтение (`getUnsyncedCashback`) и пометка шли двумя отдельными
+ * запросами: два одновременных вызова (ретрай бота по таймауту) оба
+ * получали тот же кешбэк в `pendingCashback`, и бот по контракту начислял
+ * его дважды — лишние деньги на балансе. Теперь кешбэк «забирается»
+ * условным UPDATE … RETURNING: каждую запись получает ровно один вызов,
+ * второй получает пустой список.
+ */
+export async function claimCashbackForBot(userId: string, botBalance: number): Promise<{
+  claimed: Array<{ id: string; amount: number; description: string | null; relatedUserId: string | null; createdAt: string }>;
+  balance: number;
+}> {
+  return withTransaction(async (c) => {
+    await c.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
+    const taken = await c.query<{ id: string; amount: number; description: string | null; related_user_id: string | null; created_at: Date }>(
+      `UPDATE balance_transactions SET synced_to_bot = TRUE
+       WHERE user_id = $1 AND synced_to_bot = FALSE
+       RETURNING id, amount, description, related_user_id, created_at`,
+      [userId]
+    );
+    const claimed = taken.rows
+      .map((r) => ({
+        id: r.id,
+        amount: r.amount,
+        description: r.description,
+        relatedUserId: r.related_user_id,
+        createdAt: new Date(r.created_at).toISOString(),
+      }))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const balance = botBalance + claimed.reduce((sum, tx) => sum + tx.amount, 0);
+    await c.query("UPDATE users SET balance = $2 WHERE id = $1", [userId, balance]);
+    return { claimed, balance };
+  });
 }
 
 // ─── Referral Cashback System ───────────────────────────────────

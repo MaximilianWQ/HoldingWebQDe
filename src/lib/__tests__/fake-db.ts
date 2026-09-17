@@ -387,7 +387,16 @@ export class FakeDb {
       return res();
     }
     if (s.startsWith("INSERT INTO balance_transactions")) {
-      this.balanceTx.push({ id: p[0], user_id: p[1], amount: p[2] });
+      this.balanceTx.push({ id: p[0], user_id: p[1], amount: p[2], synced_to_bot: false, description: null, related_user_id: null, created_at: new Date() });
+      return res();
+    }
+    if (s === "UPDATE balance_transactions SET synced_to_bot = TRUE WHERE user_id = $1 AND synced_to_bot = FALSE RETURNING id, amount, description, related_user_id, created_at") {
+      const taken = this.balanceTx.filter((t) => t.user_id === p[0] && t.synced_to_bot === false);
+      for (const t of taken) t.synced_to_bot = true;
+      return res(taken.map((t) => ({ id: t.id, amount: t.amount, description: t.description, related_user_id: t.related_user_id, created_at: t.created_at })));
+    }
+    if (s === "UPDATE users SET balance = $2 WHERE id = $1") {
+      this.user(p[0]).balance = p[1];
       return res();
     }
 

@@ -50,7 +50,23 @@ export async function POST(request: NextRequest) {
 
     const newPlan = isRevocation ? "trial" : plan && ["trial", "basic", "plus"].includes(plan) ? plan : null;
     const end = isRevocation ? new Date() : subscriptionEnd;
-    const updated = await botOverwriteSubscription(user.id, end, newPlan, String(telegramId));
+    const result = await botOverwriteSubscription(user.id, end, newPlan, String(telegramId), { revocation: isRevocation });
+    if (!result.ok) {
+      // Общий ключ не укорачиваем (ТЗ 4.3): продление — только /api/bot/extend,
+      // отзыв — plan "none". Срок сайта не меняется, в панель ничего не уходит.
+      console.warn(`[BOT/SYNC] REJECTED overwrite: ${user.email} end=${end.toISOString()} < current=${result.currentEnd.toISOString()}`);
+      await createAuditLog("sync.overwrite_rejected", `Bot→Site: end=${end.toISOString()} раньше текущего ${result.currentEnd.toISOString()} — не укорачиваем`, user.id, user.email);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "subscriptionEnd is earlier than the current end; use plan \"none\" to revoke, /api/bot/extend to extend",
+          code: "WOULD_SHORTEN",
+          data: { subscriptionEnd: result.currentEnd.toISOString() },
+        },
+        { status: 409 }
+      );
+    }
+    const updated = result.user;
     if (!updated) {
       return NextResponse.json({ success: false, error: "Failed to update" }, { status: 500 });
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByTelegramId, updateUser, createAuditLog, getUnsyncedCashback, markCashbackSynced } from "@/lib/store";
+import { getUserByTelegramId, createAuditLog, getUnsyncedCashback, claimCashbackForBot } from "@/lib/store";
 import { verifyBotApiKey, unauthorizedResponse } from "../auth";
 import { botSyncDisabledResponse } from "../sync-guard";
 
@@ -50,22 +50,14 @@ export async function POST(request: NextRequest) {
 
     const botBalance = Math.max(0, Math.round(balance));
 
-    // Find unsynced cashback events (credited on site, not yet sent to bot)
-    const unsyncedTx = await getUnsyncedCashback(user.id);
+    // Забрать неотданный кешбэк и выставить баланс — атомарно: одну запись
+    // кешбэка получает ровно один вызов, даже если бот повторил запрос
+    // (claimCashbackForBot в store.ts).
+    const oldBalance = user.balance;
+    const { claimed: unsyncedTx, balance: correctBalance } = await claimCashbackForBot(user.id, botBalance);
     const unsyncedTotal = unsyncedTx.reduce((sum, tx) => sum + tx.amount, 0);
 
-    // Correct balance = bot's balance + unsynced site cashback
-    const correctBalance = botBalance + unsyncedTotal;
-
-    // Update site balance
-    const oldBalance = user.balance;
-    if (oldBalance !== correctBalance) {
-      await updateUser(user.id, { balance: correctBalance });
-    }
-
-    // Mark cashback as synced
     if (unsyncedTx.length > 0) {
-      await markCashbackSynced(unsyncedTx.map((tx) => tx.id));
       await createAuditLog(
         "sync.balance",
         `Bot→Site: bot=${botBalance}, unsynced_cashback=${unsyncedTotal}, result=${correctBalance} (${unsyncedTx.length} tx synced)`,

@@ -1,0 +1,12 @@
+# railway up: только то, что нужно для сборки.
+node_modules
+.next
+.git
+src/app/lab
+design
+research
+docs
+*.png
+MEGA_PROMPT_*.md
+.env*
+!.env.example

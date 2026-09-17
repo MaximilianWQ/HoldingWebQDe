@@ -374,10 +374,14 @@ export async function linkTelegramAccount(input: LinkInput): Promise<LinkResult>
     const tx: TxOut = await withTransaction(async (c): Promise<TxOut> => {
       await lockLinkKey(c, `tg:${telegramId}`);
       await lockLinkKey(c, `email:${(email ?? target0!.email).toLowerCase()}`);
+      // Строки аккаунтов — под FOR UPDATE: решение о сроке (decideMerge)
+      // пишется абсолютной датой, и параллельный /api/bot/extend (он берёт
+      // ту же блокировку строки) иначе мог закоммитить продление между
+      // чтением и записью — связка затёрла бы свежий срок старым.
       let target = input.userId
-        ? await oneUser(c, "SELECT * FROM users WHERE id = $1", [input.userId])
-        : await oneUser(c, "SELECT * FROM users WHERE email = $1", [email]);
-      const byTg = await oneUser(c, "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1", [telegramId]);
+        ? await oneUser(c, "SELECT * FROM users WHERE id = $1 FOR UPDATE", [input.userId])
+        : await oneUser(c, "SELECT * FROM users WHERE email = $1 FOR UPDATE", [email]);
+      const byTg = await oneUser(c, "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1 FOR UPDATE", [telegramId]);
       if (!same(target, target0) || !same(byTg, byTg0)) return { kind: "retry" };
       const conflict = conflictFor(target, byTg, telegramId);
       if (conflict) return { kind: "fail", result: conflict };

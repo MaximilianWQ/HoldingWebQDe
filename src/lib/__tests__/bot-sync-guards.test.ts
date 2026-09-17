@@ -13,7 +13,7 @@ vi.mock("../db", async () => {
 });
 
 import { fakeDb } from "./fake-db";
-import { claimCashbackForBot, botOverwriteSubscription } from "../store";
+import { claimCashbackForBot, botOverwriteSubscription, peekCashbackForBot, ackCashbackForBot } from "../store";
 
 const DAY = 86400000;
 
@@ -47,6 +47,23 @@ describe("claimCashbackForBot", () => {
     const r = await claimCashbackForBot("u", 100000);
     expect(r.balance).toBe(102990);
     expect(fakeDb.users.get("u")!.balance).toBe(102990);
+  });
+});
+
+describe("двухфазный обмен кешбэком", () => {
+  it("потерянный ответ: повтор возвращает те же записи; после ack — пусто", async () => {
+    fakeDb.users.set("u", { id: "u", email: "u@example.com", balance: 0, created_at: new Date(), subscription_end: new Date() });
+    fakeDb.balanceTx.push({ id: "t1", user_id: "u", amount: 2990, synced_to_bot: false, description: null, related_user_id: null, created_at: new Date() });
+    const first = await peekCashbackForBot("u", 100000);
+    const retry = await peekCashbackForBot("u", 100000);
+    expect(first.pending.map((t) => t.id)).toEqual(["t1"]);
+    expect(retry.pending.map((t) => t.id)).toEqual(["t1"]);
+    expect(retry.balance).toBe(102990);
+    expect(await ackCashbackForBot("u", ["t1", "t1", "чужой"])).toEqual(["t1"]);
+    expect(await ackCashbackForBot("u", ["t1"])).toEqual([]);
+    const after = await peekCashbackForBot("u", 102990);
+    expect(after.pending).toHaveLength(0);
+    expect(after.balance).toBe(102990);
   });
 });
 

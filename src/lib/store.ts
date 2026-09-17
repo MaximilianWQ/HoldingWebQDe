@@ -785,6 +785,56 @@ export async function getUnsyncedCashback(userId: string): Promise<Array<{
 }
 
 /** Mark cashback transactions as synced to bot */
+type CashbackItem = { id: string; amount: number; description: string | null; relatedUserId: string | null; createdAt: string };
+
+function rowsToCashback(rows: Array<{ id: string; amount: number; description: string | null; related_user_id: string | null; created_at: Date }>): CashbackItem[] {
+  return rows
+    .map((r) => ({
+      id: r.id,
+      amount: r.amount,
+      description: r.description,
+      relatedUserId: r.related_user_id,
+      createdAt: new Date(r.created_at).toISOString(),
+    }))
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/**
+ * Двухфазный обмен кешбэком с ботом (ТЗ для бота v2, 17.09.2026), фаза 1:
+ * отдать неподтверждённый кешбэк, НЕ помечая его отданным, и выставить
+ * баланс сайта = баланс бота + неподтверждённое. Бот зачисляет записи с
+ * дедупликацией по `id` у себя и подтверждает их (`ackCashbackForBot`).
+ * Потерянный в сети ответ больше не теряет деньги: повторный запрос вернёт
+ * те же записи, а бот не зачислит их дважды.
+ */
+export async function peekCashbackForBot(userId: string, botBalance: number): Promise<{ pending: CashbackItem[]; balance: number }> {
+  return withTransaction(async (c) => {
+    await c.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
+    const r = await c.query<{ id: string; amount: number; description: string | null; related_user_id: string | null; created_at: Date }>(
+      `SELECT id, amount, description, related_user_id, created_at
+       FROM balance_transactions
+       WHERE user_id = $1 AND synced_to_bot = FALSE`,
+      [userId]
+    );
+    const pending = rowsToCashback(r.rows);
+    const balance = botBalance + pending.reduce((sum, tx) => sum + tx.amount, 0);
+    await c.query("UPDATE users SET balance = $2 WHERE id = $1", [userId, balance]);
+    return { pending, balance };
+  });
+}
+
+/** Фаза 2: бот подтвердил зачисление — пометить ровно эти записи отданными. */
+export async function ackCashbackForBot(userId: string, ids: string[]): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const r = await pool.query<{ id: string }>(
+    `UPDATE balance_transactions SET synced_to_bot = TRUE
+     WHERE user_id = $1 AND id = ANY($2) AND synced_to_bot = FALSE
+     RETURNING id`,
+    [userId, ids]
+  );
+  return r.rows.map((x) => x.id);
+}
+
 /**
  * `POST /api/bot/sync-balance`: забрать неотданный боту кешбэк и выставить
  * баланс сайта = баланс бота + забранное — одной транзакцией.

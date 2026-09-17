@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByTelegramId, createAuditLog, getUnsyncedCashback, claimCashbackForBot } from "@/lib/store";
+import { getUserByTelegramId, createAuditLog, getUnsyncedCashback, claimCashbackForBot, peekCashbackForBot, ackCashbackForBot } from "@/lib/store";
 import { verifyBotApiKey, unauthorizedResponse } from "../auth";
 import { botSyncDisabledResponse } from "../sync-guard";
 
@@ -31,7 +31,18 @@ export async function POST(request: NextRequest) {
   if (disabled) return disabled;
 
   try {
-    const { telegramId, balance } = await request.json();
+    const body = await request.json();
+    const { telegramId, balance } = body;
+
+    // Фаза 2 двухфазного обмена: бот подтверждает зачисленные записи.
+    // { telegramId, ack: ["tx-id", …] } — баланс не нужен.
+    if (telegramId && Array.isArray(body.ack)) {
+      const ids = body.ack.filter((x: unknown): x is string => typeof x === "string" && x.length > 0 && x.length <= 64).slice(0, 500);
+      const u = await getUserByTelegramId(String(telegramId));
+      if (!u) return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+      const acked = await ackCashbackForBot(u.id, ids);
+      return NextResponse.json({ success: true, data: { userId: u.id, acked, ackedCount: acked.length } });
+    }
 
     if (!telegramId || typeof balance !== "number") {
       return NextResponse.json(
@@ -54,7 +65,13 @@ export async function POST(request: NextRequest) {
     // кешбэка получает ровно один вызов, даже если бот повторил запрос
     // (claimCashbackForBot в store.ts).
     const oldBalance = user.balance;
-    const { claimed: unsyncedTx, balance: correctBalance } = await claimCashbackForBot(user.id, botBalance);
+    // twoPhase: true — записи не помечаются отданными до ack (рекомендуемый
+    // режим, ТЗ для бота v2). Без флага — прежний контракт: записи забираются
+    // сразу, атомарно (ровно один вызов получает каждую).
+    const twoPhase = body.twoPhase === true;
+    const { claimed: unsyncedTx, balance: correctBalance } = twoPhase
+      ? await peekCashbackForBot(user.id, botBalance).then((r) => ({ claimed: r.pending, balance: r.balance }))
+      : await claimCashbackForBot(user.id, botBalance);
     const unsyncedTotal = unsyncedTx.reduce((sum, tx) => sum + tx.amount, 0);
 
     if (unsyncedTx.length > 0) {
@@ -96,6 +113,7 @@ export async function POST(request: NextRequest) {
         pendingCashback,
         pendingCashbackTotal: unsyncedTotal,
         pendingCashbackTotalRubles: unsyncedTotal / 100,
+        twoPhase,
       },
     });
   } catch (err) {

@@ -87,11 +87,11 @@ export class FakeDb {
       const u = this.users.get(p[0]);
       return res(u ? [{ ...u }] : []);
     }
-    if (s === "SELECT * FROM users WHERE id = $1") {
+    if (s === "SELECT * FROM users WHERE id = $1" || s === "SELECT * FROM users WHERE id = $1 FOR UPDATE") {
       const u = this.users.get(p[0]);
       return res(u ? [{ ...u }] : []);
     }
-    if (s === "SELECT * FROM users WHERE email = $1") {
+    if (s === "SELECT * FROM users WHERE email = $1" || s === "SELECT * FROM users WHERE email = $1 FOR UPDATE") {
       return res([...this.users.values()].filter((u) => u.email === p[0]).map((u) => ({ ...u })));
     }
     if (s.startsWith("UPDATE users SET subscription_end = $2, subscription_plan = COALESCE($3, subscription_plan), panel_sync_state = 'pending'")) {
@@ -324,7 +324,7 @@ export class FakeDb {
       const u = this.users.get(p[0]);
       return res(u ? [{ id: u.id }] : []);
     }
-    if (s === "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1") {
+    if (s === "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1" || s === "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1 FOR UPDATE") {
       const u = [...this.users.values()].find((x) => x.telegram_id === p[0]);
       return res(u ? [{ ...u }] : []);
     }
@@ -394,6 +394,14 @@ export class FakeDb {
       const taken = this.balanceTx.filter((t) => t.user_id === p[0] && t.synced_to_bot === false);
       for (const t of taken) t.synced_to_bot = true;
       return res(taken.map((t) => ({ id: t.id, amount: t.amount, description: t.description, related_user_id: t.related_user_id, created_at: t.created_at })));
+    }
+    if (s === "SELECT id, amount, description, related_user_id, created_at FROM balance_transactions WHERE user_id = $1 AND synced_to_bot = FALSE") {
+      return res(this.balanceTx.filter((t) => t.user_id === p[0] && t.synced_to_bot === false).map((t) => ({ id: t.id, amount: t.amount, description: t.description, related_user_id: t.related_user_id, created_at: t.created_at })));
+    }
+    if (s === "UPDATE balance_transactions SET synced_to_bot = TRUE WHERE user_id = $1 AND id = ANY($2) AND synced_to_bot = FALSE RETURNING id") {
+      const hit = this.balanceTx.filter((t) => t.user_id === p[0] && p[1].includes(t.id) && t.synced_to_bot === false);
+      for (const t of hit) t.synced_to_bot = true;
+      return res(hit.map((t) => ({ id: t.id })));
     }
     if (s === "UPDATE users SET balance = $2 WHERE id = $1") {
       this.user(p[0]).balance = p[1];

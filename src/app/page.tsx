@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/session";
 // docs/rebrand-2027/SCREEN_SCORE.md). Прежняя главная «Гратикул»
 // осталась в components/graticule/Home.tsx: её шапка и футер ещё
 // обслуживают непереведённые страницы.
-import HomeView from "@/components/atlas/AtlasHome";
+import HomeView from "@/components/vps/Home";
 
 interface PageProps {
   searchParams: Promise<{ step?: string; ref?: string }>;

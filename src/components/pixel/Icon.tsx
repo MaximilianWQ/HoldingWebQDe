@@ -34,7 +34,19 @@ export type IconName =
   | "refresh"
   | "share"
   | "devices"
-  | "chat";
+  | "chat"
+  // Atlas Secure VPS (17.09.2026): кабинет-вкладки и карусели.
+  | "bag"
+  | "receipt"
+  | "grid"
+  | "plus"
+  | "chevron-left"
+  | "chevron-right"
+  | "chevron-down"
+  | "coins"
+  | "key"
+  | "user"
+  | "download";
 
 interface IconProps {
   name: IconName;
@@ -173,4 +185,47 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
   devices: <path d="M3.5 5.5h17v10h-17zM2 19.5h20M9 15.5v4M15 15.5v4" />,
   chat: <path d="M20.5 12a8 8 0 0 1-11.6 7.1l-5.4 1.4 1.4-5.3A8 8 0 1 1 20.5 12" />,
+  bag: (
+    <>
+      <path d="M5 8.5h14l-1 11.2a2 2 0 0 1-2 1.8H8a2 2 0 0 1-2-1.8z" />
+      <path d="M9 10.5V7a3 3 0 0 1 6 0v3.5" />
+    </>
+  ),
+  receipt: (
+    <>
+      <rect x="4.5" y="3" width="15" height="14.5" rx="3" />
+      <path d="M8.5 8h7M8.5 11.5h7M8.5 17.5V21M15.5 17.5V21" />
+    </>
+  ),
+  grid: (
+    <>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="2" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="2" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="2" />
+      <path d="M17 3.2 20.8 7 17 10.8 13.2 7z" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  "chevron-left": <path d="M15 4.5 7.5 12l7.5 7.5" />,
+  "chevron-right": <path d="M9 4.5l7.5 7.5L9 19.5" />,
+  "chevron-down": <path d="M4.5 9 12 16.5 19.5 9" />,
+  coins: (
+    <>
+      <ellipse cx="12" cy="6" rx="7.5" ry="3" />
+      <path d="M4.5 6v4c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6M4.5 10v4c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-4M4.5 14v4c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-4" />
+    </>
+  ),
+  key: (
+    <>
+      <circle cx="8" cy="15" r="4.5" />
+      <path d="M11.2 11.8 20 3M16.5 6.5l2.5 2.5M14 9l2 2" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
+    </>
+  ),
+  download: <path d="M12 3.5v12M7 10.5l5 5 5-5M4.5 20.5h15" />,
 };

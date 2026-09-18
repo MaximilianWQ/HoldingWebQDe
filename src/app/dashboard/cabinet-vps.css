@@ -60,10 +60,23 @@
 .vc-balance { padding: 0 18px; min-height: 40px; font-size: 15px; }
 
 /* ── Вкладки и «Выйти» ─────────────────────────────────────────── */
-.vc-tabs { margin: 0 0 16px; max-width: 440px; }
-.vc-tabs button { flex-direction: column; gap: 4px; min-height: 58px; }
-.vc-logout { margin-bottom: 24px; }
+/* Вкладки с подписями. Иконка без слова заставляет угадывать раздел —
+   на рабочем экране это главная причина «неудобно» (владелец,
+   18.09.2026). Подпись прячется только на очень узком телефоне, где
+   четыре слова в ряд не помещаются. */
+.vc-tabs { margin: 0 0 24px; max-width: 620px; }
+.vc-tabs button { gap: 8px; min-height: 52px; padding-inline: 10px; }
+.vc-tab-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+@media (max-width: 420px) {
+  .vc-tabs button { flex-direction: column; gap: 3px; min-height: 58px; padding-inline: 4px; }
+  .vc-tab-label { font-size: 12px; font-weight: 500; }
+}
 .vc-hr { margin-block: 0 24px; }
+
+/* Доска кабинета на широком экране: содержимое перестаёт быть узкой
+   колонкой витрины — под подписку, ключи и деньги есть ширина. */
+.vc-page { max-width: calc(1120px + 2 * var(--v-gutter)); }
+.vc-panel { max-width: 100%; }
 
 /* ── Заголовок панели ──────────────────────────────────────────── */
 .vc-cab-title {
@@ -89,13 +102,27 @@
   .vc-panel-head .vc-cab-title { font-size: 22px; }
 }
 
-/* ── Главная: верхняя строка («Обновить») ─────────────────────── */
-.vc-home-top { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-height: 24px; margin-bottom: 14px; }
-.vc-home-top p:empty { display: none; }
-
 /* ── Тёмная плита подписки (`.v-tile-dark.v-span-4`) ──────────── */
 .vc-sub-tile { justify-content: flex-start; }
-.vc-sub-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.vc-sub-head { display: flex; align-items: center; gap: 10px; }
+.vc-sub-head h3 { flex: 1 1 auto; }
+.vc-sub-sync {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background-color 220ms var(--v-ease);
+}
+.vc-sub-sync[disabled] { opacity: 0.6; cursor: default; }
+@media (hover: hover) { .vc-sub-sync:not([disabled]):hover { background: rgba(255, 255, 255, 0.22); } }
+.vc-sub-sync-note { margin: 8px 0 0; min-height: 18px; color: var(--v-on-black-2); font-size: 13px; }
+.vc-sub-sync-note:empty { display: none; }
 .vc-sub-head h3 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: rgba(255, 255, 255, 0.86); }
 .vc-sub-body { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 8px; }
 .vc-sub-ring { --size: 104px; flex: none; }
@@ -108,15 +135,23 @@
 @media (hover: hover) { .vc-btn-on-dark:hover { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.6); } }
 @media (max-width: 420px) { .vc-sub-ring { --size: 88px; } .vc-sub-body { gap: 16px; } }
 
-/* ── Плитка «Сеть сейчас» (`.v-span-2`, CabinetNetwork.tsx) ────── */
-.vc-net-tile { justify-content: flex-start; }
-.vc-net-live { width: 40px; height: 40px; border-radius: 12px; }
-.vc-net-tile h3 { margin: 2px 0 0; font-size: 15px; font-weight: 600; color: var(--v-ink-3); }
-.vc-net-num { margin: 2px 0 0; color: var(--v-ink); font-size: clamp(30px, 3.4vw, 36px); font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-.vc-net-spark { display: block; width: 100%; height: 44px; margin-top: 2px; }
-.vc-net-spark-line { fill: none; stroke: var(--v-blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.vc-net-spark-area { fill: color-mix(in srgb, var(--v-blue) 12%, transparent); stroke: none; }
-.vc-net-cap { margin: 6px 0 0; font-size: 13px; color: var(--v-ink-3); }
+/* ── Плитка «Баланс» (`.v-span-2`) ─────────────────────────────── */
+.vc-money-tile { justify-content: flex-start; gap: 6px; }
+.vc-money-tile h3 { margin: 6px 0 0; font-size: 15px; font-weight: 600; color: var(--v-ink-3); }
+.vc-money-num {
+  margin: 0;
+  color: var(--v-ink);
+  font-size: clamp(28px, 3.2vw, 34px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.vc-money-cap { margin: 0; font-size: 13px; color: var(--v-ink-3); }
+.vc-money-rows { margin: 12px 0 0; display: grid; gap: 8px; }
+.vc-money-rows > div { display: grid; gap: 2px; }
+.vc-money-rows dt { font-size: 13px; color: var(--v-ink-4); }
+.vc-money-rows dd { margin: 0; font-size: 14px; color: var(--v-ink-2); line-height: 1.35; }
+.vc-money-btn { margin-top: auto; align-self: flex-start; }
 
 /* ── Быстрые действия: 2×2 на телефоне, ряд из 4 от 760px ──────── */
 .vc-quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
@@ -283,3 +318,7 @@
 @media (prefers-reduced-motion: reduce) {
   .vc-detail, .vc-skel { animation: none !important; }
 }
+
+/* ── Выход в «Профиле» ─────────────────────────────────────────── */
+.vc-row-out b { color: var(--v-red); }
+.vc-row-out .v-row-icon { color: var(--v-red); background: var(--v-red-soft); }

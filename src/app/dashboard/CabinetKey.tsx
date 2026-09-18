@@ -11,7 +11,6 @@ import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT } from "@/lib/key-n
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import { APPS, detectPlatform, type AppId, type ClientApp, type Platform } from "@/lib/apps";
 import type { SubscriptionData } from "@/types";
-import CabinetNetwork from "./CabinetNetwork";
 
 /**
  * Кабинет · «Главная» (владелец, 17.09.2026: «перенеси UX/UI из
@@ -203,7 +202,9 @@ export default function CabinetKey({
   const bk = data.bypassKey;
   const owed = data.bypassOwedBytes ?? 0;
   const { live, status } = useBypassLive(!!(bk?.known || bk?.maybe || owed > 0));
-  const [open1, setOpen1] = useState(false);
+  // Ключ 1 раскрыт сразу: это то, ради чего человек открывает кабинет,
+  // и прятать его за «Подробнее» — лишний клик на главном пути.
+  const [open1, setOpen1] = useState(true);
   const [open2, setOpen2] = useState(false);
   const main = MAIN_KEY.member;
   const second = BYPASS_KEY.member;
@@ -374,25 +375,6 @@ export default function CabinetKey({
 
   return (
     <div className="vc-home">
-      <div className="vc-home-top">
-        <p className="vc-fine" role="status" style={{ margin: 0 }}>{resyncStatus?.text ?? ""}</p>
-        <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={onResync} disabled={resyncing}>
-          {resyncing ? (
-            "Проверяем…"
-          ) : resyncStatus?.kind === "ok" ? (
-            <>
-              <Icon name="check" size={16} />
-              Готово
-            </>
-          ) : (
-            <>
-              <Icon name="refresh" size={16} />
-              Обновить
-            </>
-          )}
-        </button>
-      </div>
-
       <div className="v-bento vc-bento">
         {/* ── Подписка ──────────────────────────────────────────── */}
         <div className="v-tile v-tile-dark v-span-4 v-lift vc-sub-tile" aria-labelledby="vc-sub-h">
@@ -401,7 +383,20 @@ export default function CabinetKey({
             <span className={`v-badge ${data.isExpired ? "v-badge-red" : isTrial ? "v-badge-amber" : "v-badge-green"}`}>
               {data.isExpired ? "Истекла" : isTrial ? "Пробный" : "Активна"}
             </span>
+            {/* Сверка с панелью — рядом со сроком, который она и
+                уточняет, а не отдельной строкой над доской. */}
+            <button
+              type="button"
+              className="vc-sub-sync"
+              onClick={onResync}
+              disabled={resyncing}
+              title="Проверить срок по серверу"
+            >
+              <Icon name={resyncStatus?.kind === "ok" ? "check" : "refresh"} size={16} />
+              <span className="v-sr">Проверить срок по серверу</span>
+            </button>
           </div>
+          <p className="vc-sub-sync-note" role="status">{resyncing ? "Проверяем…" : resyncStatus?.text ?? ""}</p>
 
           {data.isExpired ? (
             <p className="vc-sub-big">Подписка не активна</p>
@@ -440,8 +435,38 @@ export default function CabinetKey({
           </div>
         </div>
 
-        {/* ── Сеть сейчас ───────────────────────────────────────── */}
-        <CabinetNetwork />
+        {/* ── Баланс и кешбэк ──────────────────────────────────────
+            Здесь стояла плитка «Сеть сейчас» с числом подключённых.
+            Число считала детерминированная функция времени, то есть
+            это был не замер, а нарисованная кривая — показывать её
+            оплатившему человеку как факт нельзя (CLAUDE.md: числа
+            подтверждаются кодом). На её месте то, что действительно
+            есть в ответе API и действительно про него. */}
+        <section className="v-tile v-span-2 v-lift vc-money-tile" aria-labelledby="vc-money-h">
+          <span className="v-tile-icon" aria-hidden><Icon name="coins" size={22} /></span>
+          <h3 id="vc-money-h">Баланс</h3>
+          <p className="vc-money-num">{data.balance.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</p>
+          <p className="vc-money-cap">
+            уйдёт в счёт следующего продления
+          </p>
+          <dl className="vc-money-rows">
+            <div>
+              <dt>Кешбэк</dt>
+              <dd>{data.cashbackPercent}% с оплат приглашённых</dd>
+            </div>
+            <div>
+              <dt>Приглашено</dt>
+              <dd>
+                {data.referrals} {plural(data.referrals, ["человек", "человека", "человек"])}
+                {data.paidReferrals > 0 ? `, оплатили ${data.paidReferrals}` : ""}
+              </dd>
+            </div>
+          </dl>
+          <button type="button" className="v-btn v-btn-soft v-btn-sm vc-money-btn" onClick={onGoProfile}>
+            Пригласить
+            <Icon name="arrow-right" size={16} />
+          </button>
+        </section>
 
         {/* ── Быстрые действия ─────────────────────────────────── */}
         <div className="vc-quick v-span-6">

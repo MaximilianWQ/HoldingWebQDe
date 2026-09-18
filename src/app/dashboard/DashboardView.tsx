@@ -49,7 +49,7 @@ type TgLinkState =
 
 function LoadingSkeleton() {
   return (
-    <div className="v-wrap v-narrow vc-page" aria-busy="true">
+    <div className="v-wrap vc-page" aria-busy="true">
       <p className="v-sr" aria-live="polite">Загружаем кабинет…</p>
       <div className="vc-loading" aria-hidden>
         <div className="vc-skel" style={{ height: 96 }} />
@@ -225,7 +225,9 @@ function DashboardViewInner() {
 
   if (loading || !data) return <LoadingSkeleton />;
 
-  const name = data.email.split("@")[0] || data.email;
+  // Показываем почту целиком: это и есть логин, и человек сверяет,
+  // в тот ли аккаунт вошёл. Обрезанный префикс («ivan») этого не даёт.
+  const name = data.email;
   const initial = (data.email.trim().charAt(0) || "A").toUpperCase();
   const balanceStr = data.balance.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const unreadLabel = unreadCount > 9 ? "9+" : String(unreadCount);
@@ -233,7 +235,7 @@ function DashboardViewInner() {
 
   return (
     <>
-      <div className="v-wrap v-narrow vc-page">
+      <div className="v-wrap vc-page">
         {/* ── Профиль ──────────────────────────────────────────────── */}
         <div className="vc-profile-row">
           <div className="vc-profile-id">
@@ -278,15 +280,10 @@ function DashboardViewInner() {
           {TABS.map((t) => (
             <button key={t.id} type="button" role="tab" aria-selected={active === t.id} onClick={() => setActive(t.id)}>
               <Icon name={t.icon} size={20} />
-              <span className="v-sr">{t.label}</span>
+              <span className="vc-tab-label">{t.label}</span>
             </button>
           ))}
         </div>
-
-        <button type="button" className="v-btn v-btn-outline v-btn-block vc-logout" onClick={() => setShowLogoutConfirm(true)}>
-          Выйти
-        </button>
-        <hr className="v-divider vc-hr" />
 
         {/* ── Содержимое активной вкладки (key — переигрывает появление) */}
         <div key={active} className="v-fade-in">
@@ -317,6 +314,7 @@ function DashboardViewInner() {
               isAdmin={!!data.isAdmin}
               onOpenNotifications={() => setShowNotifications(true)}
               unreadCount={unreadCount}
+              onLogout={() => setShowLogoutConfirm(true)}
             />
           )}
         </div>
@@ -394,6 +392,7 @@ function ProfilePanel({
   isAdmin,
   onOpenNotifications,
   unreadCount,
+  onLogout,
 }: {
   data: SubscriptionData;
   tgLink: TgLinkState;
@@ -405,6 +404,7 @@ function ProfilePanel({
   isAdmin: boolean;
   onOpenNotifications: () => void;
   unreadCount: number;
+  onLogout: () => void;
 }) {
   const unreadLabel = unreadCount > 9 ? "9+" : String(unreadCount);
   return (
@@ -498,6 +498,16 @@ function ProfilePanel({
               <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
             </Link>
           )}
+          {/* Выход — здесь, а не над разделами: самое необратимое
+              действие не должно быть самой заметной кнопкой экрана. */}
+          <button type="button" className="v-row vc-row-btn vc-row-out" onClick={onLogout}>
+            <span className="v-row-icon" aria-hidden><Icon name="logout" size={20} /></span>
+            <span className="v-row-main">
+              <b>Выйти из аккаунта</b>
+              <span className="v-small">Понадобится код из письма, чтобы войти снова</span>
+            </span>
+            <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
+          </button>
         </div>
       </div>
     </div>

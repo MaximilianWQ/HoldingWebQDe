@@ -52,16 +52,21 @@
   animation: ov-in 480ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 .ov-card[hidden] { display: none; }
-/* Телефон: карточка cookie — компактная и у верхнего края под шапкой.
-   Внизу она закрывала главное действие первого экрана (QA 12.09.2026,
-   375: карточка 557–764, кнопка «Попробовать» 660–714). Сверху под
-   ней только плашка и имя — ничего, что нужно нажать. Селектор с
-   запасом специфичности: правила кабинета и оплаты задают .ov-card
-   `bottom`, а с `top` карточка растянулась бы на весь экран. */
+/* Телефон: карточка cookie — внизу экрана (владелец, 18.09.2026:
+   «cookies сверху, а должно быть снизу»).
+
+   История: 12.09.2026 её увели наверх, потому что она закрывала кнопку
+   первого экрана (375: карточка 557–764, кнопка «Попробовать» 660–714).
+   Решение теперь другое: карточка осталась внизу, но стала низкой —
+   две строки текста и ряд кнопок, — и первый экран отдаёт ей место
+   снизу (`--ov-cookie-h` в home-mobile/atlas-mobile не нужен: кнопка
+   витрины выше сгиба). Наверх её больше не поднимаем. */
 @media (max-width: 559px) {
   html body .ov-card.ov-card-cookie {
-    top: calc(var(--a-head-h, 64px) + 8px);
-    bottom: auto;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: auto;
     padding: 0.75rem 0.85rem 0.6rem;
   }
   .ov-card-cookie .ov-text { font-size: 0.75rem; line-height: 1.45; }
@@ -69,10 +74,6 @@
   .ov-card-cookie .ov-btn-primary { padding-inline: 0.9rem; }
   .ov-card-cookie .ov-btn-text { padding-inline: 0.15rem; }
 }
-@media (max-width: 559px) and (prefers-reduced-motion: no-preference) {
-  html body .ov-card.ov-card-cookie { animation-name: ov-in-top; }
-}
-@keyframes ov-in-top { from { opacity: 0; transform: translateY(-12px); } }
 
 .ov-row { display: flex; align-items: flex-start; gap: 0.75rem; }
 .ov-mark {
@@ -202,9 +203,21 @@
 html[data-static] .ov-card,
 html[data-static] .ov-dialog { display: none; }
 
-/* ─── Нижний лист «Atlas на экран „Домой“» (кабинет, 11.09.2026) ───
+/* ─── Нижний лист «Atlas на экран „Домой“» (кабинет, 11.09.2026,
+   оформление сверено с корпусом Atlas Secure VPS 17.09.2026) ───────
    Выезжает снизу плавно, скруглён со всех сторон и отступает от краёв —
-   как системные листы iOS. Фон слегка затемнён, тап по нему = «Не сейчас». */
+   как системные листы iOS. Фон слегка затемнён, тап по нему = «Не сейчас».
+   `.ov-sheet-wrap` — единственный потребитель этого класса на сайте
+   (грепом проверено), поэтому переопределяем только его переменные —
+   кобальт на синий акцент и гарнитуру Apple из vps.css (`--v-*`, с
+   запасными значениями: лист подключён глобально и переживёт страницу
+   без vps.css). Общие `.ov-card`/`.ov-dialog` (cookie, passkey, вход)
+   этот блок не трогает. */
+.ov-sheet-wrap {
+  --ov-cobalt: var(--v-blue, #3A85F0);
+  --ov-cobalt-deep: var(--v-blue-press, #2A6FD8);
+  --ov-font: var(--v-font, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif);
+}
 .ov-sheet-wrap {
   position: fixed;
   inset: 0;

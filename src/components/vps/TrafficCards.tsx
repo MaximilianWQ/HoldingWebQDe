@@ -63,7 +63,7 @@ export default function TrafficCards({ cta = "Купить", ids }: { cta?: stri
             </p>
 
             <p className="v-dcard-sum">
-              {gbPrice.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ₽ за гигабайт
+              {gbPrice.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽ за гигабайт
               {off > 0 ? ` · на ${off}% дешевле стартового пакета` : ""}
             </p>
 

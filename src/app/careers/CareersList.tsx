@@ -32,8 +32,14 @@ export default function CareersList() {
                 aria-controls={`tc-panel-${v.id}`}
                 onClick={() => setOpen(isOpen ? null : v.id)}
               >
-                <span className="t-num tc-pay">
-                  {v.from}–{v.to}k
+                <span className="tc-pay-wrap">
+                  <span className="t-num tc-pay">
+                    {v.from}–{v.to}k
+                  </span>
+                  {/* Единица стоит под вилкой, как на макете: «350–450k»
+                      без «₽/мес» читается как что угодно — от рублей в
+                      год до долларов. */}
+                  <span className="tc-pay-unit t-mono">₽/мес · {v.mode}</span>
                 </span>
                 <span className="tc-row-main">
                   <b className="tc-row-title">{v.title}</b>
@@ -80,7 +86,6 @@ export default function CareersList() {
                   <a className="t-btn t-btn-accent" href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">
                     Написать в Telegram
                   </a>
-                  <span className="tc-mode t-mono">{v.mode}</span>
                 </div>
               </div>
             </div>

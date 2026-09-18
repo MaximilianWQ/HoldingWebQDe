@@ -633,20 +633,37 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   flex-direction: column;
   min-height: 560px;
   padding: clamp(28px, 4vw, 44px);
+  padding-top: clamp(38px, 4.4vw, 52px);
   border-radius: var(--v-r-xl);
   background: radial-gradient(120% 80% at 50% 0%, #17171A 0%, var(--v-black) 60%);
   color: #FFFFFF;
   text-align: left;
-  overflow: hidden;
+  overflow: visible;
 }
+/* Плашка срока стоит НАД карточкой, наполовину заходя на её край:
+   так она читается первой (глаз идёт по ряду плашек, а не по ряду
+   одинаковых чёрных плит) и не съедает место внутри карточки.
+   Поэтому же у карточки overflow: visible, а у ленты — верхнее поле:
+   иначе плашку срезало бы краем прокручиваемой дорожки. */
 .v-dcard-tag {
-  align-self: flex-start;
-  max-width: 100%;
-  margin-bottom: 24px;
-  padding-block: 9px;
-  white-space: normal;
-  line-height: 1.25;
-  text-align: center;
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  z-index: 2;
+  max-width: calc(100% - 24px);
+  transform: translateX(-50%);
+  padding: 9px 18px;
+  min-height: 34px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.18);
+}
+.v-badge-soft { background: var(--v-soft); color: var(--v-ink-2); }
+/* Узкий ряд из четырёх карточек: плашки сжимаются, чтобы не залезать
+   на соседнюю. */
+@media (min-width: 1120px) and (max-width: 1359px) {
+  .v-dcard-tag { padding: 8px 13px; font-size: 13.5px; }
 }
 .v-dcard-title { margin: 0; font-size: clamp(28px, 3.4vw, 36px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
 .v-dcard-desc { margin: 16px 0 0; color: var(--v-on-black-2); font-size: 18px; line-height: 1.5; }
@@ -678,6 +695,10 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 .v-price-row b { color: #FFFFFF; font-size: 38px; font-weight: 600; letter-spacing: -0.03em; }
 .v-price-row s { color: rgba(255, 255, 255, 0.4); font-size: 17px; }
 .v-dcard .v-btn { margin-top: 22px; }
+/* Кнопка в карточке не должна вылезать за её край: теперь у карточки
+   overflow: visible (ради плашки над ней), и длинная подпись раньше
+   просто уезжала наружу. */
+.v-dcard .v-btn { white-space: normal; padding-inline: 14px; line-height: 1.2; }
 
 /* Цена тремя способами: за месяц (её сравнивают), за срок (её платят),
    за день (её примеряют к бытовым тратам). Средний срок выделен —
@@ -855,6 +876,7 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 
 /* `wide` — сравнение важнее листания: с 1120px четыре карточки стоят
    рядом, лента перестаёт быть лентой, стрелки и точки не нужны. */
+.v-carousel-wide .v-track { padding-top: 26px; }
 @media (min-width: 1120px) {
   .v-carousel-wide .v-track {
     grid-auto-columns: minmax(0, 1fr);
@@ -862,6 +884,7 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
     overflow: visible;
     scroll-snap-type: none;
     padding-bottom: 0;
+    padding-top: 26px;
   }
   .v-carousel-wide .v-car-arrow, .v-carousel-wide .v-dots { display: none; }
   .v-carousel-wide .v-dcard { padding: clamp(24px, 2.4vw, 32px); }

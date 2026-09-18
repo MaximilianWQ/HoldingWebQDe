@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import VShell from "./VShell";
 import StoreBadges from "./StoreBadges";
 import PlanCards from "./PlanCards";
 import TrafficCards from "./TrafficCards";
-import Steps from "./Steps";
 import AppsRow from "./home/AppsRow";
 import CountryMarquee from "./home/CountryMarquee";
 import WhyBento from "./home/WhyBento";
@@ -15,7 +13,6 @@ import TunnelFlow from "./home/TunnelFlow";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, TRIAL } from "./links";
-import { detectPlatform } from "@/lib/apps";
 import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, formatRub, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRAFFIC_ENTRY_RUB } from "@/lib/traffic-packs";
@@ -38,19 +35,20 @@ import "@/app/home-vps.css";
  *   06 Почему Atlas      — выгоды числами из src/lib
  *   07 Тарифы            — лестница решения с выделенным средним сроком
  *   08 Пакеты трафика    — второй продукт
- *   09 Три шага          — путь после оплаты виден заранее
- *   10 Кешбэк            — причина остаться и привести своих
- *   11 Вопросы           — шесть возражений перед кнопкой
- *   12 Финал             — последнее предложение без риска
+ *   09 Кешбэк            — причина остаться и привести своих
+ *   10 Вопросы           — шесть возражений перед кнопкой
+ *   11 Финал             — последнее предложение без риска
+ *
+ * Блока «подключение в три шага» здесь нет намеренно (владелец,
+ * 18.09.2026: «зачем оно на главной, подключение простое — пустая
+ * трата места»). Путь после оплаты описан в шаге «минута на
+ * подключение» в полосе возражений и полностью — на /devices.
  *
  * Все числа — из `src/lib`; на витрине нет слова «VPN» и инженерных
  * терминов (CLAUDE.md, «Два языка продукта»).
  */
 export default async function Home({ referralCode }: { referralCode?: string }) {
   const enter = referralCode ? `/auth?ref=${encodeURIComponent(referralCode)}` : "/auth";
-  const hdrs = await headers();
-  const platform = detectPlatform(hdrs.get("user-agent") ?? "") ?? "ios";
-
   return (
     <VShell>
       {/* 01 · первый экран */}
@@ -184,20 +182,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 09 · как подключиться */}
-      <section className="v-section v-reveal" aria-labelledby="v-how">
-        <div className="v-wrap v-narrow">
-          <h2 id="v-how" className="v-h2">
-            Подключение <span className="v-accent">в три шага</span>
-          </h2>
-          <p className="v-lead" style={{ marginInline: 0 }}>
-            Весь путь — на одном экране, чтобы решать не вслепую: вот что вас ждёт после кнопки.
-          </p>
-          <Steps keyHref={enter} platform={platform} />
-        </div>
-      </section>
-
-      {/* 10 · кешбэк за приглашённых */}
+      {/* 09 · кешбэк за приглашённых */}
       <section className="v-section v-reveal" aria-labelledby="v-ref">
         <div className="v-wrap">
           <div className="v-panel vh-ref-panel">
@@ -206,7 +191,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 11 · частые вопросы */}
+      {/* 10 · частые вопросы */}
       <section className="v-section v-center v-reveal" aria-labelledby="v-faq">
         <div className="v-wrap v-narrow">
           <h2 id="v-faq" className="v-h2">Вопросы, которые задают перед покупкой</h2>
@@ -215,7 +200,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 12 · финал */}
+      {/* 11 · финал */}
       <section className="v-section v-reveal" aria-labelledby="v-final">
         <div className="v-wrap v-narrow">
           <div className="v-panel vh-cta">

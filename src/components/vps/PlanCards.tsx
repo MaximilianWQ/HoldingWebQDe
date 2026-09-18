@@ -40,11 +40,21 @@ import { COUNTRY_COUNT } from "@/lib/locations";
 /** Рекомендуемый срок — тот самый «средний». */
 export const POPULAR: Period = 6;
 
-const TAG: Record<Period, string> = {
-  1: "Попробовать",
-  3: "Короткий срок",
-  6: "Оптимально",
-  12: "Максимум выгоды",
+/**
+ * Плашка над карточкой: подпись и цвет.
+ *
+ * Цвет здесь работает как указатель, а не украшение. Четыре одинаковые
+ * плашки не помогают выбрать — поэтому внимание нарастает слева
+ * направо: серая «Попробовать» (нейтрально) → светло-синий короткий
+ * срок → ЖЁЛТАЯ рекомендация (самое яркое пятно на белом листе) →
+ * синяя «максимум выгоды». Жёлтая одна на весь ряд: два ярких пятна
+ * рядом гасят друг друга, и выбор снова становится задачей.
+ */
+const TAG: Record<Period, { text: string; tone: string }> = {
+  1: { text: "Попробовать", tone: "v-badge-soft" },
+  3: { text: "Короткий срок", tone: "v-badge-blue" },
+  6: { text: "Оптимально", tone: "v-badge-yellow" },
+  12: { text: "Максимум выгоды", tone: "v-badge-solid-blue" },
 };
 
 function perDay(plan: PlanId, period: Period): string {
@@ -83,9 +93,9 @@ export default function PlanCards({
               className={`v-dcard${pop ? " v-dcard-pop" : ""}`}
               aria-label={`${PLAN_CONTENT[plan].name}, ${PERIOD_LABEL[p].full}${pop ? ", рекомендуем" : ""}`}
             >
-              <span className={`v-badge v-badge-lg v-dcard-tag ${pop ? "v-badge-yellow" : off > 0 ? "v-badge-solid-blue" : "v-badge-dark"}`}>
+              <span className={`v-badge v-dcard-tag ${TAG[p].tone}`}>
                 {pop ? <Icon name="bolt" size={14} /> : null}
-                {TAG[p]}{off > 0 ? ` · −${off}%` : ""}
+                {TAG[p].text}{off > 0 ? ` · −${off}%` : ""}
               </span>
 
               <h3 className="v-dcard-title">{PERIOD_LABEL[p].full}</h3>
@@ -119,7 +129,7 @@ export default function PlanCards({
                 prefetch={false}
                 className={`v-btn v-btn-block ${pop ? "v-btn-white" : "v-btn-primary"}`}
               >
-                {cta} на {PERIOD_LABEL[p].accusative}
+                {cta} · {PERIOD_LABEL[p].short}
               </Link>
             </article>
           );

@@ -8,7 +8,20 @@ import Icon from "@/components/pixel/Icon";
  * стрелки по бокам и точки снизу. Без библиотек; активная точка
  * считается по ближайшей к центру карточке.
  */
-export default function Carousel({ children, label, initial = 0 }: { children: ReactNode; label: string; initial?: number }) {
+export default function Carousel({
+  children,
+  label,
+  initial = 0,
+  wide = false,
+}: {
+  children: ReactNode;
+  label: string;
+  initial?: number;
+  /** Четыре карточки помещаются в ряд на широком экране: лента
+   *  превращается в сетку, стрелки и точки прячутся (сравнивать
+   *  сроки глазами важнее, чем листать). */
+  wide?: boolean;
+}) {
   const track = useRef<HTMLDivElement>(null);
   const items = Children.toArray(children);
   const [active, setActive] = useState(initial);
@@ -52,7 +65,7 @@ export default function Carousel({ children, label, initial = 0 }: { children: R
   }, [measure, initial]);
 
   return (
-    <div className="v-carousel" role="region" aria-roledescription="карусель" aria-label={label}>
+    <div className={`v-carousel${wide ? " v-carousel-wide" : ""}`} role="region" aria-roledescription="карусель" aria-label={label}>
       <button type="button" className="v-car-arrow v-car-prev" aria-label="Назад" disabled={edges.start} onClick={() => go(Math.max(0, active - 1))}>
         <Icon name="chevron-left" size={28} />
       </button>

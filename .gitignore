@@ -51,3 +51,7 @@ skills-lock.json
 
 # Резервные копии Blender
 *.blend1
+
+# снимки проверки (Playwright / DevTools)
+/shots/
+/.playwright-mcp/

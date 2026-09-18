@@ -1,26 +1,66 @@
 /* ═══════════════════════════════════════════════════════════════════
-   ГЛАВНАЯ ATLAS SECURE VPS — доработка (владелец, 17.09.2026: «сделай
-   более плавным, больше элементов»). Только эта страница подключает
-   файл; префикс `vh-`. Токены и приёмы — из src/app/vps.css, ничего
-   не хардкодится заново (цвета, радиусы, easing — переменные `--v-*`).
+   ГЛАВНАЯ ATLAS SECURE VPS — блоки и движение.
+
+   Владелец 17.09.2026: «сделай более плавным, больше элементов».
+   Владелец 18.09.2026: «больше блоков, больше информации, анимации
+   технологичнее; к тексту и кнопкам подойти с позиции продаж».
+
+   Только эта страница подключает файл; префикс `vh-`. Токены и общие
+   приёмы — из src/app/vps.css: цвета, радиусы, тени и easing берутся
+   переменными `--v-*`, ни один хекс здесь не заводится заново.
+
+   ПРАВИЛО ДВИЖЕНИЯ. Холостых анимаций на главной две (лента стран и
+   точка «на связи» в кикере) — всё остальное отвечает либо на руку
+   (наведение, переключатель, аккордеон), либо на прокрутку
+   (`animation-timeline: view()`). Причина простая: движение, которое
+   идёт само по себе, читается как баннер и стареет за неделю, а
+   движение, которым управляет читатель, объясняет продукт.
+   `prefers-reduced-motion` не ломает слой, а упрощает: всё, что
+   анимируется прокруткой, объявлено так, что КОНЕЧНЫЙ кадр —
+   состояние по умолчанию (@property … initial-value: 1).
 
    Устройство файла:
-     1. Первый экран (парение устройств, приложения)
-     2. Бегущая строка стран
-     3. Бенто «Почему»
-     4. «Что меняется, когда включено»
-     5. Шаги подключения (сегмент приложения)
-     6. Короткий FAQ
-     7. Финальная плита
+     1. Первый экран            2. Полоса возражений
+     3. Бегущая строка стран    4. Бенто «Почему»
+     5. «До и после»            6. Схема подключения
+     7. Тарифы: подпись и сравнение
+     8. Шаги подключения        9. Кешбэк
+    10. FAQ                    11. Финальная плита
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ 1. Первый экран ══════════════════════════════════════════════ */
 
-/* Лесенка: кикер → заголовок → лид появляются по очереди при загрузке. */
+/* Лесенка: кикер → заголовок → лид появляются по очереди при загрузке.
+   Один оркестрованный вход на всю страницу — дальше ничего само не
+   выезжает. */
 .vh-hero-in > * { animation: v-fade-up 640ms var(--v-ease) both; }
 .vh-hero-in > *:nth-child(1) { animation-delay: 40ms; }
 .vh-hero-in > *:nth-child(2) { animation-delay: 140ms; }
 .vh-hero-in > *:nth-child(3) { animation-delay: 240ms; }
+
+.vh-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: var(--v-field);
+  color: var(--v-ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Микрокопия под кнопками: снимает три возражения до первой прокрутки
+   («попросят карту», «долго настраивать», «где ключ»). */
+.vh-hero-note {
+  margin: 16px auto 0;
+  max-width: 460px;
+  color: var(--v-ink-3);
+  font-size: 15px;
+  line-height: 1.5;
+}
 
 /* Парение устройств: собственный неспешный ход + отклик на прокрутку
    страницы (глубже едет ноутбук, чуть меньше — телефон, для ощущения
@@ -81,8 +121,41 @@
 }
 @media (hover: hover) { .vh-apps-pill:hover { background: var(--v-soft-2); transform: translateY(-1px); } }
 
-/* ═══ 2. Бегущая строка стран ══════════════════════════════════════ */
-.vh-countries { margin-top: clamp(48px, 7vw, 72px); }
+/* ═══ 2. Полоса возражений ═════════════════════════════════════════ */
+.vh-proof {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 620px) { .vh-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } }
+@media (min-width: 1000px) { .vh-proof { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.vh-proof-item {
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  align-items: center;
+  gap: 2px 14px;
+  padding: 20px 22px;
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+}
+.vh-proof-icon {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--v-blue);
+  box-shadow: var(--v-shadow);
+}
+.vh-proof-item b { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
+.vh-proof-item > span:last-child { color: var(--v-ink-3); font-size: 15px; line-height: 1.4; }
+
+/* ═══ 3. Бегущая строка стран ══════════════════════════════════════ */
+.vh-countries { margin-top: clamp(24px, 4vw, 40px); }
 .vh-countries-label {
   margin: 0 0 16px;
   text-align: center;
@@ -102,7 +175,7 @@
   white-space: nowrap;
 }
 
-/* ═══ 3. Бенто «Почему» ════════════════════════════════════════════ */
+/* ═══ 4. Бенто «Почему» ════════════════════════════════════════════ */
 .vh-why-lead { margin-top: 16px; }
 .vh-bento { margin-top: clamp(32px, 5vw, 48px); text-align: left; }
 .vh-tile-fig { display: flex; align-items: baseline; gap: 8px; margin-top: auto; }
@@ -110,7 +183,7 @@
 .vh-tile-fig span { color: var(--v-ink-3); font-size: 16px; }
 .v-tile-dark .vh-tile-fig span, .v-tile-blue .vh-tile-fig span { color: rgba(255, 255, 255, 0.72); }
 
-/* ═══ 4. «Что меняется, когда включено» ═══════════════════════════ */
+/* ═══ 5. «До и после» ══════════════════════════════════════════════ */
 .vh-diff { margin-top: clamp(32px, 5vw, 48px); text-align: left; }
 .vh-diff-switch {
   display: inline-flex;
@@ -184,12 +257,201 @@
 .vh-diff[data-on] .vh-diff-now { opacity: 1; transform: translateY(0); }
 .vh-diff[data-on] .vh-diff-was { opacity: 0; transform: translateY(-6px); }
 
-/* ═══ 5. Шаги подключения — сегмент приложения ═════════════════════ */
+/* ═══ 6. Схема подключения ═════════════════════════════════════════
+   Читатель сам прогоняет пакет по туннелю: заполнение линий и
+   положение пакета считает шкала прокрутки раздела, а не таймер.
+
+   `initial-value: 1` — это КОНЕЧНЫЙ кадр, и он же состояние по
+   умолчанию: без поддержки scroll-timeline и при reduced-motion схема
+   отрисована целиком, а не пустой. `inherits: true` обязательно —
+   значения читают дочерние элементы (тот же урок, что с `--lap-n` в
+   прежнем корпусе: при `false` потомок получает начальное значение). */
+@property --vh-p1 { syntax: "<number>"; initial-value: 1; inherits: true; }
+@property --vh-p2 { syntax: "<number>"; initial-value: 1; inherits: true; }
+
+.vh-flow {
+  display: grid;
+  gap: 0;
+  margin-top: clamp(36px, 5vw, 56px);
+  text-align: left;
+}
+@media (min-width: 860px) {
+  .vh-flow {
+    grid-template-columns: minmax(0, 1fr) minmax(92px, 0.62fr) minmax(0, 1fr) minmax(92px, 0.62fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+.vh-flow-node {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(22px, 2.6vw, 30px);
+  border-radius: var(--v-r-lg);
+  background: var(--v-field);
+}
+.vh-flow-node b { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.vh-flow-node span { color: var(--v-ink-3); font-size: 15px; line-height: 1.45; }
+.vh-flow-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: var(--v-blue);
+  box-shadow: var(--v-shadow);
+}
+/* Узлы проявляются по мере того, как до них доходит линия. */
+.vh-flow-b { opacity: calc(0.5 + 0.5 * var(--vh-p1)); }
+.vh-flow-c { opacity: calc(0.5 + 0.5 * var(--vh-p2)); }
+.vh-flow-b .vh-flow-icon, .vh-flow-c .vh-flow-icon { transition: none; }
+
+/* Линия между узлами. Ширина линии известна контейнеру, поэтому
+   пакет едет на `100cqw`, а не на проценты собственной ширины. */
+.vh-flow-link {
+  container-type: inline-size;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+}
+@media (min-width: 860px) { .vh-flow-link { min-height: auto; } }
+.vh-flow-rail, .vh-flow-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+}
+.vh-flow-rail { background: var(--v-line); }
+.vh-flow-fill { background: var(--v-blue); transform-origin: left center; }
+.vh-flow-link-1 .vh-flow-fill { transform: scaleX(var(--vh-p1)); }
+.vh-flow-link-2 .vh-flow-fill { transform: scaleX(var(--vh-p2)); }
+.vh-flow-pk {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--v-blue);
+  box-shadow: 0 0 0 4px rgba(58, 133, 240, 0.18);
+}
+.vh-flow-link-1 .vh-flow-pk { transform: translateX(calc(var(--vh-p1) * (100cqw - 12px))); }
+.vh-flow-link-2 .vh-flow-pk { transform: translateX(calc(var(--vh-p2) * (100cqw - 12px))); }
+.vh-flow-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  box-shadow: var(--v-shadow);
+  color: var(--v-ink-2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.vh-flow-tag svg { color: var(--v-blue); }
+
+/* Телефон: та же схема колонкой — линия вертикальная, пакет едет вниз. */
+@media (max-width: 859px) {
+  .vh-flow-rail, .vh-flow-fill {
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 100%;
+    margin: 0 0 0 -1px;
+  }
+  .vh-flow-fill { transform-origin: center top; }
+  .vh-flow-link-1 .vh-flow-fill { transform: scaleY(var(--vh-p1)); }
+  .vh-flow-link-2 .vh-flow-fill { transform: scaleY(var(--vh-p2)); }
+  .vh-flow-pk { top: 0; left: 50%; margin: 0 0 0 -6px; }
+  .vh-flow-link-1 .vh-flow-pk { transform: translateY(calc(var(--vh-p1) * 80px)); }
+  .vh-flow-link-2 .vh-flow-pk { transform: translateY(calc(var(--vh-p2) * 80px)); }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .vh-flow {
+      animation: vh-flow-1 linear both, vh-flow-2 linear both;
+      animation-timeline: view(), view();
+      animation-range: entry 24% cover 42%, cover 42% cover 62%;
+    }
+  }
+}
+@keyframes vh-flow-1 { from { --vh-p1: 0; } to { --vh-p1: 1; } }
+@keyframes vh-flow-2 { from { --vh-p2: 0; } to { --vh-p2: 1; } }
+
+/* ═══ 7. Тарифы: подпись и сравнение ═══════════════════════════════ */
+.vh-plans-foot { max-width: 560px; margin-inline: auto; }
+.vh-plans-login { justify-self: center; min-height: 44px; display: inline-flex; align-items: center; }
+
+.vh-cmp { margin-top: clamp(32px, 4vw, 48px); }
+.vh-cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 16px;
+}
+.vh-cmp-table th, .vh-cmp-table td { padding: 16px 18px; vertical-align: top; }
+.vh-cmp-table thead th { border-bottom: 1px solid var(--v-line); }
+.vh-cmp-table thead th b { display: block; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.vh-cmp-table thead th span { display: block; margin-top: 4px; color: var(--v-ink-3); font-size: 14px; line-height: 1.4; font-weight: 400; }
+.vh-cmp-table tbody th {
+  width: 26%;
+  color: var(--v-ink-3);
+  font-weight: 500;
+  font-size: 15px;
+}
+.vh-cmp-table tbody tr + tr th, .vh-cmp-table tbody tr + tr td { border-top: 1px solid var(--v-line); }
+.vh-cmp-table td { color: var(--v-ink-2); line-height: 1.45; }
+.vh-cmp-hot { background: var(--v-blue-soft); }
+.vh-cmp-table thead .vh-cmp-hot { border-radius: var(--v-r-sm) var(--v-r-sm) 0 0; }
+.vh-cmp-table tbody tr:last-child .vh-cmp-hot { border-radius: 0 0 var(--v-r-sm) var(--v-r-sm); }
+@media (max-width: 720px) {
+  .vh-cmp { overflow-x: auto; margin-inline: calc(-1 * var(--v-gutter)); padding-inline: var(--v-gutter); }
+  .vh-cmp-table { min-width: 640px; }
+}
+
+/* ═══ 8. Шаги подключения ══════════════════════════════════════════ */
 .vh-app-seg { max-width: 260px; margin-top: 16px; }
 .vh-app-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .vh-step-note { margin: 14px 0 0; }
 
-/* ═══ 6. FAQ ════════════════════════════════════════════════════════ */
+/* ═══ 9. Кешбэк ════════════════════════════════════════════════════ */
+.v-panel.vh-ref-panel { padding: clamp(32px, 5vw, 64px); }
+.vh-ref-head .v-tile-icon { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; box-shadow: none; }
+.vh-ref-head .v-h2 { margin-top: 22px; max-width: 18ch; }
+.v-panel .vh-ref-head .v-lead { color: var(--v-on-black-2); max-width: 620px; }
+
+.vh-ref-steps {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  margin: clamp(32px, 4vw, 44px) 0 0;
+  padding: 0;
+  counter-reset: none;
+}
+@media (min-width: 760px) { .vh-ref-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.vh-ref-step {
+  display: grid;
+  gap: 6px;
+  padding: 24px;
+  border-radius: var(--v-r-lg);
+  background: rgba(255, 255, 255, 0.07);
+}
+.vh-ref-pct { font-size: clamp(34px, 4vw, 44px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.vh-ref-when { color: rgba(255, 255, 255, 0.72); font-size: 15px; line-height: 1.4; }
+.vh-ref-tier { color: rgba(255, 255, 255, 0.46); font-size: 13px; }
+.vh-ref-note { align-self: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; }
+
+/* ═══ 10. FAQ ══════════════════════════════════════════════════════ */
 .vh-faq { display: grid; gap: 10px; margin-top: clamp(28px, 4vw, 40px); text-align: left; }
 .vh-faq-item {
   border-radius: var(--v-r-lg);
@@ -233,14 +495,15 @@
 .vh-faq-item[data-open] .vh-faq-panel { grid-template-rows: 1fr; }
 .vh-faq-panel-in { overflow: hidden; min-height: 0; }
 .vh-faq-panel p { margin: 0; padding: 0 clamp(18px, 3vw, 26px) 22px; color: var(--v-ink-3); font-size: 16px; line-height: 1.55; }
+.vh-faq-panel a { color: var(--v-blue-ink); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ═══ 7. Финальная плита ═══════════════════════════════════════════ */
+/* ═══ 11. Финальная плита ══════════════════════════════════════════ */
 .v-panel.vh-cta {
   text-align: center;
   padding: clamp(48px, 8vw, 88px) clamp(24px, 5vw, 56px);
 }
 .v-panel.vh-cta .v-h2 { color: #FFFFFF; }
-.v-panel.vh-cta p { margin: 16px auto 0; max-width: 480px; color: var(--v-on-black-2); font-size: clamp(17px, 2vw, 20px); }
+.v-panel.vh-cta p { margin: 16px auto 0; max-width: 520px; color: var(--v-on-black-2); font-size: clamp(17px, 2vw, 20px); }
 .v-panel.vh-cta .v-actions { margin-top: 32px; }
 
 @media (prefers-reduced-motion: reduce) {

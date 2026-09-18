@@ -34,16 +34,19 @@ export const MENU_LINKS: VLink[] = [
 
 export interface VLinkGroup { title: string; links: VLink[] }
 
-/** Подвал — три группы ссылок (владелец, 17.09.2026: «богаче»). */
+/**
+ * Подвал — четыре группы ссылок (владелец, 18.09.2026: «низ сайта как в
+ * прошлой версии»). Состав повторяет FOOTER_COLUMNS прежнего корпуса,
+ * плюс то, что появилось после него: пакеты трафика и приложения.
+ */
 export const FOOT_LINKS: VLinkGroup[] = [
   {
     title: "Продукт",
     links: [
       { label: "Тарифы", href: "/pricing" },
       { label: "Пакеты трафика", href: "/pricing#traffic" },
-      { label: "Инструкции", href: "/devices" },
+      { label: "Устройства и приложения", href: "/devices" },
       { label: "Выделенные серверы", href: "/vds" },
-      { label: "Для бизнеса", href: "/business" },
     ],
   },
   {
@@ -51,6 +54,7 @@ export const FOOT_LINKS: VLinkGroup[] = [
     links: [
       { label: "Поддержка", href: "/support" },
       { label: "Частые вопросы", href: "/support#faq" },
+      { label: "Установка на iPhone", href: "/install-ios" },
       { label: "Контакты", href: "/contact" },
     ],
   },
@@ -58,12 +62,28 @@ export const FOOT_LINKS: VLinkGroup[] = [
     title: "Компания",
     links: [
       { label: "О компании", href: "/about" },
+      { label: "Инфраструктура", href: "/infrastructure" },
       { label: "Безопасность", href: "/security" },
-      { label: "Политика конфиденциальности", href: "/privacy" },
+      { label: "Для бизнеса", href: "/business" },
+    ],
+  },
+  {
+    title: "Документы",
+    links: [
       { label: "Пользовательское соглашение", href: "/terms" },
+      { label: "Политика конфиденциальности", href: "/privacy" },
     ],
   },
 ];
+
+/** Правовые ссылки отдельной строкой внизу подвала. */
+export const LEGAL: VLink[] = [
+  { label: "Соглашение", href: "/terms" },
+  { label: "Конфиденциальность", href: "/privacy" },
+];
+
+/** Поддержка в Telegram — тот же адрес, что на /support. */
+export const SUPPORT_TG = { handle: "@atlas_suppbot", href: "https://t.me/atlas_suppbot" };
 
 /** Имена клиентов для подписи в подвале — из единого источника приложений. */
 export const FOOT_APPS = APPS.ios.map((a) => a.name).join(", ");

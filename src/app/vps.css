@@ -498,56 +498,124 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
 .v-menu-foot { display: grid; gap: 8px; padding: 12px 6px 6px; }
 html:has(.v-menu:not([hidden])) { overflow: hidden; }
 
-/* ═══ 6. Подвал ════════════════════════════════════════════════════ */
+/* ═══ 6. Подвал ════════════════════════════════════════════════════
+   Чёрная плита в полную ширину — как в прошлой версии сайта, которая
+   понравилась владельцу (18.09.2026): слева знак, фраза пользы и
+   действие, справа четыре колонки, ниже контурное имя во всю ширину.
+   Низ страницы обязан выглядеть как конец издания, а не как обрыв. */
 .v-foot {
   margin-top: clamp(56px, 8vw, 96px);
-  padding-block: 64px calc(40px + env(safe-area-inset-bottom));
+  padding-block: clamp(56px, 8vw, 88px) calc(28px + env(safe-area-inset-bottom));
   background: var(--v-black);
   color: #FFFFFF;
 }
-.v-foot .v-logo { color: #FFFFFF; font-size: 24px; }
+.v-foot .v-logo { color: #FFFFFF; font-size: 22px; }
 
-/* Богаче: знак и о продукте слева, три колонки ссылок справа. На
-   планшете — знак сверху, три колонки ссылок в ряд ниже; на телефоне —
-   всё стопкой, каждая группа отдельно (владелец, 17.09.2026). */
-.v-foot-grid { display: grid; gap: 40px 32px; }
-.v-foot-brand { grid-column: 1 / -1; max-width: 460px; }
-@media (min-width: 640px) { .v-foot-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1024px) {
-  .v-foot-grid { grid-template-columns: 1.3fr repeat(3, 1fr); align-items: start; }
-  .v-foot-brand { grid-column: auto; }
-}
-.v-foot-about { margin: 20px 0 0; color: rgba(255, 255, 255, 0.58); font-size: 17px; line-height: 1.55; }
-.v-foot-apps { margin: 16px 0 0; font-size: 14px; color: rgba(255, 255, 255, 0.4); }
-.v-foot-apps b { color: rgba(255, 255, 255, 0.74); font-weight: 500; }
-.v-foot-org { margin: 32px 0 0; font-size: 15px; line-height: 1.8; color: rgba(255, 255, 255, 0.58); }
-.v-foot-org b { display: block; color: #FFFFFF; font-size: 17px; font-weight: 600; }
+.v-foot-top { display: grid; gap: clamp(40px, 6vw, 64px); }
+@media (min-width: 900px) { .v-foot-top { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
 
-.v-foot-group-title {
-  margin: 0 0 16px;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 13px;
+.v-foot-brand { max-width: 460px; }
+.v-foot-pitch {
+  margin: 22px 0 0;
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1.3;
+  letter-spacing: -0.022em;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: #FFFFFF;
+  text-wrap: pretty;
 }
-.v-foot-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.v-foot-pitch span { color: #7FB0F8; }
+.v-foot-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.v-btn-ghost { background: transparent; color: #FFFFFF; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.26); }
+@media (hover: hover) { .v-btn-ghost:hover { background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.5); } }
+.v-foot-support { margin: 24px 0 0; font-size: 15px; line-height: 1.6; color: rgba(255, 255, 255, 0.56); }
+.v-foot-support a {
+  color: #7FB0F8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(127, 176, 248, 0.45);
+}
+@media (hover: hover) { .v-foot-support a:hover { color: #FFFFFF; text-decoration-color: rgba(255, 255, 255, 0.6); } }
+
+.v-foot-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 24px; }
+@media (min-width: 700px) { .v-foot-cols { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.v-foot-group-title {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.v-foot-links { list-style: none; margin: 0; padding: 0; display: grid; }
 .v-foot-links a {
   display: inline-flex;
   align-items: center;
-  min-height: 44px;
-  color: #6FA6F6;
+  min-height: 40px;
+  color: rgba(255, 255, 255, 0.78);
   font-size: 16px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: rgba(111, 166, 246, 0.4);
-  transition: color 220ms var(--v-ease), transform 220ms var(--v-ease), text-decoration-color 220ms var(--v-ease);
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 220ms var(--v-ease), transform 220ms var(--v-ease);
 }
-@media (hover: hover) {
-  .v-foot-links a:hover { color: #FFFFFF; text-decoration-color: rgba(255, 255, 255, 0.5); transform: translateX(3px); }
+@media (hover: hover) { .v-foot-links a:hover { color: #FFFFFF; transform: translateX(3px); } }
+
+.v-foot-apps {
+  margin: clamp(40px, 6vw, 64px) 0 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.42);
 }
-.v-foot-copy { margin: 48px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.4); }
-.v-foot-slim { margin-top: 48px; padding-block: 28px calc(28px + env(safe-area-inset-bottom)); }
+.v-foot-apps b { color: rgba(255, 255, 255, 0.78); font-weight: 600; }
+
+/* Контурное имя во всю ширину колонки: кегль считается от ширины
+   контейнера (`--k` — отношение ширины строки к кеглю, замерено в
+   браузере). Меняя надпись или начертание, число надо перемерить. */
+.v-foot-word { container-type: inline-size; margin-top: clamp(28px, 4vw, 44px); overflow: hidden; }
+.v-foot-word p {
+  --k: 5;
+  margin: 0;
+  font-size: calc(100cqw / var(--k));
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.1);
+}
+@supports (-webkit-text-stroke: 1px #000) {
+  .v-foot-word p { color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.26); }
+}
+
+.v-foot-base {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 24px;
+  margin-top: clamp(24px, 3vw, 36px);
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.42);
+}
+.v-foot-base p { margin: 0; }
+.v-foot-legal { display: flex; flex-wrap: wrap; gap: 20px; }
+.v-foot-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+@media (hover: hover) { .v-foot-legal a:hover { color: #FFFFFF; } }
+
+/* Рабочие экраны: одна строка реквизитов, без плиты. */
+.v-foot-slim {
+  margin-top: 48px;
+  padding-block: 0 calc(20px + env(safe-area-inset-bottom));
+  background: transparent;
+  color: var(--v-ink-3);
+}
+.v-foot-slim .v-foot-base { border-top-color: var(--v-line); color: var(--v-ink-3); }
+.v-foot-slim .v-foot-legal a { color: var(--v-ink-2); }
 
 /* ═══ 7. Карточки ══════════════════════════════════════════════════ */
 .v-card {
@@ -571,7 +639,15 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   text-align: left;
   overflow: hidden;
 }
-.v-dcard-tag { align-self: flex-start; margin-bottom: 28px; }
+.v-dcard-tag {
+  align-self: flex-start;
+  max-width: 100%;
+  margin-bottom: 24px;
+  padding-block: 9px;
+  white-space: normal;
+  line-height: 1.25;
+  text-align: center;
+}
 .v-dcard-title { margin: 0; font-size: clamp(28px, 3.4vw, 36px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
 .v-dcard-desc { margin: 16px 0 0; color: var(--v-on-black-2); font-size: 18px; line-height: 1.5; }
 .v-checks { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 12px; }
@@ -602,6 +678,42 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 .v-price-row b { color: #FFFFFF; font-size: 38px; font-weight: 600; letter-spacing: -0.03em; }
 .v-price-row s { color: rgba(255, 255, 255, 0.4); font-size: 17px; }
 .v-dcard .v-btn { margin-top: 22px; }
+
+/* Цена тремя способами: за месяц (её сравнивают), за срок (её платят),
+   за день (её примеряют к бытовым тратам). Средний срок выделен —
+   почему именно так, написано в шапке PlanCards.tsx. */
+.v-dcard-price { display: flex; align-items: baseline; gap: 10px; margin: 20px 0 0; }
+.v-dcard-price b { font-size: clamp(40px, 5vw, 52px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+.v-dcard-price span { color: var(--v-on-black-2); font-size: 17px; }
+.v-dcard-sum { margin: 10px 0 0; color: var(--v-on-black-2); font-size: 16px; line-height: 1.45; }
+.v-dcard-save { margin: 16px 0 0; font-size: 15px; line-height: 1.5; color: rgba(255, 255, 255, 0.56); }
+.v-dcard-save s { color: rgba(255, 255, 255, 0.42); }
+.v-dcard-save b { display: inline-block; color: #FFFFFF; font-weight: 600; }
+.v-dcard-save-flat { color: rgba(255, 255, 255, 0.5); }
+.v-dcard .v-checks { margin-top: auto; padding-top: 26px; }
+.v-dcard .v-checks li { font-size: 16px; }
+
+/* Рекомендованный срок. Среди четырёх чёрных карточек выделяет не
+   размер, а материал: синяя плита, кольцо и белая кнопка. */
+.v-dcard-pop {
+  background: linear-gradient(158deg, #4A90F6 0%, #2A6AD8 52%, #1E56C8 100%);
+  box-shadow: 0 0 0 3px rgba(58, 133, 240, 0.22), 0 26px 60px rgba(30, 86, 200, 0.28);
+}
+.v-dcard-pop .v-dcard-price span,
+.v-dcard-pop .v-dcard-sum { color: rgba(255, 255, 255, 0.82); }
+.v-dcard-pop .v-dcard-save { color: rgba(255, 255, 255, 0.78); }
+.v-dcard-pop .v-dcard-save s { color: rgba(255, 255, 255, 0.6); }
+.v-dcard-pop .v-checks li::before { background-color: #FFFFFF; }
+.v-dcard-pop .v-badge-yellow { display: inline-flex; align-items: center; gap: 6px; }
+/* Кольцо проявляется при подводе курсора к карточке — отклик на руку,
+   а не собственная жизнь плиты. */
+@media (hover: hover) {
+  .v-dcard-pop { transition: box-shadow 420ms var(--v-ease), transform 420ms var(--v-ease); }
+  .v-dcard-pop:hover { box-shadow: 0 0 0 4px rgba(58, 133, 240, 0.34), 0 32px 70px rgba(30, 86, 200, 0.36); transform: translateY(-4px); }
+}
+
+/* Переключатель Basic / Plus над карточками. */
+.v-seg-plans { max-width: 440px; margin: clamp(28px, 4vw, 40px) auto 0; }
 
 /* Витринная тёмная плита (как «управляйте подпиской»). */
 .v-panel {
@@ -764,6 +876,22 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 }
 .v-dots button[aria-current="true"]::before { background: var(--v-blue); }
 .v-car-note { margin: 28px auto 0; max-width: 720px; text-align: center; color: var(--v-ink-3); font-size: 15px; line-height: 1.5; }
+
+/* `wide` — сравнение важнее листания: с 1120px четыре карточки стоят
+   рядом, лента перестаёт быть лентой, стрелки и точки не нужны. */
+@media (min-width: 1120px) {
+  .v-carousel-wide .v-track {
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 14px;
+    overflow: visible;
+    scroll-snap-type: none;
+    padding-bottom: 0;
+  }
+  .v-carousel-wide .v-car-arrow, .v-carousel-wide .v-dots { display: none; }
+  .v-carousel-wide .v-dcard { padding: clamp(24px, 2.4vw, 32px); }
+  .v-carousel-wide .v-dcard-pop { transform: translateY(-10px); }
+  @media (hover: hover) { .v-carousel-wide .v-dcard-pop:hover { transform: translateY(-16px); } }
+}
 
 /* ═══ 9. Шаги ══════════════════════════════════════════════════════ */
 .v-steps {

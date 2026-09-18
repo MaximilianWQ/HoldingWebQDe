@@ -17,6 +17,7 @@ import { auditLevelFor } from "./audit-level";
 import { revokeAllSessions } from "./session-store";
 import { grantId, insertBypassGrant } from "./bypass-ledger";
 import { TRAFFIC_TRIAL_BYTES } from "./traffic-packs";
+import { loyaltyNextTier, loyaltyTierFor } from "./loyalty";
 
 // Hard ceiling for direct subscription_end writes through updateUser.
 // Ledger events are not subject to it (stacked paid renewals may go
@@ -711,20 +712,24 @@ export interface LoyaltyInfo {
 
 /** Get cashback percentage based on paid referrals count */
 export function getCashbackPercent(paidReferrals: number): number {
-  if (paidReferrals >= 50) return 45;
-  if (paidReferrals >= 25) return 25;
-  return 10;
+  return loyaltyTierFor(paidReferrals).percent;
 }
 
-/** Get full loyalty tier info */
+/**
+ * Get full loyalty tier info. Пороги и проценты — только из
+ * `src/lib/loyalty.ts`: ту же таблицу читает витрина, которой нельзя
+ * импортировать этот модуль вместе с пулом базы.
+ */
 export function getLoyaltyInfo(paidReferrals: number): LoyaltyInfo {
-  if (paidReferrals >= 50) {
-    return { tier: "Партнёр", percent: 45, paidReferrals, nextTier: null, referralsToNextTier: 0 };
-  }
-  if (paidReferrals >= 25) {
-    return { tier: "Продвинутый", percent: 25, paidReferrals, nextTier: "Партнёр", referralsToNextTier: 50 - paidReferrals };
-  }
-  return { tier: "Стартовый", percent: 10, paidReferrals, nextTier: "Продвинутый", referralsToNextTier: 25 - paidReferrals };
+  const current = loyaltyTierFor(paidReferrals);
+  const next = loyaltyNextTier(paidReferrals);
+  return {
+    tier: current.tier,
+    percent: current.percent,
+    paidReferrals,
+    nextTier: next?.tier ?? null,
+    referralsToNextTier: next ? next.from - paidReferrals : 0,
+  };
 }
 
 // ─── Balance Operations ─────────────────────────────────────────

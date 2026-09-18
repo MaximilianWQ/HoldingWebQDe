@@ -3,21 +3,57 @@
 import Link from "next/link";
 import { useState } from "react";
 import Carousel from "./Carousel";
+import Icon from "@/components/pixel/Icon";
 import {
   PLANS, PERIODS, PERIOD_DAYS, PERIOD_LABEL, PLAN_CONTENT, PLAN_SPEED, DEVICE_LIMIT,
-  discountPercent, formatRub, pricePerMonth, type PlanId, type Period,
+  discountPercent, formatRub, pricePerMonth, savings, type PlanId, type Period,
 } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 
-const TAG: Record<Period, string> = { 1: "Начальный", 3: "", 6: "", 12: "Выгодно" };
-
 /**
- * Тарифы чёрными карточками: переключатель Basic / Plus и карусель сроков.
- * Цены, скидки, скорость и лимит устройств — только из src/lib.
- * `href(plan, period)` — куда ведёт «Подключиться».
+ * Карточки тарифов.
+ *
+ * ПОЧЕМУ ВЫДЕЛЕН СРЕДНИЙ СРОК (владелец, 18.09.2026: «выделить средний
+ * тариф с позиции продаж — что это супервыгодно»).
+ *
+ * Четыре равновеликие карточки — это не выбор, а задача на сравнение:
+ * человек считает в уме и уходит «подумать». Поэтому ряд построен как
+ * лестница решения:
+ *   · 1 месяц — якорь. Самый дорогой месяц (199 ₽), и он показан первым:
+ *     всё, что правее, читается относительно него.
+ *   · 3 месяца — промежуточный: скидка есть, но месяц дороже, чем у
+ *     полугода. Он делает следующую карточку очевидной.
+ *   · 6 месяцев — РЕКОМЕНДАЦИЯ. Тёмная плита, лента, кольцо, крупная
+ *     цена за месяц, зачёркнутая сумма помесячной оплаты за тот же срок
+ *     и экономия в рублях. Честная формулировка — «оптимально», а не
+ *     «выбирают чаще всего»: распределение покупок мы проверить не
+ *     можем, а выдуманная популярность — то же враньё, что выдуманная
+ *     сертификация (COMPLIANCE-CHECK.md).
+ *   · 12 месяцев — максимальная скидка, но год вперёд; стоит спокойной
+ *     карточкой, чтобы не спорить с рекомендацией.
+ *
+ * Цена показана тремя способами: за месяц (её сравнивают), за период
+ * (её платят) и за день (её примеряют к бытовым тратам). Все три —
+ * из `src/lib/plans.ts`, ни одно число не написано руками.
  */
+
+/** Рекомендуемый срок — тот самый «средний». */
+export const POPULAR: Period = 6;
+
+const TAG: Record<Period, string> = {
+  1: "Попробовать",
+  3: "Короткий срок",
+  6: "Оптимально",
+  12: "Максимум выгоды",
+};
+
+function perDay(plan: PlanId, period: Period): string {
+  const v = PLANS[plan][period] / PERIOD_DAYS[period];
+  return v.toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
 export default function PlanCards({
-  cta = "Подключиться",
+  cta = "Подключить",
   href = (plan, period) => `/subscribe?plan=${plan}&period=${period}`,
   initialPlan = "basic",
 }: {
@@ -28,34 +64,63 @@ export default function PlanCards({
   const [plan, setPlan] = useState<PlanId>(initialPlan);
   return (
     <>
-      <div className="v-seg" role="tablist" aria-label="Тариф" style={{ maxWidth: 420, margin: "32px auto 0" }}>
+      <div className="v-seg v-seg-plans" role="tablist" aria-label="Тариф">
         {(["basic", "plus"] as PlanId[]).map((id) => (
           <button key={id} type="button" role="tab" aria-selected={plan === id} onClick={() => setPlan(id)}>
             {PLAN_CONTENT[id].name} · {PLAN_SPEED[id]} Гбит/с
           </button>
         ))}
       </div>
-      <Carousel label={`Сроки тарифа ${PLAN_CONTENT[plan].name}`} key={plan}>
+
+      <Carousel label={`Сроки тарифа ${PLAN_CONTENT[plan].name}`} key={plan} initial={PERIODS.indexOf(POPULAR)} wide>
         {PERIODS.map((p) => {
           const off = discountPercent(plan, p);
-          const tag = off > 0 ? `${TAG[p] ? `${TAG[p]} · ` : ""}−${off}%` : TAG[p];
+          const pop = p === POPULAR;
+          const monthly = PLANS[plan][1] * p;
           return (
-            <article key={p} className="v-dcard" aria-label={`${PLAN_CONTENT[plan].name}, ${PERIOD_LABEL[p].full}`}>
-              <span className={`v-badge v-badge-lg v-dcard-tag ${p === 12 ? "v-badge-solid-blue" : "v-badge-dark"}`}>{tag}</span>
+            <article
+              key={p}
+              className={`v-dcard${pop ? " v-dcard-pop" : ""}`}
+              aria-label={`${PLAN_CONTENT[plan].name}, ${PERIOD_LABEL[p].full}${pop ? ", рекомендуем" : ""}`}
+            >
+              <span className={`v-badge v-badge-lg v-dcard-tag ${pop ? "v-badge-yellow" : off > 0 ? "v-badge-solid-blue" : "v-badge-dark"}`}>
+                {pop ? <Icon name="bolt" size={14} /> : null}
+                {TAG[p]}{off > 0 ? ` · −${off}%` : ""}
+              </span>
+
               <h3 className="v-dcard-title">{PERIOD_LABEL[p].full}</h3>
-              <p className="v-dcard-desc">{PLAN_CONTENT[plan].name}: доступ к Atlas Secure VPS на {PERIOD_DAYS[p]} дней.</p>
-              <ul className="v-checks">
-                <li>До {DEVICE_LIMIT} устройств на подписке</li>
-                <li>Все {COUNTRY_COUNT} стран — выбор локации</li>
-                <li>Скорость канала {PLAN_SPEED[plan]} Гбит/с</li>
-                <li>Без автосписаний</li>
-              </ul>
-              <p className="v-price-row">
-                Стоимость подключения:
-                <b>{formatRub(PLANS[plan][p])} ₽</b>
-                {p > 1 ? <span>{formatRub(pricePerMonth(plan, p))} ₽ в месяц</span> : null}
+
+              <p className="v-dcard-price">
+                <b>{formatRub(pricePerMonth(plan, p))} ₽</b>
+                <span>в месяц</span>
               </p>
-              <Link href={href(plan, p)} prefetch={false} className="v-btn v-btn-primary v-btn-block">{cta}</Link>
+
+              <p className="v-dcard-sum">
+                {formatRub(PLANS[plan][p])} ₽ за {PERIOD_LABEL[p].accusative} · ≈ {perDay(plan, p)} ₽ в день
+              </p>
+
+              {off > 0 ? (
+                <p className="v-dcard-save">
+                  <s>{formatRub(monthly)} ₽</s> помесячно за тот же срок — <b>экономия {formatRub(savings(plan, p))} ₽</b>
+                </p>
+              ) : (
+                <p className="v-dcard-save v-dcard-save-flat">Разовый платёж за месяц — попробовать без обязательств</p>
+              )}
+
+              <ul className="v-checks">
+                <li>До {DEVICE_LIMIT} устройств на одной подписке</li>
+                <li>Все {COUNTRY_COUNT} стран — страна меняется в приложении</li>
+                <li>Канал {PLAN_SPEED[plan]} Гбит/с</li>
+                <li>Без автосписаний — продлеваете сами</li>
+              </ul>
+
+              <Link
+                href={href(plan, p)}
+                prefetch={false}
+                className={`v-btn v-btn-block ${pop ? "v-btn-white" : "v-btn-primary"}`}
+              >
+                {cta} на {PERIOD_LABEL[p].accusative}
+              </Link>
             </article>
           );
         })}

@@ -38,7 +38,12 @@ PHONE_PNG = os.path.join(HERE, "iphone-screens", "dash-440.png")
 OUT = arg("--out", "/tmp/hero.png")
 SAMPLES = int(arg("--samples", "64"))
 WIDTH = int(arg("--width", "1200"))
-HEIGHT = int(round(WIDTH * 900 / 1400))
+# Высота кадра берётся с запасом (0,72 вместо 0,643 от ширины): при
+# прежней пропорции тень под телефоном упиралась в нижний край кадра и
+# после обрезки давала прямой шов — владелец 18.09.2026: «резкий переход
+# с рендеров, там тень». Обрезка всё равно ужимает кадр по содержимому,
+# так что лишняя высота ничего не стоит.
+HEIGHT = int(round(WIDTH * float(arg("--aspect", "0.72"))))
 
 sc = bpy.context.scene
 sc.frame_set(sc.frame_end)  # крышка открыта, экран горит

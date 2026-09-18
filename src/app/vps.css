@@ -265,8 +265,9 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
   transition: transform 200ms var(--v-ease), background-color 200ms var(--v-ease);
 }
-.v-store:active { transform: scale(0.98); }
-@media (hover: hover) { .v-store:hover { background: var(--v-black-3); } }
+/* Плитки информационные (18.09.2026): ни курсора-руки, ни отклика на
+   нажатие — они ничего не открывают, и обещать нажатие нельзя. */
+.v-store { cursor: default; }
 .v-store svg { flex: none; }
 .v-store span { display: grid; line-height: 1.05; text-align: left; }
 .v-store small { font-size: 12px; font-weight: 500; opacity: 0.86; }

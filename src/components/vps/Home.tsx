@@ -4,7 +4,6 @@ import Icon from "@/components/pixel/Icon";
 import StoreBadges from "./StoreBadges";
 import PlanCards from "./PlanCards";
 import TrafficCards from "./TrafficCards";
-import AppsRow from "./home/AppsRow";
 import CountryMarquee from "./home/CountryMarquee";
 import WhyBento from "./home/WhyBento";
 import DiffSwitch from "./home/DiffSwitch";
@@ -84,12 +83,12 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               с числами из src/lib и две геометрические фигуры. */}
           <div className="vh-stage" aria-hidden>
             <img
-              src="/media/hero/stage-860.v2.webp"
-              srcSet="/media/hero/stage-860.v2.webp 860w, /media/hero/stage-1720.v2.webp 1720w"
+              src="/media/hero/stage-860.v3.webp"
+              srcSet="/media/hero/stage-860.v3.webp 860w, /media/hero/stage-1720.v3.webp 1720w"
               sizes="(min-width: 1100px) 1000px, 100vw"
               alt=""
               width={860}
-              height={575}
+              height={613}
               fetchPriority="high"
               decoding="async"
             />
@@ -115,7 +114,6 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
           </div>
 
           <StoreBadges />
-          <AppsRow />
         </div>
       </section>
 

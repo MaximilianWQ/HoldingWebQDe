@@ -205,38 +205,10 @@
 
 @keyframes vh-scroll-stage { to { transform: translateY(34px) scale(0.982); } }
 
-/* «Работает в приложениях Happ и Incy» — текстовые логотипы-пилюли. */
-.vh-apps {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-top: clamp(28px, 4vw, 40px);
-}
-.vh-apps-label { margin: 0; color: var(--v-ink-4); font-size: 14px; }
-.vh-apps-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.vh-apps-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: var(--v-soft);
-  color: var(--v-ink-2);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  transition: transform 240ms var(--v-ease), background-color 240ms var(--v-ease);
-}
-.vh-apps-pill i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--v-blue);
-}
-@media (hover: hover) { .vh-apps-pill:hover { background: var(--v-soft-2); transform: translateY(-1px); } }
+/* Строка «Работает в приложениях Happ и Incy» снята с первого экрана
+   18.09.2026 вместе с компонентом AppsRow: имена клиентов ничего не
+   решают до регистрации, а первому экрану нужен один путь. Имена
+   остались в подвале и на /devices. */
 
 /* ═══ 2. Полоса возражений ═════════════════════════════════════════ */
 .vh-proof {

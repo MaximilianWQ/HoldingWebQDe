@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import VShell from "@/components/vps/VShell";
+import Icon from "@/components/pixel/Icon";
 import { BRAND, TRIAL } from "@/components/vps/links";
 import { COUNTRY_COUNT, CITY_COUNT, LOCATIONS } from "@/lib/locations";
 import { PLAN_SPEED, DEVICE_LIMIT } from "@/lib/plans";
@@ -124,27 +125,43 @@ export default function InfrastructurePage() {
         </div>
       </section>
 
-      {/* 04 · что подтверждено */}
+      {/* 04 · проверяемые числа
+          Здесь стоял блок «Что подтверждено, а что ещё нет» с колонкой
+          «Ещё не подтверждено — и мы этого не пишем»: площадки,
+          сертификаты, отклик по городам. Владелец 18.09.2026 попросил
+          убрать, и он прав — покупателю показывали внутреннюю сверку,
+          то есть рекламировали отсутствие. Список того, что ждёт
+          документов, живёт в COMPLIANCE-CHECK.md; на странице остались
+          только числа, которые можно проверить. */}
       <section className="v-section v-center v-reveal" aria-labelledby="pi-honest-title">
         <div className="v-wrap">
-          <h2 id="pi-honest-title" className="v-h2">Что подтверждено, а что ещё нет</h2>
-          <div className="pi-honest">
-            <div>
-              <h3>Подтверждено кодом</h3>
-              <ul>
-                <li>{COUNTRY_COUNT} {COUNTRY_WORD} и {CITY_COUNT} {CITY_WORD} — список в коде, из него же строится страница</li>
-                <li>Ширина канала {PLAN_SPEED.basic} и {PLAN_SPEED.plus} Гбит/с — из состава тарифов</li>
-                <li>{DEVICE_LIMIT} {plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на подписке</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Ещё не подтверждено — и мы этого не пишем</h3>
-              <ul>
-                <li>Названия площадок и точек обмена трафиком — нужно право упоминания</li>
-                <li>Сертификаты и аудиты — нужен сам документ</li>
-                <li>Отклик по городам — сейчас это оценки, а не замеры</li>
-              </ul>
-            </div>
+          <h2 id="pi-honest-title" className="v-h2">Числа, которые можно проверить</h2>
+          <p className="v-lead">
+            Всё, что написано на этой странице, берётся из того же кода, по которому работает сервис. Разойтись
+            витрине и продукту негде: список стран, состав тарифов и лимит устройств лежат в одном месте.
+          </p>
+          <div className="v-bento" style={{ marginTop: "clamp(32px, 5vw, 48px)", textAlign: "left" }}>
+            <article className="v-span-2 v-tile v-tile-blue v-lift">
+              <span className="v-tile-icon" aria-hidden><Icon name="globe" size={22} /></span>
+              <h3>География сети</h3>
+              <p>Список стран и городов — один на сайт, из него же строится карта</p>
+              <b className="v-tile-num">{COUNTRY_COUNT}</b>
+              <p>{COUNTRY_WORD}, {CITY_COUNT} {CITY_WORD}</p>
+            </article>
+            <article className="v-span-2 v-tile v-tile-dark v-lift">
+              <span className="v-tile-icon" aria-hidden><Icon name="bolt" size={22} /></span>
+              <h3>Ширина канала</h3>
+              <p>Из состава тарифов: Basic и Plus</p>
+              <b className="v-tile-num">{PLAN_SPEED.basic}–{PLAN_SPEED.plus}</b>
+              <p>Гбит/с</p>
+            </article>
+            <article className="v-span-2 v-tile v-lift">
+              <span className="v-tile-icon" aria-hidden><Icon name="devices" size={22} /></span>
+              <h3>Устройства</h3>
+              <p>Одна подписка на все ваши экраны</p>
+              <b className="v-tile-num">{DEVICE_LIMIT}</b>
+              <p>{plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} сразу</p>
+            </article>
           </div>
           <div className="v-actions">
             <Link href="/security" className="v-btn v-btn-soft">Что мы знаем о вас</Link>

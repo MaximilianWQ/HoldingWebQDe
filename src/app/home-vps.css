@@ -93,10 +93,43 @@
    прокрутку страницы: уезжая под сгиб, слегка опускается и уменьшается,
    чтобы кадр не выглядел приклеенным к экрану. */
 .vh-stage {
+  position: relative;
   width: min(100%, 860px);
   margin-inline: auto;
+  isolation: isolate;
 }
-.vh-stage img { width: 100%; height: auto; }
+.vh-stage img { position: relative; z-index: 1; width: 100%; height: auto; }
+
+/* Подложка под кадром — техническая сетка и мягкое свечение (язык
+   Yandex Cloud, на который ссылается владелец). Сетка обязана
+   растворяться по краям: прямоугольник с видимым швом вокруг кадра —
+   ровно то, за что этот первый экран уже получил «фон просто ужас».
+   Поэтому обе половины подложки погашены радиальной маской, а не
+   обрезаны рамкой. */
+.vh-stage::before,
+.vh-stage::after {
+  content: "";
+  position: absolute;
+  inset: -14% -10% -18%;
+  pointer-events: none;
+}
+.vh-stage::before {
+  z-index: -1;
+  background:
+    radial-gradient(46% 42% at 48% 46%, rgba(58, 133, 240, 0.18), transparent 70%),
+    radial-gradient(34% 30% at 76% 26%, rgba(124, 92, 231, 0.13), transparent 72%);
+  filter: blur(6px);
+}
+.vh-stage::after {
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(11, 11, 15, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(11, 11, 15, 0.055) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(54% 50% at 50% 50%, #000 34%, transparent 76%);
+  mask-image: radial-gradient(54% 50% at 50% 50%, #000 34%, transparent 76%);
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .vh-stage { animation: vh-bob-stage 9s var(--v-ease) infinite; }
@@ -404,7 +437,14 @@
     .vh-flow {
       animation: vh-flow-1 linear both, vh-flow-2 linear both;
       animation-timeline: view(), view();
-      animation-range: entry 24% cover 42%, cover 42% cover 62%;
+      /* Раньше первая линия начинала заполняться на `entry 24%`, а
+         вторая доходила до конца только к `cover 62%`: на обычной
+         прокрутке человек успевал проехать схему раньше, чем она
+         срабатывала (владелец, 18.09.2026: «анимация проигрывается
+         слишком поздно»). Теперь обе линии укладываются в первую
+         половину прохода: к моменту, когда раздел встал в центр
+         экрана, пакет уже дошёл. */
+      animation-range: entry 6% entry 70%, entry 62% cover 28%;
     }
   }
 }

@@ -172,4 +172,46 @@ select.v-input {
   text-decoration-color: color-mix(in srgb, currentColor 60%, transparent);
 }
 .vp-item-mark { flex: none; width: 20px; height: 20px; margin-top: 1px; color: var(--v-blue); }
+/* Строка границы: сначала сама вещь, ниже — что это значит на практике
+   (18.09.2026). Раньше вторая колонка была зачёркнута целиком, и блок
+   читался как список наших отказов. */
+.vp-item b { display: block; margin-bottom: 3px; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; color: var(--v-ink); }
+.vp-col-h-yes b, .vp-col-h-yes { color: var(--v-ink); }
 .vp-item-mark-off { color: var(--v-ink-4); }
+
+/* ── Контакты (/contact, 18.09.2026) ───────────────────────────────
+   Две карточки-адреса перед формой: кому пишем и что этот адрес
+   решает. Карточка — ссылка целиком, чтобы попадать по ней пальцем,
+   а не по строке почты. */
+.vc-desks {
+  display: grid;
+  gap: 14px;
+  margin-top: clamp(20px, 3vw, 28px);
+}
+@media (min-width: 720px) { .vc-desks { grid-template-columns: 1fr 1fr; } }
+.vc-desk {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  color: inherit;
+  text-decoration: none;
+}
+.vc-desk-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 14px;
+  background: var(--v-blue-soft);
+  color: var(--v-blue-ink);
+}
+.vc-desk-title { font-size: 15px; color: var(--v-ink-3); }
+.vc-desk-mail {
+  font-size: clamp(18px, 2.2vw, 21px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.vc-desk-note { margin-top: 2px; font-size: 15px; line-height: 1.45; color: var(--v-ink-3); }
+@media (hover: hover) { .vc-desk:hover .vc-desk-mail { color: var(--v-blue-ink); } }

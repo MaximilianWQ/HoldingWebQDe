@@ -67,11 +67,51 @@
 .pa-story-line b { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
 .pa-story-line span { color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
 
-/* ── Миссия ────────────────────────────────────────────────────────
-   Одна мысль на тёмной плите — та, ради которой компания появилась. */
+/* ── Миссия (18.09.2026) ───────────────────────────────────────────
+   Отдельная тёмная плита со словом «Миссия» — владелец просил выделить
+   её прямо, а не растворять в тексте. Внутри: одна фраза крупно и три
+   принципа, которые из неё следуют (они же заменили прежний блок «три
+   правила» — тот повторял их почти дословно). */
 .v-panel.pa-mission { padding: clamp(36px, 6vw, 72px); }
-.v-panel.pa-mission .v-h2 { color: #FFFFFF; max-width: 20ch; }
+.pa-mission-kicker {
+  margin: 0 0 18px !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 15px !important;
+  letter-spacing: 0.02em;
+}
+.v-panel.pa-mission .v-h2 { color: #FFFFFF; max-width: 22ch; }
 .pa-mission-accent { color: #7FB0F8; }
+.pa-mission-lead {
+  margin-top: 22px !important;
+  max-width: 62ch;
+  font-size: clamp(17px, 2vw, 21px) !important;
+  line-height: 1.55;
+  color: var(--v-on-black-2) !important;
+}
+.pa-mission-list {
+  list-style: none;
+  display: grid;
+  gap: 14px;
+  margin: clamp(32px, 4vw, 44px) 0 0;
+  padding: 0;
+}
+@media (min-width: 860px) { .pa-mission-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.pa-mission-list li {
+  padding: 24px;
+  border-radius: var(--v-r-lg);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.pa-mission-list b {
+  display: block;
+  margin-bottom: 8px;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
 .pa-story-src { margin-top: 24px !important; font-size: 14px !important; color: var(--v-ink-4) !important; }
 .pa-story-src a {
   color: var(--v-ink-3);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Logo from "./Logo";
 import { FOOT_LINKS, FOOT_APPS, LEGAL, SUPPORT_TG, BRAND, TRIAL } from "./links";
+import { SUPPORT_DESK } from "@/lib/contacts";
 import { COUNTRY_COUNT, CITY_COUNT } from "@/lib/locations";
 import { FOUNDED } from "@/lib/nav";
 import { PLANS, formatRub } from "@/lib/plans";
@@ -57,8 +58,10 @@ export default function VFooter({ slim = false }: { slim?: boolean }) {
               <Link href="/pricing" className="v-btn v-btn-ghost">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
             </div>
             <p className="v-foot-support">
-              Вопрос перед покупкой? Поддержка в Telegram —{" "}
-              <a href={SUPPORT_TG.href} target="_blank" rel="noopener noreferrer">{SUPPORT_TG.handle}</a>
+              Вопрос перед покупкой? Пишите в Telegram{" "}
+              <a href={SUPPORT_TG.href} target="_blank" rel="noopener noreferrer">{SUPPORT_TG.handle}</a>{" "}
+              или на почту{" "}
+              <a href={`mailto:${SUPPORT_DESK.email}`}>{SUPPORT_DESK.email}</a>
             </p>
           </div>
 

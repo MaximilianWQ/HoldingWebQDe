@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /install-happ — «Подключение в Happ по шагам» (владелец, 17.09.2026:
+   «анимированная инструкция, такая же по технике и качеству, как
+   /install-ios»). Префикс `ih-`, токены — vps.css (`--v-*`).
+
+   Раскладка повторяет /install-ios намеренно: один живой телефон
+   (HappPhone, сцена "tour") рядом с чек-листом шагов, шаг подсвечивается
+   в такт анимации. Второго телефона и второго набора рендеров на
+   странице нет — смысл приёма в том, что прибор один.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Первый экран: телефон + чек-лист ──────────────────────────── */
+.ih-hero.v-section { padding-block: clamp(2rem, 6vh, 4rem) clamp(2rem, 5vh, 3.5rem); }
+.ih-grid { display: grid; gap: clamp(1.75rem, 4vh, 2.5rem); align-items: center; }
+/* На телефоне корпус едет наверх (order), текст и чек-лист — под ним;
+   от 900px порядок в DOM берёт своё: телефон слева, копия справа. */
+.ih-art { order: -1; margin: 0; padding-block: 4px clamp(12px, 3vh, 20px); }
+@media (min-width: 900px) {
+  .ih-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 5vw, 4rem); }
+  .ih-art { order: 0; padding-block: 0; }
+}
+.ih-kicker { margin: 0 0 10px; font-size: 15px; font-weight: 600; color: var(--v-blue); }
+.ih-copy .v-lead { margin: 14px 0 0; max-width: 42ch; }
+/* Телефон — HappPhone (happ-phone.css): ширина задаёт всё, высота — по пропорции корпуса. */
+.ih-art .hp-dev { width: min(100%, clamp(200px, 56vw, 280px)); }
+@media (min-width: 900px) { .ih-art .hp-dev { width: clamp(240px, 24vw, 320px); } }
+
+/* ─── Чек-лист шагов: общий `.v-steps`/`.v-step`, своя подсветка ──── */
+.ih-steps { margin-top: 24px; }
+.ih-step { transition: background-color 320ms var(--v-ease); }
+.ih-step .v-step-check { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; transition: transform 320ms var(--v-ease), background-color 320ms var(--v-ease); }
+.ih-step p { max-width: 46ch; }
+.ih-tip {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--v-r-sm);
+  background: var(--v-blue-soft);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--v-ink-2);
+}
+/* Шаг, который сейчас показывает телефон — мягкая синяя подложка и
+   чуть крупнее номер; синхронизировано с `onScene` из HappPhone (tour). */
+.ih-step[data-active="true"] { background: var(--v-blue-soft); }
+.ih-step[data-active="true"] .v-step-check { transform: scale(1.12); }
+
+/* ─── Установка: ссылки магазинов по платформам ─────────────────── */
+.ih-get { padding-block: clamp(1rem, 4vh, 2rem); }
+.ih-get-head { max-width: 46ch; }
+.ih-get-head .v-h2 { margin: 0; }
+.ih-get-head .v-lead { margin: 12px 0 0; }
+.ih-cards {
+  display: grid;
+  gap: 14px;
+  margin-top: clamp(20px, 3vh, 28px);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.ih-card {
+  padding: clamp(20px, 2.4vw, 26px);
+  border-radius: var(--v-r-lg);
+  background: var(--v-soft);
+}
+.ih-card-head { display: flex; align-items: center; gap: 12px; }
+.ih-card-ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--v-blue);
+}
+.ih-card-head h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.ih-card-note { margin: 12px 0 0; font-size: 15px; line-height: 1.5; color: var(--v-ink-3); }
+.ih-card-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+/* ─── Финал: тёмная плита-переход в кабинет ─────────────────────── */
+.ih-done { padding-block: clamp(1rem, 4vh, 2rem) clamp(3rem, 8vh, 5rem); }
+.ih-done-card { padding: clamp(28px, 4vw, 48px); border-radius: var(--v-r-xl); background: var(--v-black); color: #FFFFFF; }
+.ih-h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+.ih-done-card .ih-h2 { color: #FFFFFF; }
+.ih-text { margin: 13px 0 0; font-size: 17px; line-height: 1.6; color: rgba(255, 255, 255, 0.72); max-width: 56ch; }
+.ih-done-card .v-actions { justify-content: flex-start; margin-top: 24px; }
+.ih-done-card .v-btn-outline { color: #FFFFFF; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.3); }
+@media (hover: hover) { .ih-done-card .v-btn-outline:hover { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55); color: #FFFFFF; } }
+
+/* ═══ Движение ═══════════════════════════════════════════════════ */
+/* Телефон парит холостым слоем; экран внутри играет свою петлю
+   (happ-phone.css) — корпус и экран двигаются вместе. Отключение под
+   reduced-motion — общее правило `.v *` в vps.css. */
+.ih-art .hp-dev { animation: ih-float 7s var(--v-ease) infinite; }
+@keyframes ih-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }

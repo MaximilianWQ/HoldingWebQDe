@@ -11,6 +11,7 @@ import {
   SERVER_ENTRY_USD,
   SERVER_MAX_GBPS,
   GUARANTEES,
+  CONTRACT_NOTE,
   formatUsd,
   type ServerTier,
 } from "@/lib/servers";
@@ -117,43 +118,42 @@ export default function VdsPage() {
 
       <section className="v-section v-center v-reveal" aria-labelledby="v-vds-guarantee">
         <div className="v-wrap v-narrow">
-          <h2 id="v-vds-guarantee" className="v-h2">Что гарантируем</h2>
-          <p className="v-lead">Названная граница честнее общих слов: вот что обещано, а что ещё уточняется.</p>
-          <div className="vp-cols vp-cols-3">
+          <h2 id="v-vds-guarantee" className="v-h2">За что мы отвечаем</h2>
+          <p className="v-lead">
+            Честно названная граница спокойнее общих слов: вот что вы получаете по счёту, а вот где заканчивается
+            наша часть пути.
+          </p>
+          <div className="vp-cols vp-cols-2">
             <div className="v-card v-card-pad vp-col-card v-lift">
-              <h3 className="vp-col-h">Гарантируем <b>{GUARANTEES.yes.length}</b></h3>
+              <h3 className="vp-col-h vp-col-h-yes">Отвечаем</h3>
               <ul className="vp-list">
-                {GUARANTEES.yes.map((t) => (
-                  <li key={t} className="vp-item">
+                {GUARANTEES.own.map((g) => (
+                  <li key={g.t} className="vp-item">
                     <Icon name="check" size={18} className="vp-item-mark" />
-                    <span>{t}</span>
+                    <span>
+                      <b>{g.t}</b>
+                      {g.note}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="v-card v-card-pad vp-col-card v-lift">
-              <h3 className="vp-col-h">Не гарантируем <b>{GUARANTEES.no.length}</b></h3>
+              <h3 className="vp-col-h">Зависит не от нас</h3>
               <ul className="vp-list">
-                {GUARANTEES.no.map((t) => (
-                  <li key={t} className="vp-item vp-item-no">
-                    <Icon name="close" size={18} className="vp-item-mark vp-item-mark-off" />
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="v-card v-card-pad vp-col-card v-lift">
-              <h3 className="vp-col-h">Уточняем <b>{GUARANTEES.confirm.length}</b></h3>
-              <ul className="vp-list">
-                {GUARANTEES.confirm.map((t) => (
-                  <li key={t} className="vp-item">
-                    <Icon name="clock" size={18} className="vp-item-mark vp-item-mark-off" />
-                    <span>{t}</span>
+                {GUARANTEES.outside.map((g) => (
+                  <li key={g.t} className="vp-item">
+                    <Icon name="globe" size={18} className="vp-item-mark vp-item-mark-off" />
+                    <span>
+                      <b>{g.t}</b>
+                      {g.note}
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
+          <p className="v-car-note">{CONTRACT_NOTE}</p>
         </div>
       </section>
 

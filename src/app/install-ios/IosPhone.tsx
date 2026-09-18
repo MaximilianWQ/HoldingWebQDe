@@ -217,7 +217,18 @@ function App() {
   );
 }
 
-export default function IosPhone({ scene, label, eager = false }: { scene: Scene | "tour"; label: string; eager?: boolean }) {
+export default function IosPhone({
+  scene,
+  label,
+  eager = false,
+  onScene,
+}: {
+  scene: Scene | "tour";
+  label: string;
+  eager?: boolean;
+  /** Только в scene="tour" — какой шаг сейчас на экране (для подсветки текста рядом). */
+  onScene?: (s: Scene) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -231,11 +242,15 @@ export default function IosPhone({ scene, label, eager = false }: { scene: Scene
     const stop = () => {
       window.clearTimeout(timer);
       el.removeAttribute("data-play");
-      if (scene === "tour") el.dataset.scene = "1";
+      if (scene === "tour") {
+        el.dataset.scene = "1";
+        onScene?.(1);
+      }
     };
     const next = () => {
       const s = TOUR[idx];
       el.dataset.scene = String(s);
+      onScene?.(s);
       timer = window.setTimeout(() => {
         idx = (idx + 1) % TOUR.length;
         next();
@@ -271,6 +286,8 @@ export default function IosPhone({ scene, label, eager = false }: { scene: Scene
       mq.removeEventListener("change", restart);
       document.removeEventListener("visibilitychange", restart);
     };
+    // onScene — стабильный сеттер состояния со страницы, в зависимостях не нужен.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scene]);
 
   const has = (l: "menu" | "share" | "add" | "home") => scene === "tour" || LAYERS[scene].includes(l);

@@ -88,7 +88,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               sizes="(min-width: 1040px) 52vw, 100vw"
               alt=""
               width={860}
-              height={617}
+              height={575}
               fetchPriority="high"
               decoding="async"
             />

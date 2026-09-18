@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import Icon from "@/components/pixel/Icon";
+import { DESKS, SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
 import "@/app/vps-info.css";
 
 /**
@@ -101,6 +102,33 @@ export default function ContactView() {
             Напишите <span className="v-accent">нам</span>
           </h1>
           <p className="v-lead">Вопрос по подключению, оплате или серверам — выберите тему, оставьте почту, ответим письмом.</p>
+        </div>
+      </section>
+
+      {/* Наши адреса — до формы: часть людей пишет напрямую, и заставлять
+          их заполнять форму, когда нужен просто адрес, незачем. */}
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-labelledby="v-ct-desks">
+        <div className="v-wrap v-narrow">
+          <h2 id="v-ct-desks" className="v-h3" style={{ textAlign: "center" }}>Наши контакты</h2>
+          <div className="vc-desks">
+            {DESKS.map((d) => (
+              <a key={d.email} href={`mailto:${d.email}`} className="v-card v-card-pad v-lift vc-desk">
+                <span className="vc-desk-icon" aria-hidden>
+                  <Icon name={d === SUPPORT_DESK ? "chat" : "bag"} size={22} />
+                </span>
+                <span className="vc-desk-title">{d.title}</span>
+                <span className="vc-desk-mail">{d.email}</span>
+                <span className="vc-desk-note">{d.note}</span>
+              </a>
+            ))}
+          </div>
+          <p className="v-car-note">
+            Срочный вопрос — Telegram{" "}
+            <a href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer" className="v-link">
+              {TELEGRAM_SUPPORT.handle}
+            </a>
+            . Почта на домене atlassecure.uk — это наш почтовый домен, сайт живёт на qodev.dev.
+          </p>
         </div>
       </section>
 

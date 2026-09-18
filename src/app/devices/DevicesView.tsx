@@ -420,6 +420,13 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
                 </ol>
                 {aud === "member" && <p className="vd-switch">{SWITCH_HINT[aud]}</p>}
 
+                {/* Живая инструкция по шагам — только для Happ (/install-happ). */}
+                {currentApp.id === "happ" && (
+                  <Link href="/install-happ" className="v-link vd-walkthrough">
+                    Посмотреть по шагам на экране телефона
+                  </Link>
+                )}
+
                 <Link href="/support" className="v-btn v-btn-primary v-btn-block" style={{ marginTop: 20 }}>
                   <Icon name="chat" size={20} /> Поддержка
                 </Link>

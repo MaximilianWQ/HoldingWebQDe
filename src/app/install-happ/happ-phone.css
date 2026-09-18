@@ -1,0 +1,817 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /install-happ — живой iPhone 17 Pro Max для инструкции «Happ»
+   (владелец, 17.09.2026). Та же техника, что HappPhone.tsx копирует у
+   /install-ios (IosPhone.tsx / ios-phone.css): корпус — тот же рендер
+   Blender public/media/ios/shell.webp (вырез экрана прозрачный,
+   координаты выреза совпадают — те же 4.4437 / 2.2982 / 91.1125 /
+   95.4036 %, радиус 13.2391 % / 6.0933 %), экран — HTML/CSS ПОД корпусом
+   в пунктах iPhone (440 × 956, --u = 100cqw / 440), сцены — петли на
+   CSS-ключах (только transform/opacity), data-play — только в кадре,
+   prefers-reduced-motion — статичный ключевой кадр на каждый data-scene.
+
+   Раздел 1 — устройство (общий с install-ios: та же геометрия вырова).
+   Раздел 2 — общие детали (статус-бар, касание, стекло).
+   Раздел 3 — сцена 1: наш кабинет (светлый экран сайта).
+   Раздел 4 — приложение Happ (тёмный экран): тумблер, шапка групп,
+   полоса трафика, список серверов, лист импорта, панель вкладок.
+   Раздел 5 — движение по сценам 1–6.
+   Раздел 6 — упрощение (reduced-motion).
+
+   Палитра Happ — своя, не токены сайта (как ios-phone.css не берёт
+   --v-*): тёмный сине-фиолетовый фон #1B1730 → #211C43 (описание
+   владельца), акцент #4C86FF. Палитра кабинета (сцена 1) — literal
+   HEX той же плотности, что --v-* в vps.css (белое поле, синяя кнопка),
+   без переменных — так же, как ios-phone.css не читает vps.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. Устройство ─────────────────────────────────────────────── */
+.hp-dev {
+  --u: calc(100cqw / 440);
+  --D: 4.2s;
+  --N: infinite;
+  --tx: 220;
+  --ty: 330;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 960 / 1992;
+  margin-inline: auto;
+}
+.hp-dev[data-mode="tour"] { --N: 1; }
+.hp-dev-shadow {
+  position: absolute;
+  left: 1.25%;
+  top: 0.783%;
+  width: 97.5%;
+  height: 98.434%;
+  border-radius: 15.64% / 7.47%;
+  box-shadow: 0 28px 56px -18px rgba(11, 19, 34, 0.34), 0 8px 18px -6px rgba(11, 19, 34, 0.16);
+}
+.hp-dev::before {
+  content: "";
+  position: absolute;
+  left: 3.9%;
+  top: 2.03%;
+  width: 92.2%;
+  height: 95.94%;
+  border-radius: 14% / 6.6%;
+  background: #000;
+}
+.hp-scr {
+  position: absolute;
+  left: 4.4437%;
+  top: 2.2982%;
+  width: 91.1125%;
+  height: 95.4036%;
+  overflow: hidden;
+  clip-path: inset(0 round 13.2391% / 6.0933%);
+  border-radius: 13.2391% / 6.0933%;
+  container-type: size;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.2;
+  user-select: none;
+}
+.hp-scr *, .hp-scr *::before, .hp-scr *::after { box-sizing: border-box; }
+.hp-shell {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── 2. Общие детали ───────────────────────────────────────────── */
+.hp-l { position: absolute; inset: 0; }
+.hp-g { flex: none; fill: none; stroke: currentColor; }
+.hp-st {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 4;
+  height: calc(54 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8 * var(--u)) calc(38 * var(--u)) 0 calc(58 * var(--u));
+  font-size: calc(17 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  fill: currentColor;
+}
+.hp-st-i { width: calc(78 * var(--u)); height: calc(14 * var(--u)); }
+.hp-ind {
+  position: absolute;
+  left: 50%;
+  bottom: calc(8 * var(--u));
+  width: calc(146 * var(--u));
+  height: calc(5 * var(--u));
+  margin-left: calc(-73 * var(--u));
+  border-radius: calc(3 * var(--u));
+  z-index: 5;
+}
+
+/* Касание: то же кольцо цвета бренда, что у /install-ios — одна и та
+   же "рука читателя" на обеих инструкциях. */
+.hp-touch {
+  position: absolute;
+  z-index: 20;
+  left: calc(var(--tx) * var(--u) - 23 * var(--u));
+  top: calc(var(--ty) * var(--u) - 23 * var(--u));
+  width: calc(46 * var(--u));
+  height: calc(46 * var(--u));
+  border-radius: 50%;
+  background: rgba(20, 50, 184, 0.2);
+  box-shadow: 0 0 0 calc(2 * var(--u)) rgba(20, 50, 184, 0.88), 0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(20, 50, 184, 0.3);
+  opacity: 1;
+  pointer-events: none;
+}
+.hp-touch i { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 calc(2 * var(--u)) rgba(20, 50, 184, 0.7); opacity: 0.45; transform: scale(1.55); }
+.hp-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+/* В туре сайт и приложение занимают один и тот же слот экрана —
+   переключение между ними на стыке сцен 1 → 2 такое же резкое, как
+   реальный переход между вкладками на телефоне (без кросс-фейда). Вне
+   тура на карточке шага смонтирован только один слой — правило ничего
+   не переключает. */
+.hp-dev[data-mode="tour"][data-scene="1"] .hp-app { opacity: 0; pointer-events: none; }
+.hp-dev[data-mode="tour"]:not([data-scene="1"]) .hp-site { opacity: 0; pointer-events: none; }
+
+/* ─── 3. Сцена 1 — наш кабинет (светлый) ────────────────────────── */
+.hp-site { background: #fff; color: #0b0b0f; }
+.hp-site .hp-st { color: #0b0b0f; }
+.hp-site .hp-ind { background: #000; }
+.hp-site-head {
+  position: absolute;
+  left: 0;
+  top: calc(54 * var(--u));
+  height: calc(64 * var(--u));
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  padding: 0 calc(24 * var(--u));
+}
+.hp-site-mark {
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: calc(8 * var(--u));
+  background: linear-gradient(145deg, #5aa0f7, #2566d8);
+  color: #fff;
+}
+.hp-site-mark svg { width: 64%; height: 64%; }
+.hp-site-head b { font-size: calc(19 * var(--u)); font-weight: 600; letter-spacing: -0.02em; color: #0b0b0f; }
+.hp-card {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(150 * var(--u));
+  height: calc(236 * var(--u));
+  padding: calc(24 * var(--u));
+  border-radius: calc(28 * var(--u));
+  background: #f5f6f8;
+}
+.hp-card-title {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(24 * var(--u));
+  height: calc(28 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(10 * var(--u));
+}
+.hp-card-title b { font-size: calc(18 * var(--u)); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; color: #0b0b0f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-card-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: calc(24 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  border-radius: 999px;
+  background: #e6f0fd;
+  color: #2f77e0;
+  font-size: calc(12 * var(--u));
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hp-card-sub {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(58 * var(--u));
+  font-size: calc(13 * var(--u));
+  line-height: 1.35;
+  color: #7d8390;
+}
+.hp-strip {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(84 * var(--u));
+  height: calc(50 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+  padding: 0 calc(16 * var(--u));
+  border-radius: calc(14 * var(--u));
+  background: #fff;
+}
+.hp-strip span { font: calc(13 * var(--u)) / 1.2 ui-monospace, "SF Mono", Menlo, monospace; color: #3a3a42; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-strip-dots { display: flex; gap: calc(3 * var(--u)); flex: none; }
+.hp-strip-dots i { width: calc(4 * var(--u)); height: calc(4 * var(--u)); border-radius: 50%; background: #c7ccd6; }
+.hp-btn {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(150 * var(--u));
+  height: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  border-radius: calc(20 * var(--u));
+  background: #3a85f0;
+  color: #fff;
+  font-size: calc(17 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transform-origin: center;
+}
+.hp-btn .hp-g { width: calc(18 * var(--u)); height: calc(18 * var(--u)); stroke-width: 2.2; }
+.hp-toast {
+  position: absolute;
+  left: 50%;
+  top: calc(248 * var(--u));
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  border-radius: 999px;
+  background: rgba(16, 16, 18, 0.92);
+  color: #fff;
+  font-size: calc(15 * var(--u));
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(0.94);
+}
+.hp-toast .hp-g { width: calc(15 * var(--u)); height: calc(15 * var(--u)); stroke-width: 2.6; color: #fff; }
+
+/* ─── 4. Приложение Happ (тёмный экран) ─────────────────────────── */
+.hp-app {
+  background: linear-gradient(165deg, #1b1730 0%, #211c43 60%, #1a1636 100%);
+  color: #fff;
+}
+.hp-app .hp-st { color: #fff; }
+.hp-app .hp-ind { background: #fff; }
+
+/* Тумблер подключения. */
+.hp-toggle-wrap {
+  position: absolute;
+  left: 50%;
+  top: calc(88 * var(--u));
+  width: calc(132 * var(--u));
+  height: calc(132 * var(--u));
+  margin-left: calc(-66 * var(--u));
+}
+.hp-toggle {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) rgba(255, 255, 255, 0.14);
+  transform-origin: center;
+}
+.hp-toggle .hp-g { width: calc(40 * var(--u)); height: calc(40 * var(--u)); stroke-width: 1.6; color: rgba(255, 255, 255, 0.55); }
+.hp-toggle-on {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, #5b96ff, #3a63e0);
+  box-shadow: 0 calc(10 * var(--u)) calc(28 * var(--u)) rgba(76, 134, 255, 0.45), inset 0 0 0 calc(2 * var(--u)) rgba(255, 255, 255, 0.28);
+  opacity: 0;
+  transform: scale(0.9);
+}
+.hp-toggle-on .hp-g { width: calc(40 * var(--u)); height: calc(40 * var(--u)); stroke-width: 1.7; color: #fff; }
+.hp-status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(232 * var(--u));
+  height: calc(22 * var(--u));
+  text-align: center;
+  font-size: calc(15 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.hp-status-off { color: rgba(255, 255, 255, 0.55); }
+.hp-status-on { position: absolute; inset: 0; opacity: 0; color: #8fb4ff; }
+
+/* Шапка: пустая («Профили» + «+») до импорта. */
+.hp-head {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(272 * var(--u));
+  height: calc(76 * var(--u));
+}
+.hp-head-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; }
+.hp-head-empty b { font-size: calc(20 * var(--u)); font-weight: 600; letter-spacing: -0.02em; }
+.hp-plus {
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  transform-origin: center;
+}
+.hp-plus .hp-g { width: calc(20 * var(--u)); height: calc(20 * var(--u)); stroke-width: 2; color: #fff; }
+
+/* Шапка группы (после импорта). */
+.hp-head-group {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  opacity: 0;
+  transform: scale(0.94);
+  transform-origin: 30% 50%;
+}
+.hp-grp-ico {
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: calc(14 * var(--u));
+  background: linear-gradient(135deg, #4c63ff, #7a4cff);
+  color: #fff;
+}
+.hp-grp-ico .hp-g { width: calc(22 * var(--u)); height: calc(22 * var(--u)); stroke-width: 1.8; }
+.hp-grp-t { flex: 1; min-width: 0; display: grid; gap: calc(3 * var(--u)); }
+.hp-grp-t b { font-size: calc(16 * var(--u)); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-grp-t span { font-size: calc(12 * var(--u)); color: rgba(255, 255, 255, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-grp-acts { flex: none; display: flex; gap: calc(6 * var(--u)); }
+.hp-iconbtn {
+  width: calc(32 * var(--u));
+  height: calc(32 * var(--u));
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+.hp-iconbtn .hp-g { width: calc(16 * var(--u)); height: calc(16 * var(--u)); stroke-width: 2; }
+.hp-dots3 { display: flex; align-items: center; justify-content: center; gap: calc(2.5 * var(--u)); }
+.hp-dots3 i { width: calc(3.4 * var(--u)); height: calc(3.4 * var(--u)); border-radius: 50%; background: currentColor; }
+
+/* Полоса трафика. */
+.hp-traffic {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(362 * var(--u));
+  height: calc(54 * var(--u));
+  opacity: 0;
+  transform: translateY(calc(6 * var(--u)));
+}
+.hp-traffic-row { display: flex; align-items: baseline; justify-content: space-between; }
+.hp-traffic-row b { font-size: calc(14 * var(--u)); font-weight: 700; }
+.hp-traffic-row span { font-size: calc(12 * var(--u)); color: rgba(255, 255, 255, 0.5); }
+.hp-bar { position: relative; margin-top: calc(8 * var(--u)); height: calc(8 * var(--u)); border-radius: calc(6 * var(--u)); background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.hp-bar i { position: absolute; inset: 0; width: 55%; border-radius: inherit; background: linear-gradient(90deg, #4c86ff, #7a4cff); }
+
+/* Список серверов. */
+.hp-list {
+  position: absolute;
+  left: calc(24 * var(--u));
+  right: calc(24 * var(--u));
+  top: calc(432 * var(--u));
+  height: calc(366 * var(--u));
+  opacity: 0;
+  transform: translateY(calc(8 * var(--u)));
+}
+.hp-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  padding: 0 calc(14 * var(--u));
+  border-radius: calc(16 * var(--u));
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) transparent;
+}
+.hp-row[data-row="0"] { top: calc(0 * var(--u)); }
+.hp-row[data-row="1"] { top: calc(62 * var(--u)); }
+.hp-row[data-row="2"] { top: calc(124 * var(--u)); }
+.hp-row[data-row="3"] { top: calc(186 * var(--u)); }
+.hp-row[data-row="4"] { top: calc(248 * var(--u)); }
+.hp-row[data-row="5"] { top: calc(310 * var(--u)); }
+.hp-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(38 * var(--u));
+  height: calc(22 * var(--u));
+  padding: 0 calc(6 * var(--u));
+  border-radius: calc(6 * var(--u));
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: calc(11 * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hp-row-t { flex: 1; min-width: 0; display: grid; gap: calc(2 * var(--u)); }
+.hp-row-t b { font-size: calc(15 * var(--u)); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-row-t span { font-size: calc(12 * var(--u)); color: rgba(255, 255, 255, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hp-row-check {
+  flex: none;
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #4c86ff;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.6);
+}
+.hp-row-check .hp-g { width: calc(12 * var(--u)); height: calc(12 * var(--u)); stroke-width: 2.6; }
+.hp-row[data-sel="true"] { background: rgba(76, 134, 255, 0.18); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) rgba(76, 134, 255, 0.55); }
+.hp-row[data-sel="true"] .hp-row-check { opacity: 1; transform: scale(1); }
+
+/* Таймер сессии. */
+.hp-timer {
+  position: absolute;
+  left: 50%;
+  bottom: calc(108 * var(--u));
+  display: inline-flex;
+  align-items: center;
+  gap: calc(7 * var(--u));
+  padding: calc(6 * var(--u)) calc(14 * var(--u));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: calc(13 * var(--u));
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transform: translate(-50%, calc(6 * var(--u)));
+  opacity: 0;
+  white-space: nowrap;
+}
+.hp-timer-dot { width: calc(7 * var(--u)); height: calc(7 * var(--u)); border-radius: 50%; background: #59e07a; flex: none; }
+
+/* Панель вкладок. */
+.hp-tabbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(92 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: calc(14 * var(--u));
+  background: rgba(15, 13, 30, 0.86);
+  -webkit-backdrop-filter: blur(calc(14 * var(--u)));
+  backdrop-filter: blur(calc(14 * var(--u)));
+  box-shadow: inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.06);
+}
+.hp-tab { display: grid; place-items: center; gap: calc(4 * var(--u)); color: rgba(255, 255, 255, 0.42); }
+.hp-tab .hp-g { width: calc(22 * var(--u)); height: calc(22 * var(--u)); stroke-width: 1.7; }
+.hp-tab[data-active="true"] { color: #fff; }
+.hp-tab-dot { width: calc(4 * var(--u)); height: calc(4 * var(--u)); border-radius: 50%; background: transparent; }
+.hp-tab[data-active="true"] .hp-tab-dot { background: #4c86ff; }
+
+/* Лист импорта. */
+.hp-dim { background: rgba(6, 5, 16, 0.42); opacity: 0; }
+.hp-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(340 * var(--u));
+  padding: calc(12 * var(--u)) calc(20 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(30 * var(--u)) calc(30 * var(--u)) 0 0;
+  background: #201c3c;
+  box-shadow: 0 calc(-4 * var(--u)) calc(30 * var(--u)) rgba(0, 0, 0, 0.4);
+  transform: translateY(100%);
+}
+.hp-grab { width: calc(36 * var(--u)); height: calc(5 * var(--u)); margin: 0 auto calc(12 * var(--u)); border-radius: calc(3 * var(--u)); background: rgba(255, 255, 255, 0.22); }
+.hp-sheet-title { margin: 0 0 calc(6 * var(--u)); padding: 0 calc(4 * var(--u)); font-size: calc(13 * var(--u)); font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); }
+.hp-srow {
+  position: relative;
+  height: calc(56 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  border-radius: calc(16 * var(--u));
+  font-size: calc(16 * var(--u));
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+}
+.hp-srow-ico {
+  width: calc(34 * var(--u));
+  height: calc(34 * var(--u));
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: calc(11 * var(--u));
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
+}
+.hp-srow-ico .hp-g { width: calc(17 * var(--u)); height: calc(17 * var(--u)); stroke-width: 1.9; }
+.hp-srow-hl { position: absolute; inset: 0; border-radius: inherit; background: rgba(76, 134, 255, 0.22); opacity: 0; }
+.hp-srow.is-target .hp-srow-ico { background: rgba(76, 134, 255, 0.28); color: #8fb4ff; }
+
+/* Позиция касания на паузе / без анимации — на месте следующего
+   действия сцены (та же логика, что --tx/--ty в ios-phone.css). */
+.hp-dev[data-scene="1"] { --tx: 220; --ty: 330; }
+.hp-dev[data-scene="2"] { --tx: 394; --ty: 310; }
+.hp-dev[data-scene="3"] { --tx: 220; --ty: 812; }
+.hp-dev[data-scene="4"] { --tx: 220; --ty: 600; }
+.hp-dev[data-scene="4"] .hp-touch { opacity: 0; }
+.hp-dev[data-scene="5"] { --tx: 220; --ty: 584; }
+.hp-dev[data-scene="6"] { --tx: 220; --ty: 154; }
+
+/* ═══ 5. Движение ═══════════════════════════════════════════════════ */
+.hp-dev[data-play] .hp-scr * {
+  animation-duration: var(--D);
+  animation-iteration-count: var(--N);
+  animation-fill-mode: both;
+  animation-timing-function: linear;
+}
+.hp-dev[data-play] :is(.hp-touch, .hp-sheet, .hp-dim, .hp-toggle-on, .hp-head-group, .hp-traffic, .hp-list, .hp-toast, .hp-btn, .hp-plus, .hp-status-on, .hp-timer, .hp-row-check) { will-change: transform, opacity; }
+
+/* ── Сцена 1 — карточка ключа, «Скопировать» → «Скопировано». ──── */
+.hp-dev[data-play][data-scene="1"] .hp-touch { animation-name: hp1-touch; }
+.hp-dev[data-play][data-scene="1"] .hp-touch i { animation-name: hp1-rip; }
+.hp-dev[data-play][data-scene="1"] .hp-btn { animation-name: hp1-press; }
+.hp-dev[data-play][data-scene="1"] .hp-toast { animation-name: hp1-toast; }
+@keyframes hp1-touch {
+  0%, 14% { opacity: 0; transform: translate(calc(60 * var(--u)), calc(120 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  30% { opacity: 1; transform: translate(0, 0) scale(1); }
+  34% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  38% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  45% { opacity: 1; transform: translate(0, 0) scale(1); }
+  62%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes hp1-rip {
+  0%, 37% { opacity: 0; transform: scale(0.6); }
+  38% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  60%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes hp1-press {
+  0%, 35% { transform: scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  38% { transform: scale(0.96); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  46%, 100% { transform: scale(1); }
+}
+@keyframes hp1-toast {
+  0%, 38% { opacity: 0; transform: translate(-50%, 8px) scale(0.94); animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.12); }
+  46% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  84% { opacity: 1; transform: translate(-50%, 0) scale(1); animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  96%, 100% { opacity: 0; transform: translate(-50%, -6px) scale(0.98); }
+}
+
+/* ── Сцена 2 — открываем Happ, нажимаем «+». ─────────────────────── */
+.hp-dev[data-play][data-scene="2"] .hp-touch { animation-name: hp2-touch; }
+.hp-dev[data-play][data-scene="2"] .hp-touch i { animation-name: hp2-rip; }
+.hp-dev[data-play][data-scene="2"] .hp-plus { animation-name: hp2-plus; }
+.hp-dev[data-play][data-scene="2"] .hp-sheet { animation-name: hp2-sheet; }
+.hp-dev[data-play][data-scene="2"] .hp-dim { animation-name: hp2-dim; }
+@keyframes hp2-touch {
+  0%, 10% { opacity: 0; transform: translate(calc(-70 * var(--u)), calc(110 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  26% { opacity: 1; transform: translate(0, 0) scale(1); }
+  30% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  34% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  40% { opacity: 1; transform: translate(0, 0) scale(1); }
+  50%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes hp2-rip {
+  0%, 33% { opacity: 0; transform: scale(0.6); }
+  34% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  56%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes hp2-plus {
+  0%, 30% { transform: scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  34% { transform: scale(0.85) rotate(20deg); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  42%, 100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes hp2-sheet {
+  0%, 34% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1); }
+  70%, 100% { transform: translateY(0); }
+}
+@keyframes hp2-dim {
+  0%, 34% { opacity: 0; }
+  70%, 100% { opacity: 1; }
+}
+
+/* ── Сцена 3 — лист импорта, «Импорт из буфера обмена». ──────────── */
+.hp-dev[data-play][data-scene="3"] .hp-touch { animation-name: hp3-touch; }
+.hp-dev[data-play][data-scene="3"] .hp-touch i { animation-name: hp3-rip; }
+.hp-dev[data-play][data-scene="3"] .hp-sheet { animation-name: hp3-sheet; }
+.hp-dev[data-play][data-scene="3"] .hp-dim { animation-name: hp3-dim; }
+.hp-dev[data-play][data-scene="3"] .hp-srow.is-target .hp-srow-hl { animation-name: hp3-hl; }
+@keyframes hp3-sheet {
+  0%, 78% { transform: translateY(0); }
+  92% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+  100% { transform: translateY(100%); }
+}
+@keyframes hp3-dim {
+  0%, 78% { opacity: 1; }
+  92%, 100% { opacity: 0; }
+}
+@keyframes hp3-hl {
+  0%, 26% { opacity: 0; }
+  30%, 68% { opacity: 1; }
+  76%, 100% { opacity: 0; }
+}
+@keyframes hp3-touch {
+  0%, 14% { opacity: 0; transform: translate(0, calc(90 * var(--u))) scale(1.15); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  30% { opacity: 1; transform: translate(0, 0) scale(1); }
+  34% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  38% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  46% { opacity: 1; transform: translate(0, 0) scale(1); }
+  62%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes hp3-rip {
+  0%, 37% { opacity: 0; transform: scale(0.6); }
+  38% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  60%, 100% { opacity: 0; transform: scale(2.4); }
+}
+
+/* ── Сцена 4 — подписка добавилась: вспышка на карточке группы. ──── */
+.hp-dev[data-play][data-scene="4"] .hp-head-group { animation-name: hp4-group; }
+.hp-dev[data-play][data-scene="4"] .hp-grp-ico { animation-name: hp4-flash; }
+.hp-dev[data-play][data-scene="4"] .hp-traffic { animation-name: hp4-traffic; }
+.hp-dev[data-play][data-scene="4"] .hp-list { animation-name: hp4-list; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="0"] { animation-name: hp4-row-in; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="1"] { animation-name: hp4-row-in; animation-delay: 60ms; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="2"] { animation-name: hp4-row-in; animation-delay: 120ms; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="3"] { animation-name: hp4-row-in; animation-delay: 180ms; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="4"] { animation-name: hp4-row-in; animation-delay: 240ms; }
+.hp-dev[data-play][data-scene="4"] .hp-row[data-row="5"] { animation-name: hp4-row-in; animation-delay: 300ms; }
+@keyframes hp4-group {
+  0%, 8% { opacity: 0; transform: scale(0.9); animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.12); }
+  26% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes hp4-flash {
+  0%, 24% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  30% { box-shadow: 0 0 0 calc(6 * var(--u)) rgba(255, 255, 255, 0.35); }
+  46%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+@keyframes hp4-traffic {
+  0%, 22% { opacity: 0; transform: translateY(calc(6 * var(--u))); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  40%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes hp4-list {
+  0%, 22% { opacity: 0; transform: translateY(calc(8 * var(--u))); }
+  40%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes hp4-row-in {
+  0%, 26% { opacity: 0; transform: translateY(calc(8 * var(--u))); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  50%, 100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Сцена 5 — выбор сервера: третья строка сверху. ──────────────── */
+.hp-dev[data-play][data-scene="5"] .hp-touch { animation-name: hp5-touch; }
+.hp-dev[data-play][data-scene="5"] .hp-touch i { animation-name: hp5-rip; }
+.hp-dev[data-play][data-scene="5"] .hp-row[data-row="0"] { animation-name: hp5-deselect; }
+.hp-dev[data-play][data-scene="5"] .hp-row[data-row="2"] { animation-name: hp5-select; }
+@keyframes hp5-touch {
+  0%, 16% { opacity: 0; transform: translate(calc(70 * var(--u)), calc(-70 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  34% { opacity: 1; transform: translate(0, 0) scale(1); }
+  38% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  42% { transform: translate(0, 0) scale(0.8); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  50% { opacity: 1; transform: translate(0, 0) scale(1); }
+  66%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes hp5-rip {
+  0%, 41% { opacity: 0; transform: scale(0.6); }
+  42% { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  64%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes hp5-deselect {
+  0%, 40% { background: rgba(76, 134, 255, 0.18); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) rgba(76, 134, 255, 0.55); }
+  48%, 100% { background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) transparent; }
+}
+@keyframes hp5-deselect-check { }
+.hp-dev[data-play][data-scene="5"] .hp-row[data-row="0"] .hp-row-check { animation-name: hp5-deselect-chk; }
+@keyframes hp5-deselect-chk {
+  0%, 40% { opacity: 1; transform: scale(1); }
+  48%, 100% { opacity: 0; transform: scale(0.6); }
+}
+@keyframes hp5-select {
+  0%, 44% { background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) transparent; }
+  56%, 100% { background: rgba(76, 134, 255, 0.18); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) rgba(76, 134, 255, 0.55); }
+}
+.hp-dev[data-play][data-scene="5"] .hp-row[data-row="2"] .hp-row-check { animation-name: hp5-select-chk; }
+@keyframes hp5-select-chk {
+  0%, 44% { opacity: 0; transform: scale(0.5); }
+  56% { opacity: 1; transform: scale(1.15); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  64%, 100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Сцена 6 — подключение: тумблер, статус, таймер. ─────────────── */
+.hp-dev[data-play][data-scene="6"] .hp-touch { animation-name: hp6-touch; }
+.hp-dev[data-play][data-scene="6"] .hp-touch i { animation-name: hp6-rip; }
+.hp-dev[data-play][data-scene="6"] .hp-toggle-on { animation-name: hp6-on; }
+.hp-dev[data-play][data-scene="6"] .hp-status-off { animation-name: hp6-off-text; }
+.hp-dev[data-play][data-scene="6"] .hp-status-on { animation-name: hp6-on-text; }
+.hp-dev[data-play][data-scene="6"] .hp-timer { animation-name: hp6-timer; }
+@keyframes hp6-touch {
+  0%, 16% { opacity: 0; transform: translate(calc(-60 * var(--u)), calc(110 * var(--u))) scale(1.2); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  32% { opacity: 1; transform: translate(0, 0) scale(1); }
+  36% { transform: translate(0, 0) scale(1); animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1); }
+  41% { transform: translate(0, 0) scale(0.78); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+  48% { opacity: 1; transform: translate(0, 0) scale(1); }
+  60%, 100% { opacity: 0; transform: translate(0, 0) scale(1.1); }
+}
+@keyframes hp6-rip {
+  0%, 40% { opacity: 0; transform: scale(0.6); }
+  41% { opacity: 0.85; transform: scale(0.6); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  62%, 100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes hp6-on {
+  0%, 38% { opacity: 0; transform: scale(0.9); }
+  44% { opacity: 1; transform: scale(1.08); animation-timing-function: cubic-bezier(0.2, 0.9, 0.25, 1.12); }
+  52%, 100% { opacity: 1; transform: scale(1); }
+}
+@keyframes hp6-off-text {
+  0%, 40% { opacity: 1; }
+  48%, 100% { opacity: 0; }
+}
+@keyframes hp6-on-text {
+  0%, 40% { opacity: 0; }
+  48%, 100% { opacity: 1; }
+}
+@keyframes hp6-timer {
+  0%, 56% { opacity: 0; transform: translate(-50%, calc(6 * var(--u))); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  70%, 100% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ─── 6. Упрощение движения: ключевой кадр каждой сцены ─────────── */
+/* Сцена 1: карточка + скопированное состояние. */
+.hp-dev[data-scene="1"] .hp-toast { opacity: 1; transform: translate(-50%, 0) scale(1); }
+/* Сцена 2: лист импорта открыт. */
+.hp-dev[data-scene="2"] .hp-sheet { transform: translateY(0); }
+.hp-dev[data-scene="2"] .hp-dim { opacity: 1; }
+/* Сцена 3: пункт «Импорт из буфера обмена» подсвечен. */
+.hp-dev[data-scene="3"] .hp-sheet { transform: translateY(0); }
+.hp-dev[data-scene="3"] .hp-dim { opacity: 1; }
+.hp-dev[data-scene="3"] .hp-srow.is-target .hp-srow-hl { opacity: 1; }
+/* Сцены 4–6: подписка добавлена — группа, трафик и список видны. */
+.hp-dev[data-scene="4"] .hp-head-group,
+.hp-dev[data-scene="5"] .hp-head-group,
+.hp-dev[data-scene="6"] .hp-head-group { opacity: 1; transform: scale(1); }
+.hp-dev[data-scene="4"] .hp-traffic,
+.hp-dev[data-scene="5"] .hp-traffic,
+.hp-dev[data-scene="6"] .hp-traffic { opacity: 1; transform: translateY(0); }
+.hp-dev[data-scene="4"] .hp-list,
+.hp-dev[data-scene="5"] .hp-list,
+.hp-dev[data-scene="6"] .hp-list { opacity: 1; transform: translateY(0); }
+.hp-dev[data-scene="4"] .hp-row,
+.hp-dev[data-scene="5"] .hp-row,
+.hp-dev[data-scene="6"] .hp-row { opacity: 1; transform: translateY(0); }
+/* Сцена 4: строка «Авто» выбрана (стартовое состояние). */
+.hp-dev[data-scene="4"] .hp-row[data-row="0"] { background: rgba(76, 134, 255, 0.18); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) rgba(76, 134, 255, 0.55); }
+.hp-dev[data-scene="4"] .hp-row[data-row="0"] .hp-row-check { opacity: 1; transform: scale(1); }
+/* Сцены 5–6: выбран Vienna Premium (строка 2), «Авто» снята. */
+.hp-dev[data-scene="5"] .hp-row[data-row="2"],
+.hp-dev[data-scene="6"] .hp-row[data-row="2"] { background: rgba(76, 134, 255, 0.18); box-shadow: inset 0 0 0 calc(1.5 * var(--u)) rgba(76, 134, 255, 0.55); }
+.hp-dev[data-scene="5"] .hp-row[data-row="2"] .hp-row-check,
+.hp-dev[data-scene="6"] .hp-row[data-row="2"] .hp-row-check { opacity: 1; transform: scale(1); }
+/* Сцена 6: подключено. */
+.hp-dev[data-scene="6"] .hp-toggle-on { opacity: 1; transform: scale(1); }
+.hp-dev[data-scene="6"] .hp-status-off { opacity: 0; }
+.hp-dev[data-scene="6"] .hp-status-on { opacity: 1; }
+.hp-dev[data-scene="6"] .hp-timer { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-dev .hp-scr * { animation: none !important; }
+}

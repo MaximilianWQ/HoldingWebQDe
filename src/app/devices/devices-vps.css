@@ -142,3 +142,14 @@
 @media (prefers-reduced-motion: reduce) {
   .vd-tile, .vd-app-card, .vd-key { transition: none; }
 }
+
+/* Ссылка на живую инструкцию /install-happ — в шаге «Подключитесь»,
+   только когда выбрано приложение Happ (17.09.2026). Тап-зона 44px. */
+.vd-walkthrough {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}

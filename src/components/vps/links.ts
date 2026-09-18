@@ -82,8 +82,8 @@ export const LEGAL: VLink[] = [
   { label: "Конфиденциальность", href: "/privacy" },
 ];
 
-/** Поддержка в Telegram — тот же адрес, что на /support. */
-export const SUPPORT_TG = { handle: "@atlas_suppbot", href: "https://t.me/atlas_suppbot" };
+/** Поддержка — адреса берём из единственного источника. */
+export { TELEGRAM_SUPPORT as SUPPORT_TG, SUPPORT_DESK } from "@/lib/contacts";
 
 /** Имена клиентов для подписи в подвале — из единого источника приложений. */
 export const FOOT_APPS = APPS.ios.map((a) => a.name).join(", ");

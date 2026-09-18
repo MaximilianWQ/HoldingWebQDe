@@ -4,10 +4,21 @@ import { useEffect, useRef, useState } from "react";
 
 interface Row { what: string; was: string; now: string }
 
-/** Перенос идеи прежней главной (Atlas, раздел 02 «что меняется, когда
- *  включено»): большой переключатель переводит бытовые ситуации из
- *  «без» в «с» — по прокрутке (в первый раз, когда блок появляется в
- *  кадре) и по нажатию. Без слова «VPN» — только польза. */
+/**
+ * «Знакомо?» — четыре бытовые ситуации до и после.
+ *
+ * ПОРЯДОК ВАЖНЕЕ АНИМАЦИИ (владелец, 18.09.2026). Раньше блок
+ * переключался в «после» сразу, как только попадал в кадр: человек
+ * читал заголовок «Знакомо? Так быть не должно» и видел под ним
+ * «видео запускается сразу» — то есть узнавания, ради которого блок
+ * и существует, не происходило вовсе.
+ *
+ * Теперь при появлении в кадре блок ДЕРЖИТ состояние «без Atlas»
+ * (`HOLD_MS`) — ровно столько, чтобы прочитать свою проблему, — и
+ * только потом переключается сам. Нажатие переключает в любой момент
+ * и отменяет автоматический показ: дальше рычаг принадлежит читателю.
+ */
+const HOLD_MS = 1600;
 const ROWS: Row[] = [
   { what: "Видео", was: "долго грузится и встаёт на паузу", now: "запускается сразу и идёт без пауз" },
   { what: "Сайты и приложения", was: "открываются через раз", now: "открываются сразу и целиком" },
@@ -22,25 +33,19 @@ export default function DiffSwitch() {
 
   useEffect(() => {
     let mounted = true;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      triggered.current = true;
-      // Кадр покоя сразу конечный — без промежуточного «выключено».
-      Promise.resolve().then(() => { if (mounted) setOn(true); });
-      return () => { mounted = false; };
-    }
+    let timer = 0;
     const el = rootRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !triggered.current && mounted) {
-          triggered.current = true;
-          setOn(true);
-        }
+        if (!entry.isIntersecting || triggered.current || !mounted) return;
+        triggered.current = true;
+        timer = window.setTimeout(() => { if (mounted) setOn(true); }, HOLD_MS);
       },
       { threshold: 0.5 },
     );
     io.observe(el);
-    return () => { mounted = false; io.disconnect(); };
+    return () => { mounted = false; window.clearTimeout(timer); io.disconnect(); };
   }, []);
 
   return (
@@ -48,7 +53,7 @@ export default function DiffSwitch() {
       <div className="vh-diff-head">
         <button type="button" className="vh-diff-switch" aria-pressed={on} onClick={() => { triggered.current = true; setOn((v) => !v); }}>
           <span className="vh-switch-track" aria-hidden><span className="vh-switch-thumb" /></span>
-          <span className="vh-switch-label">{on ? "Включено" : "Выключено"}</span>
+          <span className="vh-switch-label">{on ? "С Atlas Secure" : "Без Atlas Secure"}</span>
         </button>
       </div>
       <ul className="vh-diff-list">

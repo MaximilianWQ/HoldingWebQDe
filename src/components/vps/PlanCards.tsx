@@ -53,7 +53,7 @@ export const POPULAR: Period = 6;
 const TAG: Record<Period, { text: string; tone: string }> = {
   1: { text: "Попробовать", tone: "v-badge-soft" },
   3: { text: "Короткий срок", tone: "v-badge-blue" },
-  6: { text: "Оптимально", tone: "v-badge-yellow" },
+  6: { text: "Выгодно", tone: "v-badge-yellow v-dcard-tag-hero" },
   12: { text: "Максимум выгоды", tone: "v-badge-solid-blue" },
 };
 

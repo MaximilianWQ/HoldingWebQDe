@@ -46,7 +46,9 @@ export type IconName =
   | "coins"
   | "key"
   | "user"
-  | "download";
+  | "download"
+  // /install-happ (17.09.2026): вкладка «Настройки» в мокапе приложения.
+  | "settings";
 
 interface IconProps {
   name: IconName;
@@ -228,4 +230,10 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   download: <path d="M12 3.5v12M7 10.5l5 5 5-5M4.5 20.5h15" />,
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M17.8 6.2l-1.7 1.7M7.9 16.1l-1.7 1.7M17.8 17.8l-1.7-1.7M7.9 7.9 6.2 6.2" />
+    </>
+  ),
 };

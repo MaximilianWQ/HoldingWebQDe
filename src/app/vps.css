@@ -660,6 +660,21 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.18);
 }
 .v-badge-soft { background: var(--v-soft); color: var(--v-ink-2); }
+
+/* Плашка выгоды — единственная скошенная и прописная в ряду.
+   Наклон в один градус и крупный кегль делают её тем, что глаз ловит
+   первым (владелец, 18.09.2026: «сделать её неровной, скошенной,
+   заметной, большими буквами „выгодно"»). Больше одного наклона на
+   странице быть не должно — иначе приём перестаёт работать. */
+.v-dcard-tag-hero {
+  padding: 11px 22px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transform: translateX(-50%) rotate(-1.6deg);
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.24);
+}
 /* Узкий ряд из четырёх карточек: плашки сжимаются, чтобы не залезать
    на соседнюю. */
 @media (min-width: 1120px) and (max-width: 1359px) {
@@ -807,7 +822,10 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  padding: 4px 0 8px;
+  /* Верхнее поле — под плашку, которая стоит НАД карточкой: дорожка
+     прокручиваемая, то есть всё, что выходит за её край, срезается.
+     Нужно каждой ленте с карточками, а не только широкой. */
+  padding: 26px 0 8px;
 }
 .v-track::-webkit-scrollbar { display: none; }
 .v-track > * { scroll-snap-align: center; }
@@ -876,7 +894,7 @@ html:has(.v-menu:not([hidden])) { overflow: hidden; }
 
 /* `wide` — сравнение важнее листания: с 1120px четыре карточки стоят
    рядом, лента перестаёт быть лентой, стрелки и точки не нужны. */
-.v-carousel-wide .v-track { padding-top: 26px; }
+
 @media (min-width: 1120px) {
   .v-carousel-wide .v-track {
     grid-auto-columns: minmax(0, 1fr);

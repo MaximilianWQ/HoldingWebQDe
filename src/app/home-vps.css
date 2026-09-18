@@ -62,31 +62,17 @@
   line-height: 1.5;
 }
 
-/* Раскладка первого экрана. До 1040px — как было: всё по центру,
-   кадр под текстом. Дальше — две колонки: слово слева, предмет справа.
-   Причина не в моде: на ноутбуке 1440×900 кадр высотой 617px уводил
-   кнопку «Попробовать» под сгиб, то есть главное действие страницы
-   приходилось искать прокруткой. */
+/* Раскладка первого экрана — по центру.
+   Разбор 18.09.2026: две колонки (слово слева, предмет справа) дали
+   длинную строку текста слева и «много текста»; владелец вернул центр.
+   Исследование даёт тот же ответ: при коротком оффере центр работает
+   не хуже (Linear, Vercel), а разница конверсии сидит не в
+   выравнивании, а в том, видно ли действие без прокрутки. Поэтому
+   порядок теперь такой: заголовок → фраза → КНОПКА → кадр. */
 .vh-hero-sec { text-align: center; }
-.vh-hero { display: grid; gap: clamp(28px, 4vw, 40px); }
-@media (min-width: 1040px) {
-  .vh-hero-sec { text-align: left; }
-  .vh-hero {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-    align-items: center;
-    gap: clamp(32px, 4vw, 64px);
-  }
-  .vh-hero .v-lead, .vh-hero .vh-hero-note { margin-inline: 0; }
-  .vh-hero .v-actions, .vh-hero .v-stores, .vh-hero .vh-apps-row { justify-content: flex-start; }
-  .vh-hero .vh-apps { align-items: flex-start; }
-  /* Кадр немного выходит за колонку вправо — предмет на первом экране
-     должен казаться больше, чем поле, в котором он лежит. */
-  .vh-stage { margin-right: calc(-1 * clamp(0px, 3vw, 48px)); }
-  /* Заголовок считается от ширины колонки, а не от окна: в две колонки
-     прежний кегль разваливал его на три строки. */
-  .vh-hero .v-h1 { font-size: clamp(44px, 4.4vw, 64px); }
-  .vh-hero-sec { padding-top: clamp(24px, 4vw, 56px); }
-}
+.vh-hero { display: grid; gap: clamp(20px, 3vw, 32px); }
+.vh-hero-in { max-width: 760px; margin-inline: auto; }
+.vh-hero .v-actions { margin-top: 28px; }
 
 /* Сцена первого экрана — один кадр из Blender (ноутбук и телефон в
    одной сцене, hero_build.py). Она дышит своим ходом и отвечает на
@@ -94,7 +80,7 @@
    чтобы кадр не выглядел приклеенным к экрану. */
 .vh-stage {
   position: relative;
-  width: min(100%, 860px);
+  width: min(100%, 1000px);
   margin-inline: auto;
   isolation: isolate;
 }
@@ -142,6 +128,81 @@
   }
 }
 @keyframes vh-bob-stage { 50% { transform: translateY(-8px); } }
+
+/* ── Фигуры вокруг кадра (18.09.2026) ─────────────────────────────
+   Владелец просил «технологичнее, как у Yandex Tech: фигурки». Это
+   стеклянные плашки с числами из src/lib и две геометрические фигуры —
+   круг и скруглённый квадрат контуром. Они не декорация: каждая
+   плашка отвечает на вопрос, который человек задаёт на первом экране
+   («а сколько стран», «а шифрование есть», «а скорость», «а сколько
+   устройств»), поэтому им можно занимать место у кадра.
+
+   Движение — медленное парение с разным шагом, чтобы плашки не
+   ходили строем; при reduced-motion они просто стоят. */
+.vh-chip {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 14px 34px rgba(16, 24, 40, 0.12);
+  color: var(--v-ink);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.vh-chip svg { color: var(--v-blue); }
+.vh-chip-a { top: 8%; left: 0; }
+.vh-chip-b { top: 18%; right: 0; }
+.vh-chip-c { bottom: 26%; left: 2%; }
+.vh-chip-d { bottom: 10%; right: 3%; }
+
+/* Геометрия: контурный квадрат и точка — ровно две фигуры, больше
+   первому экрану не нужно. */
+.vh-shape { position: absolute; z-index: 0; display: block; }
+.vh-shape-square {
+  top: 2%;
+  right: 8%;
+  width: clamp(64px, 9vw, 104px);
+  aspect-ratio: 1;
+  border: 1.5px solid rgba(58, 133, 240, 0.28);
+  border-radius: 22px;
+  transform: rotate(14deg);
+}
+.vh-shape-dot {
+  bottom: 12%;
+  left: 12%;
+  width: clamp(28px, 4vw, 44px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #5C97F7, #2A6AD8);
+  box-shadow: 0 12px 26px rgba(42, 106, 216, 0.34);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vh-chip, .vh-shape { animation: vh-float 7.5s var(--v-ease) infinite; }
+  .vh-chip-b { animation-duration: 9s; animation-delay: -1.2s; }
+  .vh-chip-c { animation-duration: 8.2s; animation-delay: -2.6s; }
+  .vh-chip-d { animation-duration: 10s; animation-delay: -3.4s; }
+  .vh-shape-square { animation-duration: 12s; animation-delay: -1.8s; }
+  .vh-shape-dot { animation-duration: 9.4s; animation-delay: -4s; }
+}
+@keyframes vh-float { 50% { translate: 0 -10px; } }
+@keyframes vh-float-rot { 50% { translate: 0 -10px; } }
+
+/* На узком экране фигуры убираются: кадр там во всю ширину, и плашки
+   легли бы прямо на ноутбук. */
+@media (max-width: 1099px) {
+  .vh-chip, .vh-shape { display: none; }
+}
+
+
 @keyframes vh-scroll-stage { to { transform: translateY(34px) scale(0.982); } }
 
 /* «Работает в приложениях Happ и Incy» — текстовые логотипы-пилюли. */

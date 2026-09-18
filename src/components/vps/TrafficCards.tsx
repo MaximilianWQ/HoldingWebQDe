@@ -12,32 +12,41 @@ import { formatRub } from "@/lib/plans";
  * Прежние подписи «Пакет / Пакет / Пакет» не говорили ничего и стояли
  * на всех карточках подряд.
  *
- * Лестница считается от цены гигабайта в стартовом пакете — это и есть
- * то, что покупатель сравнивает, когда выбирает объём:
- *   · первый пакет            — «Для старта»;
- *   · дешевле старта до 20 %  — «Выгодно»;
- *   · дешевле старта от 20 %  — «Супервыгодно»;
- *   · самый дешёвый гигабайт  — «Лучшая цена за ГБ», жёлтая скошенная
- *     плашка, одна на весь ряд (тот же приём, что у срока подписки).
- * Процент в плашке настоящий: он считается из цен `traffic-packs.ts`,
- * а не выбирается вручную под красивое число.
+ * ЛЕСТНИЦА СЧИТАЕТСЯ ПО МЕСТУ В РЯДУ, А НЕ ПО ПОРОГУ. Первая версия
+ * ставила «Супервыгодно» всем, у кого гигабайт дешевле старта на 20 %,
+ * — и слово оказалось на девяти карточках из одиннадцати, то есть снова
+ * ничего не значило. Теперь «Супервыгодно» получают только три пакета с
+ * самым дешёвым гигабайтом после лучшего, лучший — жёлтую скошенную
+ * плашку «Лучшая цена за ГБ», остальные — «Выгодно · −N%». Проценты
+ * настоящие: считаются из цен `traffic-packs.ts`.
+ *
+ * `ids` — показать не весь список: на главной длинная лента из
+ * одиннадцати карточек стоит между тарифами и вопросами, ровно там, где
+ * человек решает. Места в лестнице считаются по ПОЛНОМУ списку, поэтому
+ * «лучшая цена» не переедет на другой пакет из-за подборки.
  */
-export default function TrafficCards({ cta = "Купить" }: { cta?: string }) {
+const SUPER_RANKS = 3;
+
+export default function TrafficCards({ cta = "Купить", ids }: { cta?: string; ids?: string[] }) {
   const perGb = (p: (typeof TRAFFIC_PACKS)[number]) => p.priceRub / p.gb;
   const base = perGb(TRAFFIC_PACKS[0]);
-  const best = Math.min(...TRAFFIC_PACKS.map(perGb));
+  const ranked = [...TRAFFIC_PACKS].sort((a, b) => perGb(a) - perGb(b));
+  const rankOf = (id: string) => ranked.findIndex((p) => p.id === id);
+  const shown = ids ? TRAFFIC_PACKS.filter((p) => ids.includes(p.id)) : TRAFFIC_PACKS;
 
   return (
     <Carousel label="Пакеты трафика">
-      {TRAFFIC_PACKS.map((p, i) => {
+      {shown.map((p, i) => {
         const gbPrice = perGb(p);
         const off = Math.round((1 - gbPrice / base) * 100);
-        const isBest = gbPrice === best;
+        const rank = rankOf(p.id);
+        const isBest = rank === 0;
         const tag =
           isBest ? { text: "Лучшая цена за ГБ", tone: "v-badge-yellow v-dcard-tag-hero" }
-          : i === 0 ? { text: "Для старта", tone: "v-badge-soft" }
-          : off >= 20 ? { text: `Супервыгодно · −${off}%`, tone: "v-badge-solid-blue" }
-          : { text: `Выгодно · −${off}%`, tone: "v-badge-blue" };
+          : i === 0 && p.id === TRAFFIC_PACKS[0].id ? { text: "Для старта", tone: "v-badge-soft" }
+          : rank <= SUPER_RANKS ? { text: `Супервыгодно · −${off}%`, tone: "v-badge-solid-blue" }
+          : off > 0 ? { text: `Выгодно · −${off}%`, tone: "v-badge-blue" }
+          : { text: "Пакет", tone: "v-badge-soft" };
 
         return (
           <article key={p.id} className={`v-dcard${isBest ? " v-dcard-pop" : ""}`} aria-label={`${p.gb} ГБ за ${p.priceRub} ₽`}>

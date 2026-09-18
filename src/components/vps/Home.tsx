@@ -1,5 +1,6 @@
 import Link from "next/link";
 import VShell from "./VShell";
+import Icon from "@/components/pixel/Icon";
 import StoreBadges from "./StoreBadges";
 import PlanCards from "./PlanCards";
 import TrafficCards from "./TrafficCards";
@@ -13,9 +14,9 @@ import TunnelFlow from "./home/TunnelFlow";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, TRIAL } from "./links";
-import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, formatRub, pricePerMonth } from "@/lib/plans";
+import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, PLAN_SPEED, formatRub, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
-import { TRAFFIC_ENTRY_RUB } from "@/lib/traffic-packs";
+import { TRAFFIC_ENTRY_RUB, TRAFFIC_PACKS } from "@/lib/traffic-packs";
 import "@/app/home-vps.css";
 
 /**
@@ -52,20 +53,22 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
   return (
     <VShell>
       {/* 01 · первый экран */}
-      <section className="v-section v-glow vh-hero-sec" aria-labelledby="v-hero">
+      <section className="v-section v-center v-glow vh-hero-sec" aria-labelledby="v-hero">
         <div className="v-wrap vh-hero">
-          <div className="vh-hero-col">
-            <div className="vh-hero-in">
-              <p className="vh-hero-kicker">
-                <span className="v-live" aria-hidden /> Серверы в {COUNTRY_COUNT} странах · пробный доступ {TRIAL}
-              </p>
-              <h1 id="v-hero" className="v-h1">
-                Любимые сервисы <span className="v-accent">на максимум</span>
-              </h1>
-              <p className="v-lead">
-                Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
-              </p>
-            </div>
+          <div className="vh-hero-in">
+            <p className="vh-hero-kicker">
+              <span className="v-live" aria-hidden /> Серверы в {COUNTRY_COUNT} странах · пробный доступ {TRIAL}
+            </p>
+            <h1 id="v-hero" className="v-h1">
+              Любимые сервисы <span className="v-accent">на максимум</span>
+            </h1>
+            <p className="v-lead">
+              Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
+            </p>
+            {/* Кнопка стоит ДО кадра. Разбор 18.09.2026: в макете по
+                центру кадр высотой в пол-экрана уводил её под сгиб, а
+                выравнивание само по себе на конверсию почти не влияет —
+                влияет то, видно ли действие без прокрутки. */}
             <div className="v-actions">
               <Link href={enter} prefetch={false} className="v-btn v-btn-primary">Попробовать {TRIAL} бесплатно</Link>
               <Link href="/pricing" className="v-btn v-btn-soft">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
@@ -73,26 +76,46 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             <p className="vh-hero-note">
               Карта не нужна. Вход по почте, ключ приходит сразу — подключение занимает минуту.
             </p>
-            <StoreBadges />
-            <AppsRow />
           </div>
 
           {/* Одна сцена, а не коллаж: ноутбук и телефон сняты вместе,
               с общим светом и общей тенью на общем полу
-              (design/blender/hero_build.py). Экраны внутри — живой
-              кабинет, снятый теми же скриптами, что и раньше. */}
+              (design/blender/hero_build.py). Вокруг — стеклянные плашки
+              с числами из src/lib и две геометрические фигуры. */}
           <div className="vh-stage" aria-hidden>
             <img
-              src="/media/hero/stage-860.webp"
-              srcSet="/media/hero/stage-860.webp 860w, /media/hero/stage-1720.webp 1720w"
-              sizes="(min-width: 1040px) 52vw, 100vw"
+              src="/media/hero/stage-860.v2.webp"
+              srcSet="/media/hero/stage-860.v2.webp 860w, /media/hero/stage-1720.v2.webp 1720w"
+              sizes="(min-width: 1100px) 1000px, 100vw"
               alt=""
               width={860}
               height={575}
               fetchPriority="high"
               decoding="async"
             />
+
+            <span className="vh-chip vh-chip-a">
+              <Icon name="globe" size={16} />
+              {COUNTRY_COUNT} стран
+            </span>
+            <span className="vh-chip vh-chip-b">
+              <Icon name="lock" size={16} />
+              Шифрование включено
+            </span>
+            <span className="vh-chip vh-chip-c">
+              <Icon name="bolt" size={16} />
+              до {PLAN_SPEED.plus} Гбит/с
+            </span>
+            <span className="vh-chip vh-chip-d">
+              <Icon name="devices" size={16} />
+              до {DEVICE_LIMIT} устройств
+            </span>
+            <i className="vh-shape vh-shape-square" />
+            <i className="vh-shape vh-shape-dot" />
           </div>
+
+          <StoreBadges />
+          <AppsRow />
         </div>
       </section>
 
@@ -177,7 +200,17 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             Отдельный ключ на усиленные серверы — для сетей, где обычное подключение не проходит. От{" "}
             {formatRub(TRAFFIC_ENTRY_RUB)} ₽, гигабайты не сгорают и складываются.
           </p>
-          <TrafficCards />
+          {/* На главной — короткая подборка, а не все одиннадцать
+              пакетов: длинная лента стоит ровно там, где человек
+              решает, и листать её вместо решения он не будет. Места в
+              лестнице выгоды считаются по полному списку, поэтому
+              «лучшая цена за ГБ» не переезжает из-за подборки. */}
+          <TrafficCards ids={["gb15", "gb100", "gb300", "gb600"]} />
+          <div className="v-actions">
+            <Link href="/pricing#traffic" className="v-btn v-btn-soft">
+              Все {TRAFFIC_PACKS.length} пакетов — до {formatRub(TRAFFIC_PACKS[TRAFFIC_PACKS.length - 1].gb)} ГБ
+            </Link>
+          </div>
           <p className="v-car-note">Пакет работает рядом с подпиской и не заменяет её.</p>
         </div>
       </section>

@@ -49,13 +49,21 @@ box = (
 im = im.crop(box)
 print("crop", box, "->", im.size)
 
+# ВЕРСИЯ В ИМЕНИ ОБЯЗАТЕЛЬНА. Статика из public/ отдаётся с
+# `cache-control: max-age=604800`: перезаписав файл под тем же именем,
+# мы оставляем читателю прежнюю картинку на неделю — так владелец
+# 18.09.2026 ещё раз увидел серую плиту, которой на сервере уже не
+# было. Перерендерили кадр — поднимите VERSION и поправьте srcset в
+# components/vps/Home.tsx.
+VERSION = "v2"
+
 # Имена и размеры постоянные: на них ссылается srcset первого экрана.
 # Обрезка зависит от кадра и может оказаться чуть уже 1720 — тогда
 # картинка немного растягивается, это незаметно и лучше, чем менять
 # разметку под каждый рендер.
 for width, limit_kb, quality in ((1720, 260, 88), (860, 110, 86)):
     h = round(im.height * width / im.width)
-    dst = os.path.join(out_dir, f"stage-{width}.webp")
+    dst = os.path.join(out_dir, f"stage-{width}.{VERSION}.webp")
     q = quality
     while True:
         im.resize((width, h), Image.LANCZOS).save(dst, "WEBP", quality=q, method=6)

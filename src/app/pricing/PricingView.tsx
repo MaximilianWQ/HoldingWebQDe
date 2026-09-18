@@ -70,8 +70,14 @@ export default function PricingView() {
               const dark = id === "plus";
               return (
                 <div key={id} className={`vp-compare-card v-lift ${dark ? "v-dcard" : "v-card v-card-pad"}`}>
+                  {/* Было «Популярный» — утверждение о том, что мы
+                      проверить не можем (распределение покупок). Замена
+                      считается из PLAN_SPEED и остаётся верной, даже
+                      если скорости поменяются. */}
                   {dark && (
-                    <span className="v-badge v-badge-lg v-dcard-tag v-badge-solid-blue">Популярный</span>
+                    <span className="v-badge v-badge-lg v-dcard-tag v-badge-solid-blue">
+                      Быстрее в {Math.round(PLAN_SPEED.plus / PLAN_SPEED.basic)} раза
+                    </span>
                   )}
                   <div className="vp-compare-head">
                     <h3 className={dark ? "v-dcard-title" : "vp-compare-name"}>{PLAN_CONTENT[id].name}</h3>

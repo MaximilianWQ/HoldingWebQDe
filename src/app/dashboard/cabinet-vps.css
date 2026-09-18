@@ -67,9 +67,14 @@
 .vc-tabs { margin: 0 0 24px; max-width: 620px; }
 .vc-tabs button { gap: 8px; min-height: 52px; padding-inline: 10px; }
 .vc-tab-label { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
-@media (max-width: 420px) {
+/* До 560px четыре слова в ряд не помещаются — подпись уходит под
+   иконку (на 440 «Профиль» обрезался). */
+@media (max-width: 560px) {
   .vc-tabs button { flex-direction: column; gap: 3px; min-height: 58px; padding-inline: 4px; }
   .vc-tab-label { font-size: 12px; font-weight: 500; }
+  .vc-profile-id { align-items: flex-start; }
+  .vc-profile-id .v-avatar { width: 48px; height: 48px; font-size: 20px; }
+  .vc-name { font-size: 16px; }
 }
 .vc-hr { margin-block: 0 24px; }
 

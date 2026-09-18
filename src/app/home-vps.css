@@ -62,31 +62,54 @@
   line-height: 1.5;
 }
 
-/* Парение устройств: собственный неспешный ход + отклик на прокрутку
-   страницы (глубже едет ноутбук, чуть меньше — телефон, для ощущения
-   объёма). Раздельные силы — на разных элементах, поэтому список
-   animation-name можно оставить простым на каждом. */
+/* Раскладка первого экрана. До 1040px — как было: всё по центру,
+   кадр под текстом. Дальше — две колонки: слово слева, предмет справа.
+   Причина не в моде: на ноутбуке 1440×900 кадр высотой 617px уводил
+   кнопку «Попробовать» под сгиб, то есть главное действие страницы
+   приходилось искать прокруткой. */
+.vh-hero-sec { text-align: center; }
+.vh-hero { display: grid; gap: clamp(28px, 4vw, 40px); }
+@media (min-width: 1040px) {
+  .vh-hero-sec { text-align: left; }
+  .vh-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+    align-items: center;
+    gap: clamp(32px, 4vw, 64px);
+  }
+  .vh-hero .v-lead, .vh-hero .vh-hero-note { margin-inline: 0; }
+  .vh-hero .v-actions, .vh-hero .v-stores, .vh-hero .vh-apps-row { justify-content: flex-start; }
+  .vh-hero .vh-apps { align-items: flex-start; }
+  /* Кадр немного выходит за колонку вправо — предмет на первом экране
+     должен казаться больше, чем поле, в котором он лежит. */
+  .vh-stage { margin-right: calc(-1 * clamp(0px, 3vw, 48px)); }
+  /* Заголовок считается от ширины колонки, а не от окна: в две колонки
+     прежний кегль разваливал его на три строки. */
+  .vh-hero .v-h1 { font-size: clamp(44px, 4.4vw, 64px); }
+  .vh-hero-sec { padding-top: clamp(24px, 4vw, 56px); }
+}
+
+/* Сцена первого экрана — один кадр из Blender (ноутбук и телефон в
+   одной сцене, hero_build.py). Она дышит своим ходом и отвечает на
+   прокрутку страницы: уезжая под сгиб, слегка опускается и уменьшается,
+   чтобы кадр не выглядел приклеенным к экрану. */
+.vh-stage {
+  width: min(100%, 860px);
+  margin-inline: auto;
+}
+.vh-stage img { width: 100%; height: auto; }
+
 @media (prefers-reduced-motion: no-preference) {
-  .vh-devices-laptop { animation: vh-bob-laptop 7s var(--v-ease) infinite; }
-  .vh-devices-phone { animation: vh-bob-phone 6s var(--v-ease) infinite; animation-delay: -1.4s; }
+  .vh-stage { animation: vh-bob-stage 9s var(--v-ease) infinite; }
   @supports (animation-timeline: scroll()) {
-    .vh-devices-laptop {
-      animation: vh-bob-laptop 7s var(--v-ease) infinite, vh-scroll-laptop linear both;
+    .vh-stage {
+      animation: vh-bob-stage 9s var(--v-ease) infinite, vh-scroll-stage linear both;
       animation-timeline: auto, scroll(root block);
-      animation-range: normal, 0% 60vh;
-    }
-    .vh-devices-phone {
-      animation: vh-bob-phone 6s var(--v-ease) infinite, vh-scroll-phone linear both;
-      animation-delay: -1.4s, 0s;
-      animation-timeline: auto, scroll(root block);
-      animation-range: normal, 0% 60vh;
+      animation-range: normal, 0% 70vh;
     }
   }
 }
-@keyframes vh-bob-laptop { 50% { transform: translateY(-7px); } }
-@keyframes vh-bob-phone { 50% { transform: translateY(-11px); } }
-@keyframes vh-scroll-laptop { to { transform: translateY(30px) scale(0.985); } }
-@keyframes vh-scroll-phone { to { transform: translateY(54px); } }
+@keyframes vh-bob-stage { 50% { transform: translateY(-8px); } }
+@keyframes vh-scroll-stage { to { transform: translateY(34px) scale(0.982); } }
 
 /* «Работает в приложениях Happ и Incy» — текстовые логотипы-пилюли. */
 .vh-apps {

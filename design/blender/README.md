@@ -6,6 +6,7 @@
 |---|---|---|
 | `atlas_iphone.blend` | Сцена «AtlasIphone»: iPhone 17 Pro Max (корень `IP_A`, корпус Deep Blue) | `public/media/ios/shell.webp` — корпус без экрана, см. ниже |
 | `atlas_laptop.blend` | Сцена «AtlasLaptop»: MacBook Pro 14" (Silver) раздела 06 главной, крышка открывается за 120 кадров; модель строит `laptop_build.py` | `public/media/laptop/f000–f119.webp`, `poster.jpg` — см. ниже |
+| `hero_build.py` + `hero_post.py` | Первый экран главной: ноутбук и телефон в одной сцене | `public/media/hero/stage-860.webp`, `stage-1720.webp` |
 | `atlas_globe2_blocks.blend` | Глобус раздела 03 (прежняя видеоверсия; сейчас на сайте глобус реального времени `GlobeGL.tsx`) | `public/media/globe2.jpg` — постер-заглушка |
 
 ## iPhone для /install-ios
@@ -55,6 +56,40 @@ node design/blender/iphone-screens/dash.cjs <путь к playwright> design/blen
 заглушка `example.invalid`; скрипт падает, если на странице осталась ссылка, QR
 или запретное слово. PNG → WebP (качество ~88, ≤ 70 КБ) —
 `public/media/ios/dash.webp`.
+
+## Первый экран главной — ноутбук и телефон в одной сцене
+
+Кадр первого экрана (`public/media/hero/stage-860.webp`,
+`stage-1720.webp`) — ОДИН рендер: ноутбук и телефон стоят на общем полу,
+под общим светом, в один объектив. До 18.09.2026 первый экран складывали
+из двух картинок (постер ноутбука + фронтальный корпус телефона поверх
+него), и рядом они читались как аппликация: разная перспектива, разный
+свет, тень телефона нарисована CSS-фильтром.
+
+```bash
+# 1. Экраны (сайт должен быть запущен; путь к playwright — свой)
+node design/blender/laptop-screen/dash.cjs <playwright> design/blender/laptop-screen/screen-1512.png http://localhost:3000
+node design/blender/iphone-screens/dash.cjs <playwright> design/blender/iphone-screens/dash-440.png http://localhost:3000
+
+# 2. Рендер (Cycles, прозрачный фон; ~2,5 мин на M5 при 320 сэмплах)
+/Applications/Blender.app/Contents/MacOS/Blender -b design/blender/atlas_laptop.blend \
+  -S AtlasLaptop -P design/blender/hero_build.py -- --out /tmp/hero.png --samples 320 --width 2100
+
+# 3. Обрезка по тени и WebP с прозрачностью (нужен Pillow)
+python design/blender/hero_post.py /tmp/hero.png public/media/hero
+```
+
+`hero_build.py` ничего не пересобирает: ноутбук уже лежит в
+`atlas_laptop.blend`, телефон прилинковывается из `atlas_iphone.blend`
+(объекты `IP_A*`). Постановка правится флагами без правки кода:
+`--phone-x/--phone-y/--phone-tilt/--phone-yaw` — телефон,
+`--dist/--az/--el/--lens/--aim-*` — камера (наводится Track To на точку
+между предметами), `--floor-light` — насколько глубокая контактная тень,
+`--phone-glow` — яркость экрана телефона.
+
+Файлы кладутся с прозрачностью: страница больше не подмешивает постер
+через `mix-blend-mode: multiply` (он темнил края на любом фоне, кроме
+чисто белого).
 
 ## MacBook Pro для раздела 06 главной
 

@@ -32,3 +32,43 @@
 .pa-make-title { margin: 4px 0 0; font-size: 21px; font-weight: 600; letter-spacing: -0.015em; }
 .pa-make-price { margin: 2px 0 0; color: var(--v-ink-3); font-size: 16px; }
 .pa-make-price b { color: var(--v-ink); font-weight: 600; }
+
+/* ── История компании (владелец, 18.09.2026) ───────────────────────
+   Текст слева, вехи справа: рассказ и хронология читаются как одно,
+   но не мешают друг другу. На телефоне — одной колонкой. */
+.pa-story { display: grid; gap: clamp(32px, 5vw, 56px); }
+@media (min-width: 900px) { .pa-story { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: start; } }
+.pa-story-text p {
+  margin: 20px 0 0;
+  max-width: 62ch;
+  color: var(--v-ink-2);
+  font-size: clamp(17px, 1.9vw, 19px);
+  line-height: 1.6;
+}
+.pa-story-line { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.pa-story-line li {
+  display: grid;
+  gap: 6px;
+  padding: 22px 0 22px 26px;
+  border-top: 1px solid var(--v-line);
+  position: relative;
+}
+.pa-story-line li:last-child { border-bottom: 1px solid var(--v-line); }
+.pa-story-line li::before {
+  content: "";
+  position: absolute;
+  top: 29px;
+  left: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--v-blue);
+}
+.pa-story-line b { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+.pa-story-line span { color: var(--v-ink-3); font-size: 16px; line-height: 1.5; }
+
+/* ── Миссия ────────────────────────────────────────────────────────
+   Одна мысль на тёмной плите — та, ради которой компания появилась. */
+.v-panel.pa-mission { padding: clamp(36px, 6vw, 72px); }
+.v-panel.pa-mission .v-h2 { color: #FFFFFF; max-width: 20ch; }
+.pa-mission-accent { color: #7FB0F8; }

@@ -7,6 +7,7 @@ import { CITY_COUNT, COUNTRY_COUNT } from "@/lib/locations";
 import { DEVICE_LIMIT, PLANS, PLAN_SPEED, formatRub } from "@/lib/plans";
 import { SERVER_ENTRY_USD, formatUsd } from "@/lib/servers";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
+import { FOUNDED } from "@/lib/nav";
 import { plural } from "@/lib/ru-words";
 import "./about-vps.css";
 
@@ -59,6 +60,62 @@ export default function AboutPage() {
             {BRAND} — VPS-ускоритель для телефона и компьютера и выделенные серверы для проектов.
             Вот во что мы верим и что можем подтвердить.
           </p>
+        </div>
+      </section>
+
+      {/* 02 · как всё началось */}
+      <section className="v-section v-reveal" aria-labelledby="pa-story-title">
+        <div className="v-wrap pa-story">
+          <div className="pa-story-text">
+            <h2 id="pa-story-title" className="v-h2">Начиналось с двоих</h2>
+            <p>
+              {BRAND.replace(" VPS", "")} основан в {FOUNDED} году в Гонконге. Нас было двое — инженеры с техническим
+              образованием: один учился в Москве, второй в Гонконге, на одной из немногих программ по сетевой
+              безопасности.
+            </p>
+            <p>
+              Первая версия делала ровно одно: открывала заблокированные сайты. Ни приложений, ни личного кабинета,
+              ни серверов в {COUNTRY_COUNT} {plural(COUNTRY_COUNT, ["стране", "странах", "странах"])} — рабочее
+              подключение для себя и знакомых, не больше.
+            </p>
+            <p>
+              Чем дольше мы этим занимались, тем очевиднее становилось: открыть доступ — половина дела. Вторая
+              половина в том, чтобы по дороге никто не читал ваш трафик. Поэтому шифрование у нас включено всегда и
+              в каждом тарифе, а не продаётся отдельной строкой.
+            </p>
+          </div>
+          <ol className="pa-story-line">
+            <li>
+              <b>{FOUNDED}</b>
+              <span>Гонконг. Двое основателей и один сервис — открыть заблокированный сайт.</span>
+            </li>
+            <li>
+              <b>Дальше</b>
+              <span>
+                Приложения, личный кабинет, серверы в {COUNTRY_COUNT}{" "}
+                {plural(COUNTRY_COUNT, ["стране", "странах", "странах"])}, до {DEVICE_LIMIT} устройств на подписке.
+              </span>
+            </li>
+            <li>
+              <b>Сегодня</b>
+              <span>Часть группы QoDev: ускоритель интернета, выделенные серверы и пакеты трафика.</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* 03 · миссия */}
+      <section className="v-section v-reveal" aria-labelledby="pa-mission-title">
+        <div className="v-wrap v-narrow">
+          <div className="v-panel pa-mission">
+            <h2 id="pa-mission-title" className="v-h2">
+              Свободный интернет — это половина. <span className="pa-mission-accent">Вторая — безопасный</span>
+            </h2>
+            <p>
+              Доступ без ограничений ничего не стоит, если по дороге видно, куда вы ходите. Мы делаем и то и другое
+              одной подпиской — и пишем об этом ровно то, что можем показать.
+            </p>
+          </div>
         </div>
       </section>
 

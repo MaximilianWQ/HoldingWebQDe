@@ -54,37 +54,47 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
   return (
     <VShell>
       {/* 01 · первый экран */}
-      <section className="v-section v-center v-glow" aria-labelledby="v-hero">
-        <div className="v-wrap">
-          <div className="vh-hero-in">
-            <p className="vh-hero-kicker">
-              <span className="v-live" aria-hidden /> Серверы в {COUNTRY_COUNT} странах · пробный доступ {TRIAL}
-            </p>
-            <h1 id="v-hero" className="v-h1">
-              Любимые сервисы <span className="v-accent">на максимум</span>
-            </h1>
-            <p className="v-lead">
-              Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
-            </p>
-          </div>
-          <div className="v-devices" aria-hidden>
-            <div className="v-devices-laptop vh-devices-laptop">
-              <img src="/media/laptop/poster.jpg" alt="" width={1400} height={900} fetchPriority="high" />
+      <section className="v-section v-glow vh-hero-sec" aria-labelledby="v-hero">
+        <div className="v-wrap vh-hero">
+          <div className="vh-hero-col">
+            <div className="vh-hero-in">
+              <p className="vh-hero-kicker">
+                <span className="v-live" aria-hidden /> Серверы в {COUNTRY_COUNT} странах · пробный доступ {TRIAL}
+              </p>
+              <h1 id="v-hero" className="v-h1">
+                Любимые сервисы <span className="v-accent">на максимум</span>
+              </h1>
+              <p className="v-lead">
+                Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
+              </p>
             </div>
-            <div className="v-phone vh-devices-phone">
-              <div className="v-phone-screen"><img src="/media/ios/dash.webp" alt="" width={880} height={1788} /></div>
-              <img className="v-phone-shell" src="/media/ios/shell.webp" alt="" width={960} height={1992} />
+            <div className="v-actions">
+              <Link href={enter} prefetch={false} className="v-btn v-btn-primary">Попробовать {TRIAL} бесплатно</Link>
+              <Link href="/pricing" className="v-btn v-btn-soft">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
             </div>
+            <p className="vh-hero-note">
+              Карта не нужна. Вход по почте, ключ приходит сразу — подключение занимает минуту.
+            </p>
+            <StoreBadges />
+            <AppsRow />
           </div>
-          <div className="v-actions">
-            <Link href={enter} prefetch={false} className="v-btn v-btn-primary">Попробовать {TRIAL} бесплатно</Link>
-            <Link href="/pricing" className="v-btn v-btn-soft">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
+
+          {/* Одна сцена, а не коллаж: ноутбук и телефон сняты вместе,
+              с общим светом и общей тенью на общем полу
+              (design/blender/hero_build.py). Экраны внутри — живой
+              кабинет, снятый теми же скриптами, что и раньше. */}
+          <div className="vh-stage" aria-hidden>
+            <img
+              src="/media/hero/stage-860.webp"
+              srcSet="/media/hero/stage-860.webp 860w, /media/hero/stage-1720.webp 1720w"
+              sizes="(min-width: 1040px) 52vw, 100vw"
+              alt=""
+              width={860}
+              height={617}
+              fetchPriority="high"
+              decoding="async"
+            />
           </div>
-          <p className="vh-hero-note">
-            Карта не нужна. Вход по почте, ключ приходит сразу — подключение занимает минуту.
-          </p>
-          <StoreBadges />
-          <AppsRow />
         </div>
       </section>
 

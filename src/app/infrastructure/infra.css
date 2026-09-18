@@ -1,0 +1,178 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /infrastructure — надстройка над тёмным корпусом (src/app/tech.css).
+   Префикс `ti-`. Здесь карта узлов, стойка и мелочи разворота.
+
+   Движение: карта живёт сама (бегущие пакеты по дугам, дыхание узлов)
+   — это единственное место на сайте, где холостое движение оправдано:
+   оно показывает работу сети, а не привлекает внимание. Стойка мигает
+   индикаторами. Всё остальное отвечает на руку. При reduced-motion
+   движение выключено общим правилом корпуса.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ti-hero { padding-top: clamp(40px, 7vw, 96px); }
+.ti-mark { margin: 0 0 22px; }
+.ti-mark-logo {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--t-accent);
+  color: #0B0B0B;
+}
+.ti-hero .t-h1 { max-width: 15ch; }
+
+/* ── Числа ────────────────────────────────────────────────────────── */
+.ti-figure { border-top: 1px solid var(--t-line-2); padding-top: clamp(18px, 2.4vw, 26px); }
+
+/* ── Карта узлов ──────────────────────────────────────────────────── */
+.ti-map {
+  margin: 0;
+  padding: clamp(16px, 2.4vw, 28px);
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background:
+    radial-gradient(60% 90% at 50% 10%, rgba(255, 90, 31, 0.08), transparent 70%),
+    var(--t-bg-2);
+}
+.ti-map svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Суша — штрихи нулевой длины с круглым концом: одна линия вместо
+   полутора тысяч кружков, рисуется дёшево. */
+.ti-map-land {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+.ti-map-arc { fill: none; stroke: rgba(255, 90, 31, 0.42); stroke-width: 1.1; stroke-dasharray: 4 5; }
+.ti-map-pk { fill: var(--t-lime); }
+
+.ti-map-node { cursor: pointer; }
+.ti-map-node:focus { outline: none; }
+.ti-map-halo { fill: rgba(255, 90, 31, 0.14); opacity: 0; transition: opacity 240ms var(--t-ease); }
+.ti-map-dot { fill: var(--t-accent); }
+.ti-map-node.is-hub .ti-map-dot { fill: var(--t-lime); }
+.ti-map-node.is-on .ti-map-halo,
+.ti-map-node:focus-visible .ti-map-halo { opacity: 1; }
+.ti-map-node.is-on .ti-map-dot { fill: var(--t-lime); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ti-map-halo { animation: ti-pulse 3.4s ease-in-out infinite; animation-delay: calc(var(--i) * -0.21s); opacity: 0.35; }
+  .ti-map-node.is-on .ti-map-halo { animation: none; opacity: 1; }
+}
+@keyframes ti-pulse {
+  0%, 100% { opacity: 0.12; transform: scale(0.72); transform-origin: center; }
+  50% { opacity: 0.5; transform: scale(1); }
+}
+
+.ti-map-cap {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--t-line-2);
+  font-family: var(--t-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--t-ink-3);
+}
+.ti-map-cap b { color: var(--t-ink); font-size: 15px; font-weight: 600; letter-spacing: 0; }
+
+/* ── Стойка ───────────────────────────────────────────────────────── */
+.ti-rack { display: grid; gap: 18px; }
+.ti-rack-body {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background: linear-gradient(180deg, #171717, #101010);
+}
+.ti-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--t-line-2);
+  border-radius: 10px;
+  background: #0E0E0E;
+  color: var(--t-ink-2);
+  font-family: var(--t-mono);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 240ms var(--t-ease), background-color 240ms var(--t-ease), color 240ms var(--t-ease);
+}
+.ti-unit.is-on { border-color: var(--t-accent); background: #151210; color: var(--t-ink); }
+.ti-unit-lime.is-on { border-color: var(--t-lime); }
+.ti-unit-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* «Диски» юнита: тонкие полосы, у активного — подсвечены. */
+.ti-unit-bays { display: flex; gap: 4px; }
+.ti-unit-bays i {
+  display: block;
+  width: 10px;
+  height: 18px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background-color 240ms var(--t-ease);
+}
+.ti-unit.is-on .ti-unit-bays i { background: rgba(255, 90, 31, 0.5); }
+.ti-unit.ti-unit-lime.is-on .ti-unit-bays i { background: rgba(228, 255, 79, 0.45); }
+
+.ti-unit-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+}
+.ti-unit.is-on .ti-unit-led { background: var(--t-accent); }
+@media (prefers-reduced-motion: no-preference) {
+  .ti-unit-led { animation: ti-led 2.6s steps(1, end) infinite; animation-delay: calc(var(--i) * -0.43s); }
+}
+@keyframes ti-led { 0%, 62% { opacity: 1; } 63%, 78% { opacity: 0.25; } 79% { opacity: 1; } }
+
+.ti-rack-note {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 18px 20px;
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background: var(--t-bg-2);
+}
+.ti-rack-note b { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.ti-rack-note span { color: var(--t-ink-2); font-size: 15px; line-height: 1.5; }
+
+/* ── Слои ─────────────────────────────────────────────────────────── */
+.ti-layer { transition: border-color 260ms var(--t-ease), transform 260ms var(--t-ease); }
+@media (hover: hover) { .ti-layer:hover { border-color: var(--t-accent); transform: translateY(-3px); } }
+.ti-layer-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--t-line);
+  border-radius: 14px;
+  color: var(--t-accent);
+}
+
+/* ── Финал ────────────────────────────────────────────────────────── */
+.ti-final {
+  display: grid;
+  gap: clamp(24px, 4vw, 40px);
+  padding: clamp(32px, 5vw, 64px);
+  border: 1px solid var(--t-line);
+  border-radius: clamp(20px, 3vw, 32px);
+  background:
+    radial-gradient(70% 120% at 88% 0%, rgba(228, 255, 79, 0.1), transparent 60%),
+    var(--t-bg-2);
+}
+@media (min-width: 1000px) { .ti-final { grid-template-columns: minmax(0, 1fr) auto; align-items: end; } }
+.ti-final .t-h2 { max-width: 16ch; }
+.ti-final-note { margin: 0; color: var(--t-ink-3); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }

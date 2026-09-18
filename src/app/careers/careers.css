@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════════════
+   /careers — надстройка над тёмным корпусом (src/app/tech.css).
+   Префикс `tc-`. Здесь только то, чего общему слою не хватило: строка
+   вакансии с вилкой контуром, раскрытие, шаги найма.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.tc-hero { padding-top: clamp(40px, 7vw, 96px); }
+.tc-mark { margin: 0 0 22px; color: var(--t-ink-2); }
+.tc-mark-logo {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--t-accent);
+  color: #0B0B0B;
+}
+.tc-hero .t-h1 { max-width: 16ch; }
+
+.tc-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  margin-left: 14px;
+  padding-inline: 10px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  color: var(--t-accent);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* ── Строка вакансии ──────────────────────────────────────────────
+   Вилка набрана тем же контуром, что числа на /infrastructure: это
+   один приём корпуса, а не украшение конкретной страницы. */
+.tc-list { display: grid; }
+.tc-row { border-top: 1px solid var(--t-line); }
+.tc-row:last-child { border-bottom: 1px solid var(--t-line); }
+.tc-row-head { margin: 0; }
+.tc-row-btn {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 20px;
+  width: 100%;
+  padding: clamp(22px, 3vw, 34px) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (min-width: 860px) {
+  .tc-row-btn { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) auto; }
+}
+.tc-pay {
+  grid-column: 1;
+  /* Вилка обязана стоять одной строкой: «350–450k», разорванное на две,
+     читается как две разные суммы. Кегль подобран так, чтобы самая
+     длинная вилка помещалась в свою колонку. */
+  white-space: nowrap;
+  font-size: clamp(34px, 4.1vw, 58px);
+  transition: -webkit-text-stroke-color 260ms var(--t-ease), color 260ms var(--t-ease);
+}
+.tc-row-main { grid-column: 1; display: grid; gap: 10px; }
+@media (min-width: 860px) { .tc-row-main { grid-column: 2; } }
+.tc-row-title { font-size: clamp(20px, 2.2vw, 26px); font-weight: 600; letter-spacing: -0.02em; }
+.tc-row-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tc-row-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  font-family: var(--t-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: var(--t-ink-3);
+}
+.tc-row-mark {
+  grid-row: 1;
+  grid-column: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--t-line);
+  border-radius: 50%;
+  color: var(--t-ink-2);
+  transition: transform 300ms var(--t-ease), border-color 300ms var(--t-ease), color 300ms var(--t-ease);
+}
+@media (min-width: 860px) { .tc-row-mark { grid-column: 3; } }
+.tc-row[data-open] .tc-row-mark { transform: rotate(180deg); border-color: var(--t-lime); color: var(--t-lime); }
+
+/* Наведение и раскрытие подсвечивают вилку — ответ на руку, а не
+   собственная жизнь строки. */
+@media (hover: hover) {
+  .tc-row-btn:hover .tc-pay { -webkit-text-stroke-color: var(--t-lime); color: transparent; }
+  .tc-row-btn:hover .tc-row-mark { border-color: var(--t-ink-2); color: var(--t-ink); }
+}
+.tc-row[data-open] .tc-pay { -webkit-text-stroke-color: var(--t-lime); }
+
+/* Раскрытие — через grid-template-rows, чтобы закрытие шло так же
+   гладко, как открытие (тот же приём, что у FAQ на главной). */
+.tc-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 420ms var(--t-ease); }
+.tc-row[data-open] .tc-panel { grid-template-rows: 1fr; }
+.tc-panel-in { overflow: hidden; min-height: 0; }
+.tc-about {
+  margin: 0 0 clamp(20px, 3vw, 28px);
+  max-width: 60ch;
+  color: var(--t-ink);
+  font-size: clamp(17px, 1.8vw, 20px);
+  line-height: 1.5;
+}
+.tc-cols { display: grid; gap: clamp(20px, 3vw, 32px); padding-bottom: 8px; }
+@media (min-width: 900px) { .tc-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tc-ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.tc-ul li {
+  position: relative;
+  padding-left: 20px;
+  color: var(--t-ink-2);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.tc-ul li::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--t-accent);
+}
+.tc-ul-plus li::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--t-lime); }
+.tc-mode { align-self: center; color: var(--t-ink-3); font-size: 13px; }
+
+/* ── Шаги найма ───────────────────────────────────────────────────── */
+.tc-steps { list-style: none; display: grid; gap: 14px; margin: 0; padding: 0; }
+@media (min-width: 760px) { .tc-steps { grid-template-columns: 1fr 1fr; } }
+.tc-step {
+  display: grid;
+  gap: 8px;
+  padding: clamp(22px, 3vw, 30px);
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background: var(--t-bg-2);
+}
+.tc-step-n { color: var(--t-accent); font-size: 13px; letter-spacing: 0.1em; }
+.tc-step b { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+.tc-step span:last-child { color: var(--t-ink-2); font-size: 15px; line-height: 1.5; }
+
+/* ── Финал ────────────────────────────────────────────────────────── */
+.tc-final {
+  padding: clamp(32px, 5vw, 64px);
+  border: 1px solid var(--t-line);
+  border-radius: clamp(20px, 3vw, 32px);
+  background:
+    radial-gradient(70% 120% at 12% 0%, rgba(255, 90, 31, 0.16), transparent 62%),
+    var(--t-bg-2);
+}
+.tc-final .t-h2 { max-width: 18ch; }

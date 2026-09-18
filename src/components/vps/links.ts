@@ -29,6 +29,7 @@ export const MENU_LINKS: VLink[] = [
   { label: "Выделенные серверы", href: "/vds" },
   { label: "Для бизнеса", href: "/business" },
   { label: "Поддержка", href: "/support" },
+  { label: "Вакансии", href: "/careers" },
   { label: "Контакты", href: "/contact" },
 ];
 
@@ -63,6 +64,7 @@ export const FOOT_LINKS: VLinkGroup[] = [
     links: [
       { label: "О компании", href: "/about" },
       { label: "Инфраструктура", href: "/infrastructure" },
+      { label: "Вакансии", href: "/careers" },
       { label: "Безопасность", href: "/security" },
       { label: "Для бизнеса", href: "/business" },
     ],

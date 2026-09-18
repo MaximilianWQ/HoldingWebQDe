@@ -1,0 +1,229 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ТЁМНЫЙ ТЕХНОЛОГИЧЕСКИЙ КОРПУС — /infrastructure и /careers.
+
+   Владелец 18.09.2026 прислал ecom.tech как образец и попросил сделать
+   ЭТИ ДВА экрана тёмными и техничными: чёрное поле, контурные
+   оранжевые числа, моноширинные подписи прописными, кнопки-пилюли
+   обводкой, крупная геометрия. Остальной сайт остаётся белым корпусом
+   Apple-стилистики — смешивать их нельзя, поэтому всё здесь живёт под
+   классом `.t` и префиксом `t-`, а страницы подключают файл сами.
+
+   Почему это не противоречит правилу «один корпус на сайт»: тёмные
+   страницы — про инженерию и наём, а не про покупку. Человек попадает
+   на них из подвала и из меню, а не с пути оплаты, и переключение
+   материала работает как смена раздела, а не как разнобой.
+
+   Устройство файла:
+     1. Токены      2. Основа и сетка    3. Типографика
+     4. Числа       5. Кнопки и метки    6. Панели и линии
+     7. Стойка и схема сети (инфраструктура)
+     8. Вакансии    9. Движение
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══ 1. Токены ════════════════════════════════════════════════════ */
+.t {
+  --t-bg: #0B0B0B;
+  --t-bg-2: #141414;
+  --t-panel: #171717;
+  --t-line: rgba(255, 255, 255, 0.12);
+  --t-line-2: rgba(255, 255, 255, 0.06);
+
+  --t-ink: #FFFFFF;
+  --t-ink-2: rgba(255, 255, 255, 0.64);
+  --t-ink-3: rgba(255, 255, 255, 0.4);
+
+  /* Оранжевый — только числа и геометрия. Лаймовый — только действия.
+     Третьего цвета в корпусе нет. */
+  --t-accent: #FF5A1F;
+  --t-accent-soft: rgba(255, 90, 31, 0.16);
+  --t-lime: #E4FF4F;
+
+  --t-mono: ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, monospace;
+  --t-font: var(--v-font, -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif);
+
+  --t-gutter: clamp(20px, 4vw, 48px);
+  --t-shell: 1320px;
+  --t-r: 18px;
+  --t-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ═══ 2. Основа и сетка ════════════════════════════════════════════ */
+html:has(.t), body:has(.t) { background: var(--t-bg); }
+.t {
+  min-height: 100svh;
+  background: var(--t-bg);
+  color: var(--t-ink);
+  font-family: var(--t-font);
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+.t :focus-visible { outline: 3px solid var(--t-lime); outline-offset: 3px; }
+.t ::selection { background: var(--t-accent); color: #0B0B0B; }
+
+.t-wrap {
+  width: 100%;
+  max-width: calc(var(--t-shell) + 2 * var(--t-gutter));
+  margin-inline: auto;
+  padding-inline: var(--t-gutter);
+}
+.t-sec { padding-block: clamp(56px, 9vw, 128px); }
+.t-sec + .t-sec { padding-top: 0; }
+
+/* Разворот как у образца: имя раздела слева, содержимое справа.
+   На телефоне — одной колонкой, имя сверху. */
+.t-split { display: grid; gap: clamp(24px, 4vw, 48px); }
+@media (min-width: 1000px) {
+  .t-split { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(32px, 5vw, 80px); }
+}
+.t-split-title {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+/* ═══ 3. Типографика ═══════════════════════════════════════════════ */
+.t-h1 {
+  margin: 0;
+  font-size: clamp(38px, 6.4vw, 92px);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+.t-h2 {
+  margin: 0;
+  font-size: clamp(30px, 4.4vw, 56px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  text-wrap: balance;
+}
+.t-lead {
+  margin: 20px 0 0;
+  max-width: 62ch;
+  font-size: clamp(17px, 1.8vw, 21px);
+  line-height: 1.55;
+  color: var(--t-ink-2);
+}
+.t-text { margin: 16px 0 0; max-width: 62ch; color: var(--t-ink-2); font-size: 16px; line-height: 1.6; }
+
+/* Моноширинная метка прописными — подпись раздела, тег, единица. */
+.t-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--t-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t-ink-3);
+}
+.t-mono { font-family: var(--t-mono); letter-spacing: 0.02em; }
+
+/* ═══ 4. Числа контуром ════════════════════════════════════════════
+   Главный приём корпуса: крупное число, набранное обводкой. Заливки
+   нет намеренно — на чёрном поле контур читается как чертёж, а не как
+   рекламный баннер. Без поддержки обводки число остаётся залитым
+   оранжевым: пустого места вместо цифры быть не должно. */
+.t-num {
+  display: block;
+  margin: 0;
+  font-size: clamp(52px, 8vw, 116px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--t-accent);
+}
+@supports (-webkit-text-stroke: 2px #000) {
+  .t-num {
+    color: transparent;
+    -webkit-text-stroke: clamp(1.5px, 0.2vw, 2.6px) var(--t-accent);
+    paint-order: stroke fill;
+  }
+}
+.t-num-sm { font-size: clamp(40px, 5vw, 64px); }
+.t-num-cap { margin: 14px 0 0; color: var(--t-ink-2); font-size: 15px; line-height: 1.45; max-width: 34ch; }
+
+.t-figures { display: grid; gap: clamp(28px, 4vw, 48px); }
+@media (min-width: 680px) { .t-figures { grid-template-columns: 1fr 1fr; } }
+
+/* ═══ 5. Кнопки и метки ════════════════════════════════════════════ */
+.t-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 30px;
+  border: 1.5px solid var(--t-lime);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--t-lime);
+  font-family: var(--t-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 240ms var(--t-ease), color 240ms var(--t-ease), transform 240ms var(--t-ease);
+}
+.t-btn:active { transform: scale(0.98); }
+@media (hover: hover) { .t-btn:hover { background: var(--t-lime); color: #0B0B0B; } }
+.t-btn-accent { border-color: var(--t-accent); color: var(--t-accent); }
+@media (hover: hover) { .t-btn-accent:hover { background: var(--t-accent); color: #0B0B0B; } }
+.t-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: clamp(28px, 4vw, 40px); }
+
+.t-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  font-family: var(--t-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--t-ink-2);
+  white-space: nowrap;
+}
+
+/* ═══ 6. Панели и линии ════════════════════════════════════════════ */
+.t-panel {
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background: var(--t-bg-2);
+}
+.t-cards { display: grid; gap: 14px; }
+@media (min-width: 760px) { .t-cards-2 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 760px) { .t-cards-3 { grid-template-columns: repeat(3, 1fr); } }
+.t-card-h { margin: 16px 0 0; font-size: 20px; font-weight: 600; letter-spacing: -0.015em; }
+.t-card-t { margin: 8px 0 0; color: var(--t-ink-2); font-size: 15px; line-height: 1.5; }
+.t-icon { display: block; width: 56px; height: 56px; color: var(--t-accent); }
+.t-rule { height: 1px; margin-block: clamp(32px, 5vw, 56px); background: var(--t-line-2); border: 0; }
+
+/* ═══ 9. Движение ══════════════════════════════════════════════════
+   Появление — по прокрутке, один приём на весь корпус. Всё остальное
+   движение объявлено рядом со своим блоком (стойка, схема, вакансии).
+   При reduced-motion страница отрисована в конечном виде. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .t-reveal {
+      animation: t-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 4% entry 46%;
+    }
+  }
+}
+@keyframes t-reveal { from { opacity: 0; transform: translateY(26px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .t *, .t *::before, .t *::after { animation: none !important; transition: none !important; }
+}

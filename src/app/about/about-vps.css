@@ -72,3 +72,11 @@
 .v-panel.pa-mission { padding: clamp(36px, 6vw, 72px); }
 .v-panel.pa-mission .v-h2 { color: #FFFFFF; max-width: 20ch; }
 .pa-mission-accent { color: #7FB0F8; }
+.pa-story-src { margin-top: 24px !important; font-size: 14px !important; color: var(--v-ink-4) !important; }
+.pa-story-src a {
+  color: var(--v-ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+}
+@media (hover: hover) { .pa-story-src a:hover { color: var(--v-blue-ink); } }

@@ -9,6 +9,7 @@ import { BRAND, TRIAL } from "@/components/vps/links";
 import { COUNTRY_COUNT, CITY_COUNT, LOCATIONS } from "@/lib/locations";
 import { PLAN_SPEED, DEVICE_LIMIT } from "@/lib/plans";
 import { SERVERS, SERVER_ENTRY_USD, formatUsd } from "@/lib/servers";
+import { PROTECTION } from "@/lib/protection";
 import { VACANCIES } from "@/lib/careers";
 import { plural } from "@/lib/ru-words";
 import "@/app/tech.css";
@@ -53,7 +54,19 @@ const FIGURES = [
   { n: String(DEVICE_LIMIT), cap: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на одной подписке, каждое со своим ключом` },
 ];
 
+/**
+ * Слои. Защита идёт первой и во всю ширину дорожки (`ti-layer-wide`):
+ * из пяти слоёв она единственный, у которого есть имя, а не описание,
+ * — и единственный, о котором спрашивают до покупки. Имя и текст — из
+ * `protection.ts`, на странице их руками не пишем.
+ */
 const LAYERS = [
+  {
+    icon: "shield" as const,
+    t: "Защита от атак",
+    d: `${PROTECTION.name}. ${PROTECTION.plain} ${PROTECTION.scope}`,
+    wide: true,
+  },
   {
     icon: "globe" as const,
     t: "Сеть",
@@ -70,7 +83,7 @@ const LAYERS = [
     d: "Срок подписки — событие в журнале, а не поле в базе: историю можно проследить целиком.",
   },
   {
-    icon: "shield" as const,
+    icon: "bell" as const,
     t: "Наблюдаемость",
     d: "Метрики и алерты на каждом участке: инцидент видит дежурный, а не пользователь.",
   },
@@ -166,7 +179,7 @@ export default function InfrastructurePage() {
               <h2 id="ti-layers-h" className="t-split-title">Из чего собрано</h2>
               <div className="t-cards t-cards-2">
                 {LAYERS.map((l) => (
-                  <article key={l.t} className="t-panel ti-layer">
+                  <article key={l.t} className={`t-panel ti-layer${"wide" in l && l.wide ? " ti-layer-wide" : ""}`}>
                     <span className="ti-layer-icon" aria-hidden><Icon name={l.icon} size={26} /></span>
                     <h3 className="t-card-h">{l.t}</h3>
                     <p className="t-card-t">{l.d}</p>

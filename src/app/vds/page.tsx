@@ -4,6 +4,7 @@ import VShell from "@/components/vps/VShell";
 import Carousel from "@/components/vps/Carousel";
 import Icon from "@/components/pixel/Icon";
 import { PLANS, formatRub } from "@/lib/plans";
+import { PROTECTION } from "@/lib/protection";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural, wordsFeminine, capitalize } from "@/lib/ru-words";
 import {
@@ -45,7 +46,7 @@ function specs(s: ServerTier): Array<[string, string]> {
     ["Память", `${s.ramGb} ГБ ECC`],
     ["Диски", s.disks],
     ["Порт", `${s.portGbps} Гбит/с · ${s.meteredTraffic ? "трафик считается" : "без учёта трафика"}`],
-    ["Защита от атак", s.ddos],
+    ["Защита от атак", PROTECTION.row],
   ];
 }
 

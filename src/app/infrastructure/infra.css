@@ -150,6 +150,9 @@
 .ti-rack-note span { color: var(--t-ink-2); font-size: 15px; line-height: 1.5; }
 
 /* ── Слои ─────────────────────────────────────────────────────────── */
+/* Защита от атак занимает дорожку целиком: нечётная пятая карточка
+   иначе осталась бы сиротой в правой колонке. */
+.ti-layer-wide { grid-column: 1 / -1; }
 .ti-layer { transition: border-color 260ms var(--t-ease), transform 260ms var(--t-ease); }
 @media (hover: hover) { .ti-layer:hover { border-color: var(--t-accent); transform: translateY(-3px); } }
 .ti-layer-icon {

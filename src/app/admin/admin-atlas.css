@@ -32,7 +32,7 @@
   .adm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-verdict, .adm-h-nodes, .adm-h-sync,
   .adm-rev, .adm-plans, .adm-series, .adm-traffic,
-  .adm-s-sync, .adm-s-cast, .adm-s-log, .adm-s-contact { grid-column: 1 / -1; }
+  .adm-s-sync, .adm-s-cast, .adm-s-log, .adm-s-inbox { grid-column: 1 / -1; }
 }
 @media (min-width: 1100px) {
   .adm-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
@@ -42,6 +42,10 @@
   .adm-h-sync { grid-column: span 4; }
   .adm-h-worker, .adm-h-traffic, .adm-h-site { grid-column: span 4; }
   .adm-series { grid-column: 1 / -1; }
+  /* «Обращения» — один список на весь раздел: без этого карточка
+     вставала в одну колонку из двенадцати и текст переносился по
+     слову (владелец, 19.09.2026: «это не норм»). */
+  .adm-s-inbox { grid-column: 1 / -1; }
   /* Бизнес. */
   .adm-rev { grid-column: span 5; }
   .adm-pace { grid-column: span 7; }

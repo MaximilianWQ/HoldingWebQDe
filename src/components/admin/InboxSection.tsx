@@ -123,7 +123,7 @@ export default function InboxSection({ reloadKey = 0 }: { reloadKey?: number }) 
 
   return (
     <div className="adm-grid adm-inbox">
-      <section className="ak-card adm-still" data-sheet="24" style={{ "--i": 1 } as CSSProperties} aria-labelledby="adm-inbox-h">
+      <section className="ak-card adm-s-inbox adm-still" data-sheet="24" style={{ "--i": 1 } as CSSProperties} aria-labelledby="adm-inbox-h">
         <div className="ak-card-head">
           <h2 id="adm-inbox-h" className="ak-eyebrow">Обращения с сайта</h2>
           <span className="ak-plan a-num">

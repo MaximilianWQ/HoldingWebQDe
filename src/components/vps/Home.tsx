@@ -115,8 +115,19 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               <Icon name="devices" size={16} />
               до {DEVICE_LIMIT} устройств
             </span>
-            <i className="vh-shape vh-shape-square" />
-            <i className="vh-shape vh-shape-dot" />
+            {/* Плитки сервисов по бокам кадра (владелец, 19.09.2026:
+                «по бокам иконки, просто квадратики»). Глифы — свои, из
+                общего набора: чужие логотипы это товарные знаки, а
+                рядом с обещанием первого экрана они читаются как
+                список конкретных площадок, ради которых сервис берут.
+                Здесь названы не площадки, а занятия: сообщения, видео,
+                игры, музыка, работа, соцсети. */}
+            <span className="vh-tile vh-tile-1"><Icon name="send" size={20} /></span>
+            <span className="vh-tile vh-tile-2"><Icon name="tv" size={20} /></span>
+            <span className="vh-tile vh-tile-3"><Icon name="bolt" size={20} /></span>
+            <span className="vh-tile vh-tile-4"><Icon name="chat" size={20} /></span>
+            <span className="vh-tile vh-tile-5"><Icon name="grid" size={20} /></span>
+            <span className="vh-tile vh-tile-6"><Icon name="users" size={20} /></span>
           </div>
 
           <StoreBadges />

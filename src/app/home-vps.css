@@ -157,40 +157,54 @@
   white-space: nowrap;
 }
 .vh-chip svg { color: var(--v-blue); }
-.vh-chip-a { top: 8%; left: 0; }
-.vh-chip-b { top: 18%; right: 0; }
-.vh-chip-c { bottom: 26%; left: 2%; }
-.vh-chip-d { bottom: 10%; right: 3%; }
+/* Подписи с числами держатся ближе к кадру, квадратики сервисов — по
+   внешнему краю: иначе они встают друг на друга (проверено на 1280 и
+   1440). */
+.vh-chip-a { top: 12%; left: 7%; }
+.vh-chip-b { top: 22%; right: 5%; }
+.vh-chip-c { bottom: 28%; left: 9%; }
+.vh-chip-d { bottom: 12%; right: 7%; }
 
-/* Геометрия: контурный квадрат и точка — ровно две фигуры, больше
-   первому экрану не нужно. */
-.vh-shape { position: absolute; z-index: 0; display: block; }
-.vh-shape-square {
-  top: 2%;
-  right: 8%;
-  width: clamp(64px, 9vw, 104px);
+/* Плитки сервисов — квадратики по бокам кадра. Глифы свои: чужой
+   логотип это товарный знак, и рядом с обещанием первого экрана он
+   читается как список конкретных площадок. Поэтому названы занятия, а
+   не площадки: сообщения, видео, игры, соцсети, работа, люди. */
+.vh-tile {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 3.6vw, 54px);
   aspect-ratio: 1;
-  border: 1.5px solid rgba(58, 133, 240, 0.28);
-  border-radius: 22px;
-  transform: rotate(14deg);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 12px 28px rgba(16, 24, 40, 0.12);
+  color: var(--v-ink-2);
+  transition: transform 320ms var(--v-ease), color 320ms var(--v-ease), box-shadow 320ms var(--v-ease);
 }
-.vh-shape-dot {
-  bottom: 12%;
-  left: 12%;
-  width: clamp(28px, 4vw, 44px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: linear-gradient(150deg, #5C97F7, #2A6AD8);
-  box-shadow: 0 12px 26px rgba(42, 106, 216, 0.34);
+@media (hover: hover) {
+  .vh-tile:hover { transform: translateY(-4px) scale(1.06); color: var(--v-blue); box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08), 0 18px 36px rgba(16, 24, 40, 0.16); }
 }
+.vh-tile-1 { top: 1%; left: -5%; }
+.vh-tile-2 { top: 42%; left: -7%; }
+.vh-tile-3 { bottom: 4%; left: -3%; }
+.vh-tile-4 { top: 3%; right: -5%; }
+.vh-tile-5 { top: 48%; right: -7%; }
+.vh-tile-6 { bottom: 6%; right: -3%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .vh-chip, .vh-shape { animation: vh-float 7.5s var(--v-ease) infinite; }
+  .vh-chip, .vh-tile { animation: vh-float 7.5s var(--v-ease) infinite; }
   .vh-chip-b { animation-duration: 9s; animation-delay: -1.2s; }
   .vh-chip-c { animation-duration: 8.2s; animation-delay: -2.6s; }
   .vh-chip-d { animation-duration: 10s; animation-delay: -3.4s; }
-  .vh-shape-square { animation-duration: 12s; animation-delay: -1.8s; }
-  .vh-shape-dot { animation-duration: 9.4s; animation-delay: -4s; }
+  .vh-tile-1 { animation-duration: 9.6s; animation-delay: -0.8s; }
+  .vh-tile-2 { animation-duration: 11s; animation-delay: -3.1s; }
+  .vh-tile-3 { animation-duration: 8.8s; animation-delay: -5.2s; }
+  .vh-tile-4 { animation-duration: 10.4s; animation-delay: -2.2s; }
+  .vh-tile-5 { animation-duration: 9.2s; animation-delay: -4.6s; }
+  .vh-tile-6 { animation-duration: 12s; animation-delay: -1.4s; }
 }
 @keyframes vh-float { 50% { translate: 0 -10px; } }
 @keyframes vh-float-rot { 50% { translate: 0 -10px; } }
@@ -198,7 +212,7 @@
 /* На узком экране фигуры убираются: кадр там во всю ширину, и плашки
    легли бы прямо на ноутбук. */
 @media (max-width: 1099px) {
-  .vh-chip, .vh-shape { display: none; }
+  .vh-chip, .vh-tile { display: none; }
 }
 
 

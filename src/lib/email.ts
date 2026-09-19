@@ -122,7 +122,7 @@ export async function sendTelegramLinkCodeEmail(email: string, code: string): Pr
 
 // ─── Generic transactional sender (plain HTML body) ───────────────
 
-async function sendTransactional(to: string, subject: string, html: string): Promise<boolean> {
+async function sendTransactional(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
   if (!process.env.RESEND_API_KEY) {
     console.log(`[DEV email → ${to}] ${subject}`);
     return true;
@@ -133,6 +133,7 @@ async function sendTransactional(to: string, subject: string, html: string): Pro
       to,
       subject,
       html,
+      ...(replyTo ? { replyTo } : {}),
     });
     if (error) {
       console.error("[EMAIL] Resend error:", error);
@@ -198,6 +199,49 @@ export async function sendTrafficPackEmail(email: string, packTitle: string, das
       `<p><b>${packTitle}</b> оплачен. Гигабайты прибавляются к остатку отдельного ключа: срока у него нет, он работает, пока есть гигабайты.</p>
        <p style="margin-top:16px"><a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Открыть личный кабинет</a></p>`
     )
+  );
+}
+
+/**
+ * Заявка с формы обратной связи — письмо в поддержку.
+ *
+ * До 19.09.2026 форма только писала строку в `contact_requests` и
+ * создавала уведомление администратору в кабинете. Письмо не уходило
+ * никуда, а страница обещала ответ «в течение четырёх рабочих часов»:
+ * обещание держалось на том, что кто-то заметит колокольчик.
+ *
+ * `replyTo` — адрес написавшего: ответить можно прямо из почты, не
+ * копируя адрес руками. Поля экранируются: они пришли из публичной
+ * формы, и почтовый клиент не должен отрисовать чужую разметку.
+ */
+export async function sendContactRequestEmail(params: {
+  to: string;
+  name: string;
+  email: string;
+  interest: string;
+  message: string | null;
+  id: string;
+}): Promise<boolean> {
+  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+  const rows = [
+    ["Имя", params.name],
+    ["Почта", params.email],
+    ["Тема", params.interest],
+    ["Сообщение", params.message || "—"],
+    ["Заявка", params.id],
+  ]
+    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
+    .join("\n");
+
+  return sendTransactional(
+    params.to,
+    `Заявка с сайта: ${params.interest}`,
+    wrapHtml(
+      "Заявка с формы обратной связи",
+      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
+<p style="margin-top:16px;color:#444">Ответьте на это письмо — оно уйдёт прямо человеку.</p>`
+    ),
+    params.email
   );
 }
 

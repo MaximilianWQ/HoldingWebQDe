@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { pool } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/client-ip";
+import { sendContactRequestEmail } from "@/lib/email";
+import { SUPPORT_DESK } from "@/lib/contacts";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
@@ -61,6 +63,22 @@ export async function POST(request: NextRequest) {
       [ADMIN_EMAIL]
     );
     const adminUserId = adminResult.rows[0]?.id;
+
+    // Письмо в поддержку — главный сигнал (владелец, 19.09.2026).
+    // Падение почты не должно ронять заявку: строка в базе уже есть, и
+    // человеку важнее, что она сохранилась, чем наш внутренний канал.
+    try {
+      await sendContactRequestEmail({
+        to: SUPPORT_DESK.email,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        interest,
+        message: message?.trim() || null,
+        id,
+      });
+    } catch (err) {
+      console.error("[CONTACT] notification email failed:", err);
+    }
 
     if (adminUserId) {
       const notifId = uuidv4();

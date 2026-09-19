@@ -32,7 +32,7 @@
   .adm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .adm-verdict, .adm-h-nodes, .adm-h-sync,
   .adm-rev, .adm-plans, .adm-series, .adm-traffic,
-  .adm-s-sync, .adm-s-cast, .adm-s-log { grid-column: 1 / -1; }
+  .adm-s-sync, .adm-s-cast, .adm-s-log, .adm-s-contact { grid-column: 1 / -1; }
 }
 @media (min-width: 1100px) {
   .adm-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
@@ -57,7 +57,9 @@
   .adm-s-pay { grid-column: span 5; }
   .adm-s-bot, .adm-s-ghost, .adm-s-diag { grid-column: span 4; }
   .adm-s-cast { grid-column: span 5; }
-  .adm-s-log { grid-column: span 7; }
+  /* Заявки с сайта — рядом с рассылками: оба про переписку с людьми. */
+  .adm-s-contact { grid-column: span 7; }
+  .adm-s-log { grid-column: 1 / -1; }
 }
 
 /* Пользователи: широкий экран — список слева, карточка справа.
@@ -1096,3 +1098,20 @@ html[data-static] .adm-ring { display: none; }
 .adm-bp-form { margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--a-g200); }
 .adm-bp-form .adm-input { min-height: 44px; }
 .adm-traffic .adm-tiles { margin-bottom: 0.9rem; }
+
+
+/* ── Заявки с сайта (ContactCard, 19.09.2026) ─────────────────────
+   Строка: слева имя, адрес, тема и текст; справа дата и кнопка
+   «Обработано». Текст заявки не обрезается — он и есть содержание. */
+.adm-contact-row {
+  display: grid;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--a-g200, rgba(0, 0, 0, 0.08));
+}
+@media (min-width: 720px) { .adm-contact-row { grid-template-columns: minmax(0, 1fr) auto; align-items: start; } }
+.adm-contact-main { display: grid; gap: 4px; min-width: 0; }
+.adm-contact-main b { font-size: 15px; font-weight: 600; }
+.adm-contact-mail { color: var(--a-cobalt, #3A85F0); text-decoration: none; font-size: 14px; overflow-wrap: anywhere; }
+.adm-contact-msg { margin-top: 4px; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.adm-contact-side { display: flex; align-items: center; gap: 10px; white-space: nowrap; }

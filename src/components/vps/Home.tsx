@@ -6,10 +6,8 @@ import PlanCards from "./PlanCards";
 import TrafficCards from "./TrafficCards";
 import CountryMarquee from "./home/CountryMarquee";
 import WhyBento from "./home/WhyBento";
-import DiffSwitch from "./home/DiffSwitch";
 import FaqAccordion from "./home/FaqAccordion";
 import ProofBar from "./home/ProofBar";
-import TunnelFlow from "./home/TunnelFlow";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, TRIAL } from "./links";
@@ -30,14 +28,22 @@ import "@/app/home-vps.css";
  *   01 Первый экран     — обещание и одно действие
  *   02 Полоса возражений — «карта не нужна», «списаний нет», «это минута»
  *   03 Страны            — масштаб сети одной лентой
- *   04 До и после        — узнавание: «да, у меня так же»
- *   05 Как это работает  — снимает страх сложности
- *   06 Почему Atlas      — выгоды числами из src/lib
- *   07 Тарифы            — лестница решения с выделенным средним сроком
- *   08 Пакеты трафика    — второй продукт
+ *   04 Как это работает  — снимает страх сложности
+ *   05 Почему Atlas      — выгоды числами из src/lib
+ *   06 Тарифы            — лестница решения с выделенным средним сроком
+ *   07 Пакеты трафика    — второй продукт
  *   09 Кешбэк            — причина остаться и привести своих
  *   10 Вопросы           — шесть возражений перед кнопкой
  *   11 Финал             — последнее предложение без риска
+ *
+ * СНЯТО 19.09.2026 по решению владельца: блок «Знакомо? Так быть не
+ * должно» (переключатель «до и после») — «спорно»; схема «Что
+ * происходит, когда вы нажимаете „Подключить"» — «зачем». Первый
+ * обещал разницу, которую страница показать не может: она проверяется
+ * на своих сервисах, для чего и есть пробные дни. Второй объяснял
+ * устройство продукта — эта работа осталась за полосой возражений
+ * («минута на подключение») и вопросами внизу («Это сложно
+ * настроить?», «Что видно из моего трафика?»).
  *
  * Блока «подключение в три шага» здесь нет намеренно (владелец,
  * 18.09.2026: «зачем оно на главной, подключение простое — пустая
@@ -127,34 +133,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         <div className="v-wrap"><CountryMarquee /></div>
       </section>
 
-      {/* 04 · до и после */}
-      <section className="v-section v-center v-reveal" aria-labelledby="v-diff">
-        <div className="v-wrap v-narrow">
-          <h2 id="v-diff" className="v-h2">
-            Знакомо? <span className="v-accent">Так быть не должно</span>
-          </h2>
-          <p className="v-lead">Четыре ситуации, из-за которых обычно и приходят. Переключите — и увидите разницу.</p>
-          <DiffSwitch />
-        </div>
-      </section>
-
-      {/* 05 · как это работает */}
-      <section className="v-section v-center v-reveal" aria-labelledby="v-flow">
-        <div className="v-wrap">
-          <h2 id="v-flow" className="v-h2">
-            Что происходит, когда вы нажимаете <span className="v-accent">«Подключить»</span>
-          </h2>
-          <p className="v-lead">
-            Три узла и одна закрытая линия между ними. Настраивать в этой схеме нечего — всё делает приложение.
-          </p>
-          <TunnelFlow />
-          <p className="v-car-note">
-            Провайдер и публичный Wi-Fi видят зашифрованный поток, а сайт — адрес выбранной вами страны.
-          </p>
-        </div>
-      </section>
-
-      {/* 06 · почему Atlas Secure VPS */}
+      {/* 04 · почему Atlas Secure VPS */}
       <section className="v-section v-center v-reveal" aria-labelledby="v-why">
         <div className="v-wrap">
           <h2 id="v-why" className="v-h2">
@@ -167,7 +146,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 07 · тарифы */}
+      {/* 05 · тарифы */}
       <section className="v-section v-center v-reveal" id="tariffs" aria-labelledby="v-plans">
         <div className="v-wrap">
           <h2 id="v-plans" className="v-h2">Чем длиннее срок, тем дешевле месяц</h2>
@@ -186,7 +165,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 08 · трафик */}
+      {/* 06 · трафик */}
       <section className="v-section v-center v-reveal" id="traffic" aria-labelledby="v-traffic">
         <div className="v-wrap">
           <div className="v-stickers" aria-hidden>
@@ -213,7 +192,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 09 · кешбэк за приглашённых */}
+      {/* 07 · кешбэк за приглашённых */}
       <section className="v-section v-reveal" aria-labelledby="v-ref">
         <div className="v-wrap">
           <div className="v-panel vh-ref-panel">
@@ -222,7 +201,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 10 · частые вопросы */}
+      {/* 08 · частые вопросы */}
       <section className="v-section v-center v-reveal" aria-labelledby="v-faq">
         <div className="v-wrap v-narrow">
           <h2 id="v-faq" className="v-h2">Вопросы, которые задают перед покупкой</h2>
@@ -231,7 +210,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 11 · финал */}
+      {/* 09 · финал */}
       <section className="v-section v-reveal" aria-labelledby="v-final">
         <div className="v-wrap v-narrow">
           <div className="v-panel vh-cta">

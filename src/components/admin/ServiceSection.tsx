@@ -7,6 +7,7 @@ import { formatDate, getJson, num, postJson, type NotificationItem } from "@/app
 import PanelSyncCard from "./PanelSyncCard";
 import CampaignsCard from "./CampaignsCard";
 import JournalCard from "./JournalCard";
+import ContactCard from "./ContactCard";
 import { Tile } from "./Viz";
 
 /**
@@ -38,7 +39,8 @@ export default function ServiceSection({ notifications, notifError, onReload, on
       <GhostCard i={4} onOpenUser={onOpenUser} />
       <DiagnoseCard i={5} />
       <CampaignsCard i={6} notifications={notifications} notifError={notifError} onNotificationsChanged={onReload} />
-      <JournalCard i={7} reloadKey={reloadKey} onOpenUser={onOpenUser} />
+      <ContactCard i={7} reloadKey={reloadKey} />
+      <JournalCard i={8} reloadKey={reloadKey} onOpenUser={onOpenUser} />
     </div>
   );
 }

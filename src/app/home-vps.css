@@ -22,10 +22,9 @@
    Устройство файла:
      1. Первый экран            2. Полоса возражений
      3. Бегущая строка стран    4. Бенто «Почему»
-     5. «До и после»            6. Схема подключения
-     7. Тарифы: подпись и сравнение
-     8. Шаги подключения        9. Кешбэк
-    10. FAQ                    11. Финальная плита
+     5. Тарифы: подпись и сравнение
+     6. Кешбэк                  7. FAQ
+     8. Финальная плита
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ═══ 1. Первый экран ══════════════════════════════════════════════ */
@@ -272,217 +271,16 @@
 .vh-tile-fig span { color: var(--v-ink-3); font-size: 16px; }
 .v-tile-dark .vh-tile-fig span, .v-tile-blue .vh-tile-fig span { color: rgba(255, 255, 255, 0.72); }
 
-/* ═══ 5. «До и после» ══════════════════════════════════════════════ */
-.vh-diff { margin-top: clamp(32px, 5vw, 48px); text-align: left; }
-.vh-diff-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  border: 0;
-  background: transparent;
-  padding: 8px;
-  margin-inline: auto;
-  cursor: pointer;
-  color: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
-.vh-diff-head { display: flex; justify-content: center; }
-.vh-switch-track {
-  position: relative;
-  width: 64px;
-  height: 36px;
-  border-radius: 999px;
-  background: var(--v-line);
-  transition: background-color 360ms var(--v-ease);
-}
-.vh-diff[data-on] .vh-switch-track { background: var(--v-blue); }
-.vh-switch-thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #FFFFFF;
-  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.2);
-  transition: transform 360ms var(--v-ease);
-}
-.vh-diff[data-on] .vh-switch-thumb { transform: translateX(28px); }
-.vh-switch-label { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+/* Раздел «До и после» («Знакомо? Так быть не должно») удалён
+   19.09.2026 вместе с компонентом DiffSwitch: владелец счёл приём
+   спорным. Разницу «до и после» страница всё равно только обещает —
+   проверяется она на своих сервисах, для чего и есть пробные дни. */
 
-.vh-diff-list { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 2px; }
-.vh-diff-row {
-  position: relative;
-  display: grid;
-  gap: 4px 20px;
-  padding: 20px 4px 20px 24px;
-  border-top: 1px solid var(--v-line);
-}
-@media (min-width: 640px) { .vh-diff-row { grid-template-columns: 220px 1fr; align-items: center; } }
-.vh-diff-row:last-child { border-bottom: 1px solid var(--v-line); }
-.vh-diff-row b { font-size: 18px; font-weight: 600; letter-spacing: -0.015em; }
-.vh-diff-row::before {
-  content: "";
-  position: absolute;
-  top: 27px;
-  left: 4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--v-line-dash);
-  transition: background-color 420ms var(--v-ease);
-}
-.vh-diff[data-on] .vh-diff-row::before { background: var(--v-blue); }
-.vh-diff-state { position: relative; display: grid; min-height: 26px; }
-.vh-diff-state span {
-  grid-area: 1 / 1;
-  color: var(--v-ink-3);
-  font-size: 17px;
-  line-height: 1.4;
-  transition: opacity 420ms var(--v-ease), transform 420ms var(--v-ease);
-}
-.vh-diff-now { opacity: 0; transform: translateY(6px); color: var(--v-ink) !important; }
-.vh-diff-was { opacity: 1; transform: translateY(0); }
-.vh-diff[data-on] .vh-diff-now { opacity: 1; transform: translateY(0); }
-.vh-diff[data-on] .vh-diff-was { opacity: 0; transform: translateY(-6px); }
-
-/* ═══ 6. Схема подключения ═════════════════════════════════════════
-   Читатель сам прогоняет пакет по туннелю: заполнение линий и
-   положение пакета считает шкала прокрутки раздела, а не таймер.
-
-   `initial-value: 1` — это КОНЕЧНЫЙ кадр, и он же состояние по
-   умолчанию: без поддержки scroll-timeline и при reduced-motion схема
-   отрисована целиком, а не пустой. `inherits: true` обязательно —
-   значения читают дочерние элементы (тот же урок, что с `--lap-n` в
-   прежнем корпусе: при `false` потомок получает начальное значение). */
-@property --vh-p1 { syntax: "<number>"; initial-value: 1; inherits: true; }
-@property --vh-p2 { syntax: "<number>"; initial-value: 1; inherits: true; }
-
-.vh-flow {
-  display: grid;
-  gap: 0;
-  margin-top: clamp(36px, 5vw, 56px);
-  text-align: left;
-}
-@media (min-width: 860px) {
-  .vh-flow {
-    grid-template-columns: minmax(0, 1fr) minmax(92px, 0.62fr) minmax(0, 1fr) minmax(92px, 0.62fr) minmax(0, 1fr);
-    align-items: stretch;
-  }
-}
-
-.vh-flow-node {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: clamp(22px, 2.6vw, 30px);
-  border-radius: var(--v-r-lg);
-  background: var(--v-field);
-}
-.vh-flow-node b { font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
-.vh-flow-node span { color: var(--v-ink-3); font-size: 15px; line-height: 1.45; }
-.vh-flow-icon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: #FFFFFF;
-  color: var(--v-blue);
-  box-shadow: var(--v-shadow);
-}
-/* Узлы проявляются по мере того, как до них доходит линия. */
-.vh-flow-b { opacity: calc(0.5 + 0.5 * var(--vh-p1)); }
-.vh-flow-c { opacity: calc(0.5 + 0.5 * var(--vh-p2)); }
-.vh-flow-b .vh-flow-icon, .vh-flow-c .vh-flow-icon { transition: none; }
-
-/* Линия между узлами. Ширина линии известна контейнеру, поэтому
-   пакет едет на `100cqw`, а не на проценты собственной ширины. */
-.vh-flow-link {
-  container-type: inline-size;
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 92px;
-}
-@media (min-width: 860px) { .vh-flow-link { min-height: auto; } }
-.vh-flow-rail, .vh-flow-fill {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  margin-top: -1px;
-  border-radius: 2px;
-}
-.vh-flow-rail { background: var(--v-line); }
-.vh-flow-fill { background: var(--v-blue); transform-origin: left center; }
-.vh-flow-link-1 .vh-flow-fill { transform: scaleX(var(--vh-p1)); }
-.vh-flow-link-2 .vh-flow-fill { transform: scaleX(var(--vh-p2)); }
-.vh-flow-pk {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 12px;
-  height: 12px;
-  margin-top: -6px;
-  border-radius: 50%;
-  background: var(--v-blue);
-  box-shadow: 0 0 0 4px rgba(58, 133, 240, 0.18);
-}
-.vh-flow-link-1 .vh-flow-pk { transform: translateX(calc(var(--vh-p1) * (100cqw - 12px))); }
-.vh-flow-link-2 .vh-flow-pk { transform: translateX(calc(var(--vh-p2) * (100cqw - 12px))); }
-.vh-flow-tag {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #FFFFFF;
-  box-shadow: var(--v-shadow);
-  color: var(--v-ink-2);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.vh-flow-tag svg { color: var(--v-blue); }
-
-/* Телефон: та же схема колонкой — линия вертикальная, пакет едет вниз. */
-@media (max-width: 859px) {
-  .vh-flow-rail, .vh-flow-fill {
-    top: 0;
-    left: 50%;
-    width: 2px;
-    height: 100%;
-    margin: 0 0 0 -1px;
-  }
-  .vh-flow-fill { transform-origin: center top; }
-  .vh-flow-link-1 .vh-flow-fill { transform: scaleY(var(--vh-p1)); }
-  .vh-flow-link-2 .vh-flow-fill { transform: scaleY(var(--vh-p2)); }
-  .vh-flow-pk { top: 0; left: 50%; margin: 0 0 0 -6px; }
-  .vh-flow-link-1 .vh-flow-pk { transform: translateY(calc(var(--vh-p1) * 80px)); }
-  .vh-flow-link-2 .vh-flow-pk { transform: translateY(calc(var(--vh-p2) * 80px)); }
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .vh-flow {
-      animation: vh-flow-1 linear both, vh-flow-2 linear both;
-      animation-timeline: view(), view();
-      /* Раньше первая линия начинала заполняться на `entry 24%`, а
-         вторая доходила до конца только к `cover 62%`: на обычной
-         прокрутке человек успевал проехать схему раньше, чем она
-         срабатывала (владелец, 18.09.2026: «анимация проигрывается
-         слишком поздно»). Теперь обе линии укладываются в первую
-         половину прохода: к моменту, когда раздел встал в центр
-         экрана, пакет уже дошёл. */
-      animation-range: entry 6% entry 70%, entry 62% cover 28%;
-    }
-  }
-}
-@keyframes vh-flow-1 { from { --vh-p1: 0; } to { --vh-p1: 1; } }
-@keyframes vh-flow-2 { from { --vh-p2: 0; } to { --vh-p2: 1; } }
+/* Схема подключения («Что происходит, когда вы нажимаете „Подключить"»)
+   удалена 19.09.2026 вместе с компонентом TunnelFlow и типизированными
+   свойствами --vh-p1/--vh-p2: владелец счёл блок лишним на главной.
+   Объяснение устройства продукта осталось в полосе возражений и в
+   вопросах внизу страницы. */
 
 /* ═══ 7. Тарифы: подпись и сравнение ═══════════════════════════════ */
 .vh-plans-foot { max-width: 560px; margin-inline: auto; }
@@ -602,6 +400,4 @@
 .v-panel.vh-cta p { margin: 16px auto 0; max-width: 520px; color: var(--v-on-black-2); font-size: clamp(17px, 2vw, 20px); }
 .v-panel.vh-cta .v-actions { margin-top: 32px; }
 
-@media (prefers-reduced-motion: reduce) {
-  .vh-diff-state span, .vh-switch-thumb, .vh-switch-track, .vh-diff-row::before { transition: none !important; }
-}
+

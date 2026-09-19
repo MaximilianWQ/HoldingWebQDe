@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { HEAD_LINKS, MENU_LINKS, TRIAL } from "./links";
+import { HEAD_LINKS, MENU_LINKS, TRIAL, currentSection } from "./links";
 
 /**
  * Шапка-островок: скруглённая стеклянная капсула над страницей.
@@ -64,6 +64,10 @@ export default function VHeader({ account = "guest" }: { account?: "guest" | "me
   }, [toActive]);
 
   const current = (href: string) => (href === pathname ? "page" : undefined);
+  // Открытый раздел, которого нет в узком списке шапки, показывается
+  // отдельным пунктом — иначе на нём дорожка пустая и непонятно, где ты.
+  const extra = currentSection(pathname);
+  const navLinks = extra ? [...HEAD_LINKS, extra] : HEAD_LINKS;
   const cabinet = account === "member"
     ? { href: "/dashboard", label: "Кабинет" }
     : { href: "/auth", label: "Войти" };
@@ -74,7 +78,7 @@ export default function VHeader({ account = "guest" }: { account?: "guest" | "me
         <Logo />
         <nav className="v-nav" aria-label="Основная навигация" ref={navRef} onMouseLeave={toActive}>
           <span className="v-nav-pill" ref={pillRef} aria-hidden />
-          {HEAD_LINKS.map((l) => (
+          {navLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}

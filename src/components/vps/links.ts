@@ -33,6 +33,28 @@ export const MENU_LINKS: VLink[] = [
   { label: "Контакты", href: "/contact" },
 ];
 
+/**
+ * Раздел, открытый сейчас, — для шапки. В её узком списке нет ни
+ * «Вакансий», ни «Инфраструктуры», ни «О компании», и на этих
+ * страницах бар показывал пустую дорожку: человек не понимал, где он
+ * (владелец, 19.09.2026: «бар должен корректно отображаться под
+ * конкретный экран»). Если открытого раздела в шапке нет — он
+ * добавляется в неё отдельным пунктом.
+ */
+export function currentSection(pathname: string): VLink | null {
+  const known = [...HEAD_LINKS, ...MENU_LINKS, ...EXTRA_SECTIONS];
+  const hit = known.find((l) => l.href === pathname);
+  if (!hit) return null;
+  return HEAD_LINKS.some((l) => l.href === pathname) ? null : hit;
+}
+
+/** Разделы, которых нет ни в шапке, ни в меню телефона. */
+const EXTRA_SECTIONS: VLink[] = [
+  { label: "Инфраструктура", href: "/infrastructure" },
+  { label: "О компании", href: "/about" },
+  { label: "Безопасность", href: "/security" },
+];
+
 export interface VLinkGroup { title: string; links: VLink[] }
 
 /**

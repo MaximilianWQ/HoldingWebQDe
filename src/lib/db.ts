@@ -122,6 +122,29 @@ export async function initDb(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_contact_created ON contact_requests(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_contact_status ON contact_requests(status);
 
+    -- Отклики на вакансии (19.09.2026). Файл резюме лежит здесь же,
+    -- в BYTEA: файловая система Railway живёт до следующей выкладки,
+    -- а резюме должно пережить её. Размер ограничен на входе
+    -- (RESUME_MAX_MB в careers.ts), так что таблица не разрастётся.
+    CREATE TABLE IF NOT EXISTS job_applications (
+      id TEXT PRIMARY KEY,
+      vacancy_id TEXT NOT NULL,
+      vacancy_title TEXT NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      contact TEXT,
+      message TEXT,
+      resume_name TEXT NOT NULL,
+      resume_type TEXT NOT NULL,
+      resume_size INTEGER NOT NULL,
+      resume_data BYTEA NOT NULL,
+      status TEXT NOT NULL DEFAULT 'new',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_jobapp_created ON job_applications(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_jobapp_status ON job_applications(status);
+
     CREATE TABLE IF NOT EXISTS passkey_credentials (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,

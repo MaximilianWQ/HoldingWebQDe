@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Icon from "@/components/pixel/Icon";
-import { VACANCIES, CAREERS_SUBJECT } from "@/lib/careers";
-import { SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
+import { VACANCIES } from "@/lib/careers";
+import { TELEGRAM_SUPPORT } from "@/lib/contacts";
+import ApplyForm from "./ApplyForm";
 
 /**
  * Список вакансий — как на макете владельца: крупная вилка контуром,
@@ -16,12 +17,15 @@ import { SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
  */
 export default function CareersList() {
   const [open, setOpen] = useState<string | null>(null);
+  // Форма раскрывается отдельно от вакансии: человек может читать
+  // требования и не собираться откликаться прямо сейчас.
+  const [applying, setApplying] = useState<string | null>(null);
 
   return (
     <div className="tc-list">
       {VACANCIES.map((v) => {
         const isOpen = open === v.id;
-        const mailto = `mailto:${SUPPORT_DESK.email}?subject=${encodeURIComponent(`${CAREERS_SUBJECT}: ${v.title}`)}`;
+        const isApplying = applying === v.id;
         return (
           <article key={v.id} className="tc-row" data-open={isOpen ? "" : undefined}>
             <h3 className="tc-row-head">
@@ -78,15 +82,19 @@ export default function CareersList() {
                     </ul>
                   </div>
                 </div>
-                <div className="t-actions">
-                  <a className="t-btn" href={mailto}>
-                    Откликнуться
-                    <Icon name="arrow-right" size={16} />
-                  </a>
-                  <a className="t-btn t-btn-accent" href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">
-                    Написать в Telegram
-                  </a>
-                </div>
+                {isApplying ? (
+                  <ApplyForm vacancyId={v.id} vacancyTitle={v.title} />
+                ) : (
+                  <div className="t-actions">
+                    <button type="button" className="t-btn" onClick={() => setApplying(v.id)}>
+                      Откликнуться
+                      <Icon name="arrow-right" size={16} />
+                    </button>
+                    <a className="t-btn t-btn-accent" href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">
+                      Написать в Telegram
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </article>

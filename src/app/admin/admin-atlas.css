@@ -1115,3 +1115,10 @@ html[data-static] .adm-ring { display: none; }
 .adm-contact-mail { color: var(--a-cobalt, #3A85F0); text-decoration: none; font-size: 14px; overflow-wrap: anywhere; }
 .adm-contact-msg { margin-top: 4px; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
 .adm-contact-side { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+
+/* ── Отклики на вакансии (ApplicationsCard, 19.09.2026) ───────────
+   Та же строка, что у заявок, плюс два своих элемента: название
+   вакансии и ссылка-файл. Отдельной сетки не заводим — это тот же
+   список, и расходиться им незачем. */
+.adm-job-vac { font-size: 13px; color: var(--a-cobalt, #3A85F0); }
+.adm-job-file { justify-self: start; margin-top: 6px; max-width: 100%; overflow-wrap: anywhere; white-space: normal; text-align: left; text-decoration: none; }

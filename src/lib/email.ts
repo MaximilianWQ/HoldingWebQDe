@@ -122,9 +122,22 @@ export async function sendTelegramLinkCodeEmail(email: string, code: string): Pr
 
 // ─── Generic transactional sender (plain HTML body) ───────────────
 
-async function sendTransactional(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
+/** Вложение письма: содержимое уезжает в base64. */
+export interface MailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
+async function sendTransactional(
+  to: string,
+  subject: string,
+  html: string,
+  replyTo?: string,
+  attachments?: MailAttachment[]
+): Promise<boolean> {
   if (!process.env.RESEND_API_KEY) {
-    console.log(`[DEV email → ${to}] ${subject}`);
+    const files = attachments?.length ? ` (+${attachments.length} файл)` : "";
+    console.log(`[DEV email → ${to}] ${subject}${files}`);
     return true;
   }
   try {
@@ -134,6 +147,9 @@ async function sendTransactional(to: string, subject: string, html: string, repl
       subject,
       html,
       ...(replyTo ? { replyTo } : {}),
+      ...(attachments?.length
+        ? { attachments: attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64") })) }
+        : {}),
     });
     if (error) {
       console.error("[EMAIL] Resend error:", error);
@@ -242,6 +258,58 @@ export async function sendContactRequestEmail(params: {
 <p style="margin-top:16px;color:#444">Ответьте на это письмо — оно уйдёт прямо человеку.</p>`
     ),
     params.email
+  );
+}
+
+/**
+ * Отклик на вакансию — письмо владельцу с резюме во вложении.
+ *
+ * Владелец, 19.09.2026: «чтобы сразу же мне на почту автоматом этот
+ * отклик дал именно мне». Поэтому письмо идёт на ADMIN_EMAIL, а не в
+ * общую поддержку, и резюме едет прикреплённым файлом: открыть его
+ * нужно там же, где пришло уведомление, а не идти за ним в админку.
+ *
+ * Адрес кандидата стоит в Reply-To: ответ из почтовой программы
+ * уходит прямо человеку, без копирования адреса руками.
+ *
+ * Значения экранируются: имя и сопроводительное письмо пришли из
+ * открытой формы, и почтовая программа не должна выполнить то, что
+ * туда вписали.
+ */
+export async function sendJobApplicationEmail(params: {
+  to: string;
+  id: string;
+  vacancyTitle: string;
+  name: string;
+  email: string;
+  contact: string | null;
+  message: string | null;
+  resume: MailAttachment | null;
+  resumeNote: string | null;
+}): Promise<boolean> {
+  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+  const rows = [
+    ["Вакансия", params.vacancyTitle],
+    ["Имя", params.name],
+    ["Почта", params.email],
+    ["Связь", params.contact || "—"],
+    ["О себе", params.message || "—"],
+    ["Резюме", params.resume ? params.resume.filename : params.resumeNote || "—"],
+    ["Отклик", params.id],
+  ]
+    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
+    .join("\n");
+
+  return sendTransactional(
+    params.to,
+    `Отклик на вакансию: ${params.vacancyTitle}`,
+    wrapHtml(
+      "Отклик с сайта",
+      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
+<p style="margin-top:16px;color:#444">Резюме — во вложении. Ответьте на это письмо, и ответ уйдёт прямо кандидату.</p>`
+    ),
+    params.email,
+    params.resume ? [params.resume] : undefined
   );
 }
 

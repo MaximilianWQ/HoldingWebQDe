@@ -8,6 +8,7 @@ import PanelSyncCard from "./PanelSyncCard";
 import CampaignsCard from "./CampaignsCard";
 import JournalCard from "./JournalCard";
 import ContactCard from "./ContactCard";
+import ApplicationsCard from "./ApplicationsCard";
 import { Tile } from "./Viz";
 
 /**
@@ -40,7 +41,8 @@ export default function ServiceSection({ notifications, notifError, onReload, on
       <DiagnoseCard i={5} />
       <CampaignsCard i={6} notifications={notifications} notifError={notifError} onNotificationsChanged={onReload} />
       <ContactCard i={7} reloadKey={reloadKey} />
-      <JournalCard i={8} reloadKey={reloadKey} onOpenUser={onOpenUser} />
+      <ApplicationsCard i={8} reloadKey={reloadKey} />
+      <JournalCard i={9} reloadKey={reloadKey} onOpenUser={onOpenUser} />
     </div>
   );
 }

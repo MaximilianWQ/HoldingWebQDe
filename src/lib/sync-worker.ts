@@ -20,12 +20,15 @@ import { recordHealthSample } from "./health";
 import { recordWorkerError, recordWorkerEvent, setWorkerRunning } from "./worker-state";
 import { runBypassGrantsPass } from "./bypass-grants";
 import { runCampaignPassLocked } from "./campaigns-pg";
+import { runRetentionPass } from "./retention";
 
 const PENDING_INTERVAL_MS = 60 * 1000;
 const HEALTH_INTERVAL_MS = 60 * 1000;
 const RECONCILE_INTERVAL_MS = 60 * 60 * 1000;
 /** Рассылки и массовые начисления (campaigns-pg.ts) — свой замок и свой таймер. */
 const CAMPAIGN_INTERVAL_MS = 30 * 1000;
+/* Сроки хранения считаются сутками — чаще раза в день смысла нет. */
+const RETENTION_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const PENDING_BATCH = 50;
 
 export interface PendingPassResult {
@@ -103,11 +106,25 @@ export async function runHealthSample(): Promise<boolean> {
   }
 }
 
+/**
+ * Уборка по срокам хранения. Под замком: инстанс может быть не один,
+ * а удалять одно и то же дважды незачем.
+ */
+async function runRetentionPassLocked(): Promise<void> {
+  try {
+    await withJobLock(LOCK_KEYS.CRON_CLEANUP, () => runRetentionPass());
+  } catch (err) {
+    await recordWorkerError("retention", err);
+    throw err;
+  }
+}
+
 type Timers = {
   pending: ReturnType<typeof setInterval>;
   reconcile: ReturnType<typeof setInterval>;
   health: ReturnType<typeof setInterval>;
   campaigns: ReturnType<typeof setInterval>;
+  retention: ReturnType<typeof setInterval>;
 };
 const g = globalThis as unknown as { __atlasSyncWorker?: Timers; __atlasSyncWorkerStarting?: boolean };
 
@@ -130,16 +147,20 @@ export function startSyncWorker(): void {
       const health = setInterval(safe("health", () => runHealthSample()), HEALTH_INTERVAL_MS);
       const reconcile = setInterval(safe("reconcile", () => runReconcilePass()), RECONCILE_INTERVAL_MS);
       const campaigns = setInterval(safe("campaigns", () => runCampaignPassLocked()), CAMPAIGN_INTERVAL_MS);
+      const retention = setInterval(safe("retention", () => runRetentionPassLocked()), RETENTION_INTERVAL_MS);
       pending.unref?.();
       health.unref?.();
       reconcile.unref?.();
       campaigns.unref?.();
-      g.__atlasSyncWorker = { pending, reconcile, health, campaigns };
+      retention.unref?.();
+      g.__atlasSyncWorker = { pending, reconcile, health, campaigns, retention };
       setWorkerRunning(true, null);
       safe("pending", () => runPendingPass())();
       safe("health", () => runHealthSample())();
       // После рестарта рассылка продолжается с того места, где встала.
       safe("campaigns", () => runCampaignPassLocked())();
+      // Первый проход сразу: инстанс мог простоять дольше суток.
+      safe("retention", () => runRetentionPassLocked())();
       console.log(
         `[SYNC-WORKER] started (pending every ${PENDING_INTERVAL_MS / 1000}s, health every ${HEALTH_INTERVAL_MS / 1000}s, reconcile every ${RECONCILE_INTERVAL_MS / 60000}min, campaigns every ${CAMPAIGN_INTERVAL_MS / 1000}s)`
       );

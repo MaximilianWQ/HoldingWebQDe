@@ -164,3 +164,102 @@
     var(--t-bg-2);
 }
 .tc-final .t-h2 { max-width: 18ch; }
+
+/* ── Форма отклика (19.09.2026) ───────────────────────────────────
+   Живёт внутри раскрытой вакансии. Поля тёмные, как корпус; кегль на
+   телефоне 16px не по эстетике — при меньшем Safari на iOS увеличивает
+   страницу при фокусе на поле и обратно уже не возвращает. */
+.tc-form {
+  margin-top: clamp(20px, 3vw, 28px);
+  padding-top: clamp(20px, 3vw, 28px);
+  border-top: 1px solid var(--t-line);
+}
+.tc-f-grid { display: grid; gap: 16px; margin-top: 16px; }
+@media (min-width: 760px) {
+  .tc-f-grid { grid-template-columns: 1fr 1fr; }
+  .tc-f-wide { grid-column: 1 / -1; }
+}
+.tc-f { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.tc-f-label { font-size: 14px; font-weight: 600; color: var(--t-ink-2); }
+.tc-f-opt { font-weight: 400; color: var(--t-ink-3); }
+.tc-f-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  border: 1px solid var(--t-line);
+  border-radius: 12px;
+  background: var(--t-bg-2);
+  color: var(--t-ink);
+  font: 400 16px/1.4 var(--t-font);
+  transition: border-color 200ms var(--t-ease);
+}
+.tc-f-input::placeholder { color: var(--t-ink-3); }
+.tc-f-input:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 1px; border-color: transparent; }
+.tc-f-area { min-height: 112px; resize: vertical; }
+.tc-f-input[aria-invalid="true"] { border-color: var(--t-accent); }
+.tc-f-hint { margin: 0; font-size: 13px; line-height: 1.4; color: var(--t-ink-3); }
+.tc-f-err { margin: 0; font-size: 13px; line-height: 1.4; color: var(--t-accent); }
+.tc-f-err-form { margin-top: 14px; }
+
+/* Родное поле файла спрятано, но остаётся в потоке фокуса: кнопкой
+   служит его `<label>`. `display: none` убрал бы его и с клавиатуры. */
+.tc-f-file { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.tc-f-file input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.tc-f-file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--t-line);
+  border-radius: 999px;
+  background: var(--t-bg-2);
+  color: var(--t-ink);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 200ms var(--t-ease), background-color 200ms var(--t-ease);
+}
+@media (hover: hover) { .tc-f-file-btn:hover { border-color: var(--t-accent); } }
+.tc-f-file input:focus-visible + .tc-f-file-btn { outline: 2px solid var(--t-accent); outline-offset: 2px; }
+.tc-f-file-name { font-size: 14px; color: var(--t-ink-3); overflow-wrap: anywhere; min-width: 0; }
+
+.tc-f-consent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 18px;
+}
+.tc-f-consent input {
+  width: 22px; height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--t-accent);
+  cursor: pointer;
+}
+.tc-f-consent label { font-size: 14px; line-height: 1.5; color: var(--t-ink-2); cursor: pointer; }
+.tc-f-consent a { color: var(--t-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.tc-f-done {
+  margin-top: clamp(20px, 3vw, 28px);
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-r);
+  background: var(--t-bg-2);
+}
+.tc-f-done-mark {
+  display: grid;
+  place-items: center;
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  background: var(--t-accent-soft);
+  color: var(--t-accent);
+}
+.tc-f-done-h { margin: 14px 0 0; font-size: 20px; font-weight: 600; }
+.tc-f-done-t { margin: 8px 0 0; font-size: 15px; line-height: 1.55; color: var(--t-ink-2); }
+.tc-f-done-t a { color: var(--t-ink); text-decoration: underline; text-underline-offset: 3px; }

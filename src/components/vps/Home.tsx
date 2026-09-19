@@ -172,10 +172,10 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             <span className="v-sticker v-sticker-a"><small>NEW</small>новинка</span>
             <span className="v-sticker v-sticker-b">ГБ</span>
           </div>
-          <h2 id="v-traffic" className="v-h2">Пакеты трафика</h2>
+          <h2 id="v-traffic" className="v-h2">Когда обычного подключения мало</h2>
           <p className="v-lead">
-            Отдельный ключ на усиленные серверы — для сетей, где обычное подключение не проходит. От{" "}
-            {formatRub(TRAFFIC_ENTRY_RUB)} ₽, гигабайты не сгорают и складываются.
+            Пакеты трафика — отдельный ключ на усиленные серверы для сложных сетей: корпоративный Wi-Fi,
+            гостиница, роуминг. От {formatRub(TRAFFIC_ENTRY_RUB)} ₽, гигабайты не сгорают и складываются.
           </p>
           {/* На главной — короткая подборка, а не все одиннадцать
               пакетов: длинная лента стоит ровно там, где человек

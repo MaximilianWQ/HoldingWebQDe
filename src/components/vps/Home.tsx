@@ -8,6 +8,7 @@ import CountryMarquee from "./home/CountryMarquee";
 import WhyBento from "./home/WhyBento";
 import FaqAccordion from "./home/FaqAccordion";
 import ProofBar from "./home/ProofBar";
+import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, TRIAL } from "./links";
@@ -70,6 +71,10 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             <p className="v-lead">
               Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
             </p>
+            {/* Знаки сервисов по бокам заголовка (владелец, 19.09.2026).
+                Только знаки, без подписей; право на использование
+                подтверждено владельцем — COMPLIANCE-CHECK.md § 1е. */}
+            <ServiceMarks />
             {/* Кнопка стоит ДО кадра. Разбор 18.09.2026: в макете по
                 центру кадр высотой в пол-экрана уводил её под сгиб, а
                 выравнивание само по себе на конверсию почти не влияет —
@@ -115,19 +120,6 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               <Icon name="devices" size={16} />
               до {DEVICE_LIMIT} устройств
             </span>
-            {/* Плитки сервисов по бокам кадра (владелец, 19.09.2026:
-                «по бокам иконки, просто квадратики»). Глифы — свои, из
-                общего набора: чужие логотипы это товарные знаки, а
-                рядом с обещанием первого экрана они читаются как
-                список конкретных площадок, ради которых сервис берут.
-                Здесь названы не площадки, а занятия: сообщения, видео,
-                игры, музыка, работа, соцсети. */}
-            <span className="vh-tile vh-tile-1"><Icon name="send" size={20} /></span>
-            <span className="vh-tile vh-tile-2"><Icon name="tv" size={20} /></span>
-            <span className="vh-tile vh-tile-3"><Icon name="bolt" size={20} /></span>
-            <span className="vh-tile vh-tile-4"><Icon name="chat" size={20} /></span>
-            <span className="vh-tile vh-tile-5"><Icon name="grid" size={20} /></span>
-            <span className="vh-tile vh-tile-6"><Icon name="users" size={20} /></span>
           </div>
 
           <StoreBadges />

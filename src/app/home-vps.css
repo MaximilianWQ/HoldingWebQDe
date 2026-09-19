@@ -165,46 +165,44 @@
 .vh-chip-c { bottom: 28%; left: 9%; }
 .vh-chip-d { bottom: 12%; right: 7%; }
 
-/* Плитки сервисов — квадратики по бокам кадра. Глифы свои: чужой
-   логотип это товарный знак, и рядом с обещанием первого экрана он
-   читается как список конкретных площадок. Поэтому названы занятия, а
-   не площадки: сообщения, видео, игры, соцсети, работа, люди. */
-.vh-tile {
+/* Знаки сервисов — квадратики по бокам ЗАГОЛОВКА (владелец,
+   19.09.2026: «сбоку текста „любимые сервисы"»). Стоят в двух
+   колонках вне текстового блока: он шириной 760px, а поле первого
+   экрана шире, и поля хватает. Подписей нет — только знаки. */
+.vh-hero-in { position: relative; }
+.vh-mark {
   position: absolute;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: clamp(44px, 3.6vw, 54px);
-  aspect-ratio: 1;
+  width: 54px;
+  height: 54px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
   backdrop-filter: blur(12px) saturate(160%);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 12px 28px rgba(16, 24, 40, 0.12);
-  color: var(--v-ink-2);
-  transition: transform 320ms var(--v-ease), color 320ms var(--v-ease), box-shadow 320ms var(--v-ease);
+  color: var(--v-ink);
+  transition: transform 320ms var(--v-ease), box-shadow 320ms var(--v-ease);
 }
 @media (hover: hover) {
-  .vh-tile:hover { transform: translateY(-4px) scale(1.06); color: var(--v-blue); box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08), 0 18px 36px rgba(16, 24, 40, 0.16); }
+  .vh-mark:hover { transform: translateY(-4px) scale(1.06); box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08), 0 18px 36px rgba(16, 24, 40, 0.16); }
 }
-.vh-tile-1 { top: 1%; left: -5%; }
-.vh-tile-2 { top: 42%; left: -7%; }
-.vh-tile-3 { bottom: 4%; left: -3%; }
-.vh-tile-4 { top: 3%; right: -5%; }
-.vh-tile-5 { top: 48%; right: -7%; }
-.vh-tile-6 { bottom: 6%; right: -3%; }
+/* Левая колонка — вдоль заголовка, правая — с небольшим сдвигом вниз,
+   чтобы ряд не читался как таблица. */
+.vh-mark-tg { top: 4%; left: -22%; }
+.vh-mark-ig { top: 34%; left: -30%; }
+.vh-mark-yt { top: 66%; left: -24%; }
+.vh-mark-tt { top: 10%; right: -22%; }
+.vh-mark-nf { top: 40%; right: -30%; }
+.vh-mark-gh { top: 72%; right: -24%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .vh-chip, .vh-tile { animation: vh-float 7.5s var(--v-ease) infinite; }
+  .vh-chip, .vh-mark { animation: vh-float 7.5s var(--v-ease) infinite; }
   .vh-chip-b { animation-duration: 9s; animation-delay: -1.2s; }
   .vh-chip-c { animation-duration: 8.2s; animation-delay: -2.6s; }
   .vh-chip-d { animation-duration: 10s; animation-delay: -3.4s; }
-  .vh-tile-1 { animation-duration: 9.6s; animation-delay: -0.8s; }
-  .vh-tile-2 { animation-duration: 11s; animation-delay: -3.1s; }
-  .vh-tile-3 { animation-duration: 8.8s; animation-delay: -5.2s; }
-  .vh-tile-4 { animation-duration: 10.4s; animation-delay: -2.2s; }
-  .vh-tile-5 { animation-duration: 9.2s; animation-delay: -4.6s; }
-  .vh-tile-6 { animation-duration: 12s; animation-delay: -1.4s; }
+  .vh-mark { animation-duration: calc(8.6s + var(--i) * 0.7s); animation-delay: calc(var(--i) * -1.3s); }
 }
 @keyframes vh-float { 50% { translate: 0 -10px; } }
 @keyframes vh-float-rot { 50% { translate: 0 -10px; } }
@@ -212,7 +210,7 @@
 /* На узком экране фигуры убираются: кадр там во всю ширину, и плашки
    легли бы прямо на ноутбук. */
 @media (max-width: 1099px) {
-  .vh-chip, .vh-tile { display: none; }
+  .vh-chip, .vh-mark { display: none; }
 }
 
 

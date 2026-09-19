@@ -12,7 +12,7 @@ import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, TRIAL } from "./links";
-import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, PLAN_SPEED, formatRub, pricePerMonth } from "@/lib/plans";
+import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, formatRub, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRAFFIC_ENTRY_RUB, TRAFFIC_PACKS } from "@/lib/traffic-packs";
 import "@/app/home-vps.css";
@@ -90,8 +90,10 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
 
           {/* Одна сцена, а не коллаж: ноутбук и телефон сняты вместе,
               с общим светом и общей тенью на общем полу
-              (design/blender/hero_build.py). Вокруг — стеклянные плашки
-              с числами из src/lib и две геометрические фигуры. */}
+              (design/blender/hero_build.py). Плашки с числами, стоявшие
+              вокруг кадра, сняты 19.09.2026 («не очень смотрится в
+              общей картине»): те же числа есть ниже, в бенто, а кадру
+              не нужна подпись — он и так показывает продукт. */}
           <div className="vh-stage" aria-hidden>
             <img
               src="/media/hero/stage-860.v3.webp"
@@ -104,22 +106,6 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               decoding="async"
             />
 
-            <span className="vh-chip vh-chip-a">
-              <Icon name="globe" size={16} />
-              {COUNTRY_COUNT} стран
-            </span>
-            <span className="vh-chip vh-chip-b">
-              <Icon name="lock" size={16} />
-              Шифрование включено
-            </span>
-            <span className="vh-chip vh-chip-c">
-              <Icon name="bolt" size={16} />
-              до {PLAN_SPEED.plus} Гбит/с
-            </span>
-            <span className="vh-chip vh-chip-d">
-              <Icon name="devices" size={16} />
-              до {DEVICE_LIMIT} устройств
-            </span>
           </div>
 
           <StoreBadges />

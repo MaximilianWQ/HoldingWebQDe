@@ -128,42 +128,11 @@
 }
 @keyframes vh-bob-stage { 50% { transform: translateY(-8px); } }
 
-/* ── Фигуры вокруг кадра (18.09.2026) ─────────────────────────────
-   Владелец просил «технологичнее, как у Yandex Tech: фигурки». Это
-   стеклянные плашки с числами из src/lib и две геометрические фигуры —
-   круг и скруглённый квадрат контуром. Они не декорация: каждая
-   плашка отвечает на вопрос, который человек задаёт на первом экране
-   («а сколько стран», «а шифрование есть», «а скорость», «а сколько
-   устройств»), поэтому им можно занимать место у кадра.
-
-   Движение — медленное парение с разным шагом, чтобы плашки не
-   ходили строем; при reduced-motion они просто стоят. */
-.vh-chip {
-  position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.86);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  backdrop-filter: blur(14px) saturate(160%);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 14px 34px rgba(16, 24, 40, 0.12);
-  color: var(--v-ink);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-.vh-chip svg { color: var(--v-blue); }
-/* Подписи с числами держатся ближе к кадру, квадратики сервисов — по
-   внешнему краю: иначе они встают друг на друга (проверено на 1280 и
-   1440). */
-.vh-chip-a { top: 12%; left: 7%; }
-.vh-chip-b { top: 22%; right: 5%; }
-.vh-chip-c { bottom: 28%; left: 9%; }
-.vh-chip-d { bottom: 12%; right: 7%; }
+/* ── Знаки сервисов у заголовка ───────────────────────────────────
+   Плашки с числами вокруг кадра («19 стран», «Шифрование включено»,
+   «до 75 Гбит/с», «до 14 устройств») сняты 19.09.2026: владелец —
+   «не очень смотрится в общей картине». Числа не потеряны, они ниже
+   в бенто; кадру подпись не нужна — он показывает продукт сам. */
 
 /* Знаки сервисов — квадратики по бокам ЗАГОЛОВКА (владелец,
    19.09.2026: «сбоку текста „любимые сервисы"»). Стоят в двух
@@ -198,10 +167,7 @@
 .vh-mark-gh { top: 72%; right: -24%; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .vh-chip, .vh-mark { animation: vh-float 7.5s var(--v-ease) infinite; }
-  .vh-chip-b { animation-duration: 9s; animation-delay: -1.2s; }
-  .vh-chip-c { animation-duration: 8.2s; animation-delay: -2.6s; }
-  .vh-chip-d { animation-duration: 10s; animation-delay: -3.4s; }
+  .vh-mark { animation: vh-float 7.5s var(--v-ease) infinite; }
   .vh-mark { animation-duration: calc(8.6s + var(--i) * 0.7s); animation-delay: calc(var(--i) * -1.3s); }
 }
 @keyframes vh-float { 50% { translate: 0 -10px; } }
@@ -210,7 +176,7 @@
 /* На узком экране фигуры убираются: кадр там во всю ширину, и плашки
    легли бы прямо на ноутбук. */
 @media (max-width: 1099px) {
-  .vh-chip, .vh-mark { display: none; }
+  .vh-mark { display: none; }
 }
 
 

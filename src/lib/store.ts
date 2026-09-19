@@ -18,6 +18,7 @@ import { revokeAllSessions } from "./session-store";
 import { grantId, insertBypassGrant } from "./bypass-ledger";
 import { TRAFFIC_TRIAL_BYTES } from "./traffic-packs";
 import { loyaltyNextTier, loyaltyTierFor } from "./loyalty";
+import crypto from "crypto";
 
 // Hard ceiling for direct subscription_end writes through updateUser.
 // Ledger events are not subject to it (stacked paid renewals may go
@@ -195,6 +196,40 @@ const codes = globalCodes.__codes;
 
 const MAX_CODE_ATTEMPTS = 5;
 
+/**
+ * Неверные попытки по АДРЕСУ, а не по коду (аудит безопасности
+ * 19.09.2026).
+ *
+ * Прежде счётчик жил внутри записи кода, а `saveCode` создавал запись
+ * заново — то есть каждый новый запрос кода обнулял бюджет попыток.
+ * Пятнадцать писем в сутки давали 75 попыток к шестизначному коду по
+ * одному адресу. На одного человека это мало, но разосланное по
+ * десяти тысячам адресов давало примерно один захваченный аккаунт в
+ * день. Этот счётчик переживает повторную выдачу кода.
+ */
+const globalFails = globalThis as unknown as { __codeFails?: Map<string, { n: number; until: number }> };
+if (!globalFails.__codeFails) globalFails.__codeFails = new Map();
+const codeFails = globalFails.__codeFails;
+
+const MAX_CODE_FAILS_PER_EMAIL = 10;
+const CODE_FAIL_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+function bumpCodeFailure(email: string): number {
+  const now = Date.now();
+  const cur = codeFails.get(email);
+  if (!cur || now > cur.until) {
+    codeFails.set(email, { n: 1, until: now + CODE_FAIL_WINDOW_MS });
+    return 1;
+  }
+  cur.n += 1;
+  return cur.n;
+}
+
+function codeFailuresExceeded(email: string): boolean {
+  const cur = codeFails.get(email);
+  return !!cur && Date.now() <= cur.until && cur.n >= MAX_CODE_FAILS_PER_EMAIL;
+}
+
 export function saveCode(email: string, code: string): void {
   codes.set(email, {
     email,
@@ -204,28 +239,53 @@ export function saveCode(email: string, code: string): void {
   });
 }
 
+/**
+ * Ответ один на все неудачи — «код неверный или истёк».
+ *
+ * Раньше ответы различались: «код не найден», «код истёк», «осталось
+ * попыток: N». По ним со стороны было видно, есть ли сейчас на адресе
+ * живой код и сколько попыток осталось, — то есть когда выгоднее
+ * запросить свежий и продолжить подбор. Само сравнение тоже стало
+ * постоянным по времени: так во всём остальном коде (токены сброса,
+ * ключ бота, вход Telegram), и разнобоя здесь быть не должно.
+ */
+const CODE_FAIL = "Код неверный или истёк. Запросите новый.";
+
 export function verifyCode(email: string, code: string): { valid: boolean; error?: string } {
+  if (codeFailuresExceeded(email)) {
+    codes.delete(email);
+    return { valid: false, error: "Слишком много неверных кодов. Попробуйте завтра или напишите в поддержку." };
+  }
+
   const record = codes.get(email);
   if (!record) {
-    return { valid: false, error: "Код не найден. Запросите новый код." };
+    bumpCodeFailure(email);
+    return { valid: false, error: CODE_FAIL };
   }
 
   if (Date.now() > record.expiresAt) {
     codes.delete(email);
-    return { valid: false, error: "Код истёк. Запросите новый код." };
+    bumpCodeFailure(email);
+    return { valid: false, error: CODE_FAIL };
   }
 
   if (record.attempts >= MAX_CODE_ATTEMPTS) {
     codes.delete(email);
-    return { valid: false, error: "Превышено количество попыток. Запросите новый код." };
+    bumpCodeFailure(email);
+    return { valid: false, error: CODE_FAIL };
   }
 
-  if (record.code !== code) {
+  const a = Buffer.from(record.code, "utf-8");
+  const b = Buffer.from(typeof code === "string" ? code : "", "utf-8");
+  const same = a.length === b.length && crypto.timingSafeEqual(a, b);
+  if (!same) {
     record.attempts++;
-    return { valid: false, error: `Неверный код. Осталось попыток: ${MAX_CODE_ATTEMPTS - record.attempts}` };
+    bumpCodeFailure(email);
+    return { valid: false, error: CODE_FAIL };
   }
 
   codes.delete(email);
+  codeFails.delete(email);
   return { valid: true };
 }
 
@@ -975,13 +1035,28 @@ export async function expirePendingPayments(): Promise<number> {
 
 const BCRYPT_ROUNDS = 10;
 
+/**
+ * Смена пароля молчать не должна (аудит безопасности 19.09.2026).
+ * Если пароль сменил не владелец, единственный шанс заметить это
+ * вовремя — увидеть запись в кабинете. Уведомление пишется рядом с
+ * самой сменой, а не в обработчике: путей смены два, и забыть его в
+ * одном из них не должно быть возможности.
+ */
+const PASSWORD_CHANGED_TITLE = "Пароль изменён";
+const PASSWORD_CHANGED_TEXT =
+  "Пароль от аккаунта только что изменили. Если это были не вы — сразу напишите в поддержку: доступ к аккаунту у кого-то ещё.";
+
 export async function setUserPassword(userId: string, password: string): Promise<boolean> {
   const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const result = await pool.query(
     "UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING id",
     [hash, userId]
   );
-  return result.rows.length > 0;
+  if (result.rows.length === 0) return false;
+  await createNotificationForUser(userId, PASSWORD_CHANGED_TITLE, PASSWORD_CHANGED_TEXT).catch((err) =>
+    console.error("[PASSWORD] set: notification failed:", err instanceof Error ? err.message : err)
+  );
+  return true;
 }
 
 // A real bcrypt hash of a random string, computed once: accounts without a
@@ -1007,6 +1082,9 @@ export async function resetUserPassword(email: string, password: string): Promis
     [hash, email]
   );
   if (result.rows.length === 0) return false;
+  await createNotificationForUser(String(result.rows[0].id), PASSWORD_CHANGED_TITLE, PASSWORD_CHANGED_TEXT).catch((err) =>
+    console.error("[PASSWORD] reset: notification failed:", err instanceof Error ? err.message : err)
+  );
   // A reset means "someone else may be in my account": sign out everywhere.
   await revokeAllSessions(String(result.rows[0].id)).catch((err) =>
     console.error("[PASSWORD] reset: could not revoke sessions:", err instanceof Error ? err.message : err)

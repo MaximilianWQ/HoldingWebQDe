@@ -227,6 +227,12 @@ export async function initDb(): Promise<void> {
   // ─── Migrations: additive + idempotent. A failure is logged with the
   //     statement and reported at the end — never swallowed. ───
   const migrations = [
+    // Чем человек доказал, что аккаунт его: код из письма, пароль,
+    // passkey или Telegram (аудит безопасности 19.09.2026). Без этого
+    // «свежая сессия» считалась доказательством владения почтой, кем
+    // бы она ни была открыта, и пароль можно было сменить не зная
+    // старого.
+    "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS auth_method TEXT",
     // Резюме переезжают из job_applications в form_attachments — один
     // раз и только если старые колонки ещё есть. Проверка колонки
     // нужна потому, что миграции прогоняются на каждом запуске: без

@@ -99,9 +99,13 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    // Текст исключения наружу не отдаём даже администратору: в
+    // сообщении драйвера базы или панели бывают имена таблиц, части
+    // запросов и адреса внутренних служб. Разбор — по журналу, там
+    // ошибка целиком (аудит безопасности 19.09.2026).
     console.error("[ADMIN/AUDIT] top-level error:", err);
     return NextResponse.json(
-      { success: false, error: err instanceof Error ? `${err.name}: ${err.message}` : "Внутренняя ошибка. См. server-side лог." },
+      { success: false, error: "Внутренняя ошибка. См. server-side лог." },
       { status: 500 }
     );
   }

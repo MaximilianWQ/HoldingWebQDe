@@ -8,7 +8,6 @@ const STORAGE_KEY = "atlas_welcome_dismissed";
 const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface WelcomeToastProps {
-  telegramLinkToken?: string | null;
   subscriptionEnd?: string | null;
 }
 
@@ -33,7 +32,7 @@ function formatTimeLeft(subscriptionEnd: string): string {
  * overlays.css вместо старой темы. Кабинет показывает её только на
  * пробном периоде. Пауза после закрытия — сутки, как было.
  */
-export default function WelcomeToast({ telegramLinkToken, subscriptionEnd }: WelcomeToastProps) {
+export default function WelcomeToast({ subscriptionEnd }: WelcomeToastProps) {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
@@ -95,7 +94,11 @@ export default function WelcomeToast({ telegramLinkToken, subscriptionEnd }: Wel
       </div>
       <div className="ov-actions">
         <a
-          href={`https://t.me/atlas_suppbot${telegramLinkToken ? `?start=${telegramLinkToken}` : ""}`}
+          // Секрет привязки в адресе не передаём (аудит 19.09.2026):
+          // это адрес бота ПОДДЕРЖКИ, а `?start=` уходит ему целиком
+          // и оседает в его журнале. Привязка — своей кнопкой в
+          // кабинете, одноразовым токеном.
+          href="https://t.me/atlas_suppbot"
           target="_blank"
           rel="noopener noreferrer"
           className="ov-btn ov-btn-primary"

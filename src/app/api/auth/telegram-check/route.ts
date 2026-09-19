@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, status: claim.status === "invalid" ? "pending" : claim.status });
     }
 
-    const { token } = await startSession(claim.userId, { ip, userAgent: request.headers.get("user-agent") });
+    const { token } = await startSession(claim.userId, { ip, userAgent: request.headers.get("user-agent") , authMethod: "telegram" });
     await createAuditLog("user.login", "telegram", claim.userId, undefined, ip || undefined);
 
     const response = NextResponse.json({ success: true, data: { userId: claim.userId } });

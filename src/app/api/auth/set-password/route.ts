@@ -3,6 +3,7 @@ import { setUserPassword, verifyUserPassword } from "@/lib/store";
 import { getSessionUser } from "@/lib/session";
 import { revokeAllSessions } from "@/lib/session-store";
 import { rateLimitLoginEmail } from "@/lib/rate-limit";
+import { passwordProblem } from "@/lib/password-policy";
 
 /**
  * A session that has just been opened by a code from the email is proof
@@ -28,39 +29,16 @@ export async function POST(request: NextRequest) {
     const password = body?.password;
     const currentPassword = body?.currentPassword;
 
-    if (!password || typeof password !== "string" || password.length < 8) {
-      return NextResponse.json(
-        { success: false, error: "Пароль должен содержать минимум 8 символов" },
-        { status: 400 }
-      );
-    }
-
-    if (password.length > 128) {
-      return NextResponse.json(
-        { success: false, error: "Пароль слишком длинный" },
-        { status: 400 }
-      );
-    }
-
-    // Check complexity: at least one letter and one digit
-    if (!/[a-zA-Zа-яА-Я]/.test(password) || !/[0-9]/.test(password)) {
-      return NextResponse.json(
-        { success: false, error: "Пароль должен содержать буквы и цифры" },
-        { status: 400 }
-      );
-    }
-
-    // Block common weak passwords
-    const weak = ["12345678", "password", "qwerty12", "00000000", "11111111", "123456789", "qwertyui"];
-    if (weak.includes(password.toLowerCase())) {
-      return NextResponse.json(
-        { success: false, error: "Слишком простой пароль. Придумайте другой." },
-        { status: 400 }
-      );
+    // Требования к паролю — из общего источника `password-policy.ts`
+    // (аудит 19.09.2026): то же правило действует при восстановлении.
+    const problem = passwordProblem(password);
+    if (problem) {
+      return NextResponse.json({ success: false, error: problem }, { status: 400 });
     }
 
     const sessionAge = Date.now() - auth.session.createdAt.getTime();
-    if (user.passwordHash && sessionAge > FRESH_SESSION_MS) {
+    const freshEmailCode = auth.session.authMethod === "email_code" && sessionAge <= FRESH_SESSION_MS;
+    if (user.passwordHash && !freshEmailCode) {
       const limit = rateLimitLoginEmail(user.email);
       if (!limit.allowed) {
         return NextResponse.json(

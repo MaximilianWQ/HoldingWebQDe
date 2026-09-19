@@ -15,7 +15,9 @@ export async function POST(request: NextRequest) {
     }
     const r = await unlinkTelegramAccount(auth.user.id, "site");
     if (!r.ok) return NextResponse.json({ success: false, error: r.error }, { status: 400 });
-    return NextResponse.json({ success: true, data: { telegramLinkToken: r.telegramLinkToken } });
+    // Постоянный токен привязки наружу не отдаём (аудит 19.09.2026):
+    // новая привязка идёт одноразовым токеном.
+    return NextResponse.json({ success: true, data: { unlinked: true } });
   } catch (err) {
     console.error("[USER/TELEGRAM-UNLINK] error:", err);
     return NextResponse.json({ success: false, error: "Ошибка сервера" }, { status: 500 });

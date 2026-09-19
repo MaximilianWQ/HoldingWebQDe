@@ -10,9 +10,12 @@ export function verifyBotApiKey(request: NextRequest): boolean {
 
   // Timing-safe comparison to prevent character-by-character guessing
   try {
-    const a = Buffer.from(key, "utf-8");
-    const b = Buffer.from(BOT_API_KEY, "utf-8");
-    if (a.length !== b.length) return false;
+    // Сравниваем хеши, а не сами строки (аудит 19.09.2026): ветка
+    // «длины не совпали» возвращалась заметно быстрее и выдавала
+    // длину ключа. Хеш всегда 32 байта, и сравнение честно
+    // постоянное по времени при любом вводе.
+    const a = crypto.createHash("sha256").update(key, "utf-8").digest();
+    const b = crypto.createHash("sha256").update(BOT_API_KEY, "utf-8").digest();
     return crypto.timingSafeEqual(a, b);
   } catch {
     return false;

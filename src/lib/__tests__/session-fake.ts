@@ -42,16 +42,16 @@ export class SecFakeDb {
 
   private exec(s: string, p: any[]): Result {
     // ── sessions ──
-    if (s.startsWith("INSERT INTO sessions (id, user_id, token_hash, created_at, last_seen_at, expires_at, ip, user_agent)")) {
-      this.sessions.push({ id: p[0], user_id: p[1], token_hash: p[2], created_at: p[3], last_seen_at: p[3], expires_at: p[4], ip: p[5], user_agent: p[6], revoked_at: null });
+    if (s.startsWith("INSERT INTO sessions (id, user_id, token_hash, created_at, last_seen_at, expires_at, ip, user_agent")) {
+      this.sessions.push({ id: p[0], user_id: p[1], token_hash: p[2], created_at: p[3], last_seen_at: p[3], expires_at: p[4], ip: p[5], user_agent: p[6], auth_method: p[7] ?? null, revoked_at: null });
       return res();
     }
     if (s === "UPDATE users SET last_login_at = NOW() WHERE id = $1") return res();
-    if (s.startsWith("SELECT s.id AS s_id, s.created_at AS s_created_at, s.last_seen_at AS s_last_seen_at, s.expires_at AS s_expires_at, u.* FROM sessions s JOIN users u")) {
+    if (s.startsWith("SELECT s.id AS s_id, s.created_at AS s_created_at, s.last_seen_at AS s_last_seen_at, s.expires_at AS s_expires_at")) {
       const sess = this.sessions.find((x) => x.token_hash === p[0] && x.revoked_at === null && t(x.expires_at) > t(p[1]));
       const u = sess && this.users.get(sess.user_id);
       if (!sess || !u) return res();
-      return res([{ ...u, s_id: sess.id, s_created_at: sess.created_at, s_last_seen_at: sess.last_seen_at, s_expires_at: sess.expires_at }]);
+      return res([{ ...u, s_id: sess.id, s_created_at: sess.created_at, s_last_seen_at: sess.last_seen_at, s_expires_at: sess.expires_at, s_auth_method: sess.auth_method ?? null }]);
     }
     if (s === "UPDATE sessions SET last_seen_at = $2, expires_at = $3 WHERE id = $1 AND revoked_at IS NULL") {
       const sess = this.sessions.find((x) => x.id === p[0] && x.revoked_at === null);
@@ -136,6 +136,7 @@ export class SecFakeDb {
 
     // ── audit (fire-and-forget) ──
     if (s.startsWith("INSERT INTO audit_logs")) return res();
+    if (s.startsWith("INSERT INTO notifications")) return res();
 
     throw new Error(`session-fake: unexpected SQL: ${s}`);
   }

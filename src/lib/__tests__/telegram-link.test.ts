@@ -447,12 +447,18 @@ describe("site first: one-time token", () => {
     expect(g.status).toBe(404);
   });
 
-  it("a legacy permanent token still works once and is rotated", async () => {
+  // Поведение изменено аудитом безопасности 19.09.2026: постоянный
+  // токен привязки больше не принимается. Он выдавался при создании
+  // аккаунта, жил вечно, хранился открытым текстом и уезжал в браузер
+  // с каждой загрузкой кабинета — то есть был вечным ключом от
+  // аккаунта, который легко утекал. Остался только одноразовый.
+  it("постоянный токен привязки больше не принимается", async () => {
     const { POST } = await import("@/app/api/bot/link/route");
     seedSiteUser("u-leg", { telegram_link_token: "0123456789abcdef" });
     const r = await POST(req("/api/bot/link", "POST", { token: "0123456789abcdef", telegramId: nextTg() }));
-    expect(r.status).toBe(200);
-    expect(linkDb.users.get("u-leg")!.telegram_link_token).not.toBe("0123456789abcdef");
+    expect(r.status).toBe(404);
+    // Привязка не состоялась: аккаунт остался без Telegram.
+    expect(linkDb.users.get("u-leg")!.telegram_id ?? null).toBe(null);
   });
 });
 

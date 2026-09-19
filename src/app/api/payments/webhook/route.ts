@@ -3,6 +3,7 @@ import { createAuditLog, transitionPaymentStatus } from "@/lib/store";
 import { getPaymentStatus as ykGetPayment, getRefund, PaymentStatus } from "@/lib/yookassa";
 import type { YooKassaNotification } from "@/lib/yookassa";
 import { confirmPayment, findLocalPayment, handleRefund } from "@/lib/payments";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const YOOKASSA_IPV4_PREFIXES = [
   "185.71.76.", "185.71.77.",
@@ -39,6 +40,16 @@ export async function POST(request: NextRequest) {
   const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "";
   if (!isYooKassaIp(clientIp)) console.warn(`[WEBHOOK] notification from non-YooKassa IP ${clientIp || "(empty)"} — verifying via API`);
 
+  // Предел на адрес (аудит безопасности 19.09.2026). Подписи у
+  // уведомлений ЮKassa нет, а каждое обращение стоит нам одного
+  // запроса к их API. Настоящих уведомлений и близко не бывает
+  // шестидесяти в минуту с одного адреса; чужой поток упрётся сюда
+  // и не съест нашу квоту к API, от которой зависит оплата живых
+  // покупателей.
+  if (!checkRateLimit(`yk-webhook:${clientIp || "unknown"}`, 60, 60_000).allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   let body: YooKassaNotification;
   try {
     body = (await request.json()) as YooKassaNotification;
@@ -49,6 +60,13 @@ export async function POST(request: NextRequest) {
   const objectId = body?.object?.id;
   if (!event || !objectId) {
     return NextResponse.json({ error: "Invalid notification format" }, { status: 400 });
+  }
+  // Идентификатор проверяется по форме ДО любого обращения к API.
+  // Это вторая застава после encodeURIComponent в yookassa.ts:
+  // строка, которой не может быть у настоящего платежа, дальше не
+  // идёт вовсе.
+  if (typeof objectId !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(objectId)) {
+    return NextResponse.json({ error: "Invalid object id" }, { status: 400 });
   }
   console.log(`[WEBHOOK] ${event}: ${objectId} ip=${clientIp}`);
 
@@ -83,6 +101,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (verified.status === PaymentStatus.SUCCEEDED) {
+      // Сверка суммы и валюты (аудит безопасности 19.09.2026). Цену
+      // считает сервер при создании платежа, так что сейчас расхождению
+      // взяться неоткуда — это застава на будущее: любая ошибка,
+      // связавшая дешёвый платёж с дорогой записью, иначе превратится
+      // в бесплатный товар. Больше ожидаемого пропускаем: переплата
+      // бывает при доплате комиссии, недоплата — нет.
+      const paid = Number(verified.amount?.value ?? NaN);
+      const currencyOk = !verified.amount?.currency || verified.amount.currency === local.currency;
+      if (!Number.isFinite(paid) || !currencyOk || paid + 1e-9 < local.amount) {
+        console.error(
+          `[WEBHOOK] amount mismatch ${verified.id}: paid ${verified.amount?.value} ${verified.amount?.currency}, expected ${local.amount} ${local.currency}`
+        );
+        return NextResponse.json({ error: "Amount mismatch" }, { status: 409 });
+      }
       const r = await confirmPayment(local.id, "webhook");
       console.log(`[WEBHOOK] payment ${local.id}: ${r.outcome}${r.newEnd ? ` newEnd=${r.newEnd}` : ""}${r.panelSynced === false ? " (panel sync deferred)" : ""}`);
     } else if (verified.status === PaymentStatus.CANCELED) {

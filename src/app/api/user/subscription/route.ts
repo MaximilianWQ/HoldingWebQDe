@@ -75,7 +75,10 @@ export async function GET(request: NextRequest) {
         xrayUuid: null,
         subToken: null,
         telegramLinked: user.telegramLinked,
-        telegramLinkToken: user.telegramLinkToken,
+        // telegramLinkToken отсюда убран (аудит безопасности
+        // 19.09.2026): это постоянный секрет привязки, который
+        // уезжал в браузер при каждой загрузке кабинета. Привязка
+        // делается одноразовым токеном — POST /api/user/telegram-link.
         referralCode: user.referralCode,
         subscriptionPlan: isExpired ? "expired" : (user.subscriptionPlan || "trial"),
         referrals: user.referrals,

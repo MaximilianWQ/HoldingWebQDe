@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
-import { savePushSubscription } from "@/lib/push";
+import { savePushSubscription, trimPushSubscriptions } from "@/lib/push";
 
 const MAX_FIELD = 2048;
 
@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     await savePushSubscription(auth.user.id, { endpoint, keys: { p256dh, auth: authKey } });
+    await trimPushSubscriptions(auth.user.id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ success: false, error: "Ошибка сервера" }, { status: 500 });

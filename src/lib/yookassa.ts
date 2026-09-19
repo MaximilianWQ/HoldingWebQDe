@@ -126,7 +126,14 @@ export async function createPayment(params: CreatePaymentParams): Promise<Create
 export async function getPaymentStatus(paymentId: string): Promise<YooKassaPayment> {
   ensureConfigured();
 
-  const res = await fetch(`${apiUrl()}/payments/${paymentId}`, {
+  // encodeURIComponent обязателен (аудит безопасности 19.09.2026).
+  // Идентификатор приходит телом вебхука, который никак не
+  // подписан, — то есть его пишет кто угодно. Без кодирования
+  // `../me` или `x?limit=100` уводили запрос на другой адрес API
+  // ЮKassa, и он уходил ТУДА С НАШИМИ БОЕВЫМИ КЛЮЧАМИ магазина.
+  // Соседняя функция возврата кодировала идентификатор с самого
+  // начала — здесь это просто забыли.
+  const res = await fetch(`${apiUrl()}/payments/${encodeURIComponent(paymentId)}`, {
     method: "GET",
     headers: {
       "Authorization": getAuthHeader(),

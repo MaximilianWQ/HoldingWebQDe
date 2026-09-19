@@ -8,7 +8,25 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+/**
+ * Счётчики живут на globalThis (аудит безопасности 19.09.2026).
+ *
+ * Раньше это была обычная переменная модуля. Next собирает серверные
+ * действия и обработчики маршрутов в разные пакеты, и один и тот же
+ * модуль мог оказаться загружен дважды — тогда вход через форму и
+ * вход через API считали в РАЗНЫЕ карты, и суточный предел писем с
+ * кодом удваивался. Коды и токены сброса лежат на globalThis по этой
+ * же причине; предел, который можно обойти сменой точки входа, —
+ * не предел.
+ *
+ * Оговорка: это по-прежнему память процесса. При нескольких копиях
+ * приложения пределы умножаются на их число, а перезапуск их
+ * обнуляет. Настоящее решение — счётчики в базе; до него пределы
+ * считать заслоном от перебора, а не гарантией.
+ */
+const globalLimits = globalThis as unknown as { __rateLimits?: Map<string, RateLimitEntry> };
+if (!globalLimits.__rateLimits) globalLimits.__rateLimits = new Map();
+const store = globalLimits.__rateLimits;
 
 // Cleanup old entries every 5 minutes
 setInterval(() => {

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Ключ не распознан" }, { status: 401 });
     }
 
-    const { token } = await startSession(result.userId, { ip, userAgent: request.headers.get("user-agent") });
+    const { token } = await startSession(result.userId, { ip, userAgent: request.headers.get("user-agent") , authMethod: "passkey" });
     const response = NextResponse.json({
       success: true,
       data: { userId: result.userId },

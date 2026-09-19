@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
     const user = result.user;
 
-    const { token } = await startSession(user.id, { ip, userAgent: request.headers.get("user-agent") });
+    const { token } = await startSession(user.id, { ip, userAgent: request.headers.get("user-agent") , authMethod: "email_code" });
     const response = NextResponse.json({
       success: true,
       data: {

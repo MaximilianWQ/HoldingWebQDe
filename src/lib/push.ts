@@ -18,14 +18,57 @@ export interface PushSubscriptionData {
   };
 }
 
-/** Save a push subscription for a user */
+/**
+ * Сохранить подписку на уведомления.
+ *
+ * ПОЧЕМУ В `ON CONFLICT` ЕСТЬ `WHERE` (аудит безопасности 19.09.2026).
+ * Раньше строка при совпадении адреса переписывалась целиком, включая
+ * `user_id`. Адрес подписки — не секрет: он лежит в браузере, попадает
+ * в наш же лог укороченным и виден на общем устройстве. Любой вошедший
+ * мог прислать чужой адрес, и строка переезжала на него: владелец
+ * переставал получать свои уведомления и никак не мог это заметить —
+ * подписка в его браузере выглядела живой. Больнее всего это било по
+ * администратору: одним запросом отключался канал сигналов о новых
+ * обращениях с сайта.
+ *
+ * Теперь `WHERE` разрешает обновление только владельцу строки. Чужой
+ * адрес — тихая пустая операция, а не захват. Соседний обработчик
+ * DELETE всегда проверял владельца; POST давал то, в чём DELETE
+ * отказывал.
+ *
+ * Передать устройство другому аккаунту по-прежнему можно — сначала
+ * отписавшись в браузере этого устройства.
+ */
 export async function savePushSubscription(userId: string, sub: PushSubscriptionData): Promise<void> {
   const id = uuidv4();
   await pool.query(
     `INSERT INTO push_subscriptions (id, user_id, endpoint, keys_p256dh, keys_auth)
      VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (endpoint) DO UPDATE SET user_id = $2, keys_p256dh = $4, keys_auth = $5`,
+     ON CONFLICT (endpoint) DO UPDATE
+        SET keys_p256dh = $4, keys_auth = $5
+      WHERE push_subscriptions.user_id = $2`,
     [id, userId, sub.endpoint, sub.keys.p256dh, sub.keys.auth]
+  );
+}
+
+/**
+ * Сколько подписок держим на аккаунт. Устройств у человека единицы;
+ * потолок отсекает бесконечное накопление строк одним аккаунтом.
+ * Лишние — самые старые: свежая подписка всегда нужнее.
+ */
+const MAX_SUBS_PER_USER = 20;
+
+export async function trimPushSubscriptions(userId: string): Promise<void> {
+  await pool.query(
+    `DELETE FROM push_subscriptions
+      WHERE user_id = $1
+        AND id NOT IN (
+          SELECT id FROM push_subscriptions
+           WHERE user_id = $1
+           ORDER BY created_at DESC
+           LIMIT $2
+        )`,
+    [userId, MAX_SUBS_PER_USER]
   );
 }
 

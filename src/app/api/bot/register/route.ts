@@ -95,7 +95,6 @@ export async function POST(request: NextRequest) {
         vpnKey: user.subscriptionUrl,
         subscriptionUrl: user.subscriptionUrl,
         referralCode: user.referralCode,
-        telegramLinkToken: user.telegramLinkToken,
         subscriptionPlan: daysLeft > 0 ? (user.subscriptionPlan || "trial") : "expired",
       },
     });

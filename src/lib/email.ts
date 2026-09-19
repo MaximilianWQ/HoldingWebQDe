@@ -141,10 +141,16 @@ async function sendTransactional(
     return true;
   }
   try {
+    // Тема чистится от переводов строк и ограничивается по длине
+    // (аудит 19.09.2026). В неё попадает текст из открытых форм, а
+    // тема письма — заголовок: перевод строки в заголовке это
+    // приглашение дописать свои. Resend такое и сам не пропустит,
+    // но полагаться на чужую библиотеку в этом месте незачем.
+    const safeSubject = String(subject).replace(/[\r\n]+/g, " ").slice(0, 200);
     const { error } = await getResend().emails.send({
       from: "Atlas Secure <noreply@qodev.dev>",
       to,
-      subject,
+      subject: safeSubject,
       html,
       ...(replyTo ? { replyTo } : {}),
       ...(attachments?.length

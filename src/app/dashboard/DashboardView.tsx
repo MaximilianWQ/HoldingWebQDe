@@ -171,7 +171,7 @@ function DashboardViewInner() {
       const res = await fetch("/api/user/telegram-unlink", { method: "POST" });
       const result = await res.json();
       if (result.success) {
-        setData((prev) => (prev ? { ...prev, telegramLinked: false, telegramLinkToken: result.data.telegramLinkToken } : prev));
+        setData((prev) => (prev ? { ...prev, telegramLinked: false } : prev));
         setUnlinkStep(0);
       }
     } catch {
@@ -339,7 +339,7 @@ function DashboardViewInner() {
       )}
 
       {(data.subscriptionPlan || "trial") === "trial" && !data.isExpired && (
-        <WelcomeToast telegramLinkToken={data.telegramLinkToken} subscriptionEnd={data.subscriptionEnd} />
+        <WelcomeToast subscriptionEnd={data.subscriptionEnd} />
       )}
       <PasskeyPrompt />
       <IosInstallSheet />

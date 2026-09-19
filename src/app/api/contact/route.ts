@@ -11,6 +11,14 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
 const MAX_LEN = { name: 200, email: 254, interest: 64, message: 5000 };
 
+/**
+ * Тема обращения — из закрытого списка (аудит 19.09.2026). На
+ * странице это выпадающий список, но обработчик принимал любую
+ * строку до 64 знаков и ставил её в тему письма. Свободный текст
+ * из открытой формы в заголовке письма не нужен.
+ */
+const INTERESTS = new Set(["vpn", "vds", "enterprise", "security", "other"]);
+
 export async function POST(request: NextRequest) {
   try {
     // Public form that writes to the DB and notifies the admin: cap per IP.
@@ -42,6 +50,10 @@ export async function POST(request: NextRequest) {
       (typeof message === "string" && message.length > MAX_LEN.message)
     ) {
       return NextResponse.json({ success: false, error: "Field too long" }, { status: 400 });
+    }
+
+    if (!INTERESTS.has(interest)) {
+      return NextResponse.json({ success: false, error: "Неизвестная тема обращения" }, { status: 400 });
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

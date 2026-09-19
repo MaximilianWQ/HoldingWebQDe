@@ -91,7 +91,11 @@ export async function generatePasskeyRegistration(userId: string, email: string)
       id: c.credentialId,
       transports: c.transports ? c.transports.split(",") as AuthenticatorTransportFuture[] : undefined,
     })),
-    authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
+    // "required", а не "preferred" (аудит безопасности 19.09.2026):
+    // "preferred" — пожелание, и ключ вправе его не выполнить. Тогда
+    // сам факт «устройство у меня в руках» становился полным входом
+    // в аккаунт, без отпечатка, лица или кода блокировки.
+    authenticatorSelection: { residentKey: "preferred", userVerification: "required" },
   });
   saveChallenge(`reg:${userId}`, options.challenge);
   return options;
@@ -106,6 +110,9 @@ export async function verifyPasskeyRegistration(userId: string, response: Regist
     expectedChallenge: challenge,
     expectedOrigin: ORIGIN,
     expectedRPID: RP_ID,
+    // Проверяем, а не просим: без этого ключ, не спросивший отпечаток
+    // или код блокировки, всё равно принимался (аудит 19.09.2026).
+    requireUserVerification: true,
   });
 
   if (!v.verified || !v.registrationInfo) throw new Error("Failed");
@@ -123,7 +130,7 @@ export async function verifyPasskeyRegistration(userId: string, response: Regist
 export async function generatePasskeyAuthentication() {
   const options = await generateAuthenticationOptions({
     rpID: RP_ID,
-    userVerification: "preferred",
+    userVerification: "required",
   });
   saveChallenge(`auth:${options.challenge}`, options.challenge);
   return options;
@@ -157,6 +164,7 @@ export async function verifyPasskeyAuthentication(response: AuthenticationRespon
         counter: cred.counter,
         transports: cred.transports ? cred.transports.split(",") as AuthenticatorTransportFuture[] : undefined,
       },
+      requireUserVerification: true,
     });
 
     if (v.verified) {

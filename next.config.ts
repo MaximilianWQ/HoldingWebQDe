@@ -26,7 +26,13 @@ const allowedOrigins = [
   "*.atlassecure.uk",
   "atlassecure.ru",
   "*.atlassecure.ru",
-  "*.up.railway.app",
+  // `*.up.railway.app` здесь стоять не должно (аудит безопасности
+  // 19.09.2026). Этот домен общий: адрес вида `чужое-приложение.up
+  // .railway.app` получает любой, кто зарегистрировался в Railway, и
+  // список доверенных источников впускал бы их страницы к нашим
+  // server actions. Свой адрес Railway приходит переменной
+  // RAILWAY_PUBLIC_DOMAIN и уже перечислен ниже — именно он, а не
+  // весь домен провайдера.
   hostOf(process.env.NEXT_PUBLIC_SITE_URL),
   hostOf(process.env.NEXT_PUBLIC_APP_URL),
   process.env.RAILWAY_PUBLIC_DOMAIN,

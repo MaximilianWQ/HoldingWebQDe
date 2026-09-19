@@ -166,7 +166,7 @@ export async function verifyCodeAction(
     isNewUser = user.isNew;
 
     const hdrs = await headers();
-    const { token } = await startSession(user.id, { ip, userAgent: hdrs.get("user-agent") });
+    const { token } = await startSession(user.id, { ip, userAgent: hdrs.get("user-agent") , authMethod: "email_code" });
     await setSessionCookieInStore(token);
     // Clean up pending_email cookie
     const cookieStore = await cookies();

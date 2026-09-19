@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { token } = await startSession(user.id, { ip, userAgent: request.headers.get("user-agent") });
+    const { token } = await startSession(user.id, { ip, userAgent: request.headers.get("user-agent") , authMethod: "password" });
     const response = NextResponse.json({
       success: true,
       data: { userId: user.id, email: user.email },

@@ -23,6 +23,7 @@ import {
   revokeSessionByToken,
   SESSION_TTL_MS,
   SessionRow,
+  type AuthMethod,
 } from "./session-store";
 
 export const SESSION_COOKIE = "session";
@@ -78,7 +79,7 @@ export async function hasSessionCookie(source?: RequestLike): Promise<boolean> {
 
 export async function startSession(
   userId: string,
-  meta: { ip?: string | null; userAgent?: string | null } = {}
+  meta: { ip?: string | null; userAgent?: string | null; authMethod?: AuthMethod } = {}
 ): Promise<{ token: string; session: SessionRow }> {
   return createSession(userId, meta);
 }

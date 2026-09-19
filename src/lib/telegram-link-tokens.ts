@@ -70,10 +70,13 @@ export async function lookupLinkToken(raw: unknown): Promise<TokenLookup> {
     if (new Date(row.expires_at).getTime() <= Date.now()) return { kind: "expired" };
     return { kind: "one_time", userId: row.user_id, hash, expiresAt: new Date(row.expires_at) };
   }
-  if (LEGACY_TOKEN_RE.test(t)) {
-    const user = await getUserByTelegramLinkToken(t);
-    return user ? { kind: "legacy", userId: user.id, token: t } : { kind: "invalid" };
-  }
+  // Постоянный токен привязки (16 шестнадцатеричных) больше не
+  // принимается (аудит безопасности 19.09.2026). Он выдавался при
+  // создании аккаунта, жил вечно, хранился открытым текстом и уезжал
+  // в браузер с каждой загрузкой кабинета — то есть был постоянным
+  // ключом от аккаунта, который легко утекал. Привязка делается
+  // одноразовым токеном на 15 минут, он и остаётся.
+  if (LEGACY_TOKEN_RE.test(t)) return { kind: "invalid" };
   return { kind: "invalid" };
 }
 

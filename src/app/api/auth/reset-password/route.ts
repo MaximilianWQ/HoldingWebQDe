@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCode, resetUserPassword, getUserByEmail } from "@/lib/store";
 import { consumeResetToken } from "@/lib/reset-tokens";
+import { passwordProblem } from "@/lib/password-policy";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { clientIpKey } from "@/lib/client-ip";
 
 /**
  * POST /api/auth/reset-password — новый пароль.
@@ -17,6 +20,17 @@ const FAIL = "Не удалось сменить пароль. Запросит�
 
 export async function POST(request: NextRequest) {
   try {
+    // Предел на адрес (аудит 19.09.2026). Здесь его не было вовсе: и
+    // подбор кода из письма, и перебор токена восстановления ничего
+    // не стоили — в отличие от входа по паролю, где предел стоял.
+    const rl = checkRateLimit(`reset:${clientIpKey(request.headers)}`, 20, 10 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Слишком много попыток. Повторите через ${rl.retryAfterSeconds} сек.` },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
     const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
     const password = body?.password;
@@ -26,11 +40,13 @@ export async function POST(request: NextRequest) {
     if (!email || !password || (!resetToken && !code)) {
       return NextResponse.json({ success: false, error: "Все поля обязательны" }, { status: 400 });
     }
-    if (typeof password !== "string" || password.length < 6) {
-      return NextResponse.json({ success: false, error: "Пароль должен содержать минимум 6 символов" }, { status: 400 });
-    }
-    if (password.length > 128) {
-      return NextResponse.json({ success: false, error: "Пароль слишком длинный" }, { status: 400 });
+    // Требования те же, что при смене пароля в кабинете: единый
+    // источник `password-policy.ts` (аудит 19.09.2026). Прежде здесь
+    // хватало шести знаков — более слабое правило стояло на пути,
+    // которым пользуется тот, кто добрался до чужой почты.
+    const problem = passwordProblem(password);
+    if (problem) {
+      return NextResponse.json({ success: false, error: problem }, { status: 400 });
     }
 
     // Сначала — доказательство владения почтой (токен или код), потом

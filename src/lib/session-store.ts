@@ -40,12 +40,22 @@ export function generateToken(): string {
   return crypto.randomBytes(32).toString("base64url");
 }
 
+/**
+ * Чем человек доказал, что аккаунт его (аудит безопасности
+ * 19.09.2026). Раньше сессия этого не помнила, и «свежая сессия»
+ * считалась доказательством владения почтой, кем бы она ни была
+ * открыта — в том числе входом через Telegram или ключом passkey.
+ * Смена пароля без знания старого опиралась именно на это.
+ */
+export type AuthMethod = "email_code" | "password" | "passkey" | "telegram";
+
 export interface SessionRow {
   id: string;
   userId: string;
   createdAt: Date;
   lastSeenAt: Date;
   expiresAt: Date;
+  authMethod: AuthMethod | null;
 }
 
 /** Pure: the new expiry for a session touched at `now`. */
@@ -57,7 +67,7 @@ const clip = (s: string | null | undefined, n: number) => (s ? s.slice(0, n) : n
 
 export async function createSession(
   userId: string,
-  meta: { ip?: string | null; userAgent?: string | null } = {},
+  meta: { ip?: string | null; userAgent?: string | null; authMethod?: AuthMethod } = {},
   now: Date = new Date()
 ): Promise<{ token: string; session: SessionRow }> {
   await waitForDb();
@@ -65,14 +75,14 @@ export async function createSession(
   const id = uuidv4();
   const expiresAt = slidingExpiry(now, now);
   await pool.query(
-    `INSERT INTO sessions (id, user_id, token_hash, created_at, last_seen_at, expires_at, ip, user_agent)
-     VALUES ($1, $2, $3, $4, $4, $5, $6, $7)`,
-    [id, userId, hashToken(token), now, expiresAt, clip(meta.ip, 64), clip(meta.userAgent, 400)]
+    `INSERT INTO sessions (id, user_id, token_hash, created_at, last_seen_at, expires_at, ip, user_agent, auth_method)
+     VALUES ($1, $2, $3, $4, $4, $5, $6, $7, $8)`,
+    [id, userId, hashToken(token), now, expiresAt, clip(meta.ip, 64), clip(meta.userAgent, 400), meta.authMethod ?? null]
   );
   await pool.query("UPDATE users SET last_login_at = NOW() WHERE id = $1", [userId]).catch(() => undefined);
   // Opportunistic cleanup of long-dead rows (cheap: indexed on expires_at).
   if (Math.random() < 0.02) void deleteExpiredSessions().catch(() => undefined);
-  return { token, session: { id, userId, createdAt: now, lastSeenAt: now, expiresAt } };
+  return { token, session: { id, userId, createdAt: now, lastSeenAt: now, expiresAt, authMethod: meta.authMethod ?? null } };
 }
 
 /**
@@ -87,7 +97,7 @@ export async function findSessionWithUser(
   if (!isWellFormedToken(token)) return null;
   await waitForDb();
   const r = await pool.query(
-    `SELECT s.id AS s_id, s.created_at AS s_created_at, s.last_seen_at AS s_last_seen_at, s.expires_at AS s_expires_at, u.*
+    `SELECT s.id AS s_id, s.created_at AS s_created_at, s.last_seen_at AS s_last_seen_at, s.expires_at AS s_expires_at, s.auth_method AS s_auth_method, u.*
      FROM sessions s JOIN users u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.revoked_at IS NULL AND s.expires_at > $2`,
     [hashToken(token), now]
@@ -101,6 +111,7 @@ export async function findSessionWithUser(
     createdAt: new Date(row.s_created_at as string),
     lastSeenAt: new Date(row.s_last_seen_at as string),
     expiresAt: new Date(row.s_expires_at as string),
+    authMethod: (row.s_auth_method as AuthMethod | null) ?? null,
   };
 
   let touched = false;

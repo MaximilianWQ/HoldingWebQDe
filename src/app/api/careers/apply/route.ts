@@ -70,6 +70,18 @@ export async function POST(request: NextRequest) {
       return bad(`Слишком много попыток. Повторите через ${minutes} мин.`, 429);
     }
 
+    // Отказ по заявленной длине ДО чтения тела (аудит 19.09.2026).
+    // У обработчиков маршрута в этой версии Next своего предела на
+    // размер тела нет: `formData()` сначала складывает всё в память,
+    // и проверка размера файла ниже срабатывала уже после того, как
+    // гигабайты приехали. Content-Length — слова клиента, поэтому это
+    // только дешёвый предварительный отказ; настоящая проверка
+    // остаётся ниже, по факту прочитанного.
+    const declared = Number(request.headers.get("content-length") || 0);
+    if (declared > RESUME_MAX_BYTES + 64 * 1024) {
+      return bad(`Файл больше ${RESUME_MAX_MB} МБ.`, 413);
+    }
+
     let form: FormData;
     try {
       form = await request.formData();

@@ -127,7 +127,6 @@ export default function ContactView() {
             <a href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer" className="v-link">
               {TELEGRAM_SUPPORT.handle}
             </a>
-            . Почта на домене atlassecure.uk — это наш почтовый домен, сайт живёт на qodev.dev.
           </p>
         </div>
       </section>

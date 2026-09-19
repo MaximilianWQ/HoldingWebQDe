@@ -4,7 +4,123 @@
    вакансии с вилкой контуром, раскрытие, шаги найма.
    ═══════════════════════════════════════════════════════════════════ */
 
-.tc-hero { padding-top: clamp(40px, 7vw, 96px); }
+.tc-hero { padding-top: clamp(32px, 6vw, 80px); }
+.tc-hero-grid { display: grid; gap: clamp(28px, 5vw, 56px); align-items: start; }
+@media (min-width: 1000px) {
+  .tc-hero-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 88px); }
+}
+
+/* Дисплейный заголовок — прописными, лаймом, моноширинным.
+   Лайм на сайте живёт только в тёмном корпусе: раздел про найм —
+   другой разговор, и он должен читаться иначе, чем продажа подписки. */
+.tc-display {
+  margin: 0;
+  font-family: var(--t-mono);
+  font-size: clamp(40px, 7.4vw, 92px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--t-lime);
+}
+
+.tc-hero-text { margin: 0; font-size: clamp(17px, 1.7vw, 20px); line-height: 1.55; color: var(--t-ink-2); max-width: 46ch; }
+.tc-hero-label { margin: clamp(26px, 4vw, 40px) 0 14px; }
+
+/* Пилюли ролей: широкая строка со стрелкой справа. Наведение
+   подсвечивает контур, а не заливает плашку — заливка на чёрном
+   читается как нажатая кнопка. */
+.tc-pills { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.tc-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 62px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--t-bg-2);
+  color: var(--t-ink);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 220ms var(--t-ease), transform 220ms var(--t-ease), color 220ms var(--t-ease);
+}
+.tc-pill svg { color: var(--t-lime); flex: none; }
+@media (hover: hover) {
+  .tc-pill:hover { border-color: var(--t-lime); transform: translateX(4px); }
+}
+
+/* Фигуры: три кадра одного шага. Насыщенность растёт слева направо —
+   так читается направление движения, а не три разных человека. */
+.tc-figs { margin-top: clamp(28px, 5vw, 52px); max-width: 520px; }
+.tc-figs svg { width: 100%; height: auto; display: block; }
+.tc-fig { fill: var(--t-accent); opacity: calc(0.34 + var(--i) * 0.33); }
+.tc-fig-floor { fill: var(--t-line); }
+.tc-fig-head { fill: var(--t-accent); }
+.tc-fig-arm, .tc-fig-leg { transform-box: fill-box; transform-origin: 50% 8%; }
+.tc-fig-leg-a { transform: rotate(16deg); }
+.tc-fig-leg-b { transform: rotate(-14deg); }
+.tc-fig-arm { transform: rotate(-12deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .tc-fig-leg-a { animation: tc-step-a 1.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.53s); }
+  .tc-fig-leg-b { animation: tc-step-b 1.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.53s); }
+  .tc-fig-arm { animation: tc-step-b 1.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.53s); }
+}
+@keyframes tc-step-a { from { transform: rotate(18deg); } to { transform: rotate(-16deg); } }
+@keyframes tc-step-b { from { transform: rotate(-16deg); } to { transform: rotate(18deg); } }
+
+/* ── Над чем работаем ─────────────────────────────────────────────
+   Сетка значков: подпись под знаком, без карточек. Плашка вокруг
+   каждого значка превратила бы раздел в ещё один набор карточек,
+   которых на странице и так хватает. */
+.tc-work { list-style: none; display: grid; gap: clamp(24px, 4vw, 40px) 16px; margin: 0; padding: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 760px) { .tc-work { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tc-work-item { display: grid; gap: 14px; justify-items: start; }
+.tc-work-icon { color: var(--t-accent); }
+.tc-work-item b { font-size: 16px; font-weight: 500; }
+
+/* ── Что даём ─────────────────────────────────────────────────────
+   Оранжевая засечка слева вместо номера: это не последовательность,
+   а перечень, и нумеровать его было бы враньём о порядке. */
+.tc-offer { list-style: none; display: grid; gap: clamp(22px, 3vw, 32px); margin: 0; padding: 0; }
+@media (min-width: 860px) { .tc-offer { grid-template-columns: 1fr 1fr; gap: clamp(26px, 3vw, 40px); } }
+.tc-offer-item { display: grid; gap: 8px; padding-left: 18px; border-left: 4px solid var(--t-accent); }
+.tc-offer-item b { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+.tc-offer-item span { color: var(--t-ink-2); font-size: 15px; line-height: 1.55; }
+
+/* ── Полоса-призыв ────────────────────────────────────────────────
+   Одна плита во всю ширину: слева фраза, справа контурная кнопка. */
+.tc-bar {
+  display: grid;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(24px, 3.4vw, 40px) clamp(24px, 3.4vw, 48px);
+  border-radius: clamp(28px, 4vw, 999px);
+  background: var(--t-bg-2);
+}
+@media (min-width: 760px) { .tc-bar { grid-template-columns: minmax(0, 1fr) auto; gap: 24px; } }
+.tc-bar-t { margin: 0; font-size: clamp(19px, 2.2vw, 26px); font-weight: 500; }
+.tc-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 0 32px;
+  border: 1.5px solid var(--t-lime);
+  border-radius: 999px;
+  color: var(--t-lime);
+  font-family: var(--t-mono);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background-color 220ms var(--t-ease), color 220ms var(--t-ease);
+}
+@media (hover: hover) { .tc-bar-btn:hover { background: var(--t-lime); color: #0B0B0B; } }
 .tc-mark { margin: 0 0 22px; color: var(--t-ink-2); }
 .tc-mark-logo {
   display: grid;
@@ -15,7 +131,7 @@
   background: var(--t-accent);
   color: #0B0B0B;
 }
-.tc-hero .t-h1 { max-width: 16ch; }
+
 
 .tc-count {
   display: inline-grid;
@@ -140,18 +256,14 @@
 .tc-mode { align-self: center; color: var(--t-ink-3); font-size: 13px; }
 
 /* ── Шаги найма ───────────────────────────────────────────────────── */
-.tc-steps { list-style: none; display: grid; gap: 14px; margin: 0; padding: 0; }
+.tc-steps { list-style: none; display: grid; gap: clamp(28px, 4vw, 44px) 24px; margin: 0; padding: 0; }
 @media (min-width: 760px) { .tc-steps { grid-template-columns: 1fr 1fr; } }
-.tc-step {
-  display: grid;
-  gap: 8px;
-  padding: clamp(22px, 3vw, 30px);
-  border: 1px solid var(--t-line);
-  border-radius: var(--t-r);
-  background: var(--t-bg-2);
-}
-.tc-step-n { color: var(--t-accent); font-size: 13px; letter-spacing: 0.1em; }
-.tc-step b { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+/* Карточки у шагов нет намеренно: число контуром и так очерчивает
+   свой блок, а плашка вокруг превратила бы раздел в четвёртый по
+   счёту набор карточек на странице. */
+.tc-step { display: grid; gap: 8px; align-content: start; }
+.tc-step-num { font-size: clamp(46px, 5vw, 68px); line-height: 1; margin-bottom: 6px; }
+.tc-step-t { font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
 .tc-step span:last-child { color: var(--t-ink-2); font-size: 15px; line-height: 1.5; }
 
 /* ── Финал ────────────────────────────────────────────────────────── */

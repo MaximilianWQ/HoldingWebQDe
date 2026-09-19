@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "@/components/pixel/Icon";
 import { VACANCIES } from "@/lib/careers";
 import { TELEGRAM_SUPPORT } from "@/lib/contacts";
@@ -21,13 +21,30 @@ export default function CareersList() {
   // требования и не собираться откликаться прямо сейчас.
   const [applying, setApplying] = useState<string | null>(null);
 
+  /**
+   * Пилюли первого экрана ведут на `#vac-<id>`. Браузер по такой
+   * ссылке доведёт до строки сам, но строка закрыта — человек
+   * приехал бы к заголовку и не увидел того, за чем шёл. Поэтому
+   * адрес читается и раскрывает свою вакансию: и при переходе по
+   * пилюле, и по ссылке, присланной кому-то в переписке.
+   */
+  useEffect(() => {
+    const openFromHash = () => {
+      const id = window.location.hash.replace(/^#vac-/, "");
+      if (id && id !== window.location.hash && VACANCIES.some((v) => v.id === id)) setOpen(id);
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+    return () => window.removeEventListener("hashchange", openFromHash);
+  }, []);
+
   return (
     <div className="tc-list">
       {VACANCIES.map((v) => {
         const isOpen = open === v.id;
         const isApplying = applying === v.id;
         return (
-          <article key={v.id} className="tc-row" data-open={isOpen ? "" : undefined}>
+          <article key={v.id} id={`vac-${v.id}`} className="tc-row" data-open={isOpen ? "" : undefined}>
             <h3 className="tc-row-head">
               <button
                 type="button"

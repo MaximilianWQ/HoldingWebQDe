@@ -73,60 +73,11 @@
 .vh-hero-in { max-width: 760px; margin-inline: auto; }
 .vh-hero .v-actions { margin-top: 28px; }
 
-/* Сцена первого экрана — один кадр из Blender (ноутбук и телефон в
-   одной сцене, hero_build.py). Она дышит своим ходом и отвечает на
-   прокрутку страницы: уезжая под сгиб, слегка опускается и уменьшается,
-   чтобы кадр не выглядел приклеенным к экрану. */
-.vh-stage {
-  position: relative;
-  width: min(100%, 1000px);
-  margin-inline: auto;
-  isolation: isolate;
-}
-.vh-stage img { position: relative; z-index: 1; width: 100%; height: auto; }
-
-/* Подложка под кадром — техническая сетка и мягкое свечение (язык
-   Yandex Cloud, на который ссылается владелец). Сетка обязана
-   растворяться по краям: прямоугольник с видимым швом вокруг кадра —
-   ровно то, за что этот первый экран уже получил «фон просто ужас».
-   Поэтому обе половины подложки погашены радиальной маской, а не
-   обрезаны рамкой. */
-.vh-stage::before,
-.vh-stage::after {
-  content: "";
-  position: absolute;
-  inset: -14% -10% -18%;
-  pointer-events: none;
-}
-.vh-stage::before {
-  z-index: -1;
-  background:
-    radial-gradient(46% 42% at 48% 46%, rgba(58, 133, 240, 0.18), transparent 70%),
-    radial-gradient(34% 30% at 76% 26%, rgba(124, 92, 231, 0.13), transparent 72%);
-  filter: blur(6px);
-}
-.vh-stage::after {
-  z-index: 0;
-  background-image:
-    linear-gradient(to right, rgba(11, 11, 15, 0.055) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(11, 11, 15, 0.055) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: center;
-  -webkit-mask-image: radial-gradient(54% 50% at 50% 50%, #000 34%, transparent 76%);
-  mask-image: radial-gradient(54% 50% at 50% 50%, #000 34%, transparent 76%);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .vh-stage { animation: vh-bob-stage 9s var(--v-ease) infinite; }
-  @supports (animation-timeline: scroll()) {
-    .vh-stage {
-      animation: vh-bob-stage 9s var(--v-ease) infinite, vh-scroll-stage linear both;
-      animation-timeline: auto, scroll(root block);
-      animation-range: normal, 0% 70vh;
-    }
-  }
-}
-@keyframes vh-bob-stage { 50% { transform: translateY(-8px); } }
+/* Сцена первого экрана (кадр из Blender с ноутбуком и телефоном)
+   удалена 19.09.2026: владелец — «сами рендеры не к месту». Вместе с
+   ней ушли техническая подложка-сетка, свечение и парение кадра.
+   Файлы кадра и сборка сцены остались в design/blender — вернуть
+   можно, не пересчитывая рендер. */
 
 /* ── Знаки сервисов у заголовка ───────────────────────────────────
    Плашки с числами вокруг кадра («19 стран», «Шифрование включено»,

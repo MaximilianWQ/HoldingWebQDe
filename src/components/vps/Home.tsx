@@ -88,25 +88,11 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             </p>
           </div>
 
-          {/* Одна сцена, а не коллаж: ноутбук и телефон сняты вместе,
-              с общим светом и общей тенью на общем полу
-              (design/blender/hero_build.py). Плашки с числами, стоявшие
-              вокруг кадра, сняты 19.09.2026 («не очень смотрится в
-              общей картине»): те же числа есть ниже, в бенто, а кадру
-              не нужна подпись — он и так показывает продукт. */}
-          <div className="vh-stage" aria-hidden>
-            <img
-              src="/media/hero/stage-860.v3.webp"
-              srcSet="/media/hero/stage-860.v3.webp 860w, /media/hero/stage-1720.v3.webp 1720w"
-              sizes="(min-width: 1100px) 1000px, 100vw"
-              alt=""
-              width={860}
-              height={613}
-              fetchPriority="high"
-              decoding="async"
-            />
-
-          </div>
+          {/* Кадра с ноутбуком и телефоном здесь нет: снят 19.09.2026
+              по решению владельца («сами рендеры не к месту»). Сам
+              рендер и его сборка остались — design/blender/hero_build.py
+              и public/media/hero/stage-*.v3.webp, — так что вернуть его
+              можно одной строкой, не пересчитывая сцену. */}
 
           <StoreBadges />
         </div>

@@ -5,6 +5,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/client-ip";
 import { sendContactRequestEmail } from "@/lib/email";
 import { SUPPORT_DESK } from "@/lib/contacts";
+import { sendPushToAdmin } from "@/lib/push";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
@@ -94,6 +95,14 @@ export async function POST(request: NextRequest) {
         `INSERT INTO notifications (id, title, message, target) VALUES ($1, $2, $3, $4)`,
         [notifId, title, notifMsg, adminUserId]
       );
+    }
+
+    // Push в установленное приложение админа — тот же сигнал, что у
+    // откликов на вакансии: письмо можно увидеть не сразу.
+    try {
+      await sendPushToAdmin(`Заявка: ${interest}`, `${name} · ${email}`, "/admin?tab=inbox");
+    } catch (err) {
+      console.error("[CONTACT] admin push failed:", err);
     }
 
     return NextResponse.json({ success: true, data: { id } });

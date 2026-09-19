@@ -7,8 +7,6 @@ import { formatDate, getJson, num, postJson, type NotificationItem } from "@/app
 import PanelSyncCard from "./PanelSyncCard";
 import CampaignsCard from "./CampaignsCard";
 import JournalCard from "./JournalCard";
-import ContactCard from "./ContactCard";
-import ApplicationsCard from "./ApplicationsCard";
 import { Tile } from "./Viz";
 
 /**
@@ -40,9 +38,10 @@ export default function ServiceSection({ notifications, notifError, onReload, on
       <GhostCard i={4} onOpenUser={onOpenUser} />
       <DiagnoseCard i={5} />
       <CampaignsCard i={6} notifications={notifications} notifError={notifError} onNotificationsChanged={onReload} />
-      <ContactCard i={7} reloadKey={reloadKey} />
-      <ApplicationsCard i={8} reloadKey={reloadKey} />
-      <JournalCard i={9} reloadKey={reloadKey} onOpenUser={onOpenUser} />
+      {/* Заявки с сайта и отклики на вакансии переехали в раздел
+          «Обращения» (19.09.2026): здесь лежат операции над системой,
+          и список писем от людей терялся между сверкой и рассылками. */}
+      <JournalCard i={7} reloadKey={reloadKey} onOpenUser={onOpenUser} />
     </div>
   );
 }

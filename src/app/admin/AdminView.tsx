@@ -7,6 +7,7 @@ import HealthSection, { overallTone } from "@/components/admin/HealthSection";
 import BusinessSection from "@/components/admin/BusinessSection";
 import UsersSection from "@/components/admin/UsersSection";
 import ServiceSection from "@/components/admin/ServiceSection";
+import InboxSection from "@/components/admin/InboxSection";
 import { Dot } from "@/components/admin/Viz";
 import { AdminConfirmProvider, AdminConfirmOutlet, Spin } from "./AdminConfirm";
 import {
@@ -44,11 +45,13 @@ import "./admin-atlas.css";
  * «Нет доступа», интерфейс админки чужому не показывается.
  */
 
-type Tab = "health" | "business" | "users" | "service";
+type Tab = "health" | "business" | "users" | "inbox" | "service";
 const TABS: { key: Tab; label: string; short: string; icon: IconName }[] = [
   { key: "health", label: "Состояние", short: "Состояние", icon: "shield" },
   { key: "business", label: "Бизнес", short: "Бизнес", icon: "bolt" },
   { key: "users", label: "Пользователи", short: "Клиенты", icon: "users" },
+  // «Обращения» — всё, что люди прислали формами сайта (19.09.2026).
+  { key: "inbox", label: "Обращения", short: "Обращения", icon: "chat" },
   { key: "service", label: "Сервис", short: "Сервис", icon: "refresh" },
 ];
 const isTab = (v: string): v is Tab => TABS.some((t) => t.key === v);
@@ -84,7 +87,7 @@ function AdminScreen() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ health: null, business: null, users: null, service: null });
+  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({ health: null, business: null, users: null, inbox: null, service: null });
 
   /* ── Загрузка ─────────────────────────────────────────────────── */
   const loadOverview = useCallback(async (fresh = false) => {
@@ -345,6 +348,7 @@ function AdminScreen() {
             {tab === "users" && (
               <UsersSection selectedId={selectedId} onSelect={setSelectedId} reloadKey={reloadKey} onChanged={onChanged} onMeta={setStats} />
             )}
+            {tab === "inbox" && <InboxSection reloadKey={reloadKey} />}
             {tab === "service" && (
               <ServiceSection notifications={notifs} notifError={notifError} onReload={loadNotifs} onOpenUser={openUser} reloadKey={reloadKey} />
             )}

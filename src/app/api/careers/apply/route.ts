@@ -5,6 +5,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/client-ip";
 import { sendJobApplicationEmail } from "@/lib/email";
 import { SUPPORT_DESK } from "@/lib/contacts";
+import { saveAttachment } from "@/lib/attachments";
+import { sendPushToAdmin } from "@/lib/push";
 import { VACANCIES, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@/lib/careers";
 
 /**
@@ -24,9 +26,10 @@ import { VACANCIES, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@
  * кнопку один раз, и его труд не должен пропасть из-за нашего
  * внутреннего канала. Ошибку видно в журнале.
  *
- * ФАЙЛ ЛЕЖИТ В БАЗЕ. Файловая система Railway живёт до следующей
- * выкладки. Резюме в `BYTEA` переживает её и не требует ни S3, ни
- * ключей к нему.
+ * ФАЙЛ ЛЕЖИТ В БАЗЕ — в общей таблице вложений `form_attachments`
+ * (`src/lib/attachments.ts`), а не в колонке этой формы: админка
+ * читает вложения всех форм одним способом, и следующей форме с
+ * файлом ничего заводить не нужно.
  *
  * ЧЕГО ЗДЕСЬ НАМЕРЕННО НЕТ: распаковки и разбора содержимого файла.
  * Мы его не открываем — только кладём в базу и прикладываем к письму.
@@ -124,15 +127,17 @@ export async function POST(request: NextRequest) {
     const id = uuidv4();
     await pool.query(
       `INSERT INTO job_applications
-         (id, vacancy_id, vacancy_title, name, email, contact, message,
-          resume_name, resume_type, resume_size, resume_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [
-        id, vacancy.id, vacancy.title, name, email,
-        contact || null, message || null,
-        filename, file.type || "application/octet-stream", bytes.length, bytes,
-      ]
+         (id, vacancy_id, vacancy_title, name, email, contact, message)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [id, vacancy.id, vacancy.title, name, email, contact || null, message || null]
     );
+    await saveAttachment({
+      source: "career",
+      entityId: id,
+      filename,
+      mime: file.type || "application/octet-stream",
+      data: bytes,
+    });
 
     const adminEmail = process.env.ADMIN_EMAIL || SUPPORT_DESK.email;
     try {
@@ -170,6 +175,18 @@ export async function POST(request: NextRequest) {
       }
     } catch (err) {
       console.error("[CAREERS] admin notification failed:", err);
+    }
+
+    // Push в установленное приложение админа: письмо можно не увидеть
+    // до вечера, а отклик на вакансию стареет быстро.
+    try {
+      await sendPushToAdmin(
+        `Отклик: ${vacancy.title}`,
+        `${name} · ${email}`,
+        "/admin?tab=inbox"
+      );
+    } catch (err) {
+      console.error("[CAREERS] admin push failed:", err);
     }
 
     return NextResponse.json({ success: true, data: { id } });

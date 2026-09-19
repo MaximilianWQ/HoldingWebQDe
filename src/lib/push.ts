@@ -78,3 +78,30 @@ export async function sendPushToAll(title: string, body: string, url?: string): 
   }
   return total;
 }
+
+/**
+ * Push администратору — и только ему.
+ *
+ * Владелец, 19.09.2026: «сделай push-уведомления в мини-приложении
+ * iOS админу для админ-панели, только админу». Отсюда и устройство:
+ * адресат ищется по `ADMIN_EMAIL`, то есть по тому же признаку, по
+ * которому `verifyAdmin` пускает в админку. Списка «кому ещё слать»
+ * нет намеренно — второй такой список разошёлся бы с первым.
+ *
+ * Молчит, а не падает: не настроены ключи VAPID, не задан
+ * `ADMIN_EMAIL`, админ не подписывался — просто ноль отправок. Push —
+ * удобство поверх письма и записи в базе, и ронять из-за него форму,
+ * которую заполнил человек, нельзя.
+ *
+ * На iPhone подписка возможна только в установленном на экран
+ * «Домой» приложении — это ограничение Safari, а не наше. Кнопка
+ * подписки живёт в самой админке и там же об этом говорит.
+ */
+export async function sendPushToAdmin(title: string, body: string, url?: string): Promise<number> {
+  const adminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  if (!adminEmail) return 0;
+  const r = await pool.query("SELECT id FROM users WHERE LOWER(email) = $1 LIMIT 1", [adminEmail]);
+  const adminId = r.rows[0]?.id;
+  if (!adminId) return 0;
+  return sendPushToUser(adminId, title, body, url || "/admin");
+}

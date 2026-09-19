@@ -134,16 +134,33 @@ export async function initDb(): Promise<void> {
       email TEXT NOT NULL,
       contact TEXT,
       message TEXT,
-      resume_name TEXT NOT NULL,
-      resume_type TEXT NOT NULL,
-      resume_size INTEGER NOT NULL,
-      resume_data BYTEA NOT NULL,
       status TEXT NOT NULL DEFAULT 'new',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
     CREATE INDEX IF NOT EXISTS idx_jobapp_created ON job_applications(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_jobapp_status ON job_applications(status);
+
+    -- Вложения форм — одно место на все формы сайта (19.09.2026).
+    -- Резюме на вакансию лежало прямо в job_applications. Как только
+    -- файл понадобился второй форме, стало ясно: хранить вложение в
+    -- таблице своей формы — значит заводить новую колонку BYTEA на
+    -- каждую следующую. Здесь source + entity_id указывают на запись
+    -- любой формы, а админка читает вложения одним запросом и не
+    -- знает, откуда они.
+    CREATE TABLE IF NOT EXISTS form_attachments (
+      id TEXT PRIMARY KEY,
+      source TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      filename TEXT NOT NULL,
+      mime TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      data BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_form_att_entity ON form_attachments(source, entity_id);
+    CREATE INDEX IF NOT EXISTS idx_form_att_created ON form_attachments(created_at DESC);
 
     CREATE TABLE IF NOT EXISTS passkey_credentials (
       id TEXT PRIMARY KEY,
@@ -210,6 +227,30 @@ export async function initDb(): Promise<void> {
   // ─── Migrations: additive + idempotent. A failure is logged with the
   //     statement and reported at the end — never swallowed. ───
   const migrations = [
+    // Резюме переезжают из job_applications в form_attachments — один
+    // раз и только если старые колонки ещё есть. Проверка колонки
+    // нужна потому, что миграции прогоняются на каждом запуске: без
+    // неё запрос после переезда падал бы вечно и писал ошибку в лог.
+    `DO $do$
+     BEGIN
+       IF EXISTS (
+         SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'job_applications' AND column_name = 'resume_data'
+       ) THEN
+         INSERT INTO form_attachments (id, source, entity_id, filename, mime, size, data, created_at)
+         SELECT id, 'career', id, resume_name, resume_type, resume_size, resume_data, created_at
+           FROM job_applications
+          WHERE resume_data IS NOT NULL
+         ON CONFLICT (id) DO NOTHING;
+
+         ALTER TABLE job_applications
+           DROP COLUMN resume_data,
+           DROP COLUMN resume_name,
+           DROP COLUMN resume_type,
+           DROP COLUMN resume_size;
+       END IF;
+     END
+     $do$;`,
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS key_regen_count INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS key_regen_window_start TIMESTAMPTZ",

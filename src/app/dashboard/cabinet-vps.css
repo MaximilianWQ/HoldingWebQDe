@@ -327,3 +327,164 @@
 /* ── Выход в «Профиле» ─────────────────────────────────────────── */
 .vc-row-out b { color: var(--v-red); }
 .vc-row-out .v-row-icon { color: var(--v-red); background: var(--v-red-soft); }
+
+/* ── Шторка уведомлений ────────────────────────────────────────────
+   Появилась здесь 19.09.2026. До этого шторка (NotificationsModal)
+   была набрана классами `.ak-*` из work-atlas.css, а кабинет при
+   переводе на этот корпус перестал подключать тот файл: правил не
+   находилось ни одного, и по нажатию на колокольчик открывалась
+   пустота.
+
+   Телефон: лист снизу, у большого пальца. Шире 720px: панель под
+   колокольчиком, в правом верхнем углу, откуда её и позвали. */
+.vc-sheet-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(10, 10, 11, 0.38);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--v-ease);
+}
+.vc-sheet-veil[data-open] { opacity: 1; pointer-events: auto; }
+
+.vc-sheet {
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: min(85vh, 85dvh);
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--v-r-xl) var(--v-r-xl) 0 0;
+  background: var(--v-soft);
+  box-shadow: var(--v-shadow-lift);
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 260ms var(--v-ease), opacity 200ms var(--v-ease);
+}
+.vc-sheet[data-open] { transform: none; opacity: 1; pointer-events: auto; }
+/* Язычок — знак листа на телефоне: рисунок, а не ручка. */
+.vc-sheet::before {
+  content: "";
+  align-self: center;
+  flex: none;
+  width: 40px;
+  height: 4px;
+  margin: 2px 0 8px;
+  border-radius: 2px;
+  background: var(--v-line);
+}
+@media (min-width: 720px) {
+  .vc-sheet-veil { background: transparent; }
+  .vc-sheet {
+    left: auto;
+    right: 20px;
+    bottom: auto;
+    top: calc(var(--v-head-h, 84px) + 8px);
+    width: 400px;
+    max-height: min(70vh, 640px);
+    border-radius: var(--v-r-lg);
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top right;
+  }
+  .vc-sheet::before { display: none; }
+}
+
+.vc-sheet-head { display: flex; align-items: center; gap: 10px; padding: 2px 6px 10px 12px; }
+.vc-sheet-h { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.vc-sheet-count {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--v-ink-3);
+}
+.vc-sheet-tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.vc-sheet-x {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--v-ink-2);
+  cursor: pointer;
+  transition: background-color 200ms var(--v-ease);
+}
+@media (hover: hover) { .vc-sheet-x:hover { background: #FFFFFF; } }
+
+.vc-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--v-r-md);
+  background: #FFFFFF;
+}
+.vc-sheet-empty { display: grid; justify-items: center; gap: 8px; padding: 44px 24px; text-align: center; }
+.vc-sheet-empty-ico {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--v-soft);
+  color: var(--v-ink-3);
+}
+.vc-sheet-spin {
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid var(--v-soft-2);
+  border-top-color: var(--v-blue);
+  border-radius: 50%;
+  animation: vc-sheet-spin 800ms linear infinite;
+}
+@keyframes vc-sheet-spin { to { transform: rotate(360deg); } }
+.vc-sheet-fine { margin: 0; font-size: 14px; line-height: 1.45; color: var(--v-ink-3); }
+.vc-sheet-foot { padding: 10px 12px 2px; }
+
+.vc-notes { list-style: none; margin: 0; padding: 8px; display: grid; gap: 6px; }
+.vc-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--v-r-sm);
+  background: var(--v-field);
+}
+/* Непрочитанное помечено полосой слева, а не цветным фоном: цветной
+   фон у пяти записей подряд превращает список в светофор. */
+.vc-note[data-unread] { box-shadow: inset 3px 0 0 var(--v-blue); }
+.vc-note-copy { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.vc-note-title { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.vc-note-text { margin: 0; font-size: 14px; line-height: 1.5; color: var(--v-ink-2); overflow-wrap: anywhere; white-space: pre-line; }
+.vc-note-time { margin: 0; font-size: 13px; color: var(--v-ink-4); }
+.vc-note-x {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--v-ink-4);
+  cursor: pointer;
+  transition: background-color 200ms var(--v-ease), color 200ms var(--v-ease);
+}
+@media (hover: hover) { .vc-note-x:hover { background: var(--v-soft-2); color: var(--v-ink); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .vc-sheet, .vc-sheet-veil { transition: none; }
+  .vc-sheet-spin { animation: none; }
+}

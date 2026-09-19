@@ -18,9 +18,20 @@ interface NotificationsModalProps {
 }
 
 /**
- * Шторка уведомлений кабинета — стиль кабинета (work-atlas.css,
- * .ak-sheet). Телефон: шторка снизу у большого пальца; шире — панель
- * под колокольчиком.
+ * Шторка уведомлений кабинета. Телефон: шторка снизу у большого
+ * пальца; шире — панель под колокольчиком.
+ *
+ * ПОЧЕМУ КЛАССЫ ПЕРЕИМЕНОВАНЫ (19.09.2026). Шторка была набрана
+ * классами `.ak-*` из `work-atlas.css`, а кабинет при переводе на
+ * корпус Atlas Secure VPS перестал подключать этот файл: его теперь
+ * подключает только админка. Правил не было ни одного, шторка
+ * выходила без размеров и фона — владелец нажимал колокольчик и
+ * видел пустоту. Стили переехали в `cabinet-vps.css` под префикс
+ * `vc-`, рядом с остальным кабинетом.
+ *
+ * Отсюда правило: у компонента, который рисуется на конкретном
+ * экране, стили живут в CSS этого экрана. Общий компонент на чужих
+ * классах молча ломается при первом же переезде корпуса.
  *
  * Логика прежняя: загрузка /api/user/notifications, при открытии всё
  * отмечается прочитанным (/api/user/notifications/read), Esc и клик
@@ -169,58 +180,58 @@ export default function NotificationsModal({ open, onClose, onUnreadCountChange 
   return (
     <>
       {/* Подложка: клик мимо шторки закрывает её. */}
-      <div className="ak-sheet-veil" data-open={shown ? "" : undefined} onClick={onClose} aria-hidden="true" />
+      <div className="vc-sheet-veil" data-open={shown ? "" : undefined} onClick={onClose} aria-hidden="true" />
 
       <div
         ref={panelRef}
-        className="ak-sheet"
+        className="vc-sheet"
         data-open={shown ? "" : undefined}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="ak-sheet-h"
+        aria-labelledby="vc-sheet-h"
       >
-        <div className="ak-sheet-head">
-          <h2 id="ak-sheet-h" className="ak-h3">Уведомления</h2>
-          {list.length > 0 && <span className="ak-sheet-count a-num" aria-label={`Всего: ${list.length}`}>{list.length}</span>}
-          <span className="ak-sheet-tools">
+        <div className="vc-sheet-head">
+          <h2 id="vc-sheet-h" className="vc-sheet-h">Уведомления</h2>
+          {list.length > 0 && <span className="vc-sheet-count" aria-label={`Всего: ${list.length}`}>{list.length}</span>}
+          <span className="vc-sheet-tools">
             {list.length > 0 && (
-              <button type="button" className="a-btn ak-btn-soft" onClick={() => hide(list.map((n) => n.id))}>
+              <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => hide(list.map((n) => n.id))}>
                 Очистить
               </button>
             )}
-            <button ref={closeRef} type="button" className="ak-icon" onClick={onClose} aria-label="Закрыть">
+            <button ref={closeRef} type="button" className="vc-sheet-x" onClick={onClose} aria-label="Закрыть">
               <Icon name="close" size={18} />
             </button>
           </span>
         </div>
 
-        <div className="ak-sheet-body">
+        <div className="vc-sheet-body">
           {loading ? (
-            <div className="ak-sheet-empty" role="status">
-              <span className="ak-sheet-spin" aria-hidden />
+            <div className="vc-sheet-empty" role="status">
+              <span className="vc-sheet-spin" aria-hidden />
               <span className="b-sr">Загружаем уведомления…</span>
             </div>
           ) : list.length === 0 ? (
-            <div className="ak-sheet-empty">
-              <span className="ak-sheet-empty-ico" aria-hidden><Icon name="bell" size={20} /></span>
-              <p className="ak-h3">Нет уведомлений</p>
-              <p className="ak-fine">
+            <div className="vc-sheet-empty">
+              <span className="vc-sheet-empty-ico" aria-hidden><Icon name="bell" size={20} /></span>
+              <p className="vc-sheet-h">Нет уведомлений</p>
+              <p className="vc-sheet-fine">
                 {clearedHere > 0 ? "Очищенные скрыты на этом устройстве. Новые появятся здесь." : "Новые появятся здесь."}
               </p>
             </div>
           ) : (
-            <ul className="ak-notes">
+            <ul className="vc-notes">
               {list.map((n, i) => (
-                <li key={n.id} className="ak-note" data-unread={!n.read ? "" : undefined} style={{ "--k": Math.min(i, 8) } as CSSProperties}>
-                  <div className="ak-note-copy">
-                    <p className="ak-note-title">
+                <li key={n.id} className="vc-note" data-unread={!n.read ? "" : undefined} style={{ "--k": Math.min(i, 8) } as CSSProperties}>
+                  <div className="vc-note-copy">
+                    <p className="vc-note-title">
                       {n.title}
                       {!n.read && <span className="b-sr"> — новое</span>}
                     </p>
-                    <p className="ak-note-text">{n.message}</p>
-                    <p className="ak-note-time">{formatTime(n.createdAt)}</p>
+                    <p className="vc-note-text">{n.message}</p>
+                    <p className="vc-note-time">{formatTime(n.createdAt)}</p>
                   </div>
-                  <button type="button" className="ak-note-x" onClick={() => hide([n.id])} aria-label={`Убрать уведомление «${n.title}»`}>
+                  <button type="button" className="vc-note-x" onClick={() => hide([n.id])} aria-label={`Убрать уведомление «${n.title}»`}>
                     <Icon name="close" size={16} />
                   </button>
                 </li>
@@ -229,7 +240,7 @@ export default function NotificationsModal({ open, onClose, onUnreadCountChange 
           )}
         </div>
 
-        {list.length > 0 && <p className="ak-fine ak-sheet-foot">Очистка скрывает уведомления на этом устройстве.</p>}
+        {list.length > 0 && <p className="vc-sheet-fine vc-sheet-foot">Очистка скрывает уведомления на этом устройстве.</p>}
       </div>
     </>
   );

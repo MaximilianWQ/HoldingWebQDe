@@ -70,6 +70,8 @@ import {
   planFromBotDescription,
   planFromSiteTag,
   RwError,
+  updateUser,
+  withMarkers,
 } from "./remnawave";
 import { MIN_REMAINING_MS, requestPanelSync, syncUserToPanel } from "./subscription-sync";
 import { findBotBypass, mergeBypassEntities, panelIdOwner } from "./bypass";
@@ -191,7 +193,25 @@ export function panelEntityLive(u: PanelUser | null, now = Date.now()): boolean 
  * сущности (или забирает истёкшую ботовскую, чтобы будущая оплата
  * оживила ОДИН ключ).
  */
-export function decideMerge(c: { site: MergeCandidate | null; placeholder: MergeCandidate | null; bot: MergeCandidate | null }, now = Date.now()): MergeDecision {
+/**
+ * Сторона, на которой в эту секунду стоит человек. Из неё следует, какой
+ * ключ прописан у него в приложении (раздел 17 ТЗ).
+ * `null` — человека рядом нет (сверка): решаем по сроку, как раньше.
+ */
+export type ActorSide = "bot" | "site" | null;
+
+/** Откуда пришла связка → на какой стороне человек. */
+export function actorSideOf(via: LinkVia): ActorSide {
+  if (via === "bot_email") return "bot";
+  if (via === "site_token" || via === "legacy_token") return "site";
+  return null; // relink — сверка, человека рядом нет
+}
+
+export function decideMerge(
+  c: { site: MergeCandidate | null; placeholder: MergeCandidate | null; bot: MergeCandidate | null },
+  now = Date.now(),
+  actor: ActorSide = null
+): MergeDecision {
   const siteSide = [c.site, c.placeholder]
     .filter((x): x is MergeCandidate => !!x && x.live)
     .sort((a, b) => b.end - a.end)[0] ?? null;
@@ -202,7 +222,26 @@ export function decideMerge(c: { site: MergeCandidate | null; placeholder: Merge
   /** Остаток проигравшей стороны, который прибавится к сроку победителя. */
   let addMs = 0;
   if (siteSide && bot) {
-    winner = bot.end > siteSide.end ? bot : siteSide;
+    /**
+     * КЛЮЧ ТОЙ СТОРОНЫ, ОТКУДА ПРИШЁЛ ЧЕЛОВЕК (владелец, 20.09.2026,
+     * раздел 17 ТЗ). Отменяет прежнее «остаётся больший срок».
+     *
+     * Человек всю жизнь пользовался ботом, ключ прописан у него в
+     * приложении, он вводит почту — а на сайте подписка оказалась
+     * длиннее. По старому правилу гасился именно ботовский ключ, тот
+     * самый, что у него настроен: нажал нашу кнопку и остался без
+     * интернета.
+     *
+     * Он стоит на одной из сторон, и ключ в приложении — её. Её и
+     * оставляем. Выбирать «подлиннее» больше незачем: дни складываются
+     * ниже, и срок не теряется при любом исходе.
+     *
+     * Человека рядом нет (сверка, `actor === null`) — тогда решает срок,
+     * как раньше: гадать, каким ключом он пользуется, мы не можем.
+     */
+    if (actor === "bot") winner = bot;
+    else if (actor === "site") winner = siteSide;
+    else winner = bot.end > siteSide.end ? bot : siteSide;
     kept = winner === bot ? "bot" : "site";
     const loser = winner === bot ? siteSide : bot;
     addMs = Math.max(0, loser.end - now);
@@ -470,7 +509,8 @@ export async function linkTelegramAccount(input: LinkInput): Promise<LinkResult>
           placeholder: cand("placeholder", placeholder, phEntity),
           bot: bot ? { side: "bot", end: Date.parse(bot.expireAt), live: panelEntityLive(bot, now), entity: bot } : null,
         },
-        now
+        now,
+        actorSideOf(input.via)
       );
       const keptId = decision.keptEntity?.id ?? null;
 
@@ -639,16 +679,88 @@ export function linkedSummary(user: UserRecord) {
  * `atlas-unlinked` (link-panel.ts). The bonus is never paid again
  * (telegram_bonus_claims). The bot's bypass stays the bot's.
  */
-export async function unlinkTelegramAccount(userId: string, via: "bot" | "site"): Promise<{ ok: true; user: UserRecord; previousTelegramId: string | null; telegramLinkToken: string } | { ok: false; status: 404; code: "NOT_LINKED"; error: string }> {
+/**
+ * Отвязка Telegram. `keep` — где остаётся подписка (раздел 16–17 ТЗ,
+ * решение владельца 20.09.2026).
+ *
+ * `"site"` (умолчание, прежнее поведение) — ключ остаётся за аккаунтом
+ * сайта, с сущности снимается Telegram ID и ставится маркер отвязки.
+ *
+ * `"bot"` — ключ возвращается боту: с сущности снимается маркер
+ * `atlas-site`, Telegram ID на ней СОХРАНЯЕТСЯ, аккаунт сайта остаётся
+ * без подписки. Дни при этом не пропадают: они на сущности, которой
+ * теперь распоряжается бот.
+ *
+ * КЛЮЧ НЕ МЕНЯЕТСЯ НИ В ОДНОМ ИЗ ВАРИАНТОВ (правило 17). Сущность в
+ * панели одна и та же; меняется только то, кто ведёт срок и куда
+ * человек платит. Настроенное приложение продолжает работать.
+ *
+ * ПОЧЕМУ ПАНЕЛЬ ПРАВИТСЯ ДО БАЗЫ, А НЕ ВОРКЕРОМ. Боту нужен ответ
+ * сейчас: пока маркер `atlas-site` не снят, сущность для него чужая и
+ * трогать её нельзя. Поэтому при `keep: "bot"` панель правится в этом
+ * же запросе, и результат уезжает полем `siteMarkerRemoved`. Не
+ * получилось — ничего не меняем и честно говорим «не вышло»: отдать
+ * владение на словах хуже, чем не отдать вовсе.
+ */
+export type UnlinkKeep = "site" | "bot";
+
+export interface UnlinkOk {
+  ok: true;
+  user: UserRecord;
+  previousTelegramId: string | null;
+  telegramLinkToken: string;
+  keep: UnlinkKeep;
+  /** Срок на момент отвязки — авторитетный, его забирает бот при keep: "bot". */
+  subscriptionEnd: string | null;
+  /** Снят ли с сущности маркер `atlas-site`. Всегда true при keep: "site". */
+  siteMarkerRemoved: boolean;
+}
+
+export async function unlinkTelegramAccount(
+  userId: string,
+  via: "bot" | "site",
+  keep: UnlinkKeep = "site"
+): Promise<UnlinkOk | { ok: false; status: 404 | 503; code: "NOT_LINKED" | "PANEL_UNAVAILABLE"; error: string }> {
   await waitForDb();
   const before = await getUserById(userId);
   if (!before || (!before.telegramId && !before.telegramLinked)) return { ok: false, status: 404, code: "NOT_LINKED", error: "Telegram не привязан" };
+  const subscriptionEnd = before.subscriptionEnd ? new Date(before.subscriptionEnd).toISOString() : null;
+
+  // keep: "bot" — сначала панель, и только при её согласии трогаем базу.
+  let markerRemoved = true;
+  if (keep === "bot" && before.panelUserId) {
+    const cur = await rwGetUserById(before.panelUserId);
+    if (!cur.ok) {
+      return { ok: false, status: 503, code: "PANEL_UNAVAILABLE", error: "Панель недоступна. Попробуйте позже." };
+    }
+    const description = withMarkers(cur.data.description, { [PANEL_MARKERS.site]: null, [PANEL_MARKERS.unlinked]: null });
+    const patched = await updateUser({ id: before.panelUserId, description });
+    if (!patched.ok) {
+      return { ok: false, status: 503, code: "PANEL_UNAVAILABLE", error: "Не удалось передать подписку боту. Попробуйте позже." };
+    }
+    markerRemoved = true;
+  }
+
   const token = generateTelegramLinkToken();
   const row = await withTransaction(async (c) => {
     if (before.telegramId) await lockLinkKey(c, `tg:${before.telegramId}`);
     await lockLinkKey(c, `email:${before.email.toLowerCase()}`);
     const r = await c.query(
-      `UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2,
+      keep === "bot"
+        ? // Подписка уходит боту: аккаунт сайта расстаётся с ключом и со
+          // сроком. Сущность в панели при этом не гасится и не меняется —
+          // маркер уже снят выше, Telegram ID на ней остался, и бот
+          // продолжает вести её сам. Ключ у человека тот же.
+          `UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2,
+                  panel_user_id = NULL, remnawave_user_uuid = NULL, remnawave_short_uuid = NULL,
+                  subscription_url = NULL, panel_username = NULL, panel_status = NULL, panel_expire_at = NULL,
+                  subscription_end = NOW(), link_kept = 'given-to-bot',
+                  bypass_panel_user_id = CASE WHEN bypass_origin = 'site' THEN bypass_panel_user_id ELSE NULL END,
+                  bypass_origin = CASE WHEN bypass_origin = 'site' THEN 'site' ELSE NULL END,
+                  bypass_subscription_url = CASE WHEN bypass_origin = 'site' THEN bypass_subscription_url ELSE NULL END,
+                  link_panel_state = 'ok', panel_sync_state = 'ok'
+           WHERE id = $1 AND (telegram_id IS NOT NULL OR telegram_linked) RETURNING *`
+        : `UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2,
               bypass_panel_user_id = CASE WHEN bypass_origin = 'site' THEN bypass_panel_user_id ELSE NULL END,
               bypass_origin = CASE WHEN bypass_origin = 'site' THEN 'site' ELSE NULL END,
               bypass_subscription_url = CASE WHEN bypass_origin = 'site' THEN bypass_subscription_url ELSE NULL END,
@@ -662,9 +774,24 @@ export async function unlinkTelegramAccount(userId: string, via: "bot" | "site")
   });
   if (!row) return { ok: false, status: 404, code: "NOT_LINKED", error: "Telegram не привязан" };
   const user = rowToUser(row);
-  if (user.panelUserId) requestPanelSync(user.id, "telegram-unlink");
-  await createAuditLog("telegram.unlink", `TG:${before.telegramId} unlinked (${via}); key ${user.panelUserId ?? "—"} stays with the account`, user.id, user.email);
-  return { ok: true, user, previousTelegramId: before.telegramId, telegramLinkToken: token };
+  if (keep === "site" && user.panelUserId) requestPanelSync(user.id, "telegram-unlink");
+  await createAuditLog(
+    "telegram.unlink",
+    keep === "bot"
+      ? `TG:${before.telegramId} unlinked (${via}); key ${before.panelUserId ?? "—"} GIVEN TO BOT, site account left without a subscription`
+      : `TG:${before.telegramId} unlinked (${via}); key ${user.panelUserId ?? "—"} stays with the account`,
+    user.id,
+    user.email
+  );
+  return {
+    ok: true,
+    user,
+    previousTelegramId: before.telegramId,
+    telegramLinkToken: token,
+    keep,
+    subscriptionEnd,
+    siteMarkerRemoved: markerRemoved,
+  };
 }
 
 // ─── E: sign-in adoption ─────────────────────────────────────────

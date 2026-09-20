@@ -265,17 +265,33 @@ describe("bot first (email + code)", () => {
     expect(near(s.expireAt, inDays(5))).toBe(true);
   });
 
-  it("both have subscriptions, the site's is longer: site key shared, bot key DISABLED", async () => {
+  // Правило 17: ключ остаётся у той стороны, откуда пришёл человек.
+  // Здесь он вводит почту В БОТЕ, значит в приложении у него ботовский
+  // ключ — его и оставляем, хотя на сайте срок вчетверо длиннее. До
+  // 20.09.2026 гасился именно ботовский, и человек оставался без
+  // интернета, нажав нашу же кнопку.
+  it("пришёл из бота: остаётся ботовский ключ, даже если на сайте срок длиннее", async () => {
     const tg = nextTg();
     const { row, entity: site } = siteWithKey("u-both-site", 40);
     const prem = botPremium(tg, 10);
     const code = await codeFor(tg, row.email);
     const r = await confirmBotEmailLink({ telegramId: tg, email: row.email, code, ip: null });
+    expect(r).toMatchObject({ ok: true, kept: "bot", disabledPanelUserId: site.id, keptPanelUserId: prem.id });
+    expect(fakePanel.get(site.id)!.status).toBe("DISABLED");
+    // Срок тот же, что и раньше: 10 (бот) + 40 (остаток сайта) + 7 = 57.
+    // Дни не зависят от того, чей ключ выжил, — они складываются.
+    expect(near(linkDb.users.get("u-both-site")!.subscription_end, inDays(57))).toBe(true);
+    expect(fakePanel.get(prem.id)!.telegramId).toBe(Number(tg));
+  });
+
+  it("пришёл с сайта: остаётся сайтовый ключ, даже если в боте срок длиннее", async () => {
+    const tg = nextTg();
+    const { entity: site } = siteWithKey("u-site-first", 10);
+    const prem = botPremium(tg, 40);
+    const r = await linkTelegramAccount({ telegramId: tg, userId: "u-site-first", via: "site_token" });
     expect(r).toMatchObject({ ok: true, kept: "site", disabledPanelUserId: prem.id, keptPanelUserId: site.id });
     expect(fakePanel.get(prem.id)!.status).toBe("DISABLED");
-    // 40 (сайт) + 10 (остаток бота) + 7 бонуса = 57.
-    expect(near(linkDb.users.get("u-both-site")!.subscription_end, inDays(57))).toBe(true);
-    expect(fakePanel.get(site.id)!.telegramId).toBe(Number(tg));
+    expect(near(linkDb.users.get("u-site-first")!.subscription_end, inDays(57))).toBe(true);
   });
 
   it("the email of someone else is never linked without its code", async () => {
@@ -359,14 +375,16 @@ describe("conflicts and repeats", () => {
     const { entity: site } = siteWithKey("u-rep", 5);
     botPremium(tg, 20);
     const a = await linkTelegramAccount({ telegramId: tg, userId: "u-rep", via: "site_token" });
-    expect(a).toMatchObject({ ok: true, kept: "bot", bonusDays: 7 });
+    // via = site_token → человек в кабинете, остаётся сайтовый ключ (17).
+    expect(a).toMatchObject({ ok: true, kept: "site", bonusDays: 7 });
     const merges = events("u-rep", "link_merge").length;
     const disables = fakePanel.calls.filter((c) => c.fn === "updateUser" && (c.arg as { status?: string }).status === "DISABLED").length;
     const b = await linkTelegramAccount({ telegramId: tg, userId: "u-rep", via: "site_token" });
-    expect(b).toMatchObject({ ok: true, alreadyLinked: true, kept: "bot", bonusDays: 0 });
+    expect(b).toMatchObject({ ok: true, alreadyLinked: true, kept: "site", bonusDays: 0 });
     expect(events("u-rep", "link_merge")).toHaveLength(merges);
     expect(fakePanel.calls.filter((c) => c.fn === "updateUser" && (c.arg as { status?: string }).status === "DISABLED")).toHaveLength(disables);
-    expect(fakePanel.get(site.id)!.status).toBe("DISABLED");
+    // Гасится ботовский ключ: человек пришёл из кабинета (site_token).
+    expect(fakePanel.get(site.id)!.status).toBe("ACTIVE");
   });
 
   it("unlink keeps the key with the account; relinking never pays the bonus twice", async () => {
@@ -591,5 +609,46 @@ describe("bypass (обход)", () => {
     const r = await syncUserToPanel("u-bad");
     expect(r).toMatchObject({ ok: false, reason: "bypass_as_premium" });
     expect(fakePanel.updates(bp.id)).toHaveLength(0);
+  });
+});
+
+// ─── Отвязка с выбором стороны (ТЗ 16–17) ────────────────────────
+
+describe("отвязка: выбор стороны", () => {
+  it('keep: "site" (умолчание) — ключ и срок остаются на сайте, как раньше', async () => {
+    const tg = nextTg();
+    const { entity: site } = siteWithKey("u-un-site", 30, { telegram_id: tg, telegram_linked: true });
+    linkDb.claims.set(tg, { telegram_id: tg, user_id: "u-un-site" });
+    const r = await unlinkTelegramAccount("u-un-site", "site");
+    expect(r).toMatchObject({ ok: true, keep: "site", siteMarkerRemoved: true });
+    const u = linkDb.users.get("u-un-site")!;
+    expect(String(u.panel_user_id)).toBe(String(site.id));
+    expect(u.telegram_id ?? null).toBe(null);
+  });
+
+  it('keep: "bot" — ключ уходит боту: маркер atlas-site снят, Telegram ID на сущности остался, сайт без подписки', async () => {
+    const tg = nextTg();
+    const { entity: site } = siteWithKey("u-un-bot", 30, { telegram_id: tg, telegram_linked: true }, { telegramId: Number(tg) });
+    linkDb.claims.set(tg, { telegram_id: tg, user_id: "u-un-bot" });
+    const urlBefore = fakePanel.get(site.id)!.subscriptionUrl;
+
+    const r = await unlinkTelegramAccount("u-un-bot", "site", "bot");
+    expect(r).toMatchObject({ ok: true, keep: "bot", siteMarkerRemoved: true });
+    if (!r.ok) throw new Error("unreachable");
+    // Срок отдан авторитетный — тот, что был на сайте в эту секунду.
+    expect(r.subscriptionEnd).not.toBeNull();
+
+    const ent = fakePanel.get(site.id)!;
+    // ГЛАВНОЕ (правило 17): ключ не изменился и сущность жива.
+    expect(ent.subscriptionUrl).toBe(urlBefore);
+    expect(ent.status).toBe("ACTIVE");
+    // Telegram ID остался — сущность снова ботовская.
+    expect(ent.telegramId).toBe(Number(tg));
+    // Маркера владения сайтом больше нет.
+    expect(ent.description ?? "").not.toContain("atlas-site:");
+
+    const u = linkDb.users.get("u-un-bot")!;
+    expect(u.panel_user_id ?? null).toBe(null);
+    expect(u.telegram_id ?? null).toBe(null);
   });
 });

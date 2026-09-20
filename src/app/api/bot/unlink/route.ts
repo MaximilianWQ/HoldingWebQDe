@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByTelegramId } from "@/lib/store";
-import { unlinkTelegramAccount } from "@/lib/telegram-link";
+import { unlinkTelegramAccount, type UnlinkKeep } from "@/lib/telegram-link";
 import { verifyBotApiKey, unauthorizedResponse } from "../auth";
 import { botSyncDisabledResponse } from "../sync-guard";
 
 /**
- * POST /api/bot/unlink { telegramId }
+ * POST /api/bot/unlink { telegramId, keep?: "site" | "bot" }
  *
- * Unlinks Telegram from the site account. The subscription and the key
- * STAY with the site account (the panel user loses its telegramId and
- * gets the marker atlas-unlinked); the +7 bonus is never paid again.
- * After this the bot must treat the person as not linked and must NOT
- * adopt that key back (see docs/bot/TZ_BOT_EMAIL_LINK.md).
+ * Отвязка Telegram от аккаунта сайта. `keep` — где остаётся подписка
+ * (ТЗ, разделы 16–17; решение владельца 20.09.2026):
+ *
+ *   "site" (умолчание, прежнее поведение) — ключ остаётся за аккаунтом
+ *          сайта, с сущности снимается Telegram ID и ставится маркер
+ *          atlas-unlinked. Бот после этого считает человека
+ *          непривязанным и забирать ключ обратно не должен.
+ *   "bot"  — ключ возвращается боту: маркер atlas-site снят, Telegram ID
+ *          на сущности сохранён, аккаунт сайта остался без подписки.
+ *
+ * Умолчание — прежнее поведение, поэтому старые вызовы без `keep` не
+ * ломаются.
+ *
+ * КЛЮЧ НЕ МЕНЯЕТСЯ НИ В ОДНОМ ИЗ ВАРИАНТОВ. Меняется только то, кто
+ * ведёт срок и куда человек платит; настроенное приложение продолжает
+ * работать. Бонус +7 не выплачивается повторно ни при каком выборе.
  */
 export async function POST(request: NextRequest) {
   if (!verifyBotApiKey(request)) return unauthorizedResponse();
@@ -29,7 +40,13 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ success: false, error: "User not found or not linked", code: "NOT_LINKED" }, { status: 404 });
     }
-    const r = await unlinkTelegramAccount(user.id, "bot");
+    const rawKeep = body?.keep;
+    if (rawKeep !== undefined && rawKeep !== "site" && rawKeep !== "bot") {
+      return NextResponse.json({ success: false, error: 'keep: "site" | "bot"', code: "VALIDATION" }, { status: 400 });
+    }
+    const keep: UnlinkKeep = rawKeep === "bot" ? "bot" : "site";
+
+    const r = await unlinkTelegramAccount(user.id, "bot", keep);
     if (!r.ok) return NextResponse.json({ success: false, error: r.error, code: r.code }, { status: r.status });
 
     return NextResponse.json({
@@ -38,8 +55,16 @@ export async function POST(request: NextRequest) {
         userId: r.user.id,
         email: r.user.email,
         unlinked: true,
-        panelUserId: r.user.panelUserId,
-        keyStaysWithAccount: true,
+        keep: r.keep,
+        // Авторитетный срок на момент отвязки: при keep: "bot" его
+        // забирает бот. Из своего зеркала он потерял бы дни, начисленные
+        // сайтом после последнего опроса статуса.
+        subscriptionEnd: r.subscriptionEnd,
+        // Снят ли маркер atlas-site. false → бот НЕ считает сущность
+        // своей и не начинает её править.
+        siteMarkerRemoved: r.siteMarkerRemoved,
+        panelUserId: r.keep === "bot" ? (user.panelUserId ?? null) : r.user.panelUserId,
+        keyStaysWithAccount: r.keep === "site",
       },
     });
   } catch (err) {

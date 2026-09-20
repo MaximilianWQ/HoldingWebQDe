@@ -80,6 +80,24 @@ export class LinkFakeDb extends FakeDb {
       });
       return res();
     }
+    // Отвязка с передачей подписки боту (ТЗ 16–17): аккаунт сайта
+    // расстаётся с ключом и сроком, сущность в панели не трогается.
+    if (s.includes("link_kept = 'given-to-bot'")) {
+      const u = this.users.get(p[0]);
+      if (!u || (u.telegram_id == null && !u.telegram_linked)) return res();
+      const site = u.bypass_origin === "site";
+      Object.assign(u, {
+        telegram_id: null, telegram_linked: false, telegram_link_token: p[1],
+        panel_user_id: null, remnawave_user_uuid: null, remnawave_short_uuid: null,
+        subscription_url: null, panel_username: null, panel_status: null, panel_expire_at: null,
+        subscription_end: new Date(), link_kept: "given-to-bot",
+        bypass_panel_user_id: site ? u.bypass_panel_user_id : null,
+        bypass_origin: site ? "site" : null,
+        bypass_subscription_url: site ? u.bypass_subscription_url : null,
+        link_panel_state: "ok", panel_sync_state: "ok",
+      });
+      return res([{ ...u }]);
+    }
     if (s.startsWith("UPDATE users SET telegram_id = NULL, telegram_linked = FALSE, telegram_link_token = $2")) {
       const u = this.users.get(p[0]);
       if (!u || (u.telegram_id == null && !u.telegram_linked)) return res();

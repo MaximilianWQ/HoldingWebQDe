@@ -247,6 +247,15 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
   const codeRef = useRef<HTMLInputElement>(null);
   const [code, setCode] = useState("");
 
+  /** Состояние входа через Telegram: ожидание подтверждения в боте. */
+  type TgLogin =
+    | { state: "idle" }
+    | { state: "busy" }
+    | { state: "waiting"; code: string; botUrl: string | null; startParam: string }
+    | { state: "done" }
+    | { state: "error"; error: string };
+  const [tgLogin, setTgLogin] = useState<TgLogin>({ state: "idle" });
+
   const [resendLoading, setResendLoading] = useState(false);
 
   // Пароль — то же поле, что и на прежнем шаге «Вход по паролю»: живёт
@@ -321,8 +330,79 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
     }
   };
 
-  const handleTelegramLogin = () => {
-    toast("Вход через Telegram в разработке");
+  /**
+   * Вход через Telegram (20.09.2026; прежде кнопка показывала «в
+   * разработке», хотя серверная часть была готова).
+   *
+   * Порядок такой, и он не случаен:
+   *   1. сайт создаёт одноразовый ключ и привязывает его К ЭТОМУ
+   *      браузеру — секрет уходит в httpOnly cookie;
+   *   2. открывается бот с этим ключом; сайт показывает четыре цифры;
+   *   3. бот показывает те же четыре цифры и спрашивает подтверждение —
+   *      так человек видит, что подтверждает ИМЕННО свой вход, а не
+   *      чей-то чужой, подсунутый ссылкой;
+   *   4. страница опрашивает сайт и получает сессию — только в том
+   *      браузере, где лежит секрет, и только один раз.
+   *
+   * Окно бота открывается СРАЗУ по нажатию, до запроса: Safari на
+   * iPhone блокирует `window.open`, вызванный после ожидания ответа.
+   * Поэтому на телефоне уходим по `location.href`, а на широком экране
+   * открываем пустую вкладку заранее и подставляем в неё адрес.
+   */
+  const tgPoll = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => () => { if (tgPoll.current) clearInterval(tgPoll.current); }, []);
+
+  const handleTelegramLogin = async () => {
+    if (tgLogin.state === "busy" || tgLogin.state === "waiting") return;
+    const mobile = window.matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const win = mobile ? null : window.open("", "_blank");
+    if (win) win.opener = null;
+    setTgLogin({ state: "busy" });
+    try {
+      const res = await fetch("/api/auth/telegram-start", { method: "POST" });
+      const j = await res.json();
+      if (!j.success) {
+        win?.close();
+        setTgLogin({ state: "error", error: j.error || "Не удалось начать вход. Попробуйте ещё раз." });
+        return;
+      }
+      const { nonce, botUrl, confirmCode, startParam } = j.data as {
+        nonce: string; botUrl: string | null; confirmCode: string; startParam: string;
+      };
+      if (botUrl && mobile) window.location.href = botUrl;
+      else if (botUrl && win) win.location.href = botUrl;
+      else win?.close();
+
+      setTgLogin({ state: "waiting", code: confirmCode, botUrl, startParam });
+
+      const until = Date.now() + 5 * 60_000;
+      if (tgPoll.current) clearInterval(tgPoll.current);
+      tgPoll.current = setInterval(async () => {
+        if (Date.now() > until) {
+          if (tgPoll.current) clearInterval(tgPoll.current);
+          setTgLogin({ state: "error", error: "Время вышло. Начните вход заново." });
+          return;
+        }
+        try {
+          const r = await fetch(`/api/auth/telegram-check?nonce=${encodeURIComponent(nonce)}`);
+          const d = await r.json();
+          if (d.success) {
+            if (tgPoll.current) clearInterval(tgPoll.current);
+            setTgLogin({ state: "done" });
+            router.replace(after);
+            router.refresh();
+          } else if (d.status && d.status !== "pending") {
+            if (tgPoll.current) clearInterval(tgPoll.current);
+            setTgLogin({ state: "error", error: "Ссылка больше недействительна. Начните вход заново." });
+          }
+        } catch {
+          /* сеть моргнула — следующая попытка через две секунды */
+        }
+      }, 2000);
+    } catch {
+      win?.close();
+      setTgLogin({ state: "error", error: "Не удалось начать вход. Проверьте связь." });
+    }
   };
 
   // ─── Server Actions ───────────────────────────────────────────
@@ -743,12 +823,41 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                 >
                   {passkeyLoading ? <Busy>Проверяем…</Busy> : <><Icon name="shield" size={16} />Войти через Passkey</>}
                 </button>
-                <button type="button" onClick={handleTelegramLogin} className="v-btn v-btn-soft v-btn-block">
-                  <Icon name="send" size={16} />
-                  Войти через Telegram
+                <button
+                  type="button"
+                  onClick={handleTelegramLogin}
+                  disabled={tgLogin.state === "busy" || tgLogin.state === "waiting"}
+                  className="v-btn v-btn-soft v-btn-block"
+                >
+                  {tgLogin.state === "busy" ? <Busy>Открываем бот…</Busy> : <><Icon name="send" size={16} />Войти через Telegram</>}
                 </button>
               </div>
               {passkeyError && <FieldError id="au-pk-err" text={passkeyError} />}
+
+              {/* Ожидание подтверждения в боте. Четыре цифры показаны
+                  здесь и в боте: человек сверяет их и видит, что
+                  подтверждает свой вход, а не подсунутый ссылкой. */}
+              {tgLogin.state === "waiting" && (
+                <div className="au-tg" role="status">
+                  <p className="au-tg-h">Подтвердите вход в боте</p>
+                  <p className="au-tg-code" aria-label={`Код подтверждения ${tgLogin.code.split("").join(" ")}`}>
+                    {tgLogin.code}
+                  </p>
+                  <p className="au-tg-t">
+                    Бот назовёт эти же четыре цифры. Совпали — нажмите в нём «Подтвердить», и вы войдёте здесь же.
+                  </p>
+                  {tgLogin.botUrl ? (
+                    <a className="v-btn v-btn-soft v-btn-sm" href={tgLogin.botUrl} target="_blank" rel="noopener noreferrer">
+                      Открыть бот ещё раз
+                    </a>
+                  ) : (
+                    <p className="au-tg-t">
+                      Откройте бота и отправьте ему: <code>/start {tgLogin.startParam}</code>
+                    </p>
+                  )}
+                </div>
+              )}
+              {tgLogin.state === "error" && <FieldError id="au-tg-err" text={tgLogin.error} />}
             </div>
           )}
 

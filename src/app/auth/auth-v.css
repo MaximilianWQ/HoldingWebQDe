@@ -221,3 +221,30 @@
   .av-spin { animation: none; }
   .av-timer i { transition: none; }
 }
+
+/* ── Ожидание подтверждения входа в боте (20.09.2026) ─────────────
+   Четыре цифры показаны и здесь, и в боте. Это не украшение: человек
+   сверяет их и видит, что подтверждает СВОЙ вход, а не чужой,
+   подсунутый ему ссылкой. Поэтому цифры крупные и читаются вслух. */
+.au-tg {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+  text-align: center;
+}
+.au-tg-h { margin: 0; font-size: 15px; font-weight: 600; }
+.au-tg-code {
+  margin: 2px 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  font-variant-numeric: tabular-nums;
+  color: var(--v-blue);
+}
+.au-tg-t { margin: 0; font-size: 14px; line-height: 1.5; color: var(--v-ink-3); max-width: 38ch; }
+.au-tg-t code { font-size: 13px; overflow-wrap: anywhere; }

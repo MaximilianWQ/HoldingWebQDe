@@ -170,12 +170,21 @@ describe("decideMerge — owner rule 2", () => {
   const ent = (id: number, days: number, status = "ACTIVE") => ({ id, status, expireAt: new Date(now + days * DAY).toISOString() }) as PanelUser;
   const c = (side: MergeCandidate["side"], days: number, entity: PanelUser | null): MergeCandidate => ({ side, end: now + days * DAY, live: days > 0, entity });
 
-  it("both live: the longer term wins, the other entity is disabled, days are not added", () => {
+  // Правило изменено владельцем 20.09.2026: дни СКЛАДЫВАЮТСЯ.
+  // Раньше здесь ожидалось `now + 20 дней` — то есть пять оплаченных
+  // дней сайта просто пропадали.
+  it("both live: the longer term wins, the other entity is disabled, remaining days are ADDED", () => {
     const d = decideMerge({ site: c("site", 5, ent(1, 5)), placeholder: null, bot: c("bot", 20, ent(2, 20)) }, now);
     expect(d.kept).toBe("bot");
     expect(d.keptEntity?.id).toBe(2);
     expect(d.disable).toEqual([1]);
+    expect(d.newEnd).toBe(now + 25 * DAY);
+    expect(d.addedMs).toBe(5 * DAY);
+  });
+  it("истёкшая сторона добавляет ноль, а не отрицательные дни", () => {
+    const d = decideMerge({ site: c("site", -8, ent(1, -8, "EXPIRED")), placeholder: null, bot: c("bot", 20, ent(2, 20)) }, now);
     expect(d.newEnd).toBe(now + 20 * DAY);
+    expect(d.addedMs).toBe(0);
   });
   it("tie keeps the site", () => {
     expect(decideMerge({ site: c("site", 9, ent(1, 9)), placeholder: null, bot: c("bot", 9, ent(2, 9)) }, now).kept).toBe("site");
@@ -238,7 +247,7 @@ describe("bot first (email + code)", () => {
     expect(fakePanel.calls.some((c) => c.fn === "createUser")).toBe(false);
   });
 
-  it("both have subscriptions, the bot's is longer: bot key shared, site key DISABLED (term untouched)", async () => {
+  it("both have subscriptions, the bot's is longer: bot key shared, site key DISABLED, days ADDED", async () => {
     const tg = nextTg();
     const { row, entity: site } = siteWithKey("u-both-bot", 5);
     const prem = botPremium(tg, 20);
@@ -247,7 +256,9 @@ describe("bot first (email + code)", () => {
     expect(r).toMatchObject({ ok: true, kept: "bot", disabledPanelUserId: site.id, keptPanelUserId: prem.id, created: false });
     const u = linkDb.users.get("u-both-bot")!;
     expect(String(u.panel_user_id)).toBe(String(prem.id));
-    expect(near(u.subscription_end, inDays(27))).toBe(true); // 20 + 7 bonus, not 5 + 20
+    // 20 (бот) + 5 (остаток сайта) + 7 бонуса = 32. Прежде было 27:
+    // пять оплаченных дней сайта пропадали (правило до 20.09.2026).
+    expect(near(u.subscription_end, inDays(32))).toBe(true);
     const s = fakePanel.get(site.id)!;
     expect(s.status).toBe("DISABLED");
     expect(near(s.expireAt, inDays(5))).toBe(true);
@@ -261,7 +272,8 @@ describe("bot first (email + code)", () => {
     const r = await confirmBotEmailLink({ telegramId: tg, email: row.email, code, ip: null });
     expect(r).toMatchObject({ ok: true, kept: "site", disabledPanelUserId: prem.id, keptPanelUserId: site.id });
     expect(fakePanel.get(prem.id)!.status).toBe("DISABLED");
-    expect(near(linkDb.users.get("u-both-site")!.subscription_end, inDays(47))).toBe(true);
+    // 40 (сайт) + 10 (остаток бота) + 7 бонуса = 57.
+    expect(near(linkDb.users.get("u-both-site")!.subscription_end, inDays(57))).toBe(true);
     expect(fakePanel.get(site.id)!.telegramId).toBe(Number(tg));
   });
 
@@ -392,7 +404,7 @@ describe("conflicts and repeats", () => {
 });
 
 describe("relink (migration of people linked before 13.09.2026)", () => {
-  it("an old link with two live keys is merged: longer wins, the other DISABLED; unknown Telegram → 404", async () => {
+  it("an old link with two live keys is merged: longer wins, days added, the other DISABLED; unknown Telegram → 404", async () => {
     const { POST } = await import("@/app/api/bot/relink/route");
     const tg = nextTg();
     const { entity: site } = siteWithKey("u-old", 30, { telegram_id: tg, telegram_linked: true, telegram_bonus_granted_at: new Date() });
@@ -402,7 +414,8 @@ describe("relink (migration of people linked before 13.09.2026)", () => {
     expect(r.status).toBe(200);
     expect((await r.json()).data).toMatchObject({ kept: "bot", disabledPanelUserId: site.id, bonusDays: 0, alreadyLinked: true });
     expect(fakePanel.get(site.id)!.status).toBe("DISABLED");
-    expect(near(linkDb.users.get("u-old")!.subscription_end, inDays(60))).toBe(true);
+    // 60 (бот) + 30 (остаток сайта) = 90; бонуса нет, он уже был выдан.
+    expect(near(linkDb.users.get("u-old")!.subscription_end, inDays(90))).toBe(true);
     const again = await POST(req("/api/bot/relink", "POST", { telegramId: tg }));
     expect((await again.json()).data).toMatchObject({ kept: "bot", alreadyLinked: true });
     const none = await POST(req("/api/bot/relink", "POST", { telegramId: nextTg() }));

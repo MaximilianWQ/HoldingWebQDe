@@ -251,7 +251,7 @@ function DashboardViewInner() {
                 ) : (
                   <button type="button" className="vc-chip" onClick={startTelegramLink} disabled={tgLink.state === "busy"}>
                     <Icon name="send" size={14} />
-                    {tgLink.state === "busy" ? "Готовим ссылку…" : "Привязать Telegram · тест"}
+                    {tgLink.state === "busy" ? "Открываем бот…" : "Привязать Telegram"}
                   </button>
                 )}
               </div>

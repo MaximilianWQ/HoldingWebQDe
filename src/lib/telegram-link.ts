@@ -152,8 +152,10 @@ export interface MergeDecision {
   kept: KeptSide;
   winner: MergeCandidate | null;
   keptEntity: PanelUser | null;
-  /** New term for the account; null → unchanged. */
+  /** New term for the account; null → unchanged. Includes `addedMs`. */
   newEnd: number | null;
+  /** Остаток проигравшей стороны, прибавленный к сроку (0 — складывать было нечего). */
+  addedMs: number;
   /** Live panel entities that lose (status → DISABLED, term untouched). */
   disable: number[];
 }
@@ -165,12 +167,29 @@ export function panelEntityLive(u: PanelUser | null, now = Date.now()): boolean 
 }
 
 /**
- * Owner rule 2: when both sides have a live subscription, the one with
- * the LONGER term survives (its key becomes the shared key) and the
- * other entity is DISABLED; days are not added. A tie keeps the site.
- * Site side = the target account, or the bot's placeholder account when
- * it is longer. With nothing live, the account keeps its own entity (or
- * takes the bot's expired one, so a later payment revives ONE key).
+ * Правило слияния (владелец, 20.09.2026: «если у него подписка есть —
+ * лучше сложить»). ЗАМЕНЯЕТ прежнее «остаётся больший срок, дни не
+ * складываются».
+ *
+ * Есть подписка и в боте, и на сайте: остаётся ОДИН ключ, а срок ему
+ * ставится равным сумме остатков обеих подписок. Человек заплатил
+ * дважды, и прежнее правило молча отнимало у него оплаченное — это
+ * единственное, что нельзя объяснить в поддержке.
+ *
+ * СКЛАДЫВАЮТСЯ ОСТАТКИ, А НЕ СРОКИ. Остаток считается от «сейчас»:
+ * сорок дней впереди на сайте плюс сто двадцать в боте дают сто
+ * шестьдесят от сегодняшнего дня. Истёкшая сторона даёт ноль, а не
+ * отрицательные дни, — отсюда `Math.max(0, …)`.
+ *
+ * ВЫЖИВАЕТ КЛЮЧ С БОЛЬШИМ СРОКОМ — это осталось прежним, и намеренно:
+ * ключ, в который вложено больше времени, скорее и есть тот, что
+ * прописан у человека в приложении. Второй гасится, ничего
+ * перенастраивать не нужно. При равенстве остаётся сайт.
+ *
+ * Сторона сайта — сам аккаунт или ботовская «заготовка», если её срок
+ * больше. Когда живого нет ни у кого, аккаунт остаётся при своей
+ * сущности (или забирает истёкшую ботовскую, чтобы будущая оплата
+ * оживила ОДИН ключ).
  */
 export function decideMerge(c: { site: MergeCandidate | null; placeholder: MergeCandidate | null; bot: MergeCandidate | null }, now = Date.now()): MergeDecision {
   const siteSide = [c.site, c.placeholder]
@@ -180,9 +199,13 @@ export function decideMerge(c: { site: MergeCandidate | null; placeholder: Merge
 
   let kept: KeptSide;
   let winner: MergeCandidate | null;
+  /** Остаток проигравшей стороны, который прибавится к сроку победителя. */
+  let addMs = 0;
   if (siteSide && bot) {
     winner = bot.end > siteSide.end ? bot : siteSide;
     kept = winner === bot ? "bot" : "site";
+    const loser = winner === bot ? siteSide : bot;
+    addMs = Math.max(0, loser.end - now);
   } else if (bot) {
     winner = bot;
     kept = "only-bot";
@@ -198,7 +221,14 @@ export function decideMerge(c: { site: MergeCandidate | null; placeholder: Merge
   const disable = [c.site, c.placeholder, c.bot]
     .filter((x): x is MergeCandidate => !!x && !!x.entity && x.entity.id !== keptEntity?.id && panelEntityLive(x.entity, now))
     .map((x) => x.entity!.id);
-  return { kept, winner, keptEntity, newEnd: winner ? winner.end : null, disable: Array.from(new Set(disable)) };
+  return {
+    kept,
+    winner,
+    keptEntity,
+    newEnd: winner ? winner.end + addMs : null,
+    addedMs: addMs,
+    disable: Array.from(new Set(disable)),
+  };
 }
 
 // ─── Panel reads ─────────────────────────────────────────────────
@@ -654,11 +684,27 @@ export async function adoptVerifiedPanelAccount(emailRaw: string, ctx: { ip?: st
     console.warn(`[ADOPT] panel lookup failed for sign-up — ordinary registration: ${describeRwError(found)}`);
     return null;
   }
-  const candidates = found.data
-    .filter((u) => hasMarker(u.description, PANEL_MARKERS.emailVerified) && !isBypassEntity(u) && u.status !== "DISABLED")
+  const verified = found.data.filter((u) => hasMarker(u.description, PANEL_MARKERS.emailVerified) && u.status !== "DISABLED");
+  const candidates = verified
+    .filter((u) => !isBypassEntity(u))
     .sort((a, b) => Date.parse(b.expireAt) - Date.parse(a.expireAt));
   const best = candidates[0];
   if (!best) return null;
+
+  /**
+   * Ключ обхода того же человека (владелец, 20.09.2026: «если
+   * пользователь найден, отдаются два ключа — `tg_{id}_premium` и
+   * `{id}`»).
+   *
+   * Отдельного запроса к панели не делаем: бот пишет подтверждённую
+   * почту в ОБЕ свои сущности, поэтому обход уже пришёл этим же
+   * поиском по адресу. Берём тот, у которого Telegram ID совпадает с
+   * премиум-ключом, — у одного адреса теоретически может оказаться
+   * несколько.
+   */
+  const bypass = verified.find(
+    (u) => isBypassEntity(u) && u.telegramId != null && best.telegramId != null && String(u.telegramId) === String(best.telegramId)
+  ) ?? null;
 
   const out = await withTransaction(async (c) => {
     const tg = best.telegramId != null ? String(best.telegramId) : null;
@@ -685,14 +731,20 @@ export async function adoptVerifiedPanelAccount(emailRaw: string, ctx: { ip?: st
     }
     let linkTg = tg;
     if (linkTg && (await oneUser(c, "SELECT * FROM users WHERE telegram_id = $1 ORDER BY created_at ASC LIMIT 1", [linkTg]))) linkTg = null;
-    await c.query(LINK_UPDATE_SQL, linkUpdateParams(id, linkTg, "adopted", [], best, null));
+    await c.query(LINK_UPDATE_SQL, linkUpdateParams(id, linkTg, "adopted", [], best, bypass ? bypass.id : null));
     return { kind: "created" as const, user: (await oneUser(c, "SELECT * FROM users WHERE id = $1", [id]))! };
   });
 
   if (out.kind === "owned") return null;
   if (out.kind === "exists") return { ...out.user, isNew: false, trialGranted: false, trialBlockedReason: null };
   requestPanelSync(out.user.id, "signin-adopt");
-  await createAuditLog("user.adopt_panel", `panel user ${best.id} (${best.username}) adopted on sign-in; no trial`, out.user.id, out.user.email, ctx.ip || undefined);
+  await createAuditLog(
+    "user.adopt_panel",
+    `panel user ${best.id} (${best.username}) adopted on sign-in; no trial${bypass ? `; bypass ${bypass.id} (${bypass.username})` : ""}`,
+    out.user.id,
+    out.user.email,
+    ctx.ip || undefined
+  );
   return { ...out.user, isNew: true, trialGranted: false, trialBlockedReason: null };
 }
 

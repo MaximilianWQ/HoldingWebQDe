@@ -108,7 +108,7 @@ function botBypass(tg: string, limitGb: number, usedGb: number): PanelUser {
 }
 
 /** A site account with a live ST entity of `days`. */
-function siteWithKey(id: string, days: number, extra: Record<string, unknown> = {}) {
+function siteWithKey(id: string, days: number, extra: Record<string, unknown> = {}, entityExtra: Record<string, unknown> = {}) {
   const pid = ++panelSeq;
   const end = inDays(days);
   const row = seedSiteUser(id, {
@@ -131,6 +131,7 @@ function siteWithKey(id: string, days: number, extra: Record<string, unknown> = 
     status: "ACTIVE",
     shortUuid: `site${pid}`,
     subscriptionUrl: `https://sub.test/site${pid}`,
+    ...entityExtra,
   });
   return { row, entity };
 }
@@ -558,6 +559,29 @@ describe("bypass (обход)", () => {
     expect(fakePanel.updates(bp.id)).toHaveLength(0);
     const snap = await getBypassForUser({ id: "u-bp", telegramId: tg, bypassPanelUserId: bp.id });
     expect(snap).toMatchObject({ remainingBytes: 7 * GB, limitBytes: 10 * GB, unlimited: false });
+  });
+
+  // Живой случай владельца 20.09.2026: аккаунт связан, премиум на сайте,
+  // гигабайты в боте, а `telegram_id` в строке аккаунта пуст — связка не
+  // проставляет его, если тем же Telegram владеет другая строка. Раньше
+  // сайт в этом случае не искал обход вовсе и показывал «ключа 2 нет».
+  it("обход находится по Telegram ID с премиум-ключа, когда в строке его нет", async () => {
+    const tg = nextTg();
+    // Бот проставляет Telegram ID обеим своим сущностям; здесь он стоит
+    // на премиум-ключе, которым уже владеет сайт.
+    const { entity: prem } = siteWithKey("u-no-tg", 30, {}, { telegramId: Number(tg) });
+    const bp = botBypass(tg, 10, 2);
+    const snap = await getBypassForUser({
+      id: "u-no-tg",
+      telegramId: null,
+      bypassPanelUserId: null,
+      panelUserId: prem.id,
+    });
+    expect(snap?.subscriptionUrl).toBe(bp.subscriptionUrl);
+    // Номер обхода запомнен, чтобы второй раз панель не спрашивать.
+    expect(String(linkDb.users.get("u-no-tg")!.bypass_panel_user_id)).toBe(String(bp.id));
+    // Состояние связки при этом не трогается: telegram_id — не наше дело.
+    expect(linkDb.users.get("u-no-tg")!.telegram_id ?? null).toBe(null);
   });
 
   it("a bypass id stored as the key is refused by the sync", async () => {

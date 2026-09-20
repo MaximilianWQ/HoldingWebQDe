@@ -23,7 +23,12 @@ export async function GET(request: NextRequest) {
   const user = auth.user;
   try {
     const [snap, owedBytes] = await Promise.all([
-      user.bypassPanelUserId || user.telegramId ? getBypassForUser(user, { timeoutMs: 2_500 }).catch(() => null) : Promise.resolve(null),
+      // `panelUserId` в условии — тот самый живой случай 20.09.2026:
+      // аккаунт связан, но `telegram_id` в строке пуст, и обход раньше
+      // не искался вовсе. Теперь Telegram ID берётся с премиум-ключа.
+      user.bypassPanelUserId || user.telegramId || user.panelUserId
+        ? getBypassForUser(user, { timeoutMs: 2_500 }).catch(() => null)
+        : Promise.resolve(null),
       getOwedBypassBytes(user.id).catch(() => 0),
     ]);
     // A linked account may have just had its bot bypass remembered.

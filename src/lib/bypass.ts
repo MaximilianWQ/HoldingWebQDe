@@ -146,18 +146,53 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
  * entity looked up once and remembered.
  */
 export async function getBypassForUser(
-  user: { id: string; telegramId: string | null; bypassPanelUserId: number | null },
+  user: { id: string; telegramId: string | null; bypassPanelUserId: number | null; panelUserId?: number | null },
   opts: { timeoutMs?: number } = {}
 ): Promise<BypassSnapshot | null> {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_READ_TIMEOUT_MS;
   const now = Date.now();
   let id = user.bypassPanelUserId;
 
-  if (!id && user.telegramId && /^\d+$/.test(user.telegramId)) {
-    const negKey = `tg:${user.telegramId}`;
+  /**
+   * Telegram ID для поиска обхода — со своей строки, а если его там нет,
+   * то с премиум-сущности в панели (20.09.2026, разбор живого случая).
+   *
+   * Живой случай владельца: подписка на сайте, гигабайты в боте, и
+   * ключ 2 на сайте не показывается даже после повторной привязки.
+   * Причина в том, что обход ищется ТОЛЬКО по `telegram_id` из строки
+   * аккаунта, а он там может отсутствовать: связка не проставляет его,
+   * если тем же Telegram владеет другая строка, и обнуляет при отвязке.
+   * Без него сайт не знает, какую сущность искать, — и не ищет вовсе.
+   *
+   * Но бот ставит `telegramId` ОБЕИМ своим сущностям (см. снимки панели
+   * в docs/bot/PANEL_USER_MODEL.md). Значит, если премиум-ключ человека
+   * уже наш, Telegram ID можно взять прямо с него.
+   *
+   * В строку аккаунта найденный ID НЕ записывается: `telegram_id` — это
+   * состояние связки, у него своя уникальность и свои правила, и менять
+   * его при показе остатка трафика нельзя. Он используется только чтобы
+   * найти обход и запомнить его номер.
+   */
+  let tg = user.telegramId;
+  if (!id && !tg && user.panelUserId) {
+    const negKey = `u:${user.id}`;
     const neg = cache.get(negKey);
     if (neg && now - neg.at < NEGATIVE_TTL_MS) return null;
-    const found = await withTimeout(findBotBypass(user.telegramId), timeoutMs);
+    const prem = await withTimeout(rwGetUserById(user.panelUserId), timeoutMs);
+    if (!prem || !prem.ok) return null; // панель не ответила — не запоминаем «нет»
+    const fromPanel = prem.data.telegramId != null ? String(prem.data.telegramId) : null;
+    if (!fromPanel) {
+      cache.set(negKey, { at: now, snap: null });
+      return null;
+    }
+    tg = fromPanel;
+  }
+
+  if (!id && tg && /^\d+$/.test(tg)) {
+    const negKey = `tg:${tg}`;
+    const neg = cache.get(negKey);
+    if (neg && now - neg.at < NEGATIVE_TTL_MS) return null;
+    const found = await withTimeout(findBotBypass(tg), timeoutMs);
     if (!found || !found.ok) return null; // not asked → do not remember a "no"
     if (!found.user) {
       cache.set(negKey, { at: now, snap: null });
@@ -179,7 +214,7 @@ export async function getBypassForUser(
   if (hit && now - hit.at < POSITIVE_TTL_MS) return hit.snap;
   const r = await withTimeout(rwGetUserById(id), timeoutMs);
   if (!r || !r.ok) return null;
-  if (!isBypassEntity(r.data) && !(user.telegramId && isBotBypassFor(r.data, user.telegramId))) {
+  if (!isBypassEntity(r.data) && !(tg && isBotBypassFor(r.data, tg))) {
     console.warn(`[BYPASS] panel user ${id} stored as bypass of ${user.id.slice(0, 8)} does not look like a bypass entity — not shown`);
     return null;
   }

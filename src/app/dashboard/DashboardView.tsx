@@ -165,10 +165,20 @@ function DashboardViewInner() {
     }
   };
 
-  const handleUnlinkTelegram = async () => {
+  /**
+   * Отвязка с выбором стороны (ТЗ 16–17, решение владельца 20.09.2026).
+   *
+   * Умолчание здесь — «на сайте»: человек стоит в кабинете, и ключ его
+   * стороны сайтовый. В боте умолчание зеркальное.
+   */
+  const handleUnlinkTelegram = async (keep: "site" | "bot" = "site") => {
     setUnlinking(true);
     try {
-      const res = await fetch("/api/user/telegram-unlink", { method: "POST" });
+      const res = await fetch("/api/user/telegram-unlink", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keep }),
+      });
       const result = await res.json();
       if (result.success) {
         setData((prev) => (prev ? { ...prev, telegramLinked: false } : prev));
@@ -400,7 +410,7 @@ function ProfilePanel({
   unlinking: boolean;
   onStartTelegramLink: () => void;
   onUnlinkStepChange: (n: number) => void;
-  onUnlinkTelegram: () => void;
+  onUnlinkTelegram: (keep?: "site" | "bot") => void;
   isAdmin: boolean;
   onOpenNotifications: () => void;
   unreadCount: number;
@@ -431,16 +441,33 @@ function ProfilePanel({
           ) : unlinkStep === 0 ? (
             <button type="button" onClick={() => onUnlinkStepChange(1)} className="v-btn v-btn-soft v-btn-sm">Отвязать</button>
           ) : (
-            <>
-              <button type="button" onClick={() => onUnlinkStepChange(0)} className="v-btn v-btn-soft v-btn-sm">Отмена</button>
-              <button type="button" onClick={onUnlinkTelegram} disabled={unlinking} className="v-btn vc-btn-danger v-btn-sm">
-                {unlinking ? "Отвязываем…" : "Да, отвязать"}
-              </button>
-            </>
+            <button type="button" onClick={() => onUnlinkStepChange(0)} className="v-btn v-btn-soft v-btn-sm">Отмена</button>
           )}
         </div>
+        {/* Выбор стороны. Сначала та, на которой человек стоит: он в
+            кабинете, значит «На сайте» первой (ТЗ 17.4). И оба текста
+            прямо говорят, что ключ продолжит работать, — без этого
+            экран читается как «выберите, что потерять». */}
         {data.telegramLinked && unlinkStep === 1 && (
-          <p className="vc-fine">Подписка и ключ останутся в этом кабинете. Бонус за повторную привязку не начисляется.</p>
+          <div className="vc-unlink" role="group" aria-label="Где оставить подписку">
+            <p className="vc-unlink-h">Где оставить подписку?</p>
+            <p className="vc-fine">
+              Ключ продолжит работать в любом случае — перенастраивать ничего не нужно. Выберите, где вам удобнее
+              платить и видеть срок.
+            </p>
+            <div className="vc-actions">
+              <button type="button" onClick={() => onUnlinkTelegram("site")} disabled={unlinking} className="v-btn v-btn-primary v-btn-sm">
+                {unlinking ? "Отвязываем…" : "Оставить на сайте"}
+              </button>
+              <button type="button" onClick={() => onUnlinkTelegram("bot")} disabled={unlinking} className="v-btn v-btn-soft v-btn-sm">
+                Оставить в боте
+              </button>
+            </div>
+            <p className="vc-fine">
+              Гигабайты обхода в выборе не участвуют — они остаются в боте. Бонус за повторную привязку не
+              начисляется.
+            </p>
+          </div>
         )}
         {!data.telegramLinked && tgLink.state === "ready" && (
           tgLink.url ? (

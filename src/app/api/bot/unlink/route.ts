@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
         // забирает бот. Из своего зеркала он потерял бы дни, начисленные
         // сайтом после последнего опроса статуса.
         subscriptionEnd: r.subscriptionEnd,
+        // Ключ, оставшийся у человека. Принимающая сторона сверяет его
+        // с привязанным: разошлось — ключ в приложении умер (правило 17).
+        subscriptionUrl: r.subscriptionUrl,
         // Снят ли маркер atlas-site. false → бот НЕ считает сущность
         // своей и не начинает её править.
         siteMarkerRemoved: r.siteMarkerRemoved,

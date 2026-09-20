@@ -488,3 +488,18 @@
   .vc-sheet, .vc-sheet-veil { transition: none; }
   .vc-sheet-spin { animation: none; }
 }
+
+/* ── Выбор стороны при отвязке (20.09.2026) ───────────────────────
+   Отвязка делит одно имущество на две стороны, и решает владелец.
+   Блок отделён рамкой: это вопрос, а не продолжение строки настроек. */
+.vc-unlink {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid var(--v-line);
+  border-radius: var(--v-r-md);
+  background: var(--v-field);
+}
+.vc-unlink-h { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.vc-unlink .vc-actions { margin: 2px 0; }

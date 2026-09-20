@@ -712,6 +712,16 @@ export interface UnlinkOk {
   keep: UnlinkKeep;
   /** Срок на момент отвязки — авторитетный, его забирает бот при keep: "bot". */
   subscriptionEnd: string | null;
+  /**
+   * Ссылка на подписку сущности, которая осталась у человека.
+   *
+   * Нужна принимающей стороне, чтобы сверить: тот ли это ключ, что был
+   * привязан (правило 17 — ключ не меняется). Команда бота на этом поле
+   * держит свою проверку: разошлось — значит ключ в приложении в эту
+   * секунду умер, и об этом надо кричать в лог, а не молчать до
+   * обращения человека.
+   */
+  subscriptionUrl: string | null;
   /** Снят ли с сущности маркер `atlas-site`. Всегда true при keep: "site". */
   siteMarkerRemoved: boolean;
 }
@@ -725,6 +735,7 @@ export async function unlinkTelegramAccount(
   const before = await getUserById(userId);
   if (!before || (!before.telegramId && !before.telegramLinked)) return { ok: false, status: 404, code: "NOT_LINKED", error: "Telegram не привязан" };
   const subscriptionEnd = before.subscriptionEnd ? new Date(before.subscriptionEnd).toISOString() : null;
+  const subscriptionUrl = before.subscriptionUrl ?? null;
 
   // keep: "bot" — сначала панель, и только при её согласии трогаем базу.
   let markerRemoved = true;
@@ -790,6 +801,7 @@ export async function unlinkTelegramAccount(
     telegramLinkToken: token,
     keep,
     subscriptionEnd,
+    subscriptionUrl,
     siteMarkerRemoved: markerRemoved,
   };
 }

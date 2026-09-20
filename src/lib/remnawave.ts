@@ -597,8 +597,19 @@ export function siteBypassUsername(publicId: string): string {
 }
 
 /** A bypass entity — the bot's (`Bypass via bot (…)`) or a future site one (`ST…_bp`). Never a premium key. */
-export function isBypassEntity(u: { username?: string | null; description?: string | null }): boolean {
+export function isBypassEntity(u: { username?: string | null; description?: string | null; telegramId?: number | string | null }): boolean {
   if (typeof u.description === "string" && /^\s*bypass via bot\b/i.test(u.description)) return true;
+  // Сущность обхода у бота названа голым Telegram ID (в панели это
+  // `1273979592`, премиум рядом — `tg_1273979592_premium`). Раньше её
+  // узнавали только по описанию «Bypass via bot», а описание можно не
+  // проставить или потерять при правке в панели руками. Тогда сайт
+  // принял бы сущность обхода с лимитом 500 МБ за премиум-ключ и отдал
+  // её человеку как подписку. Поэтому второй признак — имя из одних
+  // цифр, совпадающее с полем Telegram ID (владелец прислал разбор
+  // панели 20.09.2026).
+  if (typeof u.username === "string" && /^\d{5,20}$/.test(u.username) && u.telegramId != null && String(u.telegramId) === u.username) {
+    return true;
+  }
   return typeof u.username === "string" && u.username.endsWith(SITE_BYPASS_USERNAME_SUFFIX) && isSiteUsername(u.username.slice(0, -SITE_BYPASS_USERNAME_SUFFIX.length));
 }
 

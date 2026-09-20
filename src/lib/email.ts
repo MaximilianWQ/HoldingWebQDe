@@ -319,6 +319,52 @@ export async function sendJobApplicationEmail(params: {
   );
 }
 
+/**
+ * Заявка на пропуск в бизнес-центр — письмо админу.
+ *
+ * Номера документа в письме нет: мы его не собираем (см.
+ * `src/app/api/office-pass/route.ts`). Всё, что нужно охране, — имя
+ * латиницей, тип документа и время визита.
+ */
+export async function sendOfficePassEmail(params: {
+  to: string;
+  id: string;
+  fullName: string;
+  email: string;
+  contact: string | null;
+  company: string | null;
+  roleLabel: string;
+  docLabel: string;
+  purpose: string;
+  visitAt: string;
+}): Promise<boolean> {
+  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+  const rows = [
+    ["Имя для пропуска", params.fullName],
+    ["Кем приходит", params.roleLabel],
+    ["Документ на входе", params.docLabel],
+    ["Компания", params.company || "—"],
+    ["Когда", params.visitAt],
+    ["Цель визита", params.purpose],
+    ["Почта", params.email],
+    ["Связь", params.contact || "—"],
+    ["Заявка", params.id],
+  ]
+    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
+    .join("\n");
+
+  return sendTransactional(
+    params.to,
+    `Пропуск в офис: ${params.fullName}`,
+    wrapHtml(
+      "Заявка на пропуск",
+      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
+<p style="margin-top:16px;color:#444">Ответьте на это письмо — оно уйдёт прямо человеку.</p>`
+    ),
+    params.email
+  );
+}
+
 export async function sendRefundAdminAlertEmail(params: {
   adminEmail: string;
   orderId: string;

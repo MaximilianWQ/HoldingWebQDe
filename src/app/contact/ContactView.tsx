@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import Icon from "@/components/pixel/Icon";
-import { DESKS, SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
+import { DESKS, SUPPORT_DESK, TELEGRAM_SUPPORT, OFFICE } from "@/lib/contacts";
+import OfficePassForm from "./OfficePassForm";
 import "@/app/vps-info.css";
 
 /**
@@ -128,6 +129,32 @@ export default function ContactView() {
               {TELEGRAM_SUPPORT.handle}
             </a>
           </p>
+        </div>
+      </section>
+
+      {/* Офис и пропуск — после контактов, до формы обращения: человек,
+          которому нужен адрес, не должен пролистывать форму письма. */}
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-labelledby="v-office-h">
+        <div className="v-wrap v-narrow">
+          <h2 id="v-office-h" className="v-h3" style={{ textAlign: "center" }}>Офис</h2>
+          <div className="v-card v-card-pad vc-office">
+            <address className="vc-office-addr">
+              {OFFICE.parts.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </address>
+            <p className="v-small">{OFFICE.metro}</p>
+            <a className="v-btn v-btn-soft v-btn-sm" href={OFFICE.mapUrl} target="_blank" rel="noopener noreferrer">
+              Открыть на карте
+            </a>
+          </div>
+          <p className="v-car-note">
+            В здание пускают по пропуску — закажите его заранее, иначе на стойке развернут.
+          </p>
+          <div id="pass" className="vc-office-form">
+            <h3 id="v-pass-h" className="v-h3">Заказать пропуск</h3>
+            <OfficePassForm />
+          </div>
         </div>
       </section>
 

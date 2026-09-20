@@ -39,7 +39,7 @@ interface Attachment {
 
 interface InboxItem {
   id: string;
-  kind: "career" | "contact";
+  kind: "career" | "contact" | "pass";
   topic: string;
   name: string;
   email: string;
@@ -50,13 +50,14 @@ interface InboxItem {
   attachments: Attachment[];
 }
 
-type Kind = "all" | "career" | "contact";
+type Kind = "all" | "career" | "contact" | "pass";
 type Status = "new" | "done" | "all";
 
 const KINDS: Array<{ key: Kind; label: string }> = [
   { key: "all", label: "Все формы" },
   { key: "career", label: "Отклики" },
   { key: "contact", label: "Заявки" },
+  { key: "pass", label: "Пропуска" },
 ];
 const STATUSES: Array<{ key: Status; label: string }> = [
   { key: "new", label: "Ждут ответа" },
@@ -78,7 +79,7 @@ export default function InboxSection({ reloadKey = 0 }: { reloadKey?: number }) 
   const [kind, setKind] = useState<Kind>("all");
   const [status, setStatus] = useState<Status>("new");
   const [items, setItems] = useState<InboxItem[]>([]);
-  const [counts, setCounts] = useState<{ career: number; contact: number; total: number }>({ career: 0, contact: 0, total: 0 });
+  const [counts, setCounts] = useState<{ career: number; contact: number; pass: number; total: number }>({ career: 0, contact: 0, pass: 0, total: 0 });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -93,8 +94,8 @@ export default function InboxSection({ reloadKey = 0 }: { reloadKey?: number }) 
     setLoading(false);
     if (r.ok) {
       setItems(r.data);
-      const c = r.raw.counts as { career?: number; contact?: number; total?: number } | undefined;
-      setCounts({ career: c?.career ?? 0, contact: c?.contact ?? 0, total: c?.total ?? 0 });
+      const c = r.raw.counts as { career?: number; contact?: number; pass?: number; total?: number } | undefined;
+      setCounts({ career: c?.career ?? 0, contact: c?.contact ?? 0, pass: c?.pass ?? 0, total: c?.total ?? 0 });
       setError(null);
     } else setError(r.error);
   }, [kind, status]);
@@ -133,8 +134,8 @@ export default function InboxSection({ reloadKey = 0 }: { reloadKey?: number }) 
         </div>
 
         <p className="adm-inbox-lead">
-          Отклики на вакансии и заявки с форм «Контакты» и «Для бизнеса» — в одном списке, новые сверху.
-          Приложенные файлы открываются здесь же.
+          Отклики на вакансии, заявки с форм «Контакты» и «Для бизнеса» и заявки на пропуск в офис — в одном
+          списке, новые сверху. Приложенные файлы открываются здесь же.
         </p>
 
         <AdminPushButton />
@@ -147,6 +148,7 @@ export default function InboxSection({ reloadKey = 0 }: { reloadKey?: number }) 
               {k.label}
               {k.key === "career" && counts.career > 0 && <span className="adm-inbox-n">{counts.career}</span>}
               {k.key === "contact" && counts.contact > 0 && <span className="adm-inbox-n">{counts.contact}</span>}
+              {k.key === "pass" && counts.pass > 0 && <span className="adm-inbox-n">{counts.pass}</span>}
             </button>
           ))}
         </div>

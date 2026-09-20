@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "../middleware";
 import { pool } from "@/lib/db";
 import { attachmentsFor, type AttachmentMeta } from "@/lib/attachments";
+import { VISITOR_ROLES, VISITOR_DOCS } from "@/lib/contacts";
 
 /**
  * Обращения с сайта — одна лента на все формы (владелец, 19.09.2026:
@@ -24,10 +25,10 @@ import { attachmentsFor, type AttachmentMeta } from "@/lib/attachments";
  * НОВАЯ ФОРМА ДОБАВЛЯЕТСЯ ТАК: свой `load…` ниже и ветка в PATCH.
  * Больше ничего — ни в админке, ни в выдаче файлов.
  */
-const KINDS = new Set(["career", "contact"]);
+const KINDS = new Set(["career", "contact", "pass"]);
 const STATUSES = new Set(["new", "done"]);
 
-export type InboxKind = "career" | "contact";
+export type InboxKind = "career" | "contact" | "pass";
 
 export interface InboxItem {
   id: string;
@@ -96,6 +97,43 @@ async function loadContact(limit: number, status: string): Promise<InboxItem[]> 
   }));
 }
 
+/**
+ * Заявки на пропуск в бизнес-центр (20.09.2026). Вложений у них нет:
+ * номера документа мы не собираем, а копий и подавно.
+ */
+async function loadPass(limit: number, status: string): Promise<InboxItem[]> {
+  const where = status === "all" ? "" : "WHERE status = $2";
+  const params: unknown[] = [limit];
+  if (status !== "all") params.push(status);
+  const r = await pool.query(
+    `SELECT id, full_name, email, contact, role, doc_type, company, purpose, visit_at, status, created_at
+       FROM office_pass_requests ${where}
+      ORDER BY created_at DESC
+      LIMIT $1`,
+    params
+  );
+  return r.rows.map((row) => ({
+    id: row.id,
+    kind: "pass" as const,
+    topic: `Пропуск · ${VISITOR_ROLES.find((x) => x.value === row.role)?.label ?? row.role}`,
+    name: row.full_name,
+    email: row.email,
+    contact: row.contact,
+    // Всё, что нужно охране и хозяину кабинета, — одной строкой.
+    message: [
+      `Когда: ${row.visit_at}`,
+      `Документ: ${VISITOR_DOCS.find((x) => x.value === row.doc_type)?.label ?? row.doc_type}`,
+      row.company ? `Компания: ${row.company}` : null,
+      `Цель: ${row.purpose}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    status: row.status,
+    createdAt: new Date(row.created_at).toISOString(),
+    attachments: [],
+  }));
+}
+
 export async function GET(request: NextRequest) {
   const auth = await verifyAdmin();
   if (!auth.authorized) {
@@ -116,6 +154,7 @@ export async function GET(request: NextRequest) {
     const parts: InboxItem[][] = [];
     if (kind === "all" || kind === "career") parts.push(await loadCareer(limit, status));
     if (kind === "all" || kind === "contact") parts.push(await loadContact(limit, status));
+    if (kind === "all" || kind === "pass") parts.push(await loadPass(limit, status));
     const data = parts
       .flat()
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -123,12 +162,14 @@ export async function GET(request: NextRequest) {
 
     // Счётчики считаются по всем записям, а не по выборке: цифра
     // «ждут ответа» должна быть верной и при открытом фильтре.
-    const counts = { career: 0, contact: 0, total: 0 };
+    const counts = { career: 0, contact: 0, pass: 0, total: 0 };
     const c1 = await pool.query(`SELECT COUNT(*)::int AS n FROM job_applications WHERE status = 'new'`);
     const c2 = await pool.query(`SELECT COUNT(*)::int AS n FROM contact_requests WHERE status = 'new'`);
     counts.career = c1.rows[0]?.n ?? 0;
     counts.contact = c2.rows[0]?.n ?? 0;
-    counts.total = counts.career + counts.contact;
+    const c3 = await pool.query(`SELECT COUNT(*)::int AS n FROM office_pass_requests WHERE status = 'new'`);
+    counts.pass = c3.rows[0]?.n ?? 0;
+    counts.total = counts.career + counts.contact + counts.pass;
 
     return NextResponse.json({ success: true, data, counts });
   } catch (err) {
@@ -150,7 +191,8 @@ export async function PATCH(request: NextRequest) {
     if (!id || !kind || !KINDS.has(kind) || !status || !STATUSES.has(status)) {
       return NextResponse.json({ success: false, error: "Нужны id, тип и статус" }, { status: 400 });
     }
-    const table = kind === "career" ? "job_applications" : "contact_requests";
+    const table =
+      kind === "career" ? "job_applications" : kind === "pass" ? "office_pass_requests" : "contact_requests";
     const r = await pool.query(`UPDATE ${table} SET status = $2 WHERE id = $1 RETURNING id`, [id, status]);
     if (!r.rows.length) {
       return NextResponse.json({ success: false, error: "Обращение не найдено" }, { status: 404 });

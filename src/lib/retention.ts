@@ -24,6 +24,8 @@ import { deleteOldTelegramNonces } from "./telegram-login";
  */
 export interface RetentionReport {
   applications: number;
+  /** Заявки на пропуск в офис. */
+  passRequests: number;
   auditLogs: number;
   /** Зависшие неоплаченные платежи, помеченные просроченными. */
   expiredPayments: number;
@@ -84,8 +86,13 @@ export async function runRetentionPass(): Promise<RetentionReport> {
     "журнал администратора",
     `DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '${AUDIT_RETENTION_MONTHS} months'`
   );
+  // Заявки на пропуск — тот же срок, что у откликов; обещан в п. 3.7 Политики.
+  const passRequests = await purge(
+    "заявки на пропуск",
+    `DELETE FROM office_pass_requests WHERE created_at < NOW() - INTERVAL '${APPLICATION_RETENTION_MONTHS} months'`
+  );
   const expiredPayments = await count("зависшие платежи", expirePendingPayments);
   const deletedSessions = await count("мёртвые сессии", deleteExpiredSessions);
   const deletedNonces = await count("ключи входа через Telegram", deleteOldTelegramNonces);
-  return { applications, auditLogs, expiredPayments, deletedSessions, deletedNonces };
+  return { applications, passRequests, auditLogs, expiredPayments, deletedSessions, deletedNonces };
 }

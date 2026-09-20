@@ -138,6 +138,26 @@ export async function initDb(): Promise<void> {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    -- Заявки на пропуск в бизнес-центр (20.09.2026). Номера документов
+    -- здесь НЕТ намеренно: собираем тип документа и имя латиницей,
+    -- номер проверяют на стойке (см. VISITOR_DOCS в contacts.ts).
+    CREATE TABLE IF NOT EXISTS office_pass_requests (
+      id TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      contact TEXT,
+      role TEXT NOT NULL,
+      doc_type TEXT NOT NULL,
+      company TEXT,
+      purpose TEXT NOT NULL,
+      visit_at TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'new',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pass_created ON office_pass_requests(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_pass_status ON office_pass_requests(status);
+
     CREATE INDEX IF NOT EXISTS idx_jobapp_created ON job_applications(created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_jobapp_status ON job_applications(status);
 

@@ -1318,3 +1318,24 @@ body:has(.v) .ov-mark { border-radius: 12px; }
   .v *, .v *::before, .v *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .v-toast { animation: none; }
 }
+
+/* ── Офис и пропуск (20.09.2026) ──────────────────────────────────
+   Адрес набран <address> в несколько строк: так его читают и так
+   переписывают в такси. Форма пропуска — ниже, отдельным блоком. */
+.vc-office { display: grid; gap: 10px; justify-items: start; margin-top: 16px; }
+.vc-office-addr { display: grid; gap: 2px; font-style: normal; font-size: 17px; line-height: 1.45; }
+.vc-office-addr span:first-child { font-weight: 600; }
+.vc-office-form { margin-top: clamp(28px, 4vw, 44px); }
+.vc-office-form .v-h3 { margin-bottom: 14px; }
+
+/* Многострочное поле и согласие — их в корпусе ещё не было. */
+.v-textarea { min-height: 96px; resize: vertical; line-height: 1.5; padding-top: 14px; padding-bottom: 14px; }
+.v-check { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; }
+.v-check input {
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--v-blue);
+  cursor: pointer;
+}
+.v-check label { font-size: 15px; line-height: 1.5; color: var(--v-ink-2); cursor: pointer; }

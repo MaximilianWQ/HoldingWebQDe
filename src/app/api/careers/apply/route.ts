@@ -3,8 +3,6 @@ import { v4 as uuidv4 } from "uuid";
 import { pool } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/client-ip";
-import { sendJobApplicationEmail } from "@/lib/email";
-import { SUPPORT_DESK } from "@/lib/contacts";
 import { saveAttachment } from "@/lib/attachments";
 import { sendPushToAdmin } from "@/lib/push";
 import { VACANCIES, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@/lib/careers";
@@ -19,12 +17,15 @@ import { VACANCIES, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@
  *
  *   1. запись в `job_applications` — она же архив и она же резервная
  *      копия резюме. Пишется первой: пока строки нет, терять нечего;
- *   2. письмо владельцу с резюме во вложении — сигнал «пришёл отклик»;
- *   3. уведомление в админке — память, к которой можно вернуться.
+ *   2. уведомление в админке — память, к которой можно вернуться;
+ *   3. push администратору — сигнал «пришёл отклик».
  *
- * Падение почты или уведомления НЕ роняет отклик: человек нажал
- * кнопку один раз, и его труд не должен пропасть из-за нашего
- * внутреннего канала. Ошибку видно в журнале.
+ * ПИСЬМА АДМИНУ НЕТ (владелец, 20.09.2026): резюме открывается в
+ * разделе «Обращения», а квота Resend общая с кодами входа.
+ *
+ * Падение уведомления или push НЕ роняет отклик: человек нажал кнопку
+ * один раз, и его труд не должен пропасть из-за нашего внутреннего
+ * канала. Ошибку видно в журнале.
  *
  * ФАЙЛ ЛЕЖИТ В БАЗЕ — в общей таблице вложений `form_attachments`
  * (`src/lib/attachments.ts`), а не в колонке этой формы: админка
@@ -151,22 +152,10 @@ export async function POST(request: NextRequest) {
       data: bytes,
     });
 
-    const adminEmail = process.env.ADMIN_EMAIL || SUPPORT_DESK.email;
-    try {
-      await sendJobApplicationEmail({
-        to: adminEmail,
-        id,
-        vacancyTitle: vacancy.title,
-        name,
-        email,
-        contact: contact || null,
-        message: message || null,
-        resume: { filename, content: bytes },
-        resumeNote: null,
-      });
-    } catch (err) {
-      console.error("[CAREERS] notification email failed:", err);
-    }
+    // Письма админу здесь нет (владелец, 20.09.2026: «не надо отправлять
+    // по почте админу, просто push в админ-дашборд»). Обращение живёт в
+    // базе и видно в разделе «Обращения»; push зовёт туда. Квота Resend
+    // при этом общая с кодами входа — служебные письма её съедали.
 
     // Уведомление в админке: письмо можно пропустить, список — нет.
     try {

@@ -3,8 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { pool } from "@/lib/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { clientIpKey } from "@/lib/client-ip";
-import { sendOfficePassEmail } from "@/lib/email";
-import { SUPPORT_DESK, VISITOR_ROLES, VISITOR_DOCS } from "@/lib/contacts";
+import { VISITOR_ROLES, VISITOR_DOCS } from "@/lib/contacts";
 import { sendPushToAdmin } from "@/lib/push";
 
 /**
@@ -21,8 +20,9 @@ import { sendPushToAdmin } from "@/lib/push";
  * важно, чтобы имя в пропуске совпало с именем в документе. Поэтому
  * просим имя латиницей и ТИП документа.
  *
- * Путь тот же, что у откликов и обращений: сначала запись в базу,
- * потом письмо и push. Падение письма заявку не роняет.
+ * Путь тот же, что у откликов и обращений: запись в базу, затем push
+ * администратору. Письма админу нет (владелец, 20.09.2026) — заявка
+ * видна в разделе «Обращения».
  */
 const MAX_LEN = { fullName: 120, email: 254, contact: 120, company: 160, purpose: 1000, visitAt: 64 };
 
@@ -85,24 +85,11 @@ export async function POST(request: NextRequest) {
     );
 
     const roleLabel = VISITOR_ROLES.find((r) => r.value === role)?.label ?? role;
-    const docLabel = VISITOR_DOCS.find((d) => d.value === docType)?.label ?? docType;
 
-    try {
-      await sendOfficePassEmail({
-        to: process.env.ADMIN_EMAIL || SUPPORT_DESK.email,
-        id,
-        fullName,
-        email,
-        contact: contact || null,
-        company: company || null,
-        roleLabel,
-        docLabel,
-        purpose,
-        visitAt,
-      });
-    } catch (err) {
-      console.error("[OFFICE-PASS] notification email failed:", err);
-    }
+    // Письма админу здесь нет (владелец, 20.09.2026: «не надо отправлять
+    // по почте админу, просто push в админ-дашборд»). Обращение живёт в
+    // базе и видно в разделе «Обращения»; push зовёт туда. Квота Resend
+    // при этом общая с кодами входа — служебные письма её съедали.
 
     try {
       await sendPushToAdmin(`Пропуск: ${fullName}`, `${roleLabel} · ${visitAt}`, "/admin?tab=inbox");

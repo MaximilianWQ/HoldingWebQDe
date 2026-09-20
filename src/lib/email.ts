@@ -122,22 +122,9 @@ export async function sendTelegramLinkCodeEmail(email: string, code: string): Pr
 
 // ─── Generic transactional sender (plain HTML body) ───────────────
 
-/** Вложение письма: содержимое уезжает в base64. */
-export interface MailAttachment {
-  filename: string;
-  content: Buffer;
-}
-
-async function sendTransactional(
-  to: string,
-  subject: string,
-  html: string,
-  replyTo?: string,
-  attachments?: MailAttachment[]
-): Promise<boolean> {
+async function sendTransactional(to: string, subject: string, html: string, replyTo?: string): Promise<boolean> {
   if (!process.env.RESEND_API_KEY) {
-    const files = attachments?.length ? ` (+${attachments.length} файл)` : "";
-    console.log(`[DEV email → ${to}] ${subject}${files}`);
+    console.log(`[DEV email → ${to}] ${subject}`);
     return true;
   }
   try {
@@ -153,9 +140,6 @@ async function sendTransactional(
       subject: safeSubject,
       html,
       ...(replyTo ? { replyTo } : {}),
-      ...(attachments?.length
-        ? { attachments: attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64") })) }
-        : {}),
     });
     if (error) {
       console.error("[EMAIL] Resend error:", error);
@@ -221,147 +205,6 @@ export async function sendTrafficPackEmail(email: string, packTitle: string, das
       `<p><b>${packTitle}</b> оплачен. Гигабайты прибавляются к остатку отдельного ключа: срока у него нет, он работает, пока есть гигабайты.</p>
        <p style="margin-top:16px"><a href="${dashboardUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Открыть личный кабинет</a></p>`
     )
-  );
-}
-
-/**
- * Заявка с формы обратной связи — письмо в поддержку.
- *
- * До 19.09.2026 форма только писала строку в `contact_requests` и
- * создавала уведомление администратору в кабинете. Письмо не уходило
- * никуда, а страница обещала ответ «в течение четырёх рабочих часов»:
- * обещание держалось на том, что кто-то заметит колокольчик.
- *
- * `replyTo` — адрес написавшего: ответить можно прямо из почты, не
- * копируя адрес руками. Поля экранируются: они пришли из публичной
- * формы, и почтовый клиент не должен отрисовать чужую разметку.
- */
-export async function sendContactRequestEmail(params: {
-  to: string;
-  name: string;
-  email: string;
-  interest: string;
-  message: string | null;
-  id: string;
-}): Promise<boolean> {
-  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
-  const rows = [
-    ["Имя", params.name],
-    ["Почта", params.email],
-    ["Тема", params.interest],
-    ["Сообщение", params.message || "—"],
-    ["Заявка", params.id],
-  ]
-    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
-    .join("\n");
-
-  return sendTransactional(
-    params.to,
-    `Заявка с сайта: ${params.interest}`,
-    wrapHtml(
-      "Заявка с формы обратной связи",
-      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
-<p style="margin-top:16px;color:#444">Ответьте на это письмо — оно уйдёт прямо человеку.</p>`
-    ),
-    params.email
-  );
-}
-
-/**
- * Отклик на вакансию — письмо владельцу с резюме во вложении.
- *
- * Владелец, 19.09.2026: «чтобы сразу же мне на почту автоматом этот
- * отклик дал именно мне». Поэтому письмо идёт на ADMIN_EMAIL, а не в
- * общую поддержку, и резюме едет прикреплённым файлом: открыть его
- * нужно там же, где пришло уведомление, а не идти за ним в админку.
- *
- * Адрес кандидата стоит в Reply-To: ответ из почтовой программы
- * уходит прямо человеку, без копирования адреса руками.
- *
- * Значения экранируются: имя и сопроводительное письмо пришли из
- * открытой формы, и почтовая программа не должна выполнить то, что
- * туда вписали.
- */
-export async function sendJobApplicationEmail(params: {
-  to: string;
-  id: string;
-  vacancyTitle: string;
-  name: string;
-  email: string;
-  contact: string | null;
-  message: string | null;
-  resume: MailAttachment | null;
-  resumeNote: string | null;
-}): Promise<boolean> {
-  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
-  const rows = [
-    ["Вакансия", params.vacancyTitle],
-    ["Имя", params.name],
-    ["Почта", params.email],
-    ["Связь", params.contact || "—"],
-    ["О себе", params.message || "—"],
-    ["Резюме", params.resume ? params.resume.filename : params.resumeNote || "—"],
-    ["Отклик", params.id],
-  ]
-    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
-    .join("\n");
-
-  return sendTransactional(
-    params.to,
-    `Отклик на вакансию: ${params.vacancyTitle}`,
-    wrapHtml(
-      "Отклик с сайта",
-      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
-<p style="margin-top:16px;color:#444">Резюме — во вложении. Ответьте на это письмо, и ответ уйдёт прямо кандидату.</p>`
-    ),
-    params.email,
-    params.resume ? [params.resume] : undefined
-  );
-}
-
-/**
- * Заявка на пропуск в бизнес-центр — письмо админу.
- *
- * Номера документа в письме нет: мы его не собираем (см.
- * `src/app/api/office-pass/route.ts`). Всё, что нужно охране, — имя
- * латиницей, тип документа и время визита.
- */
-export async function sendOfficePassEmail(params: {
-  to: string;
-  id: string;
-  fullName: string;
-  email: string;
-  contact: string | null;
-  company: string | null;
-  roleLabel: string;
-  docLabel: string;
-  purpose: string;
-  visitAt: string;
-}): Promise<boolean> {
-  const esc = (v: string) => v.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
-  const rows = [
-    ["Имя для пропуска", params.fullName],
-    ["Кем приходит", params.roleLabel],
-    ["Документ на входе", params.docLabel],
-    ["Компания", params.company || "—"],
-    ["Когда", params.visitAt],
-    ["Цель визита", params.purpose],
-    ["Почта", params.email],
-    ["Связь", params.contact || "—"],
-    ["Заявка", params.id],
-  ]
-    .map(([k, v]) => `<tr><td valign="top"><b>${k}</b></td><td>${esc(String(v))}</td></tr>`)
-    .join("\n");
-
-  return sendTransactional(
-    params.to,
-    `Пропуск в офис: ${params.fullName}`,
-    wrapHtml(
-      "Заявка на пропуск",
-      `<table cellpadding="6" style="font-size:13px"><tbody>${rows}</tbody></table>
-<p style="margin-top:16px;color:#444">Ответьте на это письмо — оно уйдёт прямо человеку.</p>`
-    ),
-    params.email
   );
 }
 

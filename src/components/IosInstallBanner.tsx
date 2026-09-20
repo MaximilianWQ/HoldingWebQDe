@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import BrandMark from "@/components/pixel/BrandMark";
 import { requestOverlay, releaseOverlay, whenConsentSettled, whenEngaged, snoozed, snooze } from "@/lib/overlay-queue";
+import { holdScroll } from "@/lib/scroll-lock";
 
 const SNOOZE_KEY = "ios-install-dismissed";
 
@@ -51,15 +52,14 @@ export default function IosInstallBanner() {
 
   useEffect(() => {
     if (!guide) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const release = holdScroll();
     doneRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") dismiss();
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      release();
       window.removeEventListener("keydown", onKey);
     };
     // dismiss стабилен по смыслу: пишет в хранилище и закрывает слот.

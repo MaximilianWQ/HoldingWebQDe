@@ -22,7 +22,7 @@ export default function VShell({
     <div className="v">
       <ToastProvider>
         <a href="#main" className="b-skip">К содержимому</a>
-        <VHeader account={account} />
+        <VHeader account={account} work={work} />
         <main id="main">{children}</main>
         <VFooter slim={work} />
       </ToastProvider>

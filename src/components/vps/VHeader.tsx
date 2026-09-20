@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Logo from "./Logo";
-import { HEAD_LINKS, MENU_LINKS, TRIAL, currentSection } from "./links";
+import { HEAD_LINKS, WORK_HEAD_LINKS, MENU_LINKS, TRIAL, currentSection } from "./links";
 
 /**
  * Шапка-островок: скруглённая стеклянная капсула над страницей.
@@ -13,7 +13,7 @@ import { HEAD_LINKS, MENU_LINKS, TRIAL, currentSection } from "./links";
  * Телефон — круглая кнопка меню; меню — скруглённая карточка под капсулой
  * с затемнением фона. При прокрутке капсула уплотняется.
  */
-export default function VHeader({ account = "guest" }: { account?: "guest" | "member" }) {
+export default function VHeader({ account = "guest", work = false }: { account?: "guest" | "member"; work?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const headRef = useRef<HTMLElement>(null);
@@ -67,7 +67,9 @@ export default function VHeader({ account = "guest" }: { account?: "guest" | "me
   // Открытый раздел, которого нет в узком списке шапки, показывается
   // отдельным пунктом — иначе на нём дорожка пустая и непонятно, где ты.
   const extra = currentSection(pathname);
-  const navLinks = extra ? [...HEAD_LINKS, extra] : HEAD_LINKS;
+  // На рабочих экранах — свой список, без «Главной» (см. WORK_HEAD_LINKS).
+  const base = work ? WORK_HEAD_LINKS : HEAD_LINKS;
+  const navLinks = extra && !base.some((l) => l.href === extra.href) ? [...base, extra] : base;
   const cabinet = account === "member"
     ? { href: "/dashboard", label: "Кабинет" }
     : { href: "/auth", label: "Войти" };
@@ -110,7 +112,7 @@ export default function VHeader({ account = "guest" }: { account?: "guest" | "me
       <div className="v-menu-scrim" hidden={!open} onClick={() => setOpen(false)} aria-hidden />
       <nav id="v-menu" className="v-menu" hidden={!open} aria-label="Разделы сайта">
         <ul>
-          {MENU_LINKS.map((l, i) => (
+          {(work ? WORK_HEAD_LINKS : MENU_LINKS).map((l, i) => (
             <li key={l.href} style={{ ["--i" as string]: i }}>
               <Link href={l.href} aria-current={current(l.href)} onClick={() => setOpen(false)}>{l.label}</Link>
             </li>

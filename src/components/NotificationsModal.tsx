@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef, type CSSProperties } from "react";
 import Icon from "@/components/pixel/Icon";
+import { holdScroll } from "@/lib/scroll-lock";
 
 export interface Notification {
   id: string;
@@ -135,15 +136,9 @@ export default function NotificationsModal({ open, onClose, onUnreadCountChange 
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  // Lock body scroll when open on mobile
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+  // Блокировка прокрутки — общая, со счётчиком (`scroll-lock.ts`).
+  // Своя ставила пустую строку и затирала блокировку соседнего окна.
+  useEffect(() => (open ? holdScroll() : undefined), [open]);
 
   if (!open && !visible) return null;
 

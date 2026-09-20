@@ -17,6 +17,7 @@ import CabinetPayments from "./CabinetPayments";
 import CabinetFriends from "./CabinetFriends";
 import CabinetSettings from "./CabinetSettings";
 import "./cabinet-vps.css";
+import { formatBytes, useBypassLive } from "@/lib/use-bypass";
 
 /**
  * Кабинет на корпусе Atlas Secure VPS (владелец, 17.09.2026: «очень
@@ -70,6 +71,9 @@ function DashboardViewInner() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [unlinkStep, setUnlinkStep] = useState(0);
+  // Остаток обхода для плашки профиля. Панель спрашивается после
+  // отрисовки: экран не ждёт её, как и весь остальной кабинет.
+  const bypass = useBypassLive(true);
   const [unlinking, setUnlinking] = useState(false);
   const [tgLink, setTgLink] = useState<TgLinkState>({ state: "idle" });
   const [showNotifications, setShowNotifications] = useState(false);
@@ -239,7 +243,19 @@ function DashboardViewInner() {
   // в тот ли аккаунт вошёл. Обрезанный префикс («ivan») этого не даёт.
   const name = data.email;
   const initial = (data.email.trim().charAt(0) || "A").toUpperCase();
-  const balanceStr = data.balance.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const endShort = new Date(data.subscriptionEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+  /**
+   * Остаток обхода в плашке. Панель спрашиваем после отрисовки, и пока
+   * ответа нет — строки просто нет: пустое место лучше, чем прочерк,
+   * который человек примет за «ничего не осталось».
+   */
+  const bypassLabel = bypass.live
+    ? bypass.live.unlimited
+      ? "без лимита"
+      : bypass.live.remainingBytes != null
+        ? formatBytes(bypass.live.remainingBytes)
+        : null
+    : null;
   const unreadLabel = unreadCount > 9 ? "9+" : String(unreadCount);
   const tgError = tgLink.state === "error" ? tgLink.error : null;
 
@@ -265,19 +281,36 @@ function DashboardViewInner() {
                   </button>
                 )}
               </div>
-              <span className="v-balance vc-balance">
-                Баланс: <b>{balanceStr} ₽</b>
+              {/* Вместо баланса — то, за чем человек сюда и заходит
+                  (владелец, 20.09.2026: «баланс тут не нужен»): до
+                  какого числа работает подписка и сколько осталось
+                  трафика обхода. Баланс живёт в боте и на сайте его
+                  всё равно не потратить. */}
+              <span className="vc-facts">
+                <span className="vc-fact">
+                  <i>Подписка</i>
+                  <b>{data.isExpired ? "закончилась" : `до ${endShort}`}</b>
+                </span>
+                {bypassLabel && (
+                  <span className="vc-fact">
+                    <i>Обход</i>
+                    <b>{bypassLabel}</b>
+                  </span>
+                )}
               </span>
             </div>
           </div>
           <button
             type="button"
-            className="v-btn v-btn-soft v-btn-sm"
+            className="v-btn v-btn-soft v-btn-sm vc-bell"
             onClick={() => setShowNotifications(true)}
             aria-label={unreadCount > 0 ? `Уведомления: ${unreadLabel} новых` : "Уведомления"}
           >
             <Icon name="bell" size={16} />
-            {unreadCount > 0 && <span className="v-badge v-badge-red">{unreadLabel}</span>}
+            {/* Счётчик — маленький кружок в углу кнопки. Прежняя плашка
+                `v-badge` высотой 30px не помещалась в кнопку 44px и
+                разъезжала её (владелец, 20.09.2026). */}
+            {unreadCount > 0 && <span className="vc-bell-n" aria-hidden>{unreadLabel}</span>}
           </button>
         </div>
 

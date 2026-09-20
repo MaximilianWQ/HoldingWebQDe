@@ -503,3 +503,33 @@
 }
 .vc-unlink-h { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
 .vc-unlink .vc-actions { margin: 2px 0; }
+
+/* ── Плашка профиля: срок и обход вместо баланса (20.09.2026) ──────
+   Баланс из плашки убран: он живёт в боте, на сайте его не потратить.
+   Вместо него то, за чем человек сюда заходит — до какого числа
+   работает подписка и сколько осталось трафика обхода. */
+.vc-facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 4px; }
+.vc-fact { display: inline-flex; align-items: baseline; gap: 6px; font-size: 15px; }
+.vc-fact i { font-style: normal; color: var(--v-ink-3); font-size: 14px; }
+.vc-fact b { font-weight: 600; letter-spacing: -0.01em; }
+
+/* Счётчик уведомлений — кружок в углу кнопки. Плашка `v-badge`
+   высотой 30px не помещалась в кнопку 44px и разъезжала её. */
+.vc-bell { position: relative; }
+.vc-bell-n {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--v-red);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px var(--v-bg);
+}

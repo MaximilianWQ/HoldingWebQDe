@@ -468,6 +468,18 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
   animation: v-fade 320ms var(--v-ease) both;
 }
 .v-menu-scrim[hidden] { display: none; }
+/* `cursor: pointer` тут не украшение (владелец, 20.09.2026: «меню
+   невозможно закрыть»). Safari на iPhone не шлёт click на обычный div
+   без него — нажатие мимо меню просто не доходило до обработчика, и
+   закрыть меню было нечем. */
+.v-menu-scrim { cursor: pointer; }
+
+/* В установленном приложении бургер-меню не показываем вовсе
+   (владелец: «оно не нужно в мини-приложении»). Приложение — это
+   кабинет: разделы у него свои, а «Кабинет» и так в шапке. */
+@media (display-mode: standalone) {
+  .v-burger, .v-menu, .v-menu-scrim { display: none !important; }
+}
 @keyframes v-fade { from { opacity: 0; } }
 .v-menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .v-menu li { animation: v-menu-item 460ms var(--v-ease) both; animation-delay: calc(var(--i, 0) * 28ms + 60ms); }

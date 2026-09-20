@@ -67,17 +67,57 @@ export function releaseOverlay(id: OverlayId): void {
  *
  * Владелец, 11.09.2026: «каждый раз, когда пользователь заходит на
  * сайт, он должен соглашаться». Поэтому выбор хранится в
- * sessionStorage — до закрытия браузера (вкладки), а не навсегда:
- * новый заход — новый вопрос. По страницам внутри визита карточка
- * не повторяется.
+ * ПАМЯТЬ — 5 ДНЕЙ (владелец, 20.09.2026: «на любом устройстве очень
+ * часто высвечивается, надо запоминать хотя бы на пять дней»).
+ *
+ * Раньше выбор жил в `sessionStorage`, то есть до закрытия вкладки:
+ * человек отвечал на вопрос заново при каждом заходе, а на телефоне —
+ * практически при каждом открытии сайта. Теперь ответ лежит в
+ * `localStorage` с отметкой времени и действует пять суток.
+ *
+ * Срок, а не «навсегда»: согласие на обработку данных положено
+ * переспрашивать, и пять дней — разумная середина между «раз в жизни»
+ * и «каждый заход».
  */
+const CONSENT_TTL_MS = 5 * 24 * 60 * 60 * 1000;
+
 export function hasCookieConsent(): boolean {
   try {
-    return sessionStorage.getItem(CONSENT_KEY) !== null;
+    // Старый ключ визита уважаем до конца вкладки — чтобы у тех, кто
+    // уже ответил сегодня, карточка не выскочила снова после выкладки.
+    if (sessionStorage.getItem(CONSENT_KEY) !== null) return true;
+    const raw = localStorage.getItem(CONSENT_KEY);
+    if (!raw) return false;
+    const at = Number(raw.split("|")[1]);
+    if (!Number.isFinite(at)) return false;
+    return Date.now() - at < CONSENT_TTL_MS;
   } catch {
     // Хранилище недоступно: считаем согласие данным, иначе остальные
     // карточки не покажутся никогда.
     return true;
+  }
+}
+
+/** Значение выбора: "1" — принял, "0" — отклонил; null — ещё не отвечал. */
+export function cookieConsentValue(): "1" | "0" | null {
+  try {
+    const s = sessionStorage.getItem(CONSENT_KEY);
+    if (s === "1" || s === "0") return s;
+    const raw = localStorage.getItem(CONSENT_KEY);
+    const v = raw?.split("|")[0];
+    return v === "1" || v === "0" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Запомнить ответ: на вкладку и на пять суток. */
+export function rememberCookieConsent(value: "1" | "0"): void {
+  try {
+    sessionStorage.setItem(CONSENT_KEY, value);
+    localStorage.setItem(CONSENT_KEY, `${value}|${Date.now()}`);
+  } catch {
+    // Хранилище недоступно — выбор проживёт до перезагрузки страницы.
   }
 }
 

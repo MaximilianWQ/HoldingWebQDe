@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  CONSENT_KEY, announceConsentSettled, hasCookieConsent, requestOverlay, releaseOverlay,
+  announceConsentSettled, hasCookieConsent, rememberCookieConsent, requestOverlay, releaseOverlay,
 } from "@/lib/overlay-queue";
+import { holdScroll } from "@/lib/scroll-lock";
 
 /**
  * Согласие на cookie — первое в очереди нижних карточек.
@@ -37,6 +38,16 @@ export default function CookieConsent() {
 
   useEffect(() => {
     if (hasCookieConsent()) return;
+    // В установленном приложении карточку не показываем (владелец,
+    // 20.09.2026). Человек уже прошёл согласие в браузере, когда
+    // добавлял приложение на экран «Домой», а во весь экран телефона
+    // она там особенно мешает: приложение должно открываться сразу.
+    if (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true
+    ) {
+      return;
+    }
     let cancel = () => {};
     const t = window.setTimeout(() => {
       cancel = requestOverlay("cookie", () => setVisible(true));
@@ -50,27 +61,22 @@ export default function CookieConsent() {
   // Диалог: Esc, блокировка прокрутки, фокус.
   useEffect(() => {
     if (!details) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const release = holdScroll();
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setDetails(false);
     };
     window.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      release();
       window.removeEventListener("keydown", onKey);
       moreRef.current?.focus();
     };
   }, [details]);
 
-  // Выбор — до конца визита (sessionStorage), см. hasCookieConsent.
+  // Выбор запоминается на пять суток (см. hasCookieConsent).
   const settle = (value: "1" | "0") => {
-    try {
-      sessionStorage.setItem(CONSENT_KEY, value);
-    } catch {
-      // Хранилище недоступно: выбор действует до перезагрузки страницы.
-    }
+    rememberCookieConsent(value);
     setDetails(false);
     setVisible(false);
     releaseOverlay("cookie");

@@ -1,5 +1,8 @@
 import { pool } from "./db";
 import { APPLICATION_RETENTION_MONTHS } from "./careers";
+import { expirePendingPayments } from "./store";
+import { deleteExpiredSessions } from "./session-store";
+import { deleteOldTelegramNonces } from "./telegram-login";
 
 /**
  * Уборщик по срокам хранения.
@@ -22,6 +25,11 @@ import { APPLICATION_RETENTION_MONTHS } from "./careers";
 export interface RetentionReport {
   applications: number;
   auditLogs: number;
+  /** Зависшие неоплаченные платежи, помеченные просроченными. */
+  expiredPayments: number;
+  /** Мёртвые сессии и ключи входа через Telegram. */
+  deletedSessions: number;
+  deletedNonces: number;
 }
 
 /** Журнал действий администратора. Срок назван в Политике, п. 3.2. */
@@ -39,6 +47,34 @@ async function purge(label: string, sql: string): Promise<number> {
   }
 }
 
+/**
+ * Уборка, которая раньше висела на внешнем cron (20.09.2026).
+ *
+ * `/api/cron/cleanup-expired` правильно отказывается работать без
+ * `CRON_SECRET`, а секрет не задан — значит уборка не делалась вовсе:
+ * зависшие платежи оставались «в ожидании», мёртвые сессии и ключи
+ * входа копились. Подписки от этого не страдали (панель истекает сама,
+ * сверку крутит воркер), но мусор рос.
+ *
+ * Переносим внутрь: уборщик уже ходит раз в сутки под замком, а внешний
+ * вызов — это секрет, который можно потерять, и ещё одна движущаяся
+ * часть. Маршрут остаётся для ручного запуска, но больше ни от чего не
+ * зависит.
+ *
+ * Прохода синхронизации здесь нет намеренно: его и так делает воркер
+ * каждую минуту.
+ */
+async function count(label: string, fn: () => Promise<number>): Promise<number> {
+  try {
+    const n = await fn();
+    if (n > 0) console.log(`[RETENTION] ${label}: ${n}`);
+    return n;
+  } catch (err) {
+    console.error(`[RETENTION] ${label} error:`, err instanceof Error ? err.message : err);
+    return 0;
+  }
+}
+
 export async function runRetentionPass(): Promise<RetentionReport> {
   const applications = await purge(
     "отклики на вакансии",
@@ -48,5 +84,8 @@ export async function runRetentionPass(): Promise<RetentionReport> {
     "журнал администратора",
     `DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '${AUDIT_RETENTION_MONTHS} months'`
   );
-  return { applications, auditLogs };
+  const expiredPayments = await count("зависшие платежи", expirePendingPayments);
+  const deletedSessions = await count("мёртвые сессии", deleteExpiredSessions);
+  const deletedNonces = await count("ключи входа через Telegram", deleteOldTelegramNonces);
+  return { applications, auditLogs, expiredPayments, deletedSessions, deletedNonces };
 }

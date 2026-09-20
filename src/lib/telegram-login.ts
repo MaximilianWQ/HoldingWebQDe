@@ -87,6 +87,49 @@ export async function confirmTelegramLogin(
   };
 }
 
+/**
+ * Посмотреть запрос на вход, НЕ подтверждая его (20.09.2026).
+ *
+ * Понадобилось после разбора команды бота. `confirmTelegramLogin`
+ * подтверждает вход и только потом возвращает четыре цифры — значит
+ * бот мог показать их человеку лишь ПОСЛЕ того, как вход уже разрешён.
+ * Смысл этих цифр в том и был, чтобы человек сверил их ДО того, как
+ * что-то подтвердит: иначе одно нажатие «Старт» по присланной ссылке
+ * впускает чужого в аккаунт.
+ *
+ * Поэтому шага два: бот сначала смотрит (этот запрос), показывает код
+ * и устройство, и только на кнопку «Подтвердить» вызывает
+ * `confirmTelegramLogin`. Здесь не пишется ничего.
+ */
+export interface TelegramLoginPeek {
+  confirmCode: string | null;
+  requestIp: string | null;
+  requestUserAgent: string | null;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export async function peekTelegramLogin(nonce: string, now: Date = new Date()): Promise<TelegramLoginPeek | null> {
+  if (!isValidNonce(nonce)) return null;
+  await waitForDb();
+  const r = await pool.query(
+    `SELECT confirm_code, request_ip, request_ua, created_at, expires_at
+       FROM telegram_auth_nonces
+      WHERE nonce = $1 AND user_id IS NULL AND used = FALSE AND browser_hash IS NOT NULL AND expires_at > $2
+      LIMIT 1`,
+    [nonce, now]
+  );
+  const row = r.rows[0] as Record<string, unknown> | undefined;
+  if (!row) return null;
+  return {
+    confirmCode: (row.confirm_code as string) ?? null,
+    requestIp: (row.request_ip as string) ?? null,
+    requestUserAgent: (row.request_ua as string) ?? null,
+    createdAt: new Date(row.created_at as string).toISOString(),
+    expiresAt: new Date(row.expires_at as string).toISOString(),
+  };
+}
+
 export type TelegramClaim =
   | { status: "ok"; userId: string }
   | { status: "pending" | "expired" | "used" | "invalid" };

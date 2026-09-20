@@ -5,6 +5,13 @@
 (bypass)». Составлено по коду (`app/services/remnawave_api.py`,
 `remnawave_premium.py`, `remnawave_bypass.py`, `purchase_flow.py`).
 
+> **Правка 20.09.2026 по разбору команды бота.** Таблица в разделе 2
+> противоречила поправке в шапке: там стояло «`REMNAWAVE_PREMIUM_DEVICE_LIMIT`
+> (деф. 5)», тогда как в коде лимит зависит от тарифа (Basic 10, Plus 14).
+> Исправлено в самой таблице; из примера JSON убрано поле `deviceLimit` —
+> панель 3.x его не принимает. Какой лимит получит ОБЩАЯ сущность после
+> связки — вопрос 3 раздела 13 ТЗ, он ещё открыт.
+>
 > **Сверено с кодом бота `ATCbot main @ 4b00e79a` (17.09.2026).** Поправки к
 > тексту ниже: (1) бот ставит один тег — премиуму тарифный (`BASIC`, `PLUS`,
 > `TRIAL`, `COMBO_BASIC`, `COMBO_PLUS`, `app/services/tariffs.py`), обходу —
@@ -49,8 +56,7 @@
   "trafficLimitStrategy": "NO_RESET",
   "status": "ACTIVE",
   "expireAt": "2026-10-13T12:00:00Z",
-  "hwidDeviceLimit": 5,
-  "deviceLimit": 5,
+  "hwidDeviceLimit": 10,
   "telegramId": 738398394,
   "description": "Premium via bot (basic)",
   "activeInternalSquads": ["<squad uuid>"],
@@ -64,7 +70,7 @@
 |---|---|---|
 | `trafficLimitBytes` | `0` = **безлимит** | конкретный лимит в байтах (пакет ГБ: 1/10/75 ГБ и т.п.; триал — 500 МБ) |
 | `expireAt` | дата окончания подписки | **«бесконечность»** `2099-12-31T23:59:59Z` (обход лимитируется трафиком, не временем) |
-| `deviceLimit` / `hwidDeviceLimit` | `REMNAWAVE_PREMIUM_DEVICE_LIMIT` (деф. 5) | `REMNAWAVE_BYPASS_DEVICE_LIMIT` (деф. 5) |
+| `hwidDeviceLimit` | **зависит от тарифа: Basic 10, Plus 14** (`config.PREMIUM_DEVICE_LIMITS`); `REMNAWAVE_PREMIUM_DEVICE_LIMIT` (деф. 5) — только запасное значение, когда тариф не распознан | `REMNAWAVE_BYPASS_DEVICE_LIMIT` (деф. 5) |
 | `activeInternalSquads` | `REMNAWAVE_MAIN_SQUAD_UUID` (основные сервера) | `REMNAWAVE_CLIENTS_SQUAD_UUID` / `REMNAWAVE_SQUAD_UUID` (серверы обхода) |
 | `externalSquadUuid` | `REMNAWAVE_PREMIUM_EXTERNAL_SQUAD_UUID` (если задан) — переключает шаблон подписки на «Unlimited» | не ставится |
 | `description` | `Premium via bot ({tariff})` | `Bypass via bot ({tariff})` |

@@ -8,6 +8,15 @@ import { startFlow, endFlow, info, warn } from "@/lib/panel-log";
 // Hard cap per call: anything beyond ~13 months is a caller-side bug.
 const MAX_DAYS = 400;
 
+/** Срок для человека: «3 дн.», «10 мин.», «2 ч.». */
+function humanSpan(days: number): string {
+  const minutes = Math.round(days * 24 * 60);
+  if (minutes < 60) return `${Math.max(1, minutes)} мин.`;
+  if (minutes < 24 * 60) return `${Math.round(minutes / 60)} ч.`;
+  const whole = days % 1 === 0 ? days : Math.round(days * 10) / 10;
+  return `${whole} дн.`;
+}
+
 /**
  * POST /api/bot/extend — the bot extends a subscription after a payment
  * in the bot (contract: SYNC_TZ.md §3).
@@ -60,10 +69,14 @@ export async function POST(request: NextRequest) {
       if (sync.ok && sync.subscriptionUrl) user = { ...user, subscriptionUrl: sync.subscriptionUrl };
 
       const planLabel = plan === "plus" ? "Plus" : plan === "basic" ? "Basic" : "";
+      // Срок пишется по-человечески (20.09.2026). `days` бывает дробным:
+      // минутные админские выдачи приходят как `минуты / 1440`, и
+      // «продлена на 0.006944444444444444 дн.» человеку показывать
+      // нельзя. Меньше суток — считаем в минутах.
       await createNotificationForUser(
         user.id,
         "Подписка обновлена",
-        `Подписка${planLabel ? ` ${planLabel}` : ""} продлена на ${days} дн. через Telegram.`
+        `Подписка${planLabel ? ` ${planLabel}` : ""} продлена на ${humanSpan(days)} через Telegram.`
       );
     } else {
       info(ctx, "bot-purchase.duplicate", { sourceId: res.sourceId });

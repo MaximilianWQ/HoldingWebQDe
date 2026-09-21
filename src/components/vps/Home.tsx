@@ -11,7 +11,6 @@ import ProofBar from "./home/ProofBar";
 import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
-import RackGame from "./home/RackGame";
 import { BRAND, SUPPORT_TG } from "./links";
 import { DEVICE_LIMIT, PLANS, formatRub, planContent, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
@@ -126,11 +125,13 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
             <p className="vh-hero-note">{t.hero.note}</p>
           </div>
 
-          {/* Кадра с ноутбуком и телефоном здесь нет: снят 19.09.2026
-              по решению владельца («сами рендеры не к месту»). Сам
-              рендер и его сборка остались — design/blender/hero_build.py
-              и public/media/hero/stage-*.v3.webp, — так что вернуть его
-              можно одной строкой, не пересчитывая сцену. */}
+          {/* Предмета на первом экране нет.
+              Кадр с ноутбуком и телефоном сняли 19.09.2026 («сами
+              рендеры не к месту»); 21.09.2026 сюда поставили стеклянный
+              предмет и в тот же день сняли — владелец посмотрел на
+              локалхосте и сказал: на главной не нужен, на входе нужен.
+              Сцена цела — design/blender/glass_build.py, — и тот же
+              кадр живёт на экране входа. */}
 
           <StoreBadges availableIn={d.store.availableIn} />
         </div>
@@ -157,10 +158,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 05 · соберите стойку — мини-игра */}
-      <RackGame locale={locale} />
-
-      {/* 06 · тарифы */}
+      {/* 05 · тарифы */}
       <section className="v-section v-center v-reveal" id="tariffs" aria-labelledby="v-plans">
         <div className="v-wrap">
           <h2 id="v-plans" className="v-h2">{t.plans.title}</h2>

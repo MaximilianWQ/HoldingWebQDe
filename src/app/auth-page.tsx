@@ -739,6 +739,23 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
 
   return (
     <div className="v-section av-section v-glow">
+      {/* Предмет из Blender. На широком экране он стоит рядом с
+          карточкой, на узком — над ней. Атрибут `aria-hidden`: это
+          украшение, и диктору о нём говорить нечего. */}
+      <div className="av-split">
+        <div className="av-art" aria-hidden>
+          <img
+            src="/media/glass/auth.v1-1400.webp"
+            srcSet="/media/glass/auth.v1-700.webp 700w, /media/glass/auth.v1-1400.webp 1400w"
+            sizes="(min-width: 1024px) 46vw, 92vw"
+            alt=""
+            width={1400}
+            height={1400}
+            decoding="async"
+            fetchPriority="low"
+            draggable={false}
+          />
+        </div>
       <div className="v-wrap av-wrap">
         <div className="av-card">
           {/* ── Почта, пароль, код, passkey, Telegram ─────────────── */}
@@ -1129,6 +1146,7 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

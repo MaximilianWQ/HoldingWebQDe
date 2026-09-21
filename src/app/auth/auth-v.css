@@ -248,3 +248,52 @@
 }
 .au-tg-t { margin: 0; font-size: 14px; line-height: 1.5; color: var(--v-ink-3); max-width: 38ch; }
 .au-tg-t code { font-size: 13px; overflow-wrap: anywhere; }
+
+/* ─── Предмет рядом с карточкой (21.09.2026) ────────────────────────
+   Рендер из Blender: рифлёное стекло, кобальтовый диск, кольцо учётной
+   записи. Источник сцены — design/blender/glass_build.py.
+
+   До 1024 предмет стоит НАД карточкой, а не прячется: спрятанная
+   картинка всё равно скачивается, и мы бы платили её весом ни за что.
+   Зато на узком экране он меньше и служит шапкой. */
+
+.av-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(8px, 3vw, 24px);
+  width: 100%;
+  align-items: center;
+}
+
+.av-art {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.av-art img {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+@media (min-width: 1024px) {
+  .av-split {
+    grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+    gap: clamp(24px, 4vw, 64px);
+    max-width: 1100px;
+    margin-inline: auto;
+    padding-inline: var(--v-gutter);
+  }
+  .av-art img {
+    max-width: 520px;
+  }
+  .av-wrap {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+  .av-card {
+    margin-inline: 0;
+  }
+}

@@ -1,7 +1,7 @@
 "use server";
 
 import { generateCode, sendVerificationEmail } from "@/lib/email";
-import { saveCode, userHasPassword } from "@/lib/store";
+import { saveCode } from "@/lib/store";
 import { isDisposableEmail } from "@/lib/disposable-emails";
 import { checkRateLimit, rateLimitByEmail, rateLimitByIp, rateLimitEmailDaily } from "@/lib/rate-limit";
 import { completeEmailSignIn, DISPOSABLE_EMAIL_ERROR } from "@/lib/auth-flow";
@@ -15,7 +15,6 @@ export interface SendCodeState {
   success: boolean;
   error?: string;
   email?: string;
-  hasPassword?: boolean;
 }
 
 /**
@@ -70,11 +69,15 @@ export async function sendCodeAction(
       return { success: false, error: DISPOSABLE_EMAIL_ERROR };
     }
 
-    // If user already has a password, redirect to login instead of sending code
-    const hasPassword = await userHasPassword(email);
-    if (hasPassword) {
-      return { success: false, hasPassword: true, email };
-    }
+    // ЗАПРЕТ СНЯТ 21.09.2026. Раньше тут стояло: «у человека есть
+    // пароль — код не шлём, пусть входит паролем». Поля пароля на
+    // экране входа больше нет (владелец: «убрать поле пароль, кнопка
+    // Войти или зарегистрироваться»), и этот запрет оставил бы без
+    // входа всех, кто пароль когда-то завёл.
+    //
+    // Безопасность от этого не падает: доступ к почтовому ящику и
+    // раньше давал вход — через восстановление пароля тем же письмом.
+    // Код на почту не слабее того, что уже было.
 
     const emailLimit = rateLimitByEmail(email);
     if (!emailLimit.allowed) {

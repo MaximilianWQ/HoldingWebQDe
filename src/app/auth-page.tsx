@@ -34,12 +34,17 @@ async function guardAction<S extends { success: boolean; error?: string }>(
  *
  * Логика прежнего экрана перенесена без изменений: server actions
  * sendCodeAction / verifyCodeAction, запросы /api/auth/*, passkey,
- * реферальный код, отпечаток устройства, редиректы. Шаги «почта» и
- * «пароль» прежнего мастера объединены в один экран `start` — сервер
- * как раньше сам решает, есть ли у почты пароль (`hasPassword`), но
- * теперь это просто подсказка под тем же полем, без перехода на другой
- * шаг. Код по-прежнему набирается в одно скрытое поле поверх шести
- * клеток — так iOS/Android подставляют код из письма.
+ * реферальный код, отпечаток устройства, редиректы.
+ *
+ * ПАРОЛЯ НА ЭТОМ ЭКРАНЕ НЕТ (владелец, 21.09.2026). Вход и регистрация
+ * слиты в один путь: почта → код на письмо → внутри. Один путь для
+ * новых и для старых — `completeEmailSignIn` заводит человека, если его
+ * нет, и просто пускает, если есть. Пароль остаётся у тех, кто его
+ * завёл, и меняется в кабинете; шаги `set-password` и `reset-password`
+ * никуда не делись, на них приходят после кода.
+ *
+ * Код набирается в одно скрытое поле поверх шести клеток — так
+ * iOS/Android подставляют код из письма.
  */
 
 type AuthStep =
@@ -277,10 +282,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
 
   // Пароль — то же поле, что и на прежнем шаге «Вход по паролю»: живёт
   // на общем экране рядом с почтой.
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const pwRef = useRef<HTMLInputElement>(null);
 
   const [passkeyLoading, setPasskeyLoading] = useState(false);
@@ -454,10 +455,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
       setStep("code");
       setCountdown(60);
       setTimeout(() => codeRef.current?.focus(), 150);
-    } else if (sendState.hasPassword && sendState.email) {
-      setEmail(sendState.email);
-      setLoginError(t.errors.hasPassword);
-      setTimeout(() => pwRef.current?.focus(), 50);
     }
   }, [sendState]);
 
@@ -470,9 +467,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
     }
   }, [verifyState]);
 
-  useEffect(() => {
-    if (loginError) pwRef.current?.focus();
-  }, [loginError]);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -531,30 +525,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
   };
 
   // ─── Login Handler ────────────────────────────────────────────
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    setLoginLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        router.push(after);
-      } else {
-        setLoginError(data.error || t.errors.badLogin);
-      }
-    } catch {
-      setLoginError(t.errors.noConnection);
-    } finally {
-      setLoginLoading(false);
-    }
-  };
 
   const goReset = () => {
     setStep("reset-email");
@@ -767,7 +737,28 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
               <h1 className="av-h1">{fill(t.title, { brand: BRAND })}</h1>
               <p className="av-lead">{fill(t.lead, { trial })}</p>
 
-              <form onSubmit={handleLogin} className="v-form av-form">
+              {/* ОДНА ФОРМА И ОДНА КНОПКА (владелец, 21.09.2026).
+                  Раньше тут стояли две: «Войти» по паролю и отдельная
+                  «Получить код на почту» — и вторая была единственным
+                  путём регистрации. Владелец: «зачем, если есть кнопка
+                  войти… убрать поле пароль, и кнопка Войти или
+                  зарегистрироваться».
+
+                  Убирать одну кнопку было нельзя: «Войти» пускала
+                  только тех, у кого УЖЕ есть пароль, и по почте никто
+                  бы не завёлся. Поэтому убрано ПОЛЕ ПАРОЛЯ, а вход и
+                  регистрация слиты в один путь — код на почту. Он
+                  работает и для новых, и для старых: `completeEmailSignIn`
+                  создаёт человека, если его нет, и просто пускает, если
+                  есть (`needsPassword = !user.passwordHash`).
+
+                  Цена решения: раньше человек с паролем входил, не
+                  тратя писем, теперь каждый вход — одно письмо из
+                  суточной квоты Resend, общей с рассылками. */}
+              <form action={sendAction} className="v-form av-form">
+                {referralCode && <input type="hidden" name="ref" value={referralCode} />}
+                {next && <input type="hidden" name="next" value={next} />}
+
                 <div className="v-field">
                   <label className="v-label" htmlFor="au-email">{t.email}</label>
                   <input
@@ -789,34 +780,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   />
                   {emailError && <FieldError id="au-email-err" text={emailError} />}
                 </div>
-
-                <PasswordField
-                  t={t}
-                  id="au-pw"
-                  label={t.password}
-                  value={password}
-                  onChange={setPassword}
-                  show={showPassword}
-                  onToggle={() => setShowPassword(!showPassword)}
-                  autoComplete="current-password"
-                  inputRef={pwRef}
-                  invalid={!!loginError}
-                  describedBy={loginError ? "au-login-err" : undefined}
-                  labelExtra={<button type="button" onClick={goReset} className="av-link-sm">{t.forgot}</button>}
-                />
-                {loginError && <FieldError id="au-login-err" text={loginError} />}
-
-                <button type="submit" disabled={loginLoading} className="v-btn v-btn-primary v-btn-block av-submit">
-                  {loginLoading ? <Busy>{t.signingIn}</Busy> : t.signIn}
-                </button>
-              </form>
-
-              <p className="v-or"><span>{t.or}</span></p>
-
-              <form action={sendAction} className="v-form av-form">
-                <input type="hidden" name="email" value={email} />
-                {referralCode && <input type="hidden" name="ref" value={referralCode} />}
-                {next && <input type="hidden" name="next" value={next} />}
 
                 {/* Согласия (владелец, 13.09.2026): Политика — обязательно,
                     новости — по желанию, по умолчанию не отмечено. Ссылки —
@@ -843,10 +806,12 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   </label>
                 </div>
 
-                <button type="submit" disabled={sendPending} className="v-btn v-btn-outline v-btn-block av-submit">
-                  {sendPending ? <Busy>{t.sendingCode}</Busy> : t.getCodeByMail}
+                <button type="submit" disabled={sendPending} className="v-btn v-btn-primary v-btn-block av-submit">
+                  {sendPending ? <Busy>{t.sendingCode}</Busy> : t.enterOrSignUp}
                 </button>
               </form>
+
+              <p className="v-or"><span>{t.or}</span></p>
 
               <div className="av-alt">
                 <button
@@ -1135,8 +1100,6 @@ export default function AuthPage({ initialStep, initialEmail, referralCode, next
                   onClick={() => {
                     setStep("start");
                     setEmail(resetEmail);
-                    setPassword("");
-                    setLoginError("");
                   }}
                   className="v-btn v-btn-primary v-btn-block av-submit"
                 >

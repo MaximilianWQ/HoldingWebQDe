@@ -1,0 +1,6226 @@
+[
+ {
+  "name": "practicum",
+  "url": "https://practicum.yandex.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://practicum.yandex.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Учим профессиям и навыкам с ИИ, чтобы вы не застряли в прошлом\n\nУчим профессиям и навыкам с ИИ, чтобы вы не застряли в п",
+    "rect": {
+     "x": 277,
+     "y": 202,
+     "w": 886,
+     "h": 88
+    },
+    "size": 40,
+    "weight": "400",
+    "family": "YS Text",
+    "color": "rgba(255, 255, 255, 0.95)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "bg",
+     "src": "url(\"https://avatars.mds.yandex.net/get-lpc/16405748/71dea00e-26d4-455f-bb56-9c99d4eb7de4/width_1600_q80\")",
+     "tag": "div",
+     "rect": {
+      "x": 6,
+      "y": 6,
+      "w": 1428,
+      "h": 650
+     },
+     "vis": 928200,
+     "cover": 0.716,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://code.s3.yandex.net/discount-event-september/ru/desk.webp?etag=482f5ebeff3fbdd3a74aaf641e4639c1\")",
+     "tag": "section",
+     "rect": {
+      "x": 6,
+      "y": 6,
+      "w": 1428,
+      "h": 650
+     },
+     "vis": 928200,
+     "cover": 0.716,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://code.s3.yandex.net/discount-event-september/ru/banner-left-img-desktop.webp?etag=d81fc625198a035633a1f788a99c8139",
+     "tag": "img",
+     "rect": {
+      "x": 6,
+      "y": 677,
+      "w": 460,
+      "h": 261
+     },
+     "vis": 102436,
+     "cover": 0.079,
+     "z": "auto",
+     "pos": "static",
+     "nat": "924x525",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://code.s3.yandex.net/discount-event-september/ru/banner-right-img-desktop.webp?etag=51c0522f34d564a7c4108edd5a4d1cf8",
+     "tag": "img",
+     "rect": {
+      "x": 974,
+      "y": 678,
+      "w": 460,
+      "h": 261
+     },
+     "vis": 102307,
+     "cover": 0.079,
+     "z": "auto",
+     "pos": "static",
+     "nat": "926x525",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://code.s3.yandex.net/main-page-v7/community-block/normal-bg.webp\")",
+     "tag": "a",
+     "rect": {
+      "x": 24,
+      "y": 676,
+      "w": 200,
+      "h": 200
+     },
+     "vis": 40000,
+     "cover": 0.031,
+     "z": "1000",
+     "pos": "fixed",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -1157
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": true,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 4,
+    "img": 66,
+    "imgSrcset": 7,
+    "svg": 35,
+    "nodesInHero": 171
+   },
+   "anims": 4,
+   "infinite": 1,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 2,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 4,
+   "img": 66
+  },
+  "net": [
+   {
+    "u": "https://code.s3.yandex.net/main-page-v5/video-TANYA-4x3.mp4",
+    "ct": "video/mp4",
+    "kb": 21403
+   },
+   {
+    "u": "https://code.s3.yandex.net/main-page-v5/video-ROMAN-4x3.mp4",
+    "ct": "video/mp4",
+    "kb": 19670
+   },
+   {
+    "u": "https://code.s3.yandex.net/main-page-v5/video-MAX-4x3.mp4",
+    "ct": "video/mp4",
+    "kb": 13958
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/16904900/1f6bb822-3fc9-4b95-9b57-57a79d4a1712/orig",
+    "ct": "image/jpeg",
+    "kb": 300
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/17495851/4283155f-356c-4472-8b94-cc30089c8b1b/orig",
+    "ct": "image/webp",
+    "kb": 294
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/12602567/d7b76ed7-3f75-4127-a425-b6970c59674b/orig",
+    "ct": "image/jpeg",
+    "kb": 218
+   },
+   {
+    "u": "https://code.s3.yandex.net/discount-event-september/ru/desk.webp",
+    "ct": "image/webp",
+    "kb": 110
+   },
+   {
+    "u": "https://code.s3.yandex.net/main-page-v7/community-block/profiles-desk.webp",
+    "ct": "image/webp",
+    "kb": 110
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/12602567/6e35f292-befd-4545-b0f4-995936a54477/orig",
+    "ct": "image/jpeg",
+    "kb": 86
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/16405748/71dea00e-26d4-455f-bb56-9c99d4eb7de4/width_1600_q80",
+    "ct": "image/webp",
+    "kb": 75
+   },
+   {
+    "u": "https://code.s3.yandex.net/main-page-v7/community-block/profiles-tab.webp",
+    "ct": "image/webp",
+    "kb": 74
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-practicum/5412622/main-page-v5__video-student-3.jpg/half",
+    "ct": "image/webp",
+    "kb": 73
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/14837328/6a6199b8-9389-4912-9343-9c6b4cb3903c/orig",
+    "ct": "image/png",
+    "kb": 57
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-lpc/17800094/3e21c8db-0a7c-4087-8120-9a640358f420/width_1600_q80",
+    "ct": "image/webp",
+    "kb": 56
+   }
+  ],
+  "netCount": 104,
+  "netByType": {
+   "font/woff2": 6,
+   "image/svg+xml": 13,
+   "image/webp": 39,
+   "image/png": 30,
+   "image/gif": 8,
+   "image/jpeg": 5,
+   "video/mp4": 3
+  }
+ },
+ {
+  "name": "ycloud",
+  "url": "https://yandex.cloud/ru",
+  "ok": true,
+  "data": {
+   "url": "https://yandex.cloud/ru?utm_referrer=https%3A%2F%2Fyandex.cloud%2Fshowcaptchafast%3Fd%3D1C8844133A5C467232060FF2A9CC62FC5E3FC87DD50E8A58C0268F581F09EB18BDE44578E8F1C8CB311C61D78593A1E14393331E1F%26retpath%3DaHR0cHM6Ly95YW5kZXguY2xvdWQvcnU%252C_d1ac5557547886182cfd12a0d5b441a8%26s%3D4e5f2dbac0c07b3290cc0f7dfd14813e",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "От первого шага до результата",
+    "rect": {
+     "x": 404,
+     "y": 7759,
+     "w": 632,
+     "h": 130
+    },
+    "size": 72,
+    "weight": "900",
+    "family": "YS Display",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/hero-img-desk.png.webp",
+     "tag": "img",
+     "rect": {
+      "x": 728,
+      "y": 150,
+      "w": 646,
+      "h": 424
+     },
+     "vis": 273817,
+     "cover": 0.211,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1524x1000",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/news/scale_2026_card.svg",
+     "tag": "img",
+     "rect": {
+      "x": 108,
+      "y": 662,
+      "w": 132,
+      "h": 156
+     },
+     "vis": 20592,
+     "cover": 0.016,
+     "z": "auto",
+     "pos": "static",
+     "nat": "132x146",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/iaas-3%20(1).svg",
+     "tag": "img",
+     "rect": {
+      "x": 525,
+      "y": 663,
+      "w": 132,
+      "h": 154
+     },
+     "vis": 20328,
+     "cover": 0.016,
+     "z": "auto",
+     "pos": "static",
+     "nat": "528x560",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/main-banner-kuber.png.webp",
+     "tag": "img",
+     "rect": {
+      "x": 941,
+      "y": 663,
+      "w": 132,
+      "h": 154
+     },
+     "vis": 20328,
+     "cover": 0.016,
+     "z": "auto",
+     "pos": "static",
+     "nat": "528x560",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -308
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 28,
+    "imgSrcset": 0,
+    "svg": 59,
+    "nodesInHero": 205
+   },
+   "anims": 3,
+   "infinite": 0,
+   "bodyBg": "rgb(255, 255, 255)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 28
+  },
+  "net": [
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/img_tech%20block_no.png",
+    "ct": "image/png",
+    "kb": 3253
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/3/text-medium.woff2",
+    "ct": "font/woff2",
+    "kb": 48
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/1/text-medium.woff2",
+    "ct": "application/octet-stream",
+    "kb": 44
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/1/text-bold.woff2",
+    "ct": "application/octet-stream",
+    "kb": 44
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/1/display-heavy.woff2",
+    "ct": "application/octet-stream",
+    "kb": 43
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/1/display-medium.woff2",
+    "ct": "application/octet-stream",
+    "kb": 43
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/1/text-regular.woff2",
+    "ct": "application/octet-stream",
+    "kb": 42
+   },
+   {
+    "u": "https://yastatic.net/s3/home/fonts/ys/3/text-regular.woff2",
+    "ct": "font/woff2",
+    "kb": 40
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/hero-img-desk.png.webp",
+    "ct": "image/webp",
+    "kb": 34
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/reliability-card_2_desk-n.png.webp",
+    "ct": "image/webp",
+    "kb": 25
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/news/stackland_ver_4.png.webp",
+    "ct": "image/webp",
+    "kb": 16
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/question_block_4.png.webp",
+    "ct": "image/webp",
+    "kb": 15
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/question_block_2.png.webp",
+    "ct": "image/webp",
+    "kb": 14
+   },
+   {
+    "u": "https://storage.yandexcloud.net/cloud-www-assets/constructor/main/RU/banner-ai-academy.jpg.webp",
+    "ct": "image/webp",
+    "kb": 12
+   }
+  ],
+  "netCount": 40,
+  "netByType": {
+   "image/gif": 5,
+   "application/octet-stream": 5,
+   "font/woff2": 2,
+   "image/webp": 16,
+   "image/svg+xml": 10,
+   "image/png": 2
+  }
+ },
+ {
+  "name": "yatech",
+  "url": "https://tech.yandex.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://yandex.ru/dev/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Мы попробовали найти всё —\nи понеслось",
+    "rect": {
+     "x": 36,
+     "y": 626,
+     "w": 1368,
+     "h": 123
+    },
+    "size": 56,
+    "weight": "400",
+    "family": "YSDisplay",
+    "color": "rgb(240, 240, 240)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-05_search/bg.jpg",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "3840x2000",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-02_ml/bg.jpg",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "3840x2000",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "video",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-01_opensource/video/slide-01-test-02.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "relative",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-03_alice/bg.jpg",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "3840x2000",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "video",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-04_maps/video/slide-04-maps_desktop-02.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "relative",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-06_delivery/bg.jpg",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 24,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1261530,
+     "cover": 0.973,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "3840x2000",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-05_search/02_vlm-frame_400x400.png",
+     "tag": "img",
+     "rect": {
+      "x": 955,
+      "y": 84,
+      "w": 317,
+      "h": 317
+     },
+     "vis": 100361,
+     "cover": 0.077,
+     "z": "auto",
+     "pos": "static",
+     "nat": "800x800",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://yandex.ru/dev/static/images/hero/slide-05_search/04_solve_400x400.png",
+     "tag": "img",
+     "rect": {
+      "x": 101,
+      "y": 253,
+      "w": 317,
+      "h": 317
+     },
+     "vis": 100361,
+     "cover": 0.077,
+     "z": "auto",
+     "pos": "static",
+     "nat": "800x800",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -1404
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [
+    {
+     "pattern": "https://yandex.ru/dev/static/images/services/ya-alice.svg",
+     "n": 12
+    },
+    {
+     "pattern": "https://yandex.ru/dev/static/images/services/cloud.svg",
+     "n": 11
+    }
+   ],
+   "counts": {
+    "canvas": 0,
+    "video": 7,
+    "img": 167,
+    "imgSrcset": 0,
+    "svg": 41,
+    "nodesInHero": 278
+   },
+   "anims": 1,
+   "infinite": 0,
+   "bodyBg": "rgb(13, 13, 13)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 7,
+   "img": 167
+  },
+  "net": [
+   {
+    "u": "https://yastatic.net/s3/promohr/cdn/promo-yandex-dev/ya_tech_15s_all-2_desktop_01.webm",
+    "ct": "video/webm",
+    "kb": 5887
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-01_opensource/video/slide-01-test-02.mp4",
+    "ct": "video/mp4",
+    "kb": 4682
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-04_maps/video/slide-04-maps_desktop-02.mp4",
+    "ct": "video/mp4",
+    "kb": 1955
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-02_ml/sphere-01.mp4",
+    "ct": "video/mp4",
+    "kb": 736
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-03_alice/alice-eyes_desktop.webp",
+    "ct": "image/webp",
+    "kb": 645
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-06_delivery/rover-04_short.mp4",
+    "ct": "video/mp4",
+    "kb": 622
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-03_alice/torus-01.mp4",
+    "ct": "video/mp4",
+    "kb": 597
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-05_search/plant-01.mp4",
+    "ct": "video/mp4",
+    "kb": 502
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-02_ml/bg.jpg",
+    "ct": "image/jpeg",
+    "kb": 289
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/addition/slide-pet-desktop@2x.jpg",
+    "ct": "image/jpeg",
+    "kb": 270
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/hero/slide-05_search/06_llm-eyes_400x400.webp",
+    "ct": "image/webp",
+    "kb": 246
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/addition/slide-research-desktop@2x.jpg",
+    "ct": "image/jpeg",
+    "kb": 239
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/addition/slide-opensource-desktop@2x.jpg",
+    "ct": "image/jpeg",
+    "kb": 208
+   },
+   {
+    "u": "https://yandex.ru/dev/static/images/vacancies/bg-vacancies-parallax-desktop@2x.jpg",
+    "ct": "image/jpeg",
+    "kb": 161
+   }
+  ],
+  "netCount": 114,
+  "netByType": {
+   "image/jpeg": 19,
+   "image/png": 42,
+   "image/webp": 2,
+   "video/webm": 1,
+   "image/svg+xml": 34,
+   "video/mp4": 6,
+   "font/woff2": 7,
+   "image/gif": 3
+  }
+ },
+ {
+  "name": "y360",
+  "url": "https://360.yandex.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://360.yandex.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Цифровое пространство для важного",
+    "rect": {
+     "x": 80,
+     "y": 138,
+     "w": 486,
+     "h": 168
+    },
+    "size": 56,
+    "weight": "500",
+    "family": "YS Text Wide",
+    "color": "rgb(0, 0, 0)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "bg",
+     "src": "image-set(url(\"https://avatars.mds.yandex.net/get-bunker/50064/bfdc34985ebe69ddc66d065992159a8cfebda536/orig\") 1dppx, url(\"https://avatars.mds.yandex.net/get-bunker/135516/7b61cf8525e903fea5ae30b5917c",
+     "tag": "div",
+     "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 721
+     },
+     "vis": 1037948,
+     "cover": 0.801,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "bg",
+     "src": "image-set(url(\"https://avatars.mds.yandex.net/get-bunker/118781/77198e059aef11f1956b5201bb48962b/orig\") 1dppx), image-set(url(\"https://avatars.mds.yandex.net/get-bunker/118781/77198e059aef11f1956b5201",
+     "tag": "div",
+     "rect": {
+      "x": 638,
+      "y": 0,
+      "w": 762,
+      "h": 721
+     },
+     "vis": 548954,
+     "cover": 0.424,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "right",
+    "gapX": -566
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 3,
+    "img": 26,
+    "imgSrcset": 3,
+    "svg": 23,
+    "nodesInHero": 73
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 3,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 3,
+   "img": 26
+  },
+  "net": [
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/b2c-index/mediablock-3-new-logo.webm",
+    "ct": "video/webm",
+    "kb": 1560
+   },
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/b2c-index/mediablock-1-new-logo.webm",
+    "ct": "video/webm",
+    "kb": 1417
+   },
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/b2c-index/mediablock-2.webm",
+    "ct": "video/webm",
+    "kb": 904
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/118781/77198e059aef11f1956b5201bb48962b/orig",
+    "ct": "image/webp",
+    "kb": 564
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-display-wide.woff2",
+    "ct": "font/woff2",
+    "kb": 532
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/994123/fa0d82ddaabf11f1bca7d628184a848c/orig",
+    "ct": "image/webp",
+    "kb": 131
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/994123/ba0852ee136139802ea08f334c82e8b0c5590914/orig",
+    "ct": "image/webp",
+    "kb": 78
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/994123/3a6d37150720fa57e8b10268a8082e08d7f090e1/orig",
+    "ct": "image/webp",
+    "kb": 60
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/120922/07f7ff8a86dcf6b64d04c27481c393b7388a9fc2/orig",
+    "ct": "image/webp",
+    "kb": 55
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-medium.woff2",
+    "ct": "font/woff2",
+    "kb": 48
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-bold.woff2",
+    "ct": "font/woff2",
+    "kb": 48
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-regular.woff2",
+    "ct": "font/woff2",
+    "kb": 41
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/50064/42a2c62d1bc9946d460d8fbc3a0679a063d5014e/orig",
+    "ct": "image/webp",
+    "kb": 33
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/120922/c512599799cc2efead48ecfe307aa99f56bd20d3/orig",
+    "ct": "image/webp",
+    "kb": 27
+   }
+  ],
+  "netCount": 63,
+  "netByType": {
+   "image/svg+xml": 20,
+   "image/webp": 30,
+   "image/png": 2,
+   "video/webm": 3,
+   "font/woff2": 4,
+   "image/gif": 4
+  }
+ },
+ {
+  "name": "ozontech",
+  "url": "https://ozon.tech/",
+  "ok": true,
+  "data": {
+   "url": "https://ozon.tech/?__rr=1",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Похоже, нет соединения",
+    "rect": {
+     "x": 202,
+     "y": 430,
+     "w": 1036,
+     "h": 24
+    },
+    "size": 20,
+    "weight": "700",
+    "family": "Onest",
+    "color": "rgb(7, 7, 7)",
+    "mix": "normal"
+   },
+   "visuals": [],
+   "rel": null,
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 1,
+    "imgSrcset": 0,
+    "svg": 1,
+    "nodesInHero": 12
+   },
+   "anims": 1,
+   "infinite": 1,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 1
+  },
+  "net": [
+   {
+    "u": "https://st.ozone.ru/s3/ozon-fonts/onest.woff2",
+    "ct": "font/woff2",
+    "kb": 56
+   },
+   {
+    "u": "https://cdn2.ozone.ru/s3/abt-challenge/incidents/images/warn.png",
+    "ct": "image/png",
+    "kb": 21
+   }
+  ],
+  "netCount": 2,
+  "netByType": {
+   "font/woff2": 1,
+   "image/png": 1
+  }
+ },
+ {
+  "name": "avitotech",
+  "url": "https://tech.avito.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://avito.tech/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "AvitoTech - команда инженеров, которые не просто пишут код, а создают высокотехнологичные продукты для людей",
+    "rect": {
+     "x": 120,
+     "y": 250,
+     "w": 873,
+     "h": 350
+    },
+    "size": 58,
+    "weight": "600",
+    "family": "DrukTextWide",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://static.tildacdn.com/tild3639-3934-4333-a435-623934323536/Layer_2_2.svg",
+     "tag": "img",
+     "rect": {
+      "x": 879,
+      "y": 93,
+      "w": 637,
+      "h": 636
+     },
+     "vis": 356446,
+     "cover": 0.275,
+     "z": "auto",
+     "pos": "static",
+     "nat": "697x695",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://optim.tildacdn.com/tild3432-6131-4263-b630-396262356661/-/cover/372x145/center/center/-/format/webp/64969ce4-6810-430d-b.png.webp\")",
+     "tag": "div",
+     "rect": {
+      "x": 501,
+      "y": 557,
+      "w": 310,
+      "h": 121
+     },
+     "vis": 37510,
+     "cover": 0.029,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0.13,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -114
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 18,
+    "imgSrcset": 0,
+    "svg": 4,
+    "nodesInHero": 128
+   },
+   "anims": 1,
+   "infinite": 1,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 2,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 18
+  },
+  "net": [
+   {
+    "u": "https://optim.tildacdn.com/tild3831-6532-4361-b638-643838646363/-/cover/360x204/center/center/-/format/webp/go-txt_1560x880.jpg.webp",
+    "ct": "image/webp",
+    "kb": 33
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2",
+    "ct": "font/woff2",
+    "kb": 24
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3837-3964-4362-b638-663063353338/-/cover/360x204/center/center/-/format/webp/Frame_2136137527.png.webp",
+    "ct": "image/webp",
+    "kb": 21
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6634-3138-4363-b336-386335643638/-/cover/360x204/center/center/-/format/webp/maxresdefault_1.jpg.webp",
+    "ct": "image/webp",
+    "kb": 19
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6634-3862-4530-a335-643432303533/-/cover/360x204/center/center/-/format/webp/780440.png.webp",
+    "ct": "image/webp",
+    "kb": 15
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2",
+    "ct": "font/woff2",
+    "kb": 14
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6632-3463-4535-a538-626365323438/-/cover/360x204/center/center/-/format/webp/_1280_720.png.webp",
+    "ct": "image/webp",
+    "kb": 13
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3432-6131-4263-b630-396262356661/-/cover/372x145/center/center/-/format/webp/64969ce4-6810-430d-b.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6134-3437-4366-a561-393166613535/-/cover/224x304/center/center/-/format/webp/50440e61-471d-4449-8.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6165-3637-4864-a564-363635306535/-/cover/360x150/center/center/-/format/webp/71b1bfbc-583e-4881-8.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3430-3735-4434-b761-363637383661/-/cover/321x147/center/center/-/format/webp/11097a33-951d-4eae-9.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6534-6239-4161-a338-386231343134/-/resize/288x/-/format/webp/-14_1_2.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3462-3565-4835-b665-623266613531/-/resize/288x/-/format/webp/-01_1.png.webp",
+    "ct": "image/webp",
+    "kb": 2
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6337-3863-4364-b639-313339376639/-/cover/403x355/center/center/-/format/webp/48f46cd7-ce21-491a-9.png.webp",
+    "ct": "image/webp",
+    "kb": 1
+   }
+  ],
+  "netCount": 42,
+  "netByType": {
+   "image/svg+xml": 11,
+   "image/png": 7,
+   "image/gif": 2,
+   "image/webp": 14,
+   "image/jpeg": 2,
+   "font/woff2": 2,
+   "font/woff": 4
+  }
+ },
+ {
+  "name": "tbank",
+  "url": "https://www.tbank.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://www.tbank.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Дебетовая карта, которую рекомендуют ваши друзья",
+    "rect": {
+     "x": 264,
+     "y": 140,
+     "w": 912,
+     "h": 96
+    },
+    "size": 44,
+    "weight": "700",
+    "family": "dsHeading",
+    "color": "rgba(0, 0, 0, 0.8)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://imgproxy.cdn-tinkoff.ru/zoom_05:compressed95/aHR0cHM6Ly9jZG4udGJhbmsucnUvc3RhdGljL3BhZ2VzL2ZpbGVzLzdkZWMwNTUwLTdlYWMtNGFmYS1iNDVkLWY1ODIyZjQzMjM5OS5wbmc=",
+     "tag": "img",
+     "rect": {
+      "x": 168,
+      "y": 444,
+      "w": 1104,
+      "h": 460
+     },
+     "vis": 503424,
+     "cover": 0.388,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1104x460",
+     "srcset": "https://imgproxy.cdn-tinkoff.ru/compressed95/aHR0cHM6Ly9jZG4udGJhbmsucnUvc3RhdGljL3BhZ2VzL2ZpbGVzLzdkZWMwNTUwLTdlYWMtNGFmYS1iNDVkLWY1ODIyZjQzMjM5OS5wbmc= 2x",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://imgproxy.cdn-tinkoff.ru/compressed95/aHR0cHM6Ly9jZG4udGJhbmsucnUvc3RhdGljL3BhZ2VzL2ZpbGVzL2IwNTU3ZTlkLWYzN2UtNGE2Yi04NmZiLTNkYTdkOTllZmVkZi5wbmc=\")",
+     "tag": "div",
+     "rect": {
+      "x": 1272,
+      "y": 410,
+      "w": 144,
+      "h": 144
+     },
+     "vis": 20736,
+     "cover": 0.016,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "left",
+    "gapX": -1008
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 47,
+    "imgSrcset": 19,
+    "svg": 16,
+    "nodesInHero": 861
+   },
+   "anims": 14,
+   "infinite": 0,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 1,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 47
+  },
+  "net": [
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/c85dfb7a-b02a-4ed4-a103-e8b92efd051b.png",
+    "ct": "image/png",
+    "kb": 62
+   },
+   {
+    "u": "https://cdn.tbank.ru/frontend-libraries/npm/react-kit-font/1.0.0/TinkoffSans_Medium.woff2",
+    "ct": "binary/octet-stream",
+    "kb": 31
+   },
+   {
+    "u": "https://cdn.tbank.ru/frontend-libraries/npm/react-kit-font/1.0.0/TinkoffSans.woff2",
+    "ct": "binary/octet-stream",
+    "kb": 31
+   },
+   {
+    "u": "https://cdn.tbank.ru/frontend-libraries/npm/react-kit-font/1.0.0/TinkoffSans_Bold.woff2",
+    "ct": "binary/octet-stream",
+    "kb": 31
+   },
+   {
+    "u": "https://cdn.tbank.ru/frontend-libraries/npm/react-kit-font/1.0.0/NeueHaasUnicaW1G-Regular.woff2",
+    "ct": "binary/octet-stream",
+    "kb": 22
+   },
+   {
+    "u": "https://cdn.tbank.ru/frontend-libraries/npm/react-kit-font/1.0.0/NeueHaasUnicaW1G-Medium.woff2",
+    "ct": "binary/octet-stream",
+    "kb": 22
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/5b6fcf8e-fb91-415d-9475-6659adce0ec0.png",
+    "ct": "image/png",
+    "kb": 17
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/7df07e9d-e71c-47fd-8ab4-6c9f91b9a35f.png",
+    "ct": "image/png",
+    "kb": 16
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/12aa366e-25bb-4633-938a-bfc6e2f135ef.png",
+    "ct": "image/png",
+    "kb": 13
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/988510d7-7a5c-414a-a9e5-b57216670a8a.png",
+    "ct": "image/png",
+    "kb": 11
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/9d692464-229e-434d-93ed-b6dd2617c5e7.png",
+    "ct": "image/png",
+    "kb": 10
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/blocks/files/4c843e36-3572-4008-836e-a4380cfe1db6.svg",
+    "ct": "image/svg+xml",
+    "kb": 1
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/blocks/files/423918f0-c9c5-428c-baf5-06d19809aade.svg",
+    "ct": "image/svg+xml",
+    "kb": 1
+   },
+   {
+    "u": "https://cdn.tbank.ru/static/pages/files/8c77eb9b-b24f-44ea-849d-1048f62960cd.svg",
+    "ct": "image/svg+xml",
+    "kb": 1
+   }
+  ],
+  "netCount": 58,
+  "netByType": {
+   "binary/octet-stream": 5,
+   "image/svg+xml": 12,
+   "image/webp": 27,
+   "image/png": 7,
+   "image/gif": 7
+  }
+ },
+ {
+  "name": "ecomtech",
+  "url": "https://ecom.tech/",
+  "ok": true,
+  "data": {
+   "url": "https://ecom.tech/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Мы разрабатываемИТ-решения",
+    "rect": {
+     "x": 36,
+     "y": 140,
+     "w": 588,
+     "h": 120
+    },
+    "size": 68,
+    "weight": "400",
+    "family": "Ecomtech Mono",
+    "color": "rgb(247, 248, 33)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://ecom.tech/img/home/main-desktop-lg@x2.webp",
+     "tag": "img",
+     "rect": {
+      "x": 36,
+      "y": 284,
+      "w": 1368,
+      "h": 348
+     },
+     "vis": 476064,
+     "cover": 0.367,
+     "z": "auto",
+     "pos": "static",
+     "nat": "2736x696",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -588
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 9,
+    "imgSrcset": 0,
+    "svg": 14,
+    "nodesInHero": 58
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgb(18, 18, 18)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 9
+  },
+  "net": [
+   {
+    "u": "https://88227.selcdn.ru/stech-cms-api-images-env-prod/blog_artefacts/1728994218_upload.webp",
+    "ct": "image/webp",
+    "kb": 254
+   },
+   {
+    "u": "https://88227.selcdn.ru/stech-cms-api-images-env-prod/blog_artefacts/1728994196_upload.webp",
+    "ct": "image/webp",
+    "kb": 119
+   },
+   {
+    "u": "https://tech-data.samokat.ru/fonts/Signal-Light-Desktop.otf",
+    "ct": "font/otf",
+    "kb": 114
+   },
+   {
+    "u": "https://ecom.tech/img/home/main-desktop-lg@x2.webp",
+    "ct": "image/webp",
+    "kb": 101
+   },
+   {
+    "u": "https://88227.selcdn.ru/stech-cms-api-images-env-prod/blog_artefacts/1728994206_upload.webp",
+    "ct": "image/webp",
+    "kb": 59
+   },
+   {
+    "u": "https://tech-data.samokat.ru/fonts/Ecomtech-Mono.otf",
+    "ct": "font/otf",
+    "kb": 47
+   },
+   {
+    "u": "https://tech-data.samokat.ru/fonts/Ecomtech-Graph.otf",
+    "ct": "font/otf",
+    "kb": 43
+   },
+   {
+    "u": "https://ecom.tech/img/numbers/468.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://ecom.tech/img/numbers/200k.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://ecom.tech/img/numbers/18k.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://ecom.tech/img/numbers/300ms.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://top-fwz1.mail.ru/counter",
+    "ct": "image/gif",
+    "kb": 0
+   },
+   {
+    "u": "https://ecom.tech/img/ecom-logo-inverse.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://top-fwz1.mail.ru/tracker",
+    "ct": "image/gif",
+    "kb": 0
+   }
+  ],
+  "netCount": 15,
+  "netByType": {
+   "image/svg+xml": 5,
+   "font/otf": 3,
+   "image/webp": 4,
+   "image/gif": 2,
+   "application/octet-stream": 1
+  }
+ },
+ {
+  "name": "stripe",
+  "url": "https://stripe.com/",
+  "ok": true,
+  "data": {
+   "url": "https://stripe.com/en-nl",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Financial infrastructure to grow your revenue. Accept payments, offer financial services and implement custom revenue mo",
+    "rect": {
+     "x": 208,
+     "y": -657,
+     "w": 959,
+     "h": 221
+    },
+    "size": 48,
+    "weight": "300",
+    "family": "sohne-var",
+    "color": "rgb(129, 184, 26)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://images.stripeassets.com/fzn2n1nzq965/vYmk6v8n7oDAwbDpwhjV6/846f9b3e214549b8f14e2b8c8cfe9343/payment-bento-background.jpg?w=860&fm=webp&q=80",
+     "tag": "img",
+     "rect": {
+      "x": 99,
+      "y": 80,
+      "w": 860,
+      "h": 712
+     },
+     "vis": 612320,
+     "cover": 0.472,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "860x712",
+     "srcset": "https://images.stripeassets.com/fzn2n1nzq965/vYmk6v8n7oDAwbDpwhjV6/846f9b3e214549b8f14e2b8c8cfe9343/payment-bento-background.jpg?w=860&q=80 1x, https://images.stripeassets.com/fzn2n1nzq965/vYmk6v8n7oDAwbDpwhjV6/846f9b3e214549b8f14e2b8c8cfe9343/payment-bento-background.jpg?w=1720&q=80 2x",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://images.stripeassets.com/fzn2n1nzq965/1Vf8oT9Fm6dEwpnEx5PgK1/055956f38d7fd8b0cc7419692ef29778/bento-terminal.png?w=308&fm=webp&q=90",
+     "tag": "img",
+     "rect": {
+      "x": 117,
+      "y": 266,
+      "w": 280,
+      "h": 477
+     },
+     "vis": 133634,
+     "cover": 0.103,
+     "z": "auto",
+     "pos": "static",
+     "nat": "308x525",
+     "srcset": "https://images.stripeassets.com/fzn2n1nzq965/1Vf8oT9Fm6dEwpnEx5PgK1/055956f38d7fd8b0cc7419692ef29778/bento-terminal.png?w=308&q=90 1x, https://images.stripeassets.com/fzn2n1nzq965/1Vf8oT9Fm6dEwpnEx5PgK1/055956f38d7fd8b0cc7419692ef29778/bento-terminal.png?w=616&q=90 2x",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 80,
+      "y": 778,
+      "w": 447,
+      "h": 728
+     },
+     "vis": 54741,
+     "cover": 0.042,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 496,
+      "y": 778,
+      "w": 447,
+      "h": 728
+     },
+     "vis": 54741,
+     "cover": 0.042,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 912,
+      "y": 778,
+      "w": 447,
+      "h": 728
+     },
+     "vis": 54741,
+     "cover": 0.042,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "left",
+    "gapX": -751
+   },
+   "canvases": [
+    {
+     "w": 1392,
+     "h": 761,
+     "cw": 1393,
+     "ch": 761,
+     "cls": "hero-wave-animation__canvas",
+     "dataEng": "three.js r178"
+    },
+    {
+     "w": 447,
+     "h": 728,
+     "cw": 447,
+     "ch": 728,
+     "cls": "agentic-graphic__background-canvas",
+     "dataEng": "three.js r178"
+    },
+    {
+     "w": 447,
+     "h": 728,
+     "cw": 447,
+     "ch": 728,
+     "cls": "issuing-graphic__background-canvas",
+     "dataEng": "three.js r178"
+    },
+    {
+     "w": 447,
+     "h": 728,
+     "cw": 447,
+     "ch": 728,
+     "cls": "globe__canvas",
+     "dataEng": "three.js r178"
+    },
+    {
+     "w": 300,
+     "h": 150,
+     "cw": 1232,
+     "ch": 460,
+     "cls": "squeezy-carousel__canvas",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": true,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 5,
+    "video": 0,
+    "img": 42,
+    "imgSrcset": 41,
+    "svg": 277,
+    "nodesInHero": 985
+   },
+   "anims": 11,
+   "infinite": 0,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 1,
+  "afterScroll": {
+   "canvas": 5,
+   "video": 0,
+   "img": 42
+  },
+  "net": [
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/3NcSrMqMgaKe75QNr8wZI8/46d520dfc48c5b9f1c59dcde9460b58c/connect-bento-card-background-image.jpg",
+    "ct": "image/webp",
+    "kb": 75
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/2hmAf1AbLIejlWrAYU4iiK/cf0f4918753c76d8e37782e084d16320/map_dots.png",
+    "ct": "image/png",
+    "kb": 71
+   },
+   {
+    "u": "https://b.stripecdn.com/mkt-ssr-statics/assets/_next/static/media/Sohne.cb178166.woff2",
+    "ct": "font/woff2",
+    "kb": 57
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/2YFdgdFPeIiDpmQbhHPAx8/186752498bf713fea245f31bcec84f8a/sessions-2026-on-demand-bg.png",
+    "ct": "image/webp",
+    "kb": 53
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/115d4Vd5LVAsqFGDR1ClAv/0ceb2c44a7a7182cd624262420af7544/wave-fallback-desktop.png",
+    "ct": "image/webp",
+    "kb": 33
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/5aX9aGpHZ4QT80EUfElAki/5cb769dcb801286aaf934ac638e203ac/issuing_card_fg.png",
+    "ct": "image/webp",
+    "kb": 25
+   },
+   {
+    "u": "https://b.stripecdn.com/mkt-ssr-statics/assets/_next/static/media/SourceCodePro-Medium.f5ba3e6a.woff2",
+    "ct": "font/woff2",
+    "kb": 12
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/vYmk6v8n7oDAwbDpwhjV6/846f9b3e214549b8f14e2b8c8cfe9343/payment-bento-background.jpg",
+    "ct": "image/webp",
+    "kb": 12
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/1Vf8oT9Fm6dEwpnEx5PgK1/055956f38d7fd8b0cc7419692ef29778/bento-terminal.png",
+    "ct": "image/webp",
+    "kb": 12
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/5DrmXrFYpKk43Kj0I1MXQr/287b3c2a13ae8d4d7d0bf8305037de4e/palette.png",
+    "ct": "image/webp",
+    "kb": 11
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/7AMo1dmSHO1eH38l3dgJ9J/f5879848c530ec37266b1923e1eac089/terminal.png",
+    "ct": "image/webp",
+    "kb": 8
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/6KmB7XGsUbTefNew25WF4T/6a949fbf5567dcd145339f5fcf207fae/hoodie-navy.png",
+    "ct": "image/webp",
+    "kb": 6
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/2rL4pJabxq9Yo0haXwK2HO/83c05122b463c882c8c89111154d77ec/shirt-blue.png",
+    "ct": "image/webp",
+    "kb": 5
+   },
+   {
+    "u": "https://images.stripeassets.com/fzn2n1nzq965/3ybjmQ6DTTkLCgjGUEfh78/11df94fe6aa9931d1e1bc6a8bd4446cc/issuing-palette.png",
+    "ct": "image/webp",
+    "kb": 3
+   }
+  ],
+  "netCount": 22,
+  "netByType": {
+   "image/webp": 18,
+   "font/woff2": 2,
+   "image/png": 1,
+   "image/gif": 1
+  }
+ },
+ {
+  "name": "linear",
+  "url": "https://linear.app/",
+  "ok": true,
+  "data": {
+   "url": "https://linear.app/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "The product development system for teams and agentsThe product developmentsystem for teams and agentsThe product develop",
+    "rect": {
+     "x": 78,
+     "y": 272,
+     "w": 1282,
+     "h": 128
+    },
+    "size": 64,
+    "weight": "510",
+    "family": "Inter Variable",
+    "color": "rgb(247, 248, 248)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/c7fa8f5f-d439-4329-6a65-de549b51e300/f=auto,fit=scale-down,metadata=none,width=2560",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 491,
+      "w": 1440,
+      "h": 804
+     },
+     "vis": 588690,
+     "cover": 0.454,
+     "z": "auto",
+     "pos": "static",
+     "nat": "2560x1429",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://static.linear.app/web/_next/static/media/grain-default.mxaw2efG.png\")",
+     "tag": "div",
+     "rect": {
+      "x": 61,
+      "y": 528,
+      "w": 1318,
+      "h": 718
+     },
+     "vis": 490296,
+     "cover": 0.378,
+     "z": "2",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -1360
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 39,
+    "imgSrcset": 0,
+    "svg": 240,
+    "nodesInHero": 291
+   },
+   "anims": 181,
+   "infinite": 178,
+   "bodyBg": "rgb(8, 9, 10)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 39
+  },
+  "net": [
+   {
+    "u": "https://static.linear.app/web/_next/static/media/grain-default.mxaw2efG.png",
+    "ct": "image/png",
+    "kb": 680
+   },
+   {
+    "u": "https://static.linear.app/fonts/InterVariable.woff2",
+    "ct": "application/octet-stream",
+    "kb": 344
+   },
+   {
+    "u": "https://static.linear.app/fonts/Berkeley-Mono-Variable.woff2",
+    "ct": "application/octet-stream",
+    "kb": 157
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/c7fa8f5f-d439-4329-6a65-de549b51e300/f=auto,fit=scale-down,metadata=none,width=2560",
+    "ct": "image/webp",
+    "kb": 25
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/c8aeedda-7726-4a4f-226a-f573f85d8d00/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 16
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/22210a73-581d-42db-d42a-bf2907860300/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 5
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/580cd9c0-2770-4fe4-1ad2-95c76fc6f000/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 4
+   },
+   {
+    "u": "https://webassets.linear.app/images/ornj730p/production/f79251b06e9edeeacbf2875384defe629e000b3c-352x352.png",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/c2f6447a-d507-43c1-f3ab-3f2c6fbceb00/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/f28b59f4-538c-4517-cfd7-510913015200/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/302b16a5-f9ca-42f2-dbae-3c76f19b2d00/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/4d3381aa-fb2f-4d3d-1a06-957fc616d400/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/1eb8f8b2-3593-473f-ba8a-acac99aa0300/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   },
+   {
+    "u": "https://linear.app/cdn-cgi/imagedelivery/fO02fVwohEs9s9UHFwon6A/7ea107e7-c1a0-4c99-756d-5837fd91f200/f=auto,fit=scale-down,metadata=none",
+    "ct": "image/avif",
+    "kb": 2
+   }
+  ],
+  "netCount": 20,
+  "netByType": {
+   "application/octet-stream": 2,
+   "image/avif": 14,
+   "image/png": 1,
+   "image/webp": 1,
+   "image/svg+xml": 1,
+   "image/x-icon": 1
+  }
+ },
+ {
+  "name": "vercel",
+  "url": "https://vercel.com/home",
+  "ok": true,
+  "data": {
+   "url": "https://vercel.com/home",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Agentic Infrastructure",
+    "rect": {
+     "x": 24,
+     "y": -4702,
+     "w": 444,
+     "h": 128
+    },
+    "size": 64,
+    "weight": "400",
+    "family": "GeistSans",
+    "color": "rgb(23, 23, 23)",
+    "mix": "normal"
+   },
+   "visuals": [],
+   "rel": null,
+   "canvases": [
+    {
+     "w": 1080,
+     "h": 720,
+     "cw": 1080,
+     "ch": 720,
+     "cls": "absolute inset-0 block h-full w-full opacity-0 transition-op",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 1,
+    "video": 0,
+    "img": 19,
+    "imgSrcset": 14,
+    "svg": 47,
+    "nodesInHero": 550
+   },
+   "anims": 3,
+   "infinite": 2,
+   "bodyBg": "rgb(250, 250, 250)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 1,
+   "video": 0,
+   "img": 19
+  },
+  "net": [
+   {
+    "u": "https://lishhsx6kmthaacj.public.blob.vercel-storage.com/mintlify-desktop-light.webp",
+    "ct": "image/webp",
+    "kb": 77
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/Geist_Variable-s.p.2v-cf9syxr5ni.woff2",
+    "ct": "font/woff2",
+    "kb": 68
+   },
+   {
+    "u": "https://lishhsx6kmthaacj.public.blob.vercel-storage.com/notion-desktop-light.webp",
+    "ct": "image/webp",
+    "kb": 45
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Square.p.3ig4wtfmw09gh.woff2",
+    "ct": "font/woff2",
+    "kb": 28
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Triangle.p.0s2yyo-clipe_.woff2",
+    "ct": "font/woff2",
+    "kb": 28
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Grid.p.0c5uz3kz61pux.woff2",
+    "ct": "font/woff2",
+    "kb": 28
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Circle.p.2p5mi6n8co77s.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   },
+   {
+    "u": "https://lishhsx6kmthaacj.public.blob.vercel-storage.com/zapier-desktop-light.webp",
+    "ct": "image/webp",
+    "kb": 26
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/797e433ab948586e.p.1v5bejj26fx9h.woff2",
+    "ct": "font/woff2",
+    "kb": 23
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/GeistPixel_Line.p.3lxddzyuwzx1_.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/image",
+    "ct": "image/avif",
+    "kb": 5
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/eve-light.1e3bxs4ejw62x.svg",
+    "ct": "image/svg+xml",
+    "kb": 0
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/vercel-light.3_gxxexgi1nmy.svg",
+    "ct": "image/svg+xml",
+    "kb": 0
+   },
+   {
+    "u": "https://vercel.com/vc-ap-vercel-marketing/_next/static/immutable/media/vercel-dark.1f3cgy23m5_jy.svg",
+    "ct": "image/svg+xml",
+    "kb": 0
+   }
+  ],
+  "netCount": 16,
+  "netByType": {
+   "font/woff2": 7,
+   "image/svg+xml": 4,
+   "image/avif": 1,
+   "image/webp": 3,
+   "image/gif": 1
+  }
+ },
+ {
+  "name": "framer",
+  "url": "https://www.framer.com/",
+  "ok": true,
+  "data": {
+   "url": "https://www.framer.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Framer is the design agent for every step from idea to launch",
+    "rect": {
+     "x": 120,
+     "y": 164,
+     "w": 721,
+     "h": 108
+    },
+    "size": 54,
+    "weight": "500",
+    "family": "GT Walsheim Medium",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "bg",
+     "src": "url(\"data:image/webp;base64,UklGRkqTAQBXRUJQVlA4ID6TAQAwMQGdASpgAIAEAAAAJaQDYy6gvgv4L/FP4B+jv62f5f2B/A/gv4j/Vf0h/rn9n/wn0I+ln5p+JHiE8J/Cf4t+DXuB/Bfo18b/tv+O/m/9U/zf+W+wf4P/HPww/gH+a/wHsD+Afgf8e/ET9rP8",
+     "tag": "div",
+     "rect": {
+      "x": 120,
+      "y": 372,
+      "w": 1200,
+      "h": 673
+     },
+     "vis": 633600,
+     "cover": 0.489,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "video",
+     "src": "https://framerusercontent.com/assets/2zyGmnAWVTTdkv4LY1mFKgEdhg.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 120,
+      "y": 372,
+      "w": 1200,
+      "h": 673
+     },
+     "vis": 633600,
+     "cover": 0.489,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -721
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 4,
+    "img": 84,
+    "imgSrcset": 51,
+    "svg": 116,
+    "nodesInHero": 131
+   },
+   "anims": 1,
+   "infinite": 1,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 19,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 4,
+   "img": 84
+  },
+  "net": [
+   {
+    "u": "https://framerusercontent.com/assets/2zyGmnAWVTTdkv4LY1mFKgEdhg.mp4",
+    "ct": "video/mp4",
+    "kb": 3818
+   },
+   {
+    "u": "https://framerusercontent.com/assets/hic7XBe6FXqwZV643HMvMXcJjdw.ttf",
+    "ct": "application/octet-stream",
+    "kb": 107
+   },
+   {
+    "u": "https://framerusercontent.com/assets/kvPaaOVtxHpd0RYFgmZS8bukwk.ttf",
+    "ct": "application/octet-stream",
+    "kb": 107
+   },
+   {
+    "u": "https://framerusercontent.com/assets/7lw0VWkeXrGYJT05oB3DsFy8BaY.woff2",
+    "ct": "font/woff2",
+    "kb": 98
+   },
+   {
+    "u": "https://framerusercontent.com/assets/fMJs1lJbVR05voQOF2AQ6OSyGOc.woff2",
+    "ct": "font/woff2",
+    "kb": 69
+   },
+   {
+    "u": "https://framerusercontent.com/assets/6kEeNyQwxT59TY7SpLEnehG2fc.woff2",
+    "ct": "application/octet-stream",
+    "kb": 44
+   },
+   {
+    "u": "https://framerusercontent.com/assets/d3tHnaQIAeqiE5hGcRw4mmgWYU.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   },
+   {
+    "u": "https://framerusercontent.com/assets/yDtI2UI8XcEg1W2je9XPN3Noo.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   },
+   {
+    "u": "https://app.framerstatic.com/Inter-Bold.latin-UCM45LQF.woff2",
+    "ct": "font/woff2",
+    "kb": 20
+   },
+   {
+    "u": "https://app.framerstatic.com/Inter-Regular.latin-JLQMKCHE.woff2",
+    "ct": "font/woff2",
+    "kb": 19
+   },
+   {
+    "u": "https://framerusercontent.com/images/X8K2iCW5Tob8sQuioDPe6TJEU.png",
+    "ct": "image/png",
+    "kb": null
+   },
+   {
+    "u": "https://framerusercontent.com/images/aKUIMjNuPk8A4te7JSSJ3Jek.jpg",
+    "ct": "image/avif",
+    "kb": null
+   },
+   {
+    "u": "https://framerusercontent.com/images/dQPoEn0aItuMAYSsewyzx5QWzM.jpg",
+    "ct": "image/avif",
+    "kb": null
+   },
+   {
+    "u": "https://framerusercontent.com/images/DWrkpsEG9AceDP0WEcPJSIwIKwU.jpg",
+    "ct": "image/avif",
+    "kb": null
+   }
+  ],
+  "netCount": 60,
+  "netByType": {
+   "image/png": 1,
+   "image/avif": 42,
+   "font/woff2": 6,
+   "application/octet-stream": 5,
+   "image/jpeg": 3,
+   "video/mp4": 1,
+   "image/gif": 2
+  }
+ },
+ {
+  "name": "raycast",
+  "url": "https://www.raycast.com/",
+  "ok": true,
+  "data": {
+   "url": "https://www.raycast.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Your shortcut to everything.",
+    "rect": {
+     "x": 450,
+     "y": 370,
+     "w": 540,
+     "h": 141
+    },
+    "size": 64,
+    "weight": "600",
+    "family": "Inter",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 120,
+      "y": 0,
+      "w": 1200,
+      "h": 967
+     },
+     "vis": 1080000,
+     "cover": 0.833,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -870
+   },
+   "canvases": [
+    {
+     "w": 2400,
+     "h": 1934,
+     "cw": 1200,
+     "ch": 967,
+     "cls": "",
+     "dataEng": "three.js r185"
+    }
+   ],
+   "libs": {
+    "three": true,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 1,
+    "video": 0,
+    "img": 117,
+    "imgSrcset": 94,
+    "svg": 169,
+    "nodesInHero": 46
+   },
+   "anims": 24,
+   "infinite": 5,
+   "bodyBg": "rgb(7, 8, 10)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 1,
+   "video": 0,
+   "img": 117
+  },
+  "net": [
+   {
+    "u": "https://www.raycast.com/_next/image",
+    "ct": "image/webp",
+    "kb": 108
+   },
+   {
+    "u": "https://www.raycast.com/_next/static/immutable/media/1bffadaabf893a1e-s.0szrwpqb9mkwe.woff2",
+    "ct": "font/woff2",
+    "kb": 83
+   },
+   {
+    "u": "https://www.raycast.com/_next/static/immutable/media/GeistMono_Variable.p.1sg4ifey12l8-.woff2",
+    "ct": "font/woff2",
+    "kb": 57
+   },
+   {
+    "u": "https://www.raycast.com/_next/static/immutable/media/83afe278b6a6bb3c-s.p.45535valc9rzk.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://www.raycast.com/_next/static/immutable/media/70bc3e132a0a741e-s.p.269kn9uafm0ti.woff2",
+    "ct": "font/woff2",
+    "kb": 40
+   },
+   {
+    "u": "https://i.ytimg.com/vi/UUPStiOLKlU/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 25
+   },
+   {
+    "u": "https://i.ytimg.com/vi/_DxukQdW1yg/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 22
+   },
+   {
+    "u": "https://i.ytimg.com/vi/oy8jtxl7c2I/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 22
+   },
+   {
+    "u": "https://i.ytimg.com/vi/HDQIvbLCF7Y/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 20
+   },
+   {
+    "u": "https://i.ytimg.com/vi/OHuLnaY7Nxs/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 19
+   },
+   {
+    "u": "https://i.ytimg.com/vi/Xc262WTsZoU/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 19
+   },
+   {
+    "u": "https://i.ytimg.com/vi/m5MDv9qwhU8/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 16
+   },
+   {
+    "u": "https://i.ytimg.com/vi/4Hi21ZpdrOc/hqdefault.jpg",
+    "ct": "image/jpeg",
+    "kb": 16
+   },
+   {
+    "u": "https://www.raycast.com/_next/static/immutable/media/e41d5df559864f9e-s.p.2rlzm4mj5kw8e.woff2",
+    "ct": "font/woff2",
+    "kb": 15
+   }
+  ],
+  "netCount": 27,
+  "netByType": {
+   "font/woff2": 6,
+   "image/webp": 3,
+   "image/jpeg": 18
+  }
+ },
+ {
+  "name": "clerk",
+  "url": "https://clerk.com/",
+  "ok": true,
+  "data": {
+   "url": "https://clerk.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "More than authentication, Complete User Management",
+    "rect": {
+     "x": 272,
+     "y": 218,
+     "w": 896,
+     "h": 144
+    },
+    "size": 64,
+    "weight": "700",
+    "family": "geistNumbers",
+    "color": "rgb(19, 19, 22)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "svg",
+     "src": null,
+     "tag": "svg",
+     "rect": {
+      "x": -1032,
+      "y": -22,
+      "w": 3504,
+      "h": 918
+     },
+     "vis": 1290240,
+     "cover": 0.996,
+     "z": "-10",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": true,
+     "overflowsR": true,
+     "overflowsT": true,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/static/immutable/media/circuit-lines@2xl.2ip7jpoupl_wt.webp",
+     "tag": "img",
+     "rect": {
+      "x": -249,
+      "y": 46,
+      "w": 969,
+      "h": 887
+     },
+     "vis": 614880,
+     "cover": 0.474,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1938x1774",
+     "srcset": "",
+     "overflowsL": true,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/static/immutable/media/circuit-components@2xl.20_i4au-7bjdf.webp",
+     "tag": "img",
+     "rect": {
+      "x": -249,
+      "y": 46,
+      "w": 969,
+      "h": 887
+     },
+     "vis": 614880,
+     "cover": 0.474,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1938x1774",
+     "srcset": "",
+     "overflowsL": true,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/static/immutable/media/circuit-lines@2xl.2ip7jpoupl_wt.webp",
+     "tag": "img",
+     "rect": {
+      "x": 720,
+      "y": 46,
+      "w": 969,
+      "h": 887
+     },
+     "vis": 614880,
+     "cover": 0.474,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1938x1774",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/static/immutable/media/circuit-components@2xl.20_i4au-7bjdf.webp",
+     "tag": "img",
+     "rect": {
+      "x": 720,
+      "y": 46,
+      "w": 969,
+      "h": 887
+     },
+     "vis": 614880,
+     "cover": 0.474,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1938x1774",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fsign-up_2x.3d0mswze3_3h2.webp&w=384&q=90",
+     "tag": "img",
+     "rect": {
+      "x": 72,
+      "y": 208,
+      "w": 352,
+      "h": 628
+     },
+     "vis": 221023,
+     "cover": 0.171,
+     "z": "auto",
+     "pos": "static",
+     "nat": "352x627",
+     "srcset": "/_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fsign-up_2x.3d0mswze3_3h2.webp&w=32&q=90 32w, /_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fsign-up_2x.3d0mswze3_3h2.webp&w=48&q=90 48w, /_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fsign-up_2x.3d0mswze3_3h2.webp&w=64&q=90",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://clerk.com/_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fpricing-table_2x.2nk9n3cy07p29.webp&w=3840&q=90",
+     "tag": "img",
+     "rect": {
+      "x": 808,
+      "y": 50,
+      "w": 360,
+      "h": 444
+     },
+     "vis": 159840,
+     "cover": 0.123,
+     "z": "auto",
+     "pos": "static",
+     "nat": "0x0",
+     "srcset": "/_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fpricing-table_2x.2nk9n3cy07p29.webp&w=32&q=90 32w, /_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fpricing-table_2x.2nk9n3cy07p29.webp&w=48&q=90 48w, /_next/image?url=%2F_next%2Fstatic%2Fimmutable%2Fmedia%2Fpricing-table_2x.2nk9n3cy07",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 255,
+      "y": 71,
+      "w": 403,
+      "h": 363
+     },
+     "vis": 146289,
+     "cover": 0.113,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -2200
+   },
+   "canvases": [
+    {
+     "w": 403,
+     "h": 363,
+     "cw": 403,
+     "ch": 363,
+     "cls": "absolute inset-0 h-full w-full",
+     "dataEng": null
+    },
+    {
+     "w": 403,
+     "h": 363,
+     "cw": 403,
+     "ch": 363,
+     "cls": "absolute inset-0 h-full w-full",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 2,
+    "video": 0,
+    "img": 102,
+    "imgSrcset": 63,
+    "svg": 228,
+    "nodesInHero": 548
+   },
+   "anims": 1,
+   "infinite": 1,
+   "bodyBg": "rgb(247, 247, 248)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 102
+  },
+  "net": [
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/83afe278b6a6bb3c-s.45535valc9rzk.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/circuit-components@2xl.20_i4au-7bjdf.webp",
+    "ct": "image/webp",
+    "kb": 30
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/circuit-bento@2xq95.450fd6vagzoi3.webp",
+    "ct": "image/webp",
+    "kb": 28
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/glow-bento@q30r.2q4ub5g282n1u.avif",
+    "ct": "image/avif",
+    "kb": 22
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_SemiBoldItalic-s.p.3pdf515_t0wa_.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_BookItalic-s.p.1qky57xzagphu.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_Medium-s.p.3034-r-4niicv.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_Regular-s.p.0z_z2ccbdvksh.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_Bold-s.p.3apq79xsdhsa_.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_MediumItalic-s.p.3grtn8jczn3z6.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_SemiBold-s.p.3lstdh700wb75.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_BoldItalic-s.p.26zpp78ejlsbh.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_RegularItalic-s.p.3rfru8unvf3x7.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   },
+   {
+    "u": "https://clerk.com/_next/static/immutable/media/SuisseIntl_Book-s.p.1tp558au52mp8.woff2",
+    "ct": "font/woff2",
+    "kb": 17
+   }
+  ],
+  "netCount": 30,
+  "netByType": {
+   "font/woff2": 14,
+   "image/webp": 4,
+   "image/svg+xml": 11,
+   "image/avif": 1
+  }
+ },
+ {
+  "name": "resend",
+  "url": "https://resend.com/",
+  "ok": true,
+  "data": {
+   "url": "https://resend.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Email fordevelopers",
+    "rect": {
+     "x": 168,
+     "y": 327,
+     "w": 480,
+     "h": 204
+    },
+    "size": 96,
+    "weight": "400",
+    "family": "domaine",
+    "color": "rgb(240, 240, 240)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://resend.com/_next/image?url=%2Fstatic%2Flanding-page%2Fbg-light.png&w=1920&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": -22,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1264320,
+     "cover": 0.976,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1920x1080",
+     "srcset": "/_next/image?url=%2Fstatic%2Flanding-page%2Fbg-light.png&w=1920&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid 1x, /_next/image?url=%2Fstatic%2Flanding-page%2Fbg-light.png&w=3840&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid 2x",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": true,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://resend.com/_next/image?url=%2Fstatic%2Flanding-page%2Fbg-hero-1.jpg&w=1920&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 58,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1212480,
+     "cover": 0.936,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1920x1080",
+     "srcset": "/_next/image?url=%2Fstatic%2Flanding-page%2Fbg-hero-1.jpg&w=1920&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid 1x, /_next/image?url=%2Fstatic%2Flanding-page%2Fbg-hero-1.jpg&w=3840&q=100&dpl=dpl_HG713rBG2tnTR1FDU6QjegtgAKid 2x",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 688,
+      "y": 193,
+      "w": 648,
+      "h": 550
+     },
+     "vis": 356400,
+     "cover": 0.275,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "right",
+    "gapX": -648
+   },
+   "canvases": [
+    {
+     "w": 648,
+     "h": 550,
+     "cw": 648,
+     "ch": 550,
+     "cls": "",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 1,
+    "video": 5,
+    "img": 73,
+    "imgSrcset": 7,
+    "svg": 102,
+    "nodesInHero": 62
+   },
+   "anims": 7,
+   "infinite": 4,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 3,
+  "afterScroll": {
+   "canvas": 1,
+   "video": 5,
+   "img": 73
+  },
+  "net": [
+   {
+    "u": "https://resend.com/_next/image",
+    "ct": "image/webp",
+    "kb": 2221
+   },
+   {
+    "u": "https://resend.com/static/cube.mp4",
+    "ct": "video/mp4",
+    "kb": 654
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-broadcast.mp4",
+    "ct": "video/mp4",
+    "kb": 427
+   },
+   {
+    "u": "https://resend.com/_next/static/immutable/media/inter_variable.p.2v4uvb3i5caxn.woff2",
+    "ct": "font/woff2",
+    "kb": 344
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-control.mp4",
+    "ct": "video/mp4",
+    "kb": 329
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-react.mp4",
+    "ct": "video/mp4",
+    "kb": 285
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-integrate-afternoon.mp4",
+    "ct": "video/mp4",
+    "kb": 250
+   },
+   {
+    "u": "https://resend.com/static/avatars/tara-nagar.jpg",
+    "ct": "image/jpeg",
+    "kb": 138
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-react-fallback.jpg",
+    "ct": "image/jpeg",
+    "kb": 78
+   },
+   {
+    "u": "https://resend.com/static/avatars/bradley-greenwood.jpg",
+    "ct": "image/jpeg",
+    "kb": 76
+   },
+   {
+    "u": "https://resend.com/static/avatars/dan-farrelly.jpg",
+    "ct": "image/jpeg",
+    "kb": 64
+   },
+   {
+    "u": "https://resend.com/static/landing-page/3d-integrate-afternoon-fallback.jpg",
+    "ct": "image/jpeg",
+    "kb": 63
+   },
+   {
+    "u": "https://resend.com/static/avatars/guillermo-rauch.webp",
+    "ct": "image/webp",
+    "kb": 60
+   },
+   {
+    "u": "https://resend.com/static/avatars/amadeo-pellicce.jpg",
+    "ct": "image/jpeg",
+    "kb": 58
+   }
+  ],
+  "netCount": 43,
+  "netByType": {
+   "font/woff2": 8,
+   "application/octet-stream": 1,
+   "image/webp": 2,
+   "image/jpeg": 17,
+   "image/png": 9,
+   "video/mp4": 5,
+   "image/vnd.microsoft.icon": 1
+  }
+ },
+ {
+  "name": "cloudflare",
+  "url": "https://www.cloudflare.com/",
+  "ok": true,
+  "data": {
+   "url": "https://www.cloudflare.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Everything we learned from powering 20% of the Internet—yours by default",
+    "rect": {
+     "x": 180,
+     "y": 350,
+     "w": 1080,
+     "h": 111
+    },
+    "size": 56,
+    "weight": "500",
+    "family": "FT Kunst Grotesk",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "svg",
+     "src": null,
+     "tag": "svg",
+     "rect": {
+      "x": -20,
+      "y": 0,
+      "w": 1480,
+      "h": 7033
+     },
+     "vis": 1296000,
+     "cover": 1,
+     "z": "0",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": true,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://www.cloudflare.com/static/hero-poster.avif",
+     "tag": "img",
+     "rect": {
+      "x": 8,
+      "y": 80,
+      "w": 1424,
+      "h": 760
+     },
+     "vis": 1082240,
+     "cover": 0.835,
+     "z": "1",
+     "pos": "absolute",
+     "nat": "1472x860",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -1280
+   },
+   "canvases": [
+    {
+     "w": 300,
+     "h": 150,
+     "cw": 1395,
+     "ch": 485,
+     "cls": "",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 1,
+    "video": 1,
+    "img": 68,
+    "imgSrcset": 0,
+    "svg": 189,
+    "nodesInHero": 86
+   },
+   "anims": 238,
+   "infinite": 226,
+   "bodyBg": "rgb(255, 255, 255)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 1,
+   "video": 1,
+   "img": 68
+  },
+  "net": [
+   {
+    "u": "https://www.cloudflare.com/static/earth-land-points.bin",
+    "ct": "application/octet-stream",
+    "kb": 94
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/21708102-7a68-4230-8ca6-b088879ce262.png",
+    "ct": "image/png",
+    "kb": 77
+   },
+   {
+    "u": "https://www.cloudflare.com/fonts/Apercu%20Mono%20Pro%20Regular.woff2",
+    "ct": "font/woff2",
+    "kb": 26
+   },
+   {
+    "u": "https://www.cloudflare.com/fonts/Kunst%20Grotesk%20Medium.woff2",
+    "ct": "font/woff2",
+    "kb": 22
+   },
+   {
+    "u": "https://www.cloudflare.com/fonts/Kunst%20Grotesk%20Regular.woff2",
+    "ct": "font/woff2",
+    "kb": 19
+   },
+   {
+    "u": "https://www.cloudflare.com/static/hero-poster.avif",
+    "ct": "image/avif",
+    "kb": 17
+   },
+   {
+    "u": "https://www.cloudflare.com/people/duncan-davidson.png",
+    "ct": "image/png",
+    "kb": 6
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/3ccce0b1-a008-42d0-a6e3-7c228a78d0c8.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/e4ea9663-706f-4411-b25c-539fca52c862.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/0c59832d-e3d3-458e-bb88-8894a4f9d18e.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/icons.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/74c5e83e-abc8-49a4-a55b-0ecf972bb849.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/ecbc9f10-50da-4a73-9a27-54a18d00aa9e.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.cloudflare.com/companies/47e69d4e-6b6d-46e4-868a-3f22950572f8.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   }
+  ],
+  "netCount": 41,
+  "netByType": {
+   "image/avif": 1,
+   "font/woff2": 3,
+   "image/svg+xml": 34,
+   "image/png": 2,
+   "application/octet-stream": 1
+  }
+ },
+ {
+  "name": "arc",
+  "url": "https://arc.net/",
+  "ok": true,
+  "data": {
+   "url": "https://arc.net/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Arc is the Chrome  replacement I've been  waiting for.",
+    "rect": {
+     "x": 0,
+     "y": 0,
+     "w": 0,
+     "h": 0
+    },
+    "size": 32,
+    "weight": "700",
+    "family": "Marlin Soft SQ",
+    "color": "rgb(255, 252, 236)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "bg",
+     "src": "url(\"https://arc.net/images/dia-background-image.png\")",
+     "tag": "div",
+     "rect": {
+      "x": 0,
+      "y": 90,
+      "w": 1440,
+      "h": 617
+     },
+     "vis": 888480,
+     "cover": 0.686,
+     "z": "auto",
+     "pos": "relative",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://arc.net/images/dia-hero-image.png",
+     "tag": "img",
+     "rect": {
+      "x": 120,
+      "y": 380,
+      "w": 1200,
+      "h": 693
+     },
+     "vis": 624000,
+     "cover": 0.481,
+     "z": "auto",
+     "pos": "static",
+     "nat": "2400x1386",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "video",
+     "src": "https://arc.net/video/ArcDiaPLG_Video.webm",
+     "tag": "video",
+     "rect": {
+      "x": 480,
+      "y": 452,
+      "w": 720,
+      "h": 501
+     },
+     "vis": 322605,
+     "cover": 0.249,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://arc.net/noise-light.png\")",
+     "tag": "section",
+     "rect": {
+      "x": 0,
+      "y": 707,
+      "w": 1440,
+      "h": 920
+     },
+     "vis": 277920,
+     "cover": 0.214,
+     "z": "auto",
+     "pos": "relative",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://arc.net/noise-light.png\")",
+     "tag": "div",
+     "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 96
+     },
+     "vis": 138240,
+     "cover": 0.107,
+     "z": "99",
+     "pos": "fixed",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": 0
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 4,
+    "img": 3,
+    "imgSrcset": 1,
+    "svg": 35,
+    "nodesInHero": 63
+   },
+   "anims": 2,
+   "infinite": 2,
+   "bodyBg": "rgb(255, 252, 236)"
+  },
+  "srcChangedOnScroll": 1,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 4,
+   "img": 4
+  },
+  "net": [
+   {
+    "u": "https://arc.net/space-swiping.mp4",
+    "ct": "video/mp4",
+    "kb": 1778
+   },
+   {
+    "u": "https://arc.net/video/ArcDiaPLG_Video.webm",
+    "ct": "video/webm",
+    "kb": 1468
+   },
+   {
+    "u": "https://arc.net/theme-picker.mp4",
+    "ct": "video/mp4",
+    "kb": 1216
+   },
+   {
+    "u": "https://arc.net/zero-chrome.mp4",
+    "ct": "video/mp4",
+    "kb": 1191
+   },
+   {
+    "u": "https://arc.net/images/dia-background-image.png",
+    "ct": "image/png",
+    "kb": 1151
+   },
+   {
+    "u": "https://arc.net/zero-chrome.png",
+    "ct": "image/png",
+    "kb": 928
+   },
+   {
+    "u": "https://arc.net/space-swiping.png",
+    "ct": "image/png",
+    "kb": 473
+   },
+   {
+    "u": "https://arc.net/_next/image",
+    "ct": "image/webp",
+    "kb": 448
+   },
+   {
+    "u": "https://arc.net/images/dia-hero-image.png",
+    "ct": "image/png",
+    "kb": 384
+   },
+   {
+    "u": "https://arc.net/images/dia_app_icon.png",
+    "ct": "image/png",
+    "kb": 351
+   },
+   {
+    "u": "https://arc.net/theme-picker.png",
+    "ct": "image/png",
+    "kb": 348
+   },
+   {
+    "u": "https://arc.net/fonts/205TF-Exposure-[-40].woff2",
+    "ct": "font/woff2",
+    "kb": 81
+   },
+   {
+    "u": "https://arc.net/fonts/205TF-Exposure-[-30].woff2",
+    "ct": "font/woff2",
+    "kb": 78
+   },
+   {
+    "u": "https://arc.net/video/ArcDiaPLG_Video-poster.jpg",
+    "ct": "image/jpeg",
+    "kb": 55
+   }
+  ],
+  "netCount": 26,
+  "netByType": {
+   "font/woff2": 10,
+   "image/webp": 1,
+   "video/webm": 1,
+   "image/png": 9,
+   "image/jpeg": 1,
+   "video/mp4": 3,
+   "image/svg+xml": 1
+  }
+ },
+ {
+  "name": "rive",
+  "url": "https://rive.app/",
+  "ok": true,
+  "data": {
+   "url": "https://rive.app/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "The Interactive experience engine",
+    "rect": {
+     "x": 589,
+     "y": 272,
+     "w": 631,
+     "h": 96
+    },
+    "size": 40,
+    "weight": "900",
+    "family": "Orbitron",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "video",
+     "src": "https://framerusercontent.com/assets/LbCLJ75AO7l248pdkB0P0EFisbE.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 221,
+      "y": 542,
+      "w": 300,
+      "h": 257
+     },
+     "vis": 77142,
+     "cover": 0.06,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "video",
+     "src": "https://framerusercontent.com/assets/ECBYGU97tURypreR5jen03aJ4xQ.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 221,
+      "y": 295,
+      "w": 300,
+      "h": 225
+     },
+     "vis": 67500,
+     "cover": 0.052,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "video",
+     "src": "https://cdn.rive.app/framer/product_ui2.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 221,
+      "y": 32,
+      "w": 300,
+      "h": 224
+     },
+     "vis": 67163,
+     "cover": 0.052,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "video",
+     "src": "https://framerusercontent.com/assets/RROO3gsepwxfYDx3dsxJfx8HDzE.mp4",
+     "tag": "video",
+     "rect": {
+      "x": 221,
+      "y": 823,
+      "w": 300,
+      "h": 224
+     },
+     "vis": 23235,
+     "cover": 0.018,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "left",
+    "gapX": 68
+   },
+   "canvases": [
+    {
+     "w": 19,
+     "h": 19,
+     "cw": 19,
+     "ch": 19,
+     "cls": "",
+     "dataEng": null
+    },
+    {
+     "w": 19,
+     "h": 19,
+     "cw": 19,
+     "ch": 19,
+     "cls": "",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 2,
+    "video": 10,
+    "img": 46,
+    "imgSrcset": 10,
+    "svg": 15,
+    "nodesInHero": 158
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 2,
+   "video": 10,
+   "img": 46
+  },
+  "net": [
+   {
+    "u": "https://framerusercontent.com/assets/zaD0ZO3kwm01nA6O1s2ipRdItrc.mp4",
+    "ct": "video/mp4",
+    "kb": 2784
+   },
+   {
+    "u": "https://framerusercontent.com/assets/hlJph9cAPEB5L803Ax8BQ3UQuU.woff2",
+    "ct": "font/woff2",
+    "kb": 1202
+   },
+   {
+    "u": "https://framerusercontent.com/assets/LbCLJ75AO7l248pdkB0P0EFisbE.mp4",
+    "ct": "video/mp4",
+    "kb": 1008
+   },
+   {
+    "u": "https://cdn.rive.app/framer/joel_home.mp4",
+    "ct": "video/mp4",
+    "kb": 971
+   },
+   {
+    "u": "https://framerusercontent.com/assets/ECBYGU97tURypreR5jen03aJ4xQ.mp4",
+    "ct": "video/mp4",
+    "kb": 714
+   },
+   {
+    "u": "https://cdn.rive.app/framer/territory_sequence.mp4",
+    "ct": "video/mp4",
+    "kb": 485
+   },
+   {
+    "u": "https://cdn.rive.app/framer/data_driven2.mp4",
+    "ct": "video/mp4",
+    "kb": 434
+   },
+   {
+    "u": "https://cdn.rive.app/framer/product_ui2.mp4",
+    "ct": "video/mp4",
+    "kb": 394
+   },
+   {
+    "u": "https://cdn.rive.app/framer/broadcast.mp4",
+    "ct": "video/mp4",
+    "kb": 359
+   },
+   {
+    "u": "https://cdn.rive.app/framer/figma_rive.mp4",
+    "ct": "video/mp4",
+    "kb": 280
+   },
+   {
+    "u": "https://framerusercontent.com/assets/RROO3gsepwxfYDx3dsxJfx8HDzE.mp4",
+    "ct": "video/mp4",
+    "kb": 277
+   },
+   {
+    "u": "https://framerusercontent.com/assets/yDtI2UI8XcEg1W2je9XPN3Noo.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   },
+   {
+    "u": "https://framerusercontent.com/assets/vQyevYAyHtARFwPqUzQGpnDs.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   },
+   {
+    "u": "https://framerusercontent.com/assets/d3tHnaQIAeqiE5hGcRw4mmgWYU.woff2",
+    "ct": "font/woff2",
+    "kb": 27
+   }
+  ],
+  "netCount": 66,
+  "netByType": {
+   "font/woff2": 9,
+   "video/mp4": 10,
+   "image/svg+xml": 25,
+   "image/avif": 20,
+   "image/gif": 1,
+   "application/octet-stream": 1
+  }
+ },
+ {
+  "name": "selectel",
+  "url": "https://selectel.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://selectel.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "AI-платформа",
+    "rect": {
+     "x": 519,
+     "y": 228,
+     "w": 401,
+     "h": 29
+    },
+    "size": 24,
+    "weight": "600",
+    "family": "Manrope",
+    "color": "rgb(9, 36, 51)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://selectel.ru/images/components/content/pages/index/swiper-cards/ellipse.svg",
+     "tag": "img",
+     "rect": {
+      "x": 260,
+      "y": 109,
+      "w": 1235,
+      "h": 1246
+     },
+     "vis": 932978,
+     "cover": 0.72,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1154x996",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/pages/index/swiper-cards/ai-infrastructure.png",
+     "tag": "img",
+     "rect": {
+      "x": 495,
+      "y": 204,
+      "w": 454,
+      "h": 591
+     },
+     "vis": 268132,
+     "cover": 0.207,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "486x540",
+     "srcset": "/_ipx/w_320&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-infrastructure.png 320w, /_ipx/w_640&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-infrastructure.png 640w, /_ipx/w_768&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-infrastructure.png ",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/pages/index/swiper-cards/ai-card-illustration.png",
+     "tag": "img",
+     "rect": {
+      "x": 572,
+      "y": 346,
+      "w": 407,
+      "h": 380
+     },
+     "vis": 154875,
+     "cover": 0.12,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1280x1195",
+     "srcset": "/_ipx/w_320&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-card-illustration.png 320w, /_ipx/w_640&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-card-illustration.png 640w, /_ipx/w_768&f_png&q_80/images/components/content/pages/index/swiper-cards/ai-card-illustra",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "bg",
+     "src": "url(\"https://selectel.ru/wp-content/uploads/bg-desktop.jpg\")",
+     "tag": "div",
+     "rect": {
+      "x": 36,
+      "y": 4,
+      "w": 1368,
+      "h": 41
+     },
+     "vis": 56366,
+     "cover": 0.043,
+     "z": "auto",
+     "pos": "relative",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://selectel.ru/images/components/content/pages/index/swiper-cards/dedicated.svg",
+     "tag": "img",
+     "rect": {
+      "x": 1389,
+      "y": 338,
+      "w": 697,
+      "h": 382
+     },
+     "vis": 19488,
+     "cover": 0.015,
+     "z": "10",
+     "pos": "absolute",
+     "nat": "274x150",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "right",
+    "gapX": -660
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 33,
+    "imgSrcset": 18,
+    "svg": 351,
+    "nodesInHero": 1814
+   },
+   "anims": 8,
+   "infinite": 8,
+   "bodyBg": "rgb(255, 255, 255)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 33
+  },
+  "net": [
+   {
+    "u": "https://cdn.selectel.ru/site_v3/_nuxt_v3/academy-bg.C0lOoJhu.jpg",
+    "ct": "image/jpeg",
+    "kb": 210
+   },
+   {
+    "u": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/pages/index/swiper-cards/ai-card-illustration.png",
+    "ct": "image/png",
+    "kb": 174
+   },
+   {
+    "u": "https://selectel.ru/_ipx/_/images/components/content/pages/index/cases/x5.jpg",
+    "ct": "image/jpeg",
+    "kb": 134
+   },
+   {
+    "u": "https://selectel.ru/_ipx/_/images/components/content/pages/index/cases/uchi.ru.jpg",
+    "ct": "image/jpeg",
+    "kb": 131
+   },
+   {
+    "u": "https://selectel.ru/_ipx/_/images/components/content/pages/index/cases/rehau.jpg",
+    "ct": "image/jpeg",
+    "kb": 131
+   },
+   {
+    "u": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/pages/careers/img9.jpg",
+    "ct": "image/jpeg",
+    "kb": 73
+   },
+   {
+    "u": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/factoid-cards/clients.jpg",
+    "ct": "image/jpeg",
+    "kb": 68
+   },
+   {
+    "u": "https://selectel.ru/_ipx/_/images/components/content/pages/index/cases/level.jpg",
+    "ct": "image/jpeg",
+    "kb": 60
+   },
+   {
+    "u": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/pages/index/swiper-cards/ai-infrastructure.png",
+    "ct": "image/png",
+    "kb": 49
+   },
+   {
+    "u": "https://cdn.selectel.ru/site_v3/_nuxt_v3/ManropeRegular.DwSNFBnA.woff2",
+    "ct": "application/octet-stream",
+    "kb": 48
+   },
+   {
+    "u": "https://cdn.selectel.ru/site_v3/_nuxt_v3/ManropeSemibold.CM9VGQjF.woff2",
+    "ct": "application/octet-stream",
+    "kb": 48
+   },
+   {
+    "u": "https://cdn.selectel.ru/site_v3/_nuxt_v3/ManropeMedium.D2xEcEwK.woff2",
+    "ct": "application/octet-stream",
+    "kb": 48
+   },
+   {
+    "u": "https://selectel.ru/_ipx/w_1280&f_webp&q_80/images/components/content/factoid-cards/products.jpg",
+    "ct": "image/jpeg",
+    "kb": 45
+   },
+   {
+    "u": "https://chatwoot.selectel.ru/rails/active_storage/disk/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdDVG9JYTJWNVNTSWhaREZtT0dkb2IyeDNjRGw2YURkeWNHRmhOV0pyTURabU1HdHJiZ1k2QmtWVU9oQmthWE53YjNOcGRHbHZia2tpTzJsdWJHbHVaVHNnWm1sc1pXNWhiV1U5SWpjMkxUSXVjRzVuSWpzZ1ptbHNaVzVoYldVcVBWVlVSaTA0SnljM05pMHlMbkJ1WndZN0JsUTZFV052Ym5SbGJuUmZkSGx3WlVraURtbHRZV2RsTDNCdVp3WTdCbFE2RVhObGNuWnBZMlZmYm1GdFpUb0tiRzlqWVd3PSIsImV4cCI6IjIwMjYtMDktMjFUMTI6MzE6MzguNTIzWiIsInB1ciI6ImJsb2Jfa2V5In19--65f69dde075d9168cd8510ff9594335d5f798400/76-2.png",
+    "ct": "image/png",
+    "kb": 44
+   }
+  ],
+  "netCount": 52,
+  "netByType": {
+   "image/svg+xml": 13,
+   "image/png": 13,
+   "image/jpeg": 14,
+   "application/octet-stream": 3,
+   "image/gif": 7,
+   "font/woff2": 2
+  }
+ },
+ {
+  "name": "cloudru",
+  "url": "https://cloud.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://cloud.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Cloud․ru — провайдер облачных сервисов и AI-технологий.",
+    "rect": {
+     "x": 15,
+     "y": 60,
+     "w": 1,
+     "h": 1
+    },
+    "size": 32,
+    "weight": "700",
+    "family": "SB Sans Display",
+    "color": "rgb(0, 0, 0)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://cdn.cloud.ru/backend/main-slider/agents_space_desktop.webp",
+     "tag": "img",
+     "rect": {
+      "x": 816,
+      "y": 77,
+      "w": 512,
+      "h": 352
+     },
+     "vis": 180224,
+     "cover": 0.139,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1024x704",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://cloud.ru/svg/components/Calculator/calculator.png",
+     "tag": "img",
+     "rect": {
+      "x": 424,
+      "y": 633,
+      "w": 300,
+      "h": 526
+     },
+     "vis": 80100,
+     "cover": 0.062,
+     "z": "-1",
+     "pos": "absolute",
+     "nat": "280x476",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": 800
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": true,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 1,
+    "img": 33,
+    "imgSrcset": 0,
+    "svg": 66,
+    "nodesInHero": 309
+   },
+   "anims": 1,
+   "infinite": 0,
+   "bodyBg": "rgb(238, 239, 243)"
+  },
+  "srcChangedOnScroll": 1,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 1,
+   "img": 33
+  },
+  "net": [
+   {
+    "u": "https://cdn-video.cloud.ru/backend/video/main-page/lk_evolution_compute.mp4",
+    "ct": "video/mp4",
+    "kb": 28735
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/agents_space_desktop.webp",
+    "ct": "image/webp",
+    "kb": 417
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/gocloud2026_desktop.webp",
+    "ct": "image/webp",
+    "kb": 82
+   },
+   {
+    "u": "https://cloud.ru/svg/components/Calculator/calculator.png",
+    "ct": "image/png",
+    "kb": 62
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-text/SBSansTextSemiBold.woff2",
+    "ct": "font/woff2",
+    "kb": 52
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/video/main-page/lk_evolution_compute_preview.webp",
+    "ct": "image/webp",
+    "kb": 52
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-text/SBSansText.woff2",
+    "ct": "font/woff2",
+    "kb": 45
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/giga_desktop.webp",
+    "ct": "image/webp",
+    "kb": 29
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-display/SBSansDisplaySemiBold.woff2",
+    "ct": "font/woff2",
+    "kb": 26
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-display/SBSansDisplayRegular.woff2",
+    "ct": "font/woff2",
+    "kb": 23
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/images/about/card_pattern.webp",
+    "ct": "image/webp",
+    "kb": 19
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/haval/logo_gwm.webp",
+    "ct": "image/webp",
+    "kb": 17
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/hoff_logo.webp",
+    "ct": "image/webp",
+    "kb": 11
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/Magnit/logo_magnit.webp",
+    "ct": "image/webp",
+    "kb": 6
+   }
+  ],
+  "netCount": 33,
+  "netByType": {
+   "font/woff2": 4,
+   "image/png": 2,
+   "image/svg+xml": 8,
+   "image/webp": 10,
+   "video/mp4": 1,
+   "image/gif": 8
+  }
+ },
+ {
+  "name": "apple-mbp",
+  "url": "https://www.apple.com/macbook-pro/",
+  "ok": true,
+  "data": {
+   "url": "https://www.apple.com/macbook-pro/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "MacBook Pro",
+    "rect": {
+     "x": 90,
+     "y": 576,
+     "w": 630,
+     "h": 32
+    },
+    "size": 28,
+    "weight": "600",
+    "family": "SF Pro Display",
+    "color": "rgb(245, 245, 247)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "video",
+     "src": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/hero/large.mp4",
+     "tag": "video",
+     "rect": {
+      "x": -720,
+      "y": 70,
+      "w": 2880,
+      "h": 830
+     },
+     "vis": 1195200,
+     "cover": 0.922,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": true,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://www.apple.com/v/macbook-pro/ax/images/overview/welcome/hero_endframe__fwev9ebh42mq_large.jpg",
+     "tag": "img",
+     "rect": {
+      "x": -720,
+      "y": 70,
+      "w": 2880,
+      "h": 830
+     },
+     "vis": 1195200,
+     "cover": 0.922,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1440x1440",
+     "srcset": "",
+     "overflowsL": true,
+     "overflowsR": true,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "right",
+    "gapX": -1440
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [
+    {
+     "pattern": "data:image/gif;base#,R#lGODlhAQABAHAAACH#BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
+     "n": 91
+    }
+   ],
+   "counts": {
+    "canvas": 0,
+    "video": 13,
+    "img": 111,
+    "imgSrcset": 0,
+    "svg": 154,
+    "nodesInHero": 853
+   },
+   "anims": 10,
+   "infinite": 0,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 16,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 13,
+   "img": 111
+  },
+  "net": [
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/performance-chip-background/large.mp4",
+    "ct": "video/mp4",
+    "kb": 4237
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/pv-audio/large.mp4",
+    "ct": "video/mp4",
+    "kb": 2328
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/hero/large.mp4",
+    "ct": "video/mp4",
+    "kb": 1634
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/pv-hero/large.mp4",
+    "ct": "video/mp4",
+    "kb": 1503
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/pv-camera/large.mp4",
+    "ct": "video/mp4",
+    "kb": 1347
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2025/785e1bc4-d1bd-4cf4-b1b3-94b9411c9e74/anim/pv-sizes/large.mp4",
+    "ct": "video/mp4",
+    "kb": 783
+   },
+   {
+    "u": "https://www.apple.com/v/macbook-pro/ax/images/overview/product-viewer/pv_connectivity__27f84rcgb42e_large.jpg",
+    "ct": "image/jpeg",
+    "kb": 444
+   },
+   {
+    "u": "https://www.apple.com/v/macbook-pro/ax/images/overview/product-viewer/pv_durable__ee5bejbfpis2_large.jpg",
+    "ct": "image/jpeg",
+    "kb": 412
+   },
+   {
+    "u": "https://www.apple.com/105/media/us/macbook-pro/2026/2a290130-49ff-4459-984d-1feeda3d24cb/anim/highlights-chips/large.mp4",
+    "ct": "video/mp4",
+    "kb": 251
+   },
+   {
+    "u": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_semibold.woff2",
+    "ct": "font/woff2",
+    "kb": 229
+   },
+   {
+    "u": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_light.woff2",
+    "ct": "font/woff2",
+    "kb": 220
+   },
+   {
+    "u": "https://www.apple.com/wss/fonts/SF-Pro-Text/v3/sf-pro-text_regular.woff2",
+    "ct": "font/woff2",
+    "kb": 215
+   },
+   {
+    "u": "https://www.apple.com/v/macbook-pro/ax/images/overview/highlights/highlights_liquid_glass__fup1pqvqx866_large.jpg",
+    "ct": "image/jpeg",
+    "kb": 210
+   },
+   {
+    "u": "https://www.apple.com/v/macbook-pro/ax/images/overview/product-viewer/pv_camera_endframe__3d423kiwog2y_large.jpg",
+    "ct": "image/jpeg",
+    "kb": 209
+   }
+  ],
+  "netCount": 53,
+  "netByType": {
+   "image/svg+xml": 2,
+   "image/jpeg": 26,
+   "font/woff2": 9,
+   "image/png": 9,
+   "video/mp4": 7
+  }
+ },
+ {
+  "name": "igloo",
+  "url": "https://www.igloo.inc/",
+  "ok": true,
+  "data": {
+   "url": "https://www.igloo.inc/",
+   "vw": 1440,
+   "vh": 900,
+   "head": null,
+   "visuals": [],
+   "rel": null,
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 0,
+    "imgSrcset": 0,
+    "svg": 0,
+    "nodesInHero": 4
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgb(160, 165, 177)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 0
+  },
+  "net": [
+   {
+    "u": "https://www.igloo.inc/assets/images/scroll-datatexture.ktx2",
+    "ct": "image/ktx2",
+    "kb": 1256
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/cubes/cube3_normal.ktx2",
+    "ct": "image/ktx2",
+    "kb": 1108
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/cubes/cube2_normal.ktx2",
+    "ct": "image/ktx2",
+    "kb": 1052
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/cubes/cube1_normal.ktx2",
+    "ct": "image/ktx2",
+    "kb": 1052
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/igloo/igloo_exploded_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 823
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/volumes/peachesbody_64.ktx2",
+    "ct": "image/ktx2",
+    "kb": 817
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/floor_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 615
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/igloo/ground_sansigloo_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 614
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/igloo/ground_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 611
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/igloo/mountain_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 578
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/igloo/igloo_color.ktx2",
+    "ct": "image/ktx2",
+    "kb": 521
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/volumes/x_64.ktx2",
+    "ct": "image/ktx2",
+    "kb": 311
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/cubes_env.exr",
+    "ct": "image/aces",
+    "kb": 253
+   },
+   {
+    "u": "https://www.igloo.inc/assets/images/cubes/cube2_roughness.ktx2",
+    "ct": "image/ktx2",
+    "kb": 242
+   }
+  ],
+  "netCount": 76,
+  "netByType": {
+   "image/png": 4,
+   "application/octet-stream": 22,
+   "image/ktx2": 49,
+   "image/aces": 1
+  }
+ },
+ {
+  "name": "vkcloud",
+  "url": "https://cloud.vk.com/",
+  "ok": true,
+  "data": {
+   "url": "https://cloud.vk.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "VK Cloud",
+    "rect": {
+     "x": 463,
+     "y": 205,
+     "w": 514,
+     "h": 68
+    },
+    "size": 64,
+    "weight": "500",
+    "family": "VK Sans Display Expanded",
+    "color": "rgb(254, 254, 254)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/VK_Cloud_Desktop_5589b22b53.png",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1296000,
+     "cover": 1,
+     "z": "auto",
+     "pos": "static",
+     "nat": "2560x1240",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -977
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [
+    {
+     "pattern": "https://vkcloud-cms-prod.s#.prodcloud.vk.team/Caret_Right_SM_#b#fdd#.svg",
+     "n": 9
+    }
+   ],
+   "counts": {
+    "canvas": 0,
+    "video": 2,
+    "img": 78,
+    "imgSrcset": 0,
+    "svg": 25,
+    "nodesInHero": 321
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 2,
+   "img": 79
+  },
+  "net": [
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/Group_2087326453_5_6e50d945d5.png",
+    "ct": "image/png",
+    "kb": 613
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/star_1_2_ab28185335.png",
+    "ct": "image/png",
+    "kb": 434
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/6737e8c1_44ed_4675_9bf0_d305ee8cd29d_2_2_7e339da4dd.png",
+    "ct": "image/png",
+    "kb": 405
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/44d471169b9a556b975586b0e4a1b526af3fb746_1_4754bb302b.png",
+    "ct": "image/png",
+    "kb": 375
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/VK_Cloud_Desktop_5589b22b53.png",
+    "ct": "image/png",
+    "kb": 373
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/Group_1948758253_1_70518b805f.png",
+    "ct": "image/png",
+    "kb": 358
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup3_8ed5cb320c.png",
+    "ct": "image/png",
+    "kb": 281
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup4_5f1805b759.png",
+    "ct": "image/png",
+    "kb": 272
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup2_48ef96b0bb.png",
+    "ct": "image/png",
+    "kb": 258
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup8_dca653a7d2.png",
+    "ct": "image/png",
+    "kb": 244
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup7_ef1b1332d4.png",
+    "ct": "image/png",
+    "kb": 240
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup6_209bf27ee1.png",
+    "ct": "image/png",
+    "kb": 238
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup5_752fa8a0e4.png",
+    "ct": "image/png",
+    "kb": 231
+   },
+   {
+    "u": "https://vkcloud-cms-prod.s3.prodcloud.vk.team/main_mockup1_ac054ef32a.png",
+    "ct": "image/png",
+    "kb": 217
+   }
+  ],
+  "netCount": 65,
+  "netByType": {
+   "image/svg+xml": 38,
+   "image/png": 20,
+   "font/woff2": 1,
+   "image/gif": 5,
+   "application/octet-stream": 1
+  }
+ },
+ {
+  "name": "sbercloud",
+  "url": "https://sbercloud.ru/",
+  "ok": true,
+  "data": {
+   "url": "https://cloud.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Cloud․ru — провайдер облачных сервисов и AI-технологий.",
+    "rect": {
+     "x": 15,
+     "y": 60,
+     "w": 1,
+     "h": 1
+    },
+    "size": 32,
+    "weight": "700",
+    "family": "SB Sans Display",
+    "color": "rgb(0, 0, 0)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://cdn.cloud.ru/backend/main-slider/agents_space_desktop.webp",
+     "tag": "img",
+     "rect": {
+      "x": 816,
+      "y": 77,
+      "w": 512,
+      "h": 352
+     },
+     "vis": 180224,
+     "cover": 0.139,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1024x704",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://cloud.ru/svg/components/Calculator/calculator.png",
+     "tag": "img",
+     "rect": {
+      "x": 424,
+      "y": 633,
+      "w": 300,
+      "h": 526
+     },
+     "vis": 80100,
+     "cover": 0.062,
+     "z": "-1",
+     "pos": "absolute",
+     "nat": "280x476",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": 800
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": true,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 1,
+    "img": 33,
+    "imgSrcset": 0,
+    "svg": 66,
+    "nodesInHero": 309
+   },
+   "anims": 1,
+   "infinite": 0,
+   "bodyBg": "rgb(238, 239, 243)"
+  },
+  "srcChangedOnScroll": 1,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 1,
+   "img": 33
+  },
+  "net": [
+   {
+    "u": "https://cdn-video.cloud.ru/backend/video/main-page/lk_evolution_compute.mp4",
+    "ct": "video/mp4",
+    "kb": 28735
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/agents_space_desktop.webp",
+    "ct": "image/webp",
+    "kb": 417
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/gocloud2026_desktop.webp",
+    "ct": "image/webp",
+    "kb": 82
+   },
+   {
+    "u": "https://cloud.ru/svg/components/Calculator/calculator.png",
+    "ct": "image/png",
+    "kb": 62
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-text/SBSansTextSemiBold.woff2",
+    "ct": "font/woff2",
+    "kb": 52
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/video/main-page/lk_evolution_compute_preview.webp",
+    "ct": "image/webp",
+    "kb": 52
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-text/SBSansText.woff2",
+    "ct": "font/woff2",
+    "kb": 45
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/main-slider/giga_desktop.webp",
+    "ct": "image/webp",
+    "kb": 29
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-display/SBSansDisplaySemiBold.woff2",
+    "ct": "font/woff2",
+    "kb": 26
+   },
+   {
+    "u": "https://cloud.ru/fonts/sb-sans-display/SBSansDisplayRegular.woff2",
+    "ct": "font/woff2",
+    "kb": 23
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/images/about/card_pattern.webp",
+    "ct": "image/webp",
+    "kb": 19
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/haval/logo_gwm.webp",
+    "ct": "image/webp",
+    "kb": 17
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/hoff_logo.webp",
+    "ct": "image/webp",
+    "kb": 11
+   },
+   {
+    "u": "https://cdn.cloud.ru/backend/cases/Magnit/logo_magnit.webp",
+    "ct": "image/webp",
+    "kb": 6
+   }
+  ],
+  "netCount": 33,
+  "netByType": {
+   "font/woff2": 4,
+   "image/svg+xml": 8,
+   "image/webp": 10,
+   "image/png": 2,
+   "video/mp4": 1,
+   "image/gif": 8
+  }
+ },
+ {
+  "name": "spline",
+  "url": "https://spline.design/",
+  "ok": true,
+  "data": {
+   "url": "https://spline.design/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Make anything 3D",
+    "rect": {
+     "x": 370,
+     "y": 221,
+     "w": 700,
+     "h": 48
+    },
+    "size": 38,
+    "weight": "500",
+    "family": "Spline Sans",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "canvas",
+     "src": null,
+     "tag": "canvas",
+     "rect": {
+      "x": 0,
+      "y": -4,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1290240,
+     "cover": 0.996,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -1070
+   },
+   "canvases": [
+    {
+     "w": 1440,
+     "h": 900,
+     "cw": 1440,
+     "ch": 900,
+     "cls": "",
+     "dataEng": null
+    },
+    {
+     "w": 300,
+     "h": 150,
+     "cw": 0,
+     "ch": 0,
+     "cls": "",
+     "dataEng": null
+    },
+    {
+     "w": 524,
+     "h": 500,
+     "cw": 524,
+     "ch": 500,
+     "cls": "",
+     "dataEng": null
+    }
+   ],
+   "libs": {
+    "three": false,
+    "spline": true,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 3,
+    "video": 12,
+    "img": 39,
+    "imgSrcset": 13,
+    "svg": 99,
+    "nodesInHero": 67
+   },
+   "anims": 3,
+   "infinite": 3,
+   "bodyBg": "rgb(0, 0, 0)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 3,
+   "video": 12,
+   "img": 39
+  },
+  "net": [
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-8.mp4",
+    "ct": "video/mp4",
+    "kb": 6907
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-7.mp4",
+    "ct": "video/mp4",
+    "kb": 3071
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-9.mp4",
+    "ct": "video/mp4",
+    "kb": 2639
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-5.mp4",
+    "ct": "video/mp4",
+    "kb": 2408
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-2.mp4",
+    "ct": "video/mp4",
+    "kb": 1967
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-3.mp4",
+    "ct": "video/mp4",
+    "kb": 1391
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-1.mp4",
+    "ct": "video/mp4",
+    "kb": 1068
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-6.mp4",
+    "ct": "video/mp4",
+    "kb": 1055
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/usecase-4.mp4",
+    "ct": "video/mp4",
+    "kb": 896
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/bento-materials.mp4",
+    "ct": "video/mp4",
+    "kb": 607
+   },
+   {
+    "u": "https://spline.design/images/templates/nobrakes.webp",
+    "ct": "image/webp",
+    "kb": 202
+   },
+   {
+    "u": "https://cdn.spline.design/_assets/_videos/bento-design.mp4",
+    "ct": "video/mp4",
+    "kb": 198
+   },
+   {
+    "u": "https://spline.design/images/templates/op1.webp",
+    "ct": "image/webp",
+    "kb": 132
+   },
+   {
+    "u": "https://spline.design/images/templates/retrofuturism.webp",
+    "ct": "image/webp",
+    "kb": 124
+   }
+  ],
+  "netCount": 33,
+  "netByType": {
+   "font/woff2": 5,
+   "image/webp": 14,
+   "video/mp4": 12,
+   "image/svg+xml": 1,
+   "image/gif": 1
+  }
+ },
+ {
+  "name": "yandex360b",
+  "url": "https://360.yandex.ru/business",
+  "ok": true,
+  "data": {
+   "url": "https://360.yandex.ru/business/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Рабочее место вашего бизнеса",
+    "rect": {
+     "x": 271,
+     "y": 228,
+     "w": 898,
+     "h": 160
+    },
+    "size": 80,
+    "weight": "500",
+    "family": "YS Text Wide",
+    "color": "rgb(52, 52, 60)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "bg",
+     "src": "image-set(url(\"https://avatars.mds.yandex.net/get-bunker/49769/95d103ca90d111f1a06b9aaadd1107e1/orig\") 1dppx, url(\"https://avatars.mds.yandex.net/get-bunker/128809/92faa0cd90d111f1b0df5201bb48962b/ori",
+     "tag": "div",
+     "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 721
+     },
+     "vis": 1037948,
+     "cover": 0.801,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -1169
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 13,
+    "img": 21,
+    "imgSrcset": 0,
+    "svg": 4,
+    "nodesInHero": 101
+   },
+   "anims": 6,
+   "infinite": 6,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 13,
+   "img": 21
+  },
+  "net": [
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/business-smb-orbita/360/test/2kv-white.webm",
+    "ct": "video/webm",
+    "kb": 3097
+   },
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/mail/1kv-white.webm",
+    "ct": "video/webm",
+    "kb": 2851
+   },
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/business-smb-orbita/360/test/3kv-white.webm",
+    "ct": "video/webm",
+    "kb": 2531
+   },
+   {
+    "u": "https://yastatic.net/s3/tuning/cms-assets/360/business-smb-orbita/business-hero-desktop-optimized.webm",
+    "ct": "video/webm",
+    "kb": 1130
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-display-wide.woff2",
+    "ct": "font/woff2",
+    "kb": 532
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/120922/74b2fb72afee4aba951d4e5b7199a62af2291f8d/orig",
+    "ct": "image/webp",
+    "kb": 62
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/50064/b672345d3e5e150f48d007e3c44704ee4dadfb16/orig",
+    "ct": "image/webp",
+    "kb": 55
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/49769/4a7976419ccd3ccb98a22928a4ebd7ebb396767c/orig",
+    "ct": "image/webp",
+    "kb": 54
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/118781/42dc2508844e11f1a782d6cefa787077/orig",
+    "ct": "image/webp",
+    "kb": 51
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-medium.woff2",
+    "ct": "font/woff2",
+    "kb": 48
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/49769/95d103ca90d111f1a06b9aaadd1107e1/orig",
+    "ct": "image/webp",
+    "kb": 45
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/61205/bc551e4241c7b8a7928b11d6fdb07b79e0692b4b/orig",
+    "ct": "image/webp",
+    "kb": 45
+   },
+   {
+    "u": "https://yastatic.net/s3/psf/orb/fonts/ys-text-regular.woff2",
+    "ct": "font/woff2",
+    "kb": 41
+   },
+   {
+    "u": "https://avatars.mds.yandex.net/get-bunker/61205/4c4d3c845ab44423203d2c9ebd9e5ee3b35078b1/orig",
+    "ct": "image/webp",
+    "kb": 35
+   }
+  ],
+  "netCount": 91,
+  "netByType": {
+   "image/svg+xml": 29,
+   "image/webp": 49,
+   "video/webm": 4,
+   "font/woff2": 3,
+   "image/gif": 5,
+   "image/png": 1
+  }
+ },
+ {
+  "name": "dodo",
+  "url": "https://dodo.dev/",
+  "ok": true,
+  "data": {
+   "url": "https://dodoengineering.ru/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "380+",
+    "rect": {
+     "x": 141,
+     "y": 599,
+     "w": 473,
+     "h": 81
+    },
+    "size": 60,
+    "weight": "700",
+    "family": "PPObjectSans",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://static.tildacdn.com/tild3161-6131-4565-b638-643936343566/giphy1.gif",
+     "tag": "img",
+     "rect": {
+      "x": -60,
+      "y": -347,
+      "w": 1560,
+      "h": 1560
+     },
+     "vis": 1296000,
+     "cover": 1,
+     "z": "auto",
+     "pos": "static",
+     "nat": "500x500",
+     "srcset": "",
+     "overflowsL": true,
+     "overflowsR": true,
+     "overflowsT": true,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "right",
+    "gapX": -674
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [
+    {
+     "pattern": "https://thb.tildacdn.com/tild#-#-#-b#-#/-/resize/#x/#.png",
+     "n": 54
+    },
+    {
+     "pattern": "https://thb.tildacdn.com/tild#-#-#-a#-#/-/resize/#x/#.png",
+     "n": 38
+    },
+    {
+     "pattern": "https://static.tildacdn.com/tild#-#-#-b#-#/Group_#.svg",
+     "n": 8
+    }
+   ],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 141,
+    "imgSrcset": 0,
+    "svg": 2,
+    "nodesInHero": 82
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgba(0, 0, 0, 0)"
+  },
+  "srcChangedOnScroll": 19,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 141
+  },
+  "net": [
+   {
+    "u": "https://static.tildacdn.com/tild3161-6131-4565-b638-643936343566/giphy1.gif",
+    "ct": "image/gif",
+    "kb": 2468
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3330-6366-4335-a139-376431643238/-/resize/664x/-/format/webp/Image_abstract_-_12.png.webp",
+    "ct": "image/webp",
+    "kb": 55
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6433-3039-4066-a462-353566623966/-/resize/360x/-/format/webp/_.png.webp",
+    "ct": "image/webp",
+    "kb": 39
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3433-6166-4964-a563-373936326436/-/resize/432x/-/format/webp/_.png.webp",
+    "ct": "image/webp",
+    "kb": 22
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3164-3563-4531-a139-316534386634/-/resize/432x/-/format/webp/__.png.webp",
+    "ct": "image/webp",
+    "kb": 19
+   },
+   {
+    "u": "https://static.tildacdn.com/tild3235-6536-4037-b566-643266383732/__.png",
+    "ct": "image/png",
+    "kb": 18
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3333-3165-4632-b862-663536623330/-/resize/432x/-/format/webp/__.png.webp",
+    "ct": "image/webp",
+    "kb": 18
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3036-3165-4131-a638-346231303064/-/resize/432x/-/format/webp/Frame_126.png.webp",
+    "ct": "image/webp",
+    "kb": 18
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3833-6138-4338-b138-613663666136/-/resize/432x/-/format/webp/428.jpg.webp",
+    "ct": "image/webp",
+    "kb": 17
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6430-6337-4330-a239-643165333763/-/resize/432x/-/format/webp/5785.jpg.webp",
+    "ct": "image/webp",
+    "kb": 15
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3762-3563-4165-a162-306461646364/-/resize/432x/-/format/webp/_2.png.webp",
+    "ct": "image/webp",
+    "kb": 12
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6532-6361-4634-b832-363162623938/-/format/webp/121.png.webp",
+    "ct": "image/webp",
+    "kb": 8
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild3866-3031-4034-b631-393638356661/-/resize/201x/-/format/webp/3D_Image_-_38.png.webp",
+    "ct": "image/webp",
+    "kb": 7
+   },
+   {
+    "u": "https://optim.tildacdn.com/tild6361-3266-4932-b462-306134643038/-/resize/69x/-/format/webp/dodorender28_4.png.webp",
+    "ct": "image/webp",
+    "kb": 3
+   }
+  ],
+  "netCount": 140,
+  "netByType": {
+   "image/svg+xml": 11,
+   "image/png": 69,
+   "image/gif": 2,
+   "image/webp": 56,
+   "font/woff": 2
+  }
+ },
+ {
+  "name": "nothing",
+  "url": "https://nothing.tech/",
+  "ok": true,
+  "data": {
+   "url": "https://nothing.tech/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Netherlands/Nederland",
+    "rect": {
+     "x": 505,
+     "y": 382,
+     "w": 430,
+     "h": 35
+    },
+    "size": 32,
+    "weight": "100",
+    "family": "NType82-Regular",
+    "color": "rgb(4, 4, 4)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://cdn.sanity.io/images/gtd4w1cq/production/04b62d522a73fb4e6c7128039d8c5fd926f6f7ba-4000x2250.webp?auto=format",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+     },
+     "vis": 1296000,
+     "cover": 1,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "4000x2250",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "img",
+     "src": "https://cdn.shopify.com/s/files/1/0376/5420/0459/files/product-thumbnail-pink.png?v=1782317092",
+     "tag": "img",
+     "rect": {
+      "x": 812,
+      "y": 664,
+      "w": 148,
+      "h": 148
+     },
+     "vis": 21904,
+     "cover": 0.017,
+     "z": "auto",
+     "pos": "static",
+     "nat": "1080x1080",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 1,
+    "textCenterInVisual": true,
+    "visualSideOfText": "left",
+    "gapX": -935
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 20,
+    "imgSrcset": 0,
+    "svg": 9,
+    "nodesInHero": 113
+   },
+   "anims": 0,
+   "infinite": 0,
+   "bodyBg": "rgb(244, 244, 244)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 20
+  },
+  "net": [
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/TIdPUrbsDRTuVriB94My7V02din401z41gGK6HbXhvRFiLR2H300SQlVoOiBpAeIqveWCXGjRdA3Zbk28ccbQp2SmA8VYoJ3Us1/2.ts",
+    "ct": "video/MP2T",
+    "kb": 2914
+   },
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/xCp4XOkhobvrjcEuvXAzVgJ8HGUYypw4q72jWQKqD01SLpSNin3Gp1f8lwFEcRBfhh3Ch02djbXAwyyBwR00CipWpEG2ePfZS01L/3.ts",
+    "ct": "video/MP2T",
+    "kb": 2809
+   },
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/8UhFLfjg7YNCvVZA1xF9fMRJ4kW7wavmuD4LyB30201Gwuj3IWpZsuz8RTa01Y00Lpjkx402LavAjbi5Qv1dZJUx5XfbXJU7AOrv02/1.ts",
+    "ct": "video/MP2T",
+    "kb": 2550
+   },
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/Fme4U2mDg801yFZke6Ft92X6zBlQ7B002k02iK2g01smSfaHhsShgnwk9h9ofsuyC00zmSibwMZ2IVwUwsVjrueTPZQkRHaf2fehh/4.ts",
+    "ct": "video/MP2T",
+    "kb": 1860
+   },
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/5Dmw5YUTUGWDYUzfRNz1gM02d1bZSaLRrliL02WxR5MSYy39Vpbs6p00i02nCaYw8yv0001X5EbYhkY654VojB9N3I2M3PnohCtP9l/5.ts",
+    "ct": "video/MP2T",
+    "kb": 1651
+   },
+   {
+    "u": "https://chunk-oci-us-phoenix-1-vop1.edgemv.mux.com/v1/chunk/ibXDtJfNMJCCpNYmrcSBk5cdNNyFW8t1s8CJwmD01xG7IpgIJyxtrPKmGfngcZVJb00v012dZFEZyPy4P9wiU3RmNZW1oCAiSbr/0.ts",
+    "ct": "video/MP2T",
+    "kb": 1211
+   },
+   {
+    "u": "https://cdn.sanity.io/images/gtd4w1cq/production/63f0a5870bac4035b50e56d6c8728d223a75aed0-3840x2160.webp",
+    "ct": "image/avif",
+    "kb": 293
+   },
+   {
+    "u": "https://cdn.sanity.io/images/gtd4w1cq/production/04b62d522a73fb4e6c7128039d8c5fd926f6f7ba-4000x2250.webp",
+    "ct": "image/avif",
+    "kb": 211
+   },
+   {
+    "u": "https://cdn.shopify.com/s/files/1/0376/5420/0459/files/Phone-4a-Pro-White.png",
+    "ct": "image/webp",
+    "kb": 201
+   },
+   {
+    "u": "https://cdn.shopify.com/s/files/1/0376/5420/0459/files/Phone-4a-White.png",
+    "ct": "image/webp",
+    "kb": 154
+   },
+   {
+    "u": "https://cdn.shopify.com/s/files/1/0376/5420/0459/files/headphone-a-white-3_4-view-thumbnail.webp",
+    "ct": "image/webp",
+    "kb": 141
+   },
+   {
+    "u": "https://cdn.shopify.com/s/files/1/0376/5420/0459/files/headphone-1-white-3_4-view-thumbnail.webp",
+    "ct": "image/webp",
+    "kb": 116
+   },
+   {
+    "u": "https://cdn.sanity.io/images/gtd4w1cq/production/d537f4c841503edee2f704a0a279697e8a1ce909-4096x2305.jpg",
+    "ct": "image/avif",
+    "kb": 86
+   },
+   {
+    "u": "https://image.mux.com/YyShYNODGr4h32ZboJDckdXSLuhe02FEeR9Nd8ps2XeE/thumbnail.webp",
+    "ct": "image/webp",
+    "kb": 68
+   }
+  ],
+  "netCount": 23,
+  "netByType": {
+   "image/webp": 7,
+   "image/avif": 6,
+   "video/MP2T": 6,
+   "image/png": 1,
+   "font/otf": 3
+  }
+ },
+ {
+  "name": "supabase",
+  "url": "https://supabase.com/",
+  "ok": true,
+  "data": {
+   "url": "https://supabase.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Build in a weekendScale to millions",
+    "rect": {
+     "x": 176,
+     "y": 281,
+     "w": 536,
+     "h": 92
+    },
+    "size": 46,
+    "weight": "500",
+    "family": "Manrope",
+    "color": "oklch(0.1 0 34)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://supabase.com/images/index/products/auth-light.svg",
+     "tag": "img",
+     "rect": {
+      "x": 727,
+      "y": 508,
+      "w": 261,
+      "h": 398
+     },
+     "vis": 102312,
+     "cover": 0.079,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "331x430",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://supabase.com/images/index/products/edge-functions-light.svg",
+     "tag": "img",
+     "rect": {
+      "x": 1002,
+      "y": 508,
+      "w": 261,
+      "h": 398
+     },
+     "vis": 102312,
+     "cover": 0.079,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "330x430",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    },
+    {
+     "kind": "img",
+     "src": "https://supabase.com/_next/image?url=%2Fimages%2Findex%2Fproducts%2Fdatabase-light.png&w=1920&q=100",
+     "tag": "img",
+     "rect": {
+      "x": 457,
+      "y": 508,
+      "w": 256,
+      "h": 398
+     },
+     "vis": 100352,
+     "cover": 0.077,
+     "z": "0",
+     "pos": "absolute",
+     "nat": "585x645",
+     "srcset": "/_next/image?url=%2Fimages%2Findex%2Fproducts%2Fdatabase-light.png&w=16&q=100 16w, /_next/image?url=%2Fimages%2Findex%2Fproducts%2Fdatabase-light.png&w=32&q=100 32w, /_next/image?url=%2Fimages%2Findex%2Fproducts%2Fdatabase-light.png&w=48&q=100 48w, /_next/image?url=%2Fimages%2Findex%2Fproducts%2Fdat",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": 15
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 57,
+    "imgSrcset": 17,
+    "svg": 133,
+    "nodesInHero": 328
+   },
+   "anims": 15,
+   "infinite": 14,
+   "bodyBg": "oklch(0.995 0 34)"
+  },
+  "srcChangedOnScroll": 20,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 1,
+   "img": 58
+  },
+  "net": [
+   {
+    "u": "https://xguihxuzqibwxjnimxev.supabase.co/storage/v1/object/public/videos/marketing/website/supabase-table-editor-light.webm",
+    "ct": "video/webm",
+    "kb": 4045
+   },
+   {
+    "u": "https://supabase.com/images/blog/avatars/bryan-byrne-lovable.jpeg",
+    "ct": "image/jpeg",
+    "kb": 122
+   },
+   {
+    "u": "https://supabase.com/images/index/dashboard/supabase-table-editor-light.png",
+    "ct": "image/png",
+    "kb": 105
+   },
+   {
+    "u": "https://supabase.com/images/blog/avatars/seth-siegler.jpg",
+    "ct": "image/jpeg",
+    "kb": 93
+   },
+   {
+    "u": "https://supabase.com/images/blog/avatars/kris-woods-phoenix-energy.jpg",
+    "ct": "image/jpeg",
+    "kb": 72
+   },
+   {
+    "u": "https://supabase.com/_next/image",
+    "ct": "image/webp",
+    "kb": 61
+   },
+   {
+    "u": "https://supabase.com/images/blog/avatars/thiago-peres-rally.jpeg",
+    "ct": "image/jpeg",
+    "kb": 51
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/www/aaa1b8c0dfa4/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/docs/aaa1b8c0dfa4/_next/static/media/e4af272ccee01ff0-s.p.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/www/aaa1b8c0dfa4/_next/static/media/4c9affa5bc8f420e-s.p.woff2",
+    "ct": "font/woff2",
+    "kb": 24
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/docs/aaa1b8c0dfa4/_next/static/media/4c9affa5bc8f420e-s.p.woff2",
+    "ct": "font/woff2",
+    "kb": 24
+   },
+   {
+    "u": "https://supabase.com/images/blog/avatars/yasser-elsaid-chatbase.jpeg",
+    "ct": "image/jpeg",
+    "kb": 23
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/www/aaa1b8c0dfa4/_next/static/media/443896d591e4f761-s.p.woff2",
+    "ct": "font/woff2",
+    "kb": 21
+   },
+   {
+    "u": "https://frontend-assets.supabase.com/www/aaa1b8c0dfa4/_next/static/media/DepartureMonoSuperbase-Regular.f37ac6dd.woff2",
+    "ct": "font/woff2",
+    "kb": 20
+   }
+  ],
+  "netCount": 37,
+  "netByType": {
+   "font/woff2": 6,
+   "image/svg+xml": 20,
+   "image/webp": 1,
+   "image/jpeg": 5,
+   "image/png": 3,
+   "application/octet-stream": 1,
+   "video/webm": 1
+  }
+ },
+ {
+  "name": "railway",
+  "url": "https://railway.com/",
+  "ok": true,
+  "data": {
+   "url": "https://railway.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Ship software peacefully",
+    "rect": {
+     "x": 426,
+     "y": -11112,
+     "w": 588,
+     "h": 60
+    },
+    "size": 54,
+    "weight": "500",
+    "family": "IBM Plex Serif",
+    "color": "rgb(255, 255, 255)",
+    "mix": "normal"
+   },
+   "visuals": [],
+   "rel": null,
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 65,
+    "imgSrcset": 2,
+    "svg": 57,
+    "nodesInHero": 217
+   },
+   "anims": 11,
+   "infinite": 6,
+   "bodyBg": "rgb(19, 17, 28)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 65
+  },
+  "net": [
+   {
+    "u": "https://railway.com/secret-landing/build-and-deploy/maskgroup-forest.webp",
+    "ct": "image/webp",
+    "kb": 293
+   },
+   {
+    "u": "https://railway.com/secret-landing/hero/bg-train-dusk.webp",
+    "ct": "image/webp",
+    "kb": 262
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/intertight/v9/NGSwv5HMAFg6IuGlBNMjxLsH8ahuQ2e8.woff2",
+    "ct": "font/woff2",
+    "kb": 44
+   },
+   {
+    "u": "https://railway.com/secret-landing/build-and-deploy/forest-texture.webp",
+    "ct": "image/webp",
+    "kb": 42
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbV2o-flEEny0FZhsfKu5WU4xD7OwGtT0rU.woff2",
+    "ct": "font/woff2",
+    "kb": 40
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/ibmplexserif/v20/jizAREVNn1dOx-zrZ2X3pZvkTi3s-CI0q1s.woff2",
+    "ct": "font/woff2",
+    "kb": 20
+   },
+   {
+    "u": "https://railway.com/secret-landing/hero/transition-dusk.webp",
+    "ct": "image/webp",
+    "kb": 19
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/ibmplexserif/v20/jizAREVNn1dOx-zrZ2X3pZvkTi3s-CI0q1vjitOh.woff2",
+    "ct": "font/woff2",
+    "kb": 15
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/ibmplexserif/v20/jizDREVNn1dOx-zrZ2X3pZvkTiUf2zcZiVbJ.woff2",
+    "ct": "font/woff2",
+    "kb": 15
+   },
+   {
+    "u": "https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbV2o-flEEny0FZhsfKu5WU4xD4OwGtT0rU3BE.woff2",
+    "ct": "font/woff2",
+    "kb": 9
+   },
+   {
+    "u": "https://railway.com/landing-2/logos/comp/logo-helm.svg",
+    "ct": "image/svg+xml",
+    "kb": 5
+   },
+   {
+    "u": "https://cms.railway.com/media/website-original-4eaf13ddeb85e9d509c0947c258349165a4f2a1e9399871e2c1840300feb1af9.svg",
+    "ct": "image/svg+xml",
+    "kb": 5
+   },
+   {
+    "u": "https://railway.com/favicons/favicon-light.ico",
+    "ct": "image/vnd.microsoft.icon",
+    "kb": 5
+   }
+  ],
+  "netCount": 29,
+  "netByType": {
+   "image/webp": 4,
+   "font/woff2": 7,
+   "image/svg+xml": 17,
+   "image/vnd.microsoft.icon": 1
+  }
+ },
+ {
+  "name": "cursor",
+  "url": "https://cursor.com/",
+  "ok": true,
+  "data": {
+   "url": "https://cursor.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Cursor is your coding agent for building ambitious software.",
+    "rect": {
+     "x": 70,
+     "y": 164,
+     "w": 658,
+     "h": 65
+    },
+    "size": 26,
+    "weight": "400",
+    "family": "CursorGothic",
+    "color": "rgb(38, 37, 30)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://cursor.com/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca23250c.jpg&w=1920&q=70",
+     "tag": "img",
+     "rect": {
+      "x": 70,
+      "y": 351,
+      "w": 1300,
+      "h": 720
+     },
+     "vis": 714147,
+     "cover": 0.551,
+     "z": "auto",
+     "pos": "absolute",
+     "nat": "1440x960",
+     "srcset": "/marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca23250c.jpg&w=640&q=70 640w, /marketing-static/_next/image?url=https%3A%2F%2Fptht05hbb1ssoooe.public.blob.vercel-storage.com%2Fassets%2Fmisc%2Fasset-cc24ca462279ca2325",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": true
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "right",
+    "gapX": -658
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 1,
+    "img": 26,
+    "imgSrcset": 25,
+    "svg": 54,
+    "nodesInHero": 524
+   },
+   "anims": 36,
+   "infinite": 36,
+   "bodyBg": "rgb(247, 247, 244)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 1,
+   "img": 26
+  },
+  "net": [
+   {
+    "u": "https://cursor.com/marketing-static/demos/cursor-wallpaper.png",
+    "ct": "image/png",
+    "kb": 1423
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/image",
+    "ct": "image/webp",
+    "kb": 129
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/1497d94d4ac5c969.p.0zw8maj75452d.woff2",
+    "ct": "font/woff2",
+    "kb": 111
+   },
+   {
+    "u": "https://cursor.com/marketing-static/fonts/cursor-icons-16.woff2",
+    "ct": "font/woff2",
+    "kb": 87
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/346e8051f901134e.p.0o1dbgwxcty-b.woff2",
+    "ct": "font/woff2",
+    "kb": 86
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/CursorGothic_BoldItalic-s.p.0cqzqaem~_s9y.woff2",
+    "ct": "font/woff2",
+    "kb": 51
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/CursorGothic_Bold-s.p.15hkw~ebmtjvr.woff2",
+    "ct": "font/woff2",
+    "kb": 48
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/CursorGothic_Italic-s.p.0klm.ze1la4ej.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/4ee71d90e0f663bd.p.0_4wfesx-21w2.woff2",
+    "ct": "font/woff2",
+    "kb": 47
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/CursorGothic_Regular-s.p.05-84umc_47y9.woff2",
+    "ct": "font/woff2",
+    "kb": 44
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/e4505858a30c79c2.p.093j32h9etvau.woff2",
+    "ct": "font/woff2",
+    "kb": 43
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/BerkeleyMono_Oblique.p.0ljxuk9ar7~k_.woff2",
+    "ct": "font/woff2",
+    "kb": 25
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/BerkeleyMono_Regular.p.0x~g-6.~uijej.woff2",
+    "ct": "font/woff2",
+    "kb": 23
+   },
+   {
+    "u": "https://cursor.com/marketing-static/_next/static/media/1112828ec2c13661-s.p.17_qw44._rch-.woff2",
+    "ct": "font/woff2",
+    "kb": 15
+   }
+  ],
+  "netCount": 26,
+  "netByType": {
+   "font/woff2": 22,
+   "image/webp": 1,
+   "image/png": 1,
+   "image/svg+xml": 1,
+   "image/vnd.microsoft.icon": 1
+  }
+ },
+ {
+  "name": "hetzner",
+  "url": "https://www.hetzner.com/",
+  "ok": true,
+  "data": {
+   "url": "https://www.hetzner.com/",
+   "vw": 1440,
+   "vh": 900,
+   "head": {
+    "text": "Product overview",
+    "rect": {
+     "x": 150,
+     "y": 739,
+     "w": 1140,
+     "h": 40
+    },
+    "size": 37,
+    "weight": "600",
+    "family": "Montserrat",
+    "color": "rgb(51, 51, 51)",
+    "mix": "normal"
+   },
+   "visuals": [
+    {
+     "kind": "img",
+     "src": "https://cdn.hetzner.com/assets/Uploads/gex45_web_big.webp",
+     "tag": "img",
+     "rect": {
+      "x": 0,
+      "y": 136,
+      "w": 1440,
+      "h": 543
+     },
+     "vis": 781740,
+     "cover": 0.603,
+     "z": "auto",
+     "pos": "static",
+     "nat": "2401x940",
+     "srcset": "",
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    },
+    {
+     "kind": "svg",
+     "src": null,
+     "tag": "svg",
+     "rect": {
+      "x": 161,
+      "y": 668,
+      "w": 1118,
+      "h": 22
+     },
+     "vis": 24596,
+     "cover": 0.019,
+     "z": "auto",
+     "pos": "static",
+     "nat": null,
+     "srcset": null,
+     "overflowsL": false,
+     "overflowsR": false,
+     "overflowsT": false,
+     "overflowsB": false
+    }
+   ],
+   "rel": {
+    "overlapOfText": 0,
+    "textCenterInVisual": false,
+    "visualSideOfText": "left",
+    "gapX": -1290
+   },
+   "canvases": [],
+   "libs": {
+    "three": false,
+    "spline": false,
+    "lottie": false,
+    "rive": false,
+    "modelViewer": false,
+    "gsap": false,
+    "lenis": false
+   },
+   "seq": [],
+   "counts": {
+    "canvas": 0,
+    "video": 0,
+    "img": 44,
+    "imgSrcset": 0,
+    "svg": 18,
+    "nodesInHero": 359
+   },
+   "anims": 1,
+   "infinite": 1,
+   "bodyBg": "rgb(255, 255, 255)"
+  },
+  "srcChangedOnScroll": 0,
+  "afterScroll": {
+   "canvas": 0,
+   "video": 0,
+   "img": 44
+  },
+  "net": [
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/fa-solid-900.woff2",
+    "ct": "font/woff2",
+    "kb": 155
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/fa-brands-400.woff2",
+    "ct": "font/woff2",
+    "kb": 116
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/Inter-SemiBold.woff2",
+    "ct": "font/woff2",
+    "kb": 103
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/Inter-Medium.woff2",
+    "ct": "font/woff2",
+    "kb": 103
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/Inter-Regular.woff2",
+    "ct": "font/woff2",
+    "kb": 97
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/montserrat-v31-latin-600.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/general/dist/fonts/montserrat-v31-latin-regular.woff2",
+    "ct": "font/woff2",
+    "kb": 18
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-hetzner-cloud.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-hetzner-robot.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-hetzner-konsoleh.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-circle-serverboerse.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-circle-serverfinder.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://www.hetzner.com/_resources/themes/hetzner/images/logo/hetzner-logo.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   },
+   {
+    "u": "https://cdn.hetzner.com/assets/Uploads/icon-load-balancer.svg",
+    "ct": "image/svg+xml",
+    "kb": null
+   }
+  ],
+  "netCount": 52,
+  "netByType": {
+   "image/svg+xml": 37,
+   "font/woff2": 7,
+   "image/webp": 2,
+   "image/png": 3,
+   "image/jpeg": 3
+  }
+ }
+]

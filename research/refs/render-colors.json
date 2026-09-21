@@ -1,0 +1,188 @@
+{
+ "practicum": {
+  "satShare": 32.2,
+  "fams": [
+   "30°:23%",
+   "0°:6%",
+   "60°:3%"
+  ]
+ },
+ "ycloud": {
+  "satShare": 5.1,
+  "fams": [
+   "30°:2%",
+   "210°:2%"
+  ]
+ },
+ "yatech": {
+  "satShare": 2.1,
+  "fams": []
+ },
+ "y360": {
+  "satShare": 19.7,
+  "fams": [
+   "30°:10%",
+   "0°:7%"
+  ]
+ },
+ "ozontech": {
+  "satShare": 0.5,
+  "fams": []
+ },
+ "avitotech": {
+  "satShare": 35,
+  "fams": [
+   "210°:12%",
+   "270°:10%",
+   "240°:9%"
+  ]
+ },
+ "tbank": {
+  "satShare": 11.6,
+  "fams": [
+   "60°:6%",
+   "30°:4%"
+  ]
+ },
+ "ecomtech": {
+  "satShare": 18.2,
+  "fams": [
+   "30°:15%",
+   "60°:3%"
+  ]
+ },
+ "stripe": {
+  "satShare": 16.1,
+  "fams": [
+   "240°:6%",
+   "210°:4%",
+   "270°:4%"
+  ]
+ },
+ "linear": {
+  "satShare": 0.1,
+  "fams": []
+ },
+ "vercel": {
+  "satShare": 0,
+  "fams": []
+ },
+ "framer": {
+  "satShare": 38.4,
+  "fams": [
+   "240°:38%"
+  ]
+ },
+ "raycast": {
+  "satShare": 22.8,
+  "fams": [
+   "0°:20%"
+  ]
+ },
+ "clerk": {
+  "satShare": 0,
+  "fams": []
+ },
+ "resend": {
+  "satShare": 0,
+  "fams": []
+ },
+ "cloudflare": {
+  "satShare": 81,
+  "fams": [
+   "30°:80%"
+  ]
+ },
+ "arc": {
+  "satShare": 3.7,
+  "fams": []
+ },
+ "rive": {
+  "satShare": 3,
+  "fams": []
+ },
+ "selectel": {
+  "satShare": 7.4,
+  "fams": [
+   "210°:6%"
+  ]
+ },
+ "cloudru": {
+  "satShare": 1.9,
+  "fams": []
+ },
+ "apple-mbp": {
+  "satShare": 0.8,
+  "fams": []
+ },
+ "igloo": {
+  "satShare": 4.2,
+  "fams": [
+   "210°:4%"
+  ]
+ },
+ "vkcloud": {
+  "satShare": 35.1,
+  "fams": [
+   "210°:33%",
+   "180°:2%"
+  ]
+ },
+ "sbercloud": {
+  "satShare": 1.9,
+  "fams": []
+ },
+ "spline": {
+  "satShare": 10,
+  "fams": [
+   "240°:5%",
+   "150°:2%"
+  ]
+ },
+ "yandex360b": {
+  "satShare": 21.7,
+  "fams": [
+   "240°:12%",
+   "210°:5%"
+  ]
+ },
+ "dodo": {
+  "satShare": 56.9,
+  "fams": [
+   "210°:19%",
+   "240°:11%",
+   "300°:10%",
+   "270°:9%",
+   "180°:4%",
+   "330°:3%"
+  ]
+ },
+ "nothing": {
+  "satShare": 0,
+  "fams": []
+ },
+ "supabase": {
+  "satShare": 0,
+  "fams": []
+ },
+ "railway": {
+  "satShare": 48.6,
+  "fams": [
+   "210°:41%",
+   "240°:5%",
+   "270°:3%"
+  ]
+ },
+ "cursor": {
+  "satShare": 1.1,
+  "fams": []
+ },
+ "hetzner": {
+  "satShare": 92,
+  "fams": [
+   "240°:66%",
+   "270°:22%",
+   "300°:2%"
+  ]
+ }
+}

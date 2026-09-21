@@ -1,0 +1,162 @@
+{
+ "ycloud": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "y360": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "yandex360b": {
+  "rest": {
+   "mean": 43.84,
+   "pctMoved": 42.6
+  },
+  "cur": {
+   "mean": 47.57,
+   "pctMoved": 45.1
+  }
+ },
+ "vkcloud": {
+  "rest": {
+   "mean": 216.42,
+   "pctMoved": 45.6
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "cloudru": {
+  "rest": {
+   "mean": 73.56,
+   "pctMoved": 23.6
+  },
+  "cur": {
+   "mean": 0.05,
+   "pctMoved": 0
+  }
+ },
+ "tbank": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "stripe": {
+  "rest": {
+   "mean": 7.71,
+   "pctMoved": 5.9
+  },
+  "cur": {
+   "mean": 7.22,
+   "pctMoved": 4.8
+  }
+ },
+ "vercel": {
+  "rest": {
+   "mean": 0.41,
+   "pctMoved": 0.2
+  },
+  "cur": {
+   "mean": 0.48,
+   "pctMoved": 0.3
+  }
+ },
+ "raycast": {
+  "rest": {
+   "mean": 18.33,
+   "pctMoved": 21.9
+  },
+  "cur": {
+   "mean": 25.64,
+   "pctMoved": 27.2
+  }
+ },
+ "resend": {
+  "rest": {
+   "mean": 4.8,
+   "pctMoved": 6.2
+  },
+  "cur": {
+   "mean": 7.69,
+   "pctMoved": 7.5
+  }
+ },
+ "clerk": {
+  "rest": {
+   "mean": 0.26,
+   "pctMoved": 0.1
+  },
+  "cur": {
+   "mean": 2.74,
+   "pctMoved": 0.6
+  }
+ },
+ "spline": {
+  "rest": {
+   "mean": 3.66,
+   "pctMoved": 3
+  },
+  "cur": {
+   "mean": 29.94,
+   "pctMoved": 16.9
+  }
+ },
+ "linear": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "igloo": {
+  "rest": {
+   "mean": 50.09,
+   "pctMoved": 52.2
+  },
+  "cur": {
+   "mean": 65.05,
+   "pctMoved": 62.6
+  }
+ },
+ "hetzner": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ },
+ "atlas": {
+  "rest": {
+   "mean": 0,
+   "pctMoved": 0
+  },
+  "cur": {
+   "mean": 0,
+   "pctMoved": 0
+  }
+ }
+}

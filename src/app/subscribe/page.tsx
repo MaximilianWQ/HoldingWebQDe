@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import SubscribeView from "./SubscribeView";
+import { dict } from "@/i18n";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /subscribe — серверная обёртка оплаты: метаданные и оболочка VShell
@@ -14,16 +16,16 @@ import SubscribeView from "./SubscribeView";
  * поэтому из поиска закрыта. Без сессии SubscribeView сам уводит на
  * /auth?next=<этот адрес>.
  */
-export const metadata: Metadata = {
-  title: "Оплата",
-  description: "Оплата подписки или пакета трафика Atlas Secure.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const m = dict(await getLocale()).subscribe.meta;
+  return { title: m.title, description: m.description, robots: { index: false, follow: false } };
+}
 
-export default function SubscribePage() {
+export default async function SubscribePage() {
+  const locale = await getLocale();
   return (
     <VShell work account="member">
-      <SubscribeView />
+      <SubscribeView locale={locale} t={dict(locale).subscribe} />
     </VShell>
   );
 }

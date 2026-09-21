@@ -7,9 +7,9 @@ import Icon from "@/components/pixel/Icon";
 import Carousel from "@/components/vps/Carousel";
 import {
   PERIODS,
-  PERIOD_LABEL,
+  periodLabel,
   PLANS as PLAN_PRICES,
-  PLAN_CONTENT,
+  planContent,
   PLAN_SPEED,
   discountPercent,
   formatRub,
@@ -20,6 +20,9 @@ import {
   type Period,
   type PlanId,
 } from "@/lib/plans";
+import type { Dict } from "@/i18n";
+import { fill } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 import {
   TRAFFIC_PACKS,
   formatPricePerGb,
@@ -64,7 +67,7 @@ type PackId = TrafficPack["id"];
 const PACK_IDS: PackId[] = TRAFFIC_PACKS.map((p) => p.id);
 /** Отмеченный по умолчанию пакет, если адрес не назвал другой. */
 const DEFAULT_PACK: PackId = TRAFFIC_PACKS[Math.min(1, TRAFFIC_PACKS.length - 1)].id;
-const gbLabel = (p: TrafficPack) => `${formatRub(p.gb)} ГБ`;
+const gbLabel = (p: TrafficPack, gb: string) => `${formatRub(p.gb)} ${gb}`;
 
 /** Что показал ответ /api/payments/status — для экранов после кассы. */
 interface PaidInfo {
@@ -82,55 +85,68 @@ interface PeriodOption {
   discount?: string;
 }
 
-function periodOption(plan: Plan, p: Period): PeriodOption {
+/**
+ * Вариант срока. Подпись зависит от языка, поэтому `locale` приходит
+ * аргументом: раньше таблица PRICES собиралась один раз на модуль и
+ * несла русские подписи на обеих версиях сайта.
+ */
+function periodOption(plan: Plan, p: Period, locale: Locale): PeriodOption {
   const off = discountPercent(plan, p);
   return {
     months: p,
-    label: PERIOD_LABEL[p].full,
+    label: periodLabel(locale)[p].full,
     price: PLAN_PRICES[plan][p],
     perMonth: pricePerMonth(plan, p),
     discount: off > 0 ? `-${off}%` : undefined,
   };
 }
 
-const PRICES: Record<Plan, PeriodOption[]> = {
-  basic: PERIODS.map((p) => periodOption("basic", p)),
-  plus: PERIODS.map((p) => periodOption("plus", p)),
-};
+function pricesFor(locale: Locale): Record<Plan, PeriodOption[]> {
+  return {
+    basic: PERIODS.map((p) => periodOption("basic", p, locale)),
+    plus: PERIODS.map((p) => periodOption("plus", p, locale)),
+  };
+}
 
 const PLAN_ORDER: Plan[] = ["basic", "plus"];
 
-const STEPS: Record<Product, readonly string[]> = {
-  subscription: ["Тариф", "Срок", "Оплата"],
-  traffic: ["Пакет", "Оплата"],
-};
+
 
 type PageStep = "plans" | "periods" | "packs" | "payment-methods" | "processing" | "success" | "failed" | "expired";
 
-function periodFor(plan: Plan, months: number): PeriodOption {
-  return PRICES[plan].find((o) => o.months === months) ?? PRICES[plan][PRICES[plan].length - 1];
+function periodFor(prices: Record<Plan, PeriodOption[]>, plan: Plan, months: number): PeriodOption {
+  return prices[plan].find((o) => o.months === months) ?? prices[plan][prices[plan].length - 1];
 }
 
-const cheapest = (plan: Plan) => Math.min(...PRICES[plan].map((p) => p.perMonth));
+const cheapest = (prices: Record<Plan, PeriodOption[]>, plan: Plan) =>
+  Math.min(...prices[plan].map((p) => p.perMonth));
 
-export default function SubscribeView() {
+export default function SubscribeView({ locale, t }: { locale: Locale; t: Dict["subscribe"] }) {
   return (
     <Suspense
       fallback={
         <section className="v-section v-center" aria-busy="true">
           <div className="v-wrap">
-            <p className="b-sr" aria-live="polite">Загружаем оплату…</p>
+            <p className="b-sr" aria-live="polite">{t.loading}</p>
             <div className="vs-skel" aria-hidden />
           </div>
         </section>
       }
     >
-      <SubscribeContent />
+      <SubscribeContent locale={locale} t={t} />
     </Suspense>
   );
 }
 
-function SubscribeContent() {
+function SubscribeContent({ locale, t }: { locale: Locale; t: Dict["subscribe"] }) {
+  const to = (href: string) => localeHref(href, locale);
+  const PRICES = pricesFor(locale);
+  const PLAN_CONTENT = planContent(locale);
+  const PERIOD_LABEL = periodLabel(locale);
+  const STEPS: Record<Product, readonly string[]> = {
+    subscription: t.stepsSubscription,
+    traffic: t.stepsTraffic,
+  };
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialProduct: Product = searchParams.get("product") === "traffic" ? "traffic" : "subscription";
@@ -141,7 +157,7 @@ function SubscribeContent() {
   const queryPlan: Plan | null = initialProduct === "subscription" && isPlanId(queryPlanRaw) ? queryPlanRaw : null;
   const queryPeriodRaw = Number(searchParams.get("period"));
   const queryPeriod: Period | null = queryPlan && isPeriod(queryPeriodRaw) ? queryPeriodRaw : null;
-  const initialSelectedPeriod = queryPlan && queryPeriod ? periodOption(queryPlan, queryPeriod) : null;
+  const initialSelectedPeriod = queryPlan && queryPeriod ? periodOption(queryPlan, queryPeriod, locale) : null;
   const initialStep: PageStep =
     initialProduct === "traffic" ? "packs" : initialSelectedPeriod ? "payment-methods" : queryPlan ? "periods" : "plans";
 
@@ -290,10 +306,10 @@ function SubscribeContent() {
         setPaymentId(data.data.paymentId);
         window.location.href = data.data.redirectUrl;
       } else {
-        setError(data.error || "Не удалось создать платёж");
+        setError(data.error || t.errCreate);
       }
     } catch {
-      setError("Ошибка соединения. Попробуйте позже.");
+      setError(t.errConnection);
     } finally {
       setLoading(false);
     }
@@ -386,33 +402,37 @@ function SubscribeContent() {
   // Сводка: тариф и срок — выбранные, а до выбора — отмеченные.
   const plan: Plan = selectedPlan ?? draftPlan;
   const months = step === "payment-methods" && selectedPeriod ? selectedPeriod.months : draftMonths;
-  const order = periodFor(plan, months);
+  const order = periodFor(PRICES, plan, months);
   const save = savings(plan, order.months as Period);
 
   const total = isTraffic ? pack.priceRub : order.price;
-  const backLabel = step === "plans" ? "К тарифам" : step === "packs" ? "К пакетам на витрине" : inFunnel ? "Назад" : "В кабинет";
+  const backLabel = step === "plans" ? t.backToPlans : step === "packs" ? t.backToPacks : inFunnel ? t.back : t.backToCabinet;
   const title =
     step === "plans"
-      ? "Выберите тариф"
+      ? t.titlePlans
       : step === "periods"
-        ? "Выберите срок"
+        ? t.titlePeriods
         : step === "packs"
-          ? "Выберите пакет трафика"
+          ? t.titlePacks
           : step === "payment-methods"
-            ? "Проверьте и оплатите"
+            ? t.titleCheck
             : paid.product === "traffic"
-              ? "Оплата пакета трафика"
-              : "Оплата подписки";
+              ? t.titlePaidTraffic
+              : t.titlePaidPlan;
 
   // Главное действие сводки и нижней панели.
   const primary =
     step === "plans"
-      ? { label: "Дальше — срок", run: () => commitPlan(draftPlan), busy: false }
+      ? { label: t.nextPeriod, run: () => commitPlan(draftPlan), busy: false }
       : step === "periods"
-        ? { label: "Дальше — оплата", run: () => commitPeriod(order), busy: loading }
+        ? { label: t.nextPayment, run: () => commitPeriod(order), busy: loading }
         : step === "packs"
-          ? { label: "Дальше — оплата", run: () => commitPack(draftPack), busy: false }
-          : { label: loading ? "Создаём платёж…" : `Оплатить ${formatRub(total)} ₽`, run: handlePayYooKassa, busy: loading };
+          ? { label: t.nextPayment, run: () => commitPack(draftPack), busy: false }
+          : {
+              label: loading ? t.creating : fill(t.payNow, { sum: formatRub(total, locale) }),
+              run: handlePayYooKassa,
+              busy: loading,
+            };
 
   // Смена шага: заголовок получает фокус (чтец экрана слышит новый шаг),
   // а если верх страницы ушёл из кадра — страница возвращается к нему.
@@ -452,18 +472,18 @@ function SubscribeContent() {
           </button>
           <h1 ref={headRef} tabIndex={-1} className="v-h2 vs-title">{title}</h1>
 
-          <div className="v-seg vs-pick vs-product" role="tablist" aria-label="Что оплачиваем">
+          <div className="v-seg vs-pick vs-product" role="tablist" aria-label={t.productLabel}>
             <button type="button" role="tab" aria-selected={!isTraffic} onClick={() => switchProduct("subscription")}>
-              <Icon name="clock" size={16} /> Подписка
+              <Icon name="clock" size={16} /> {t.productPlan}
             </button>
             <button type="button" role="tab" aria-selected={isTraffic} onClick={() => switchProduct("traffic")}>
-              <Icon name="bolt" size={16} /> Пакет трафика
+              <Icon name="bolt" size={16} /> {t.productTraffic}
             </button>
           </div>
 
-          <p className="vs-safe"><Icon name="lock" size={16} /> Безопасная оплата через защищённый платёжный шлюз</p>
+          <p className="vs-safe"><Icon name="lock" size={16} /> {t.safe}</p>
 
-          <nav className="v-seg vs-pick vs-steps" aria-label="Шаги оплаты">
+          <nav className="v-seg vs-pick vs-steps" aria-label={t.stepsLabel}>
             {steps.map((label, k) => {
               const n = k + 1;
               const state = n < stepNum ? "done" : n === stepNum ? "now" : "next";
@@ -494,12 +514,12 @@ function SubscribeContent() {
               {/* ── Шаг 1 · Тариф ───────────────────────────────────── */}
               {step === "plans" && (
                 <div key="plans" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-plans-h">
-                  <h2 id="vs-plans-h" className="vs-eyebrow">Шаг 1 · Тариф</h2>
-                  <p className="v-text">Два тарифа на одной инфраструктуре — отличаются только скоростью канала.</p>
-                  <div className="v-seg vs-pick" role="tablist" aria-label="Тариф">
+                  <h2 id="vs-plans-h" className="vs-eyebrow">{t.planStep}</h2>
+                  <p className="v-text">{t.planStepText}</p>
+                  <div className="v-seg vs-pick" role="tablist" aria-label={t.planLabel}>
                     {PLAN_ORDER.map((id) => (
                       <button key={id} type="button" role="tab" aria-selected={draftPlan === id} onClick={() => setDraftPlan(id)}>
-                        {PLAN_CONTENT[id].name} · {PLAN_SPEED[id]} Гбит/с
+                        {PLAN_CONTENT[id].name} · {PLAN_SPEED[id]} Gbit/s
                       </button>
                     ))}
                   </div>
@@ -511,10 +531,10 @@ function SubscribeContent() {
                         <li key={f}>{f}</li>
                       ))}
                     </ul>
-                    <p className="vs-detail-price">от <b>{formatRub(cheapest(draftPlan))}</b> ₽/мес</p>
+                    <p className="vs-detail-price">{t.fromPerMonth} <b>{formatRub(cheapest(PRICES, draftPlan), locale)}</b> {t.perMonthShort}</p>
                   </div>
                   <button type="button" className="v-btn v-btn-primary v-btn-block" onClick={() => commitPlan(draftPlan)}>
-                    Дальше — срок <Icon name="arrow-right" size={16} />
+                    {t.nextPeriod} <Icon name="arrow-right" size={16} />
                   </button>
                 </div>
               )}
@@ -523,10 +543,10 @@ function SubscribeContent() {
               {step === "periods" && selectedPlan && (
                 <div key="periods" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-periods-h">
                   <h2 id="vs-periods-h" className="vs-eyebrow">
-                    Шаг 2 · Срок <span className="v-badge v-badge-blue">{PLAN_CONTENT[selectedPlan].name}</span>
+                    {t.periodStep} <span className="v-badge v-badge-blue">{PLAN_CONTENT[selectedPlan].name}</span>
                   </h2>
-                  <p className="v-text">Чем дольше срок — тем ниже цена за месяц. Оплата разовая, без автосписаний.</p>
-                  <div className="v-seg vs-pick vs-pick-4" role="tablist" aria-label="Срок">
+                  <p className="v-text">{t.periodStepText}</p>
+                  <div className="v-seg vs-pick vs-pick-4" role="tablist" aria-label={t.periodLabel}>
                     {PRICES[selectedPlan].map((o) => (
                       <button key={o.months} type="button" role="tab" aria-selected={draftMonths === o.months} onClick={() => setDraftMonths(o.months)}>
                         {PERIOD_LABEL[o.months as Period].short}
@@ -537,26 +557,26 @@ function SubscribeContent() {
                   <div key={draftMonths} className="vs-detail vs-detail-pick v-fade-in">
                     <p className="vs-detail-price"><b>{formatRub(order.perMonth)}</b> ₽ в месяц</p>
                     <p className="v-text">
-                      {formatRub(order.price)} ₽ за {PERIOD_LABEL[order.months as Period].accusative}
+                      {formatRub(order.price, locale)} ₽ · {PERIOD_LABEL[order.months as Period].accusative}
                       {save > 0 ? <> · экономия <b>{formatRub(save)} ₽</b></> : null}
                     </p>
                   </div>
                   {error && <ErrorNote>{error}</ErrorNote>}
                   <button type="button" className="v-btn v-btn-primary v-btn-block" disabled={loading} onClick={() => commitPeriod(order)}>
-                    {loading ? "Создаём платёж…" : "Дальше — оплата"} <Icon name="arrow-right" size={16} />
+                    {loading ? t.creating : t.nextPayment} <Icon name="arrow-right" size={16} />
                   </button>
-                  <p className="v-small">Оплата через защищённую платёжную систему · 15 минут на оплату</p>
+                  <p className="v-small">{t.payNote}</p>
                 </div>
               )}
 
               {/* ── Пакет трафика · Шаг 1 · Пакет ───────────────────── */}
               {step === "packs" && (
                 <div key="packs" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-packs-h">
-                  <h2 id="vs-packs-h" className="vs-eyebrow">Шаг 1 · Пакет</h2>
+                  <h2 id="vs-packs-h" className="vs-eyebrow">{t.packStep}</h2>
                   <p className="v-text">
-                    Гигабайты для отдельного ключа «Обход» — без срока действия. Новый пакет прибавится к остатку.
+                    {t.packStepText}
                   </p>
-                  <Carousel label="Пакеты трафика" initial={Math.max(0, PACK_IDS.indexOf(draftPack))}>
+                  <Carousel label={t.packsLabel} initial={Math.max(0, PACK_IDS.indexOf(draftPack))}>
                     {TRAFFIC_PACKS.map((p) => (
                       <button
                         key={p.id}
@@ -565,9 +585,9 @@ function SubscribeContent() {
                         aria-pressed={draftPack === p.id}
                         onClick={() => commitPack(p.id)}
                       >
-                        <span className="v-badge v-badge-lg v-dcard-tag v-badge-dark">{formatPricePerGb(p)} ₽/ГБ</span>
-                        <span className="v-dcard-title">{formatRub(p.gb)} ГБ</span>
-                        <span className="v-dcard-desc">Без срока действия — пакеты складываются</span>
+                        <span className="v-badge v-badge-lg v-dcard-tag v-badge-dark">{formatPricePerGb(p)} {t.perGb}</span>
+                        <span className="v-dcard-title">{formatRub(p.gb, locale)} {t.gb}</span>
+                        <span className="v-dcard-desc">{t.packNoExpiry}</span>
                         <span className="v-price-row"><b>{formatRub(p.priceRub)} ₽</b></span>
                       </button>
                     ))}
@@ -579,14 +599,14 @@ function SubscribeContent() {
               {step === "payment-methods" && (isTraffic ? !!selectedPack : !!(selectedPlan && selectedPeriod)) && (
                 <div key="payment-methods" className="v-card v-card-pad vs-panel v-fade-in" aria-labelledby="vs-pay-h">
                   <h2 id="vs-pay-h" className="vs-eyebrow">
-                    Шаг {isTraffic ? 2 : 3} · Способ оплаты
-                    {isTraffic && <span className="v-badge v-badge-blue">{gbLabel(pack)}</span>}
+                    {fill(t.payStep, { n: isTraffic ? 2 : 3 })}
+                    {isTraffic && <span className="v-badge v-badge-blue">{gbLabel(pack, t.gb)}</span>}
                   </h2>
                   <div className="vs-method">
                     <span className="vs-method-ico" aria-hidden><Icon name="shield" size={22} /></span>
                     <span className="vs-method-copy">
-                      <b>Карта или СБП</b>
-                      <span>Visa, Mastercard, МИР, СБП</span>
+                      <b>{t.methodTitle}</b>
+                      <span>{t.methodNote}</span>
                     </span>
                     <span className="vs-method-badges" aria-hidden="true">
                       <i>VISA</i>
@@ -596,12 +616,12 @@ function SubscribeContent() {
                     </span>
                   </div>
                   <ol className="vs-next">
-                    <li>Откроется страница платёжной системы — на оплату 15 минут.</li>
-                    <li>После оплаты вы вернётесь сюда, и мы проверим платёж.</li>
+                    <li>{t.next1}</li>
+                    <li>{t.next2}</li>
                     <li>
                       {isTraffic
-                        ? "Гигабайты прибавятся к остатку ключа «Обход» — он виден в кабинете."
-                        : "Подписка продлится — срок будет виден в кабинете."}
+                        ? t.next3Traffic
+                        : t.next3Plan}
                     </li>
                   </ol>
                   {error && <ErrorNote>{error}</ErrorNote>}
@@ -611,30 +631,30 @@ function SubscribeContent() {
 
             {/* ── Сводка заказа ─────────────────────────────────────── */}
             <aside className="v-card v-card-pad vs-summary v-lift" aria-labelledby="vs-sum-h">
-              <h2 id="vs-sum-h" className="vs-eyebrow">Ваш заказ</h2>
+              <h2 id="vs-sum-h" className="vs-eyebrow">{t.orderTitle}</h2>
 
               {isTraffic ? (
                 <dl key={pack.id} className="vs-sum-list v-fade-in">
-                  <div className="vs-sum-row"><dt>Пакет трафика</dt><dd>{formatRub(pack.gb)} ГБ</dd></div>
-                  <div className="vs-sum-row"><dt>Срок</dt><dd>без срока действия</dd></div>
-                  <div className="vs-sum-row"><dt>За гигабайт</dt><dd>{formatPricePerGb(pack)} ₽</dd></div>
+                  <div className="vs-sum-row"><dt>{t.rowPack}</dt><dd>{formatRub(pack.gb, locale)} {t.gb}</dd></div>
+                  <div className="vs-sum-row"><dt>{t.rowTerm}</dt><dd>{t.rowNoExpiry}</dd></div>
+                  <div className="vs-sum-row"><dt>{t.rowPerGb}</dt><dd>{formatPricePerGb(pack)} ₽</dd></div>
                 </dl>
               ) : (
                 <dl key={`${plan}-${order.months}`} className="vs-sum-list v-fade-in">
-                  <div className="vs-sum-row"><dt>Тариф</dt><dd>{PLAN_CONTENT[plan].name} · {PLAN_SPEED[plan]} Гбит/с</dd></div>
-                  <div className="vs-sum-row"><dt>Срок</dt><dd>{order.label}</dd></div>
-                  <div className="vs-sum-row"><dt>В месяц</dt><dd>{formatRub(order.perMonth)} ₽</dd></div>
-                  {save > 0 && <div className="vs-sum-row"><dt>Экономия</dt><dd>{formatRub(save)} ₽</dd></div>}
+                  <div className="vs-sum-row"><dt>{t.rowPlan}</dt><dd>{PLAN_CONTENT[plan].name} · {PLAN_SPEED[plan]} Gbit/s</dd></div>
+                  <div className="vs-sum-row"><dt>{t.rowTerm}</dt><dd>{order.label}</dd></div>
+                  <div className="vs-sum-row"><dt>{t.rowPerMonth}</dt><dd>{formatRub(order.perMonth, locale)} ₽</dd></div>
+                  {save > 0 && <div className="vs-sum-row"><dt>{t.rowSaving}</dt><dd>{formatRub(save, locale)} ₽</dd></div>}
                 </dl>
               )}
 
-              <p className="vs-total"><b>{formatRub(total)}</b> ₽ <span>к оплате</span></p>
+              <p className="vs-total"><b>{formatRub(total, locale)}</b> ₽ <span>{t.toPay}</span></p>
               <p className="v-small">
                 {isTraffic
-                  ? "Без срока действия — прибавится к остатку ключа «Обход». Оплата разовая, без автосписаний."
+                  ? t.fineTraffic
                   : step === "plans"
-                    ? "Срок можно поменять на следующем шаге. Оплата сразу за весь срок."
-                    : "Оплата сразу за весь срок, цена за месяц — для сравнения."}
+                    ? t.finePlans
+                    : t.finePeriods}
               </p>
 
               <button type="button" className="v-btn v-btn-primary v-btn-block vs-summary-cta" onClick={primary.run} disabled={primary.busy}>
@@ -646,9 +666,9 @@ function SubscribeContent() {
       </section>
 
       {/* ── Нижняя панель телефона: итог и главное действие ─────────── */}
-      <div className="vs-dock" role="region" aria-label="Итог и оплата">
+      <div className="vs-dock" role="region" aria-label={t.dockLabel}>
         <p className="vs-dock-sum">
-          <span>{isTraffic ? `${gbLabel(pack)} · без срока` : `${PLAN_CONTENT[plan].name} · ${PERIOD_LABEL[order.months as Period].short}`}</span>
+          <span>{isTraffic ? `${gbLabel(pack, t.gb)} · ${t.rowNoExpiry}` : `${PLAN_CONTENT[plan].name} · ${PERIOD_LABEL[order.months as Period].short}`}</span>
           <b>{formatRub(total)} ₽</b>
         </p>
         <button type="button" className="v-btn v-btn-primary" onClick={primary.run} disabled={primary.busy}>

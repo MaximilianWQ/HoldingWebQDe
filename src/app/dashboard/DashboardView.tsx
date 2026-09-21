@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import type { Dict } from "@/i18n";
-import type { Locale } from "@/lib/locale";
+import { fill, type Dict } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { rich } from "@/i18n/rich";
+import { localeHref, type Locale } from "@/lib/locale";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
@@ -37,12 +39,18 @@ import { formatBytes, useBypassLive } from "@/lib/use-bypass";
  */
 
 type TabId = "subs" | "payments" | "buy" | "profile";
-const TABS: { id: TabId; label: string; icon: IconName }[] = [
-  { id: "subs", label: "Главная", icon: "bag" },
-  { id: "payments", label: "Платежи", icon: "receipt" },
-  { id: "buy", label: "Купить", icon: "grid" },
-  { id: "profile", label: "Профиль", icon: "user" },
+type T = Dict["cabinet"];
+
+/** Подписи разделов — из словаря по тому же ключу (`t.tabs.subs`). */
+const TABS: { id: TabId; icon: IconName }[] = [
+  { id: "subs", icon: "bag" },
+  { id: "payments", icon: "receipt" },
+  { id: "buy", icon: "grid" },
+  { id: "profile", icon: "user" },
 ];
+
+/** Локаль для Intl: русская страница считает «14 сент.», английская «14 Sep». */
+const intlLocale = (l: Locale) => (l === "ru" ? "ru-RU" : "en-GB");
 
 type TgLinkState =
   | { state: "idle" }
@@ -50,10 +58,10 @@ type TgLinkState =
   | { state: "ready"; url: string | null; startParam: string; mobile: boolean }
   | { state: "error"; error: string };
 
-function LoadingSkeleton() {
+function LoadingSkeleton({ loading }: { loading: string }) {
   return (
     <div className="v-wrap vc-page" aria-busy="true">
-      <p className="v-sr" aria-live="polite">Загружаем кабинет…</p>
+      <p className="v-sr" aria-live="polite">{loading}</p>
       <div className="vc-loading" aria-hidden>
         <div className="vc-skel" style={{ height: 96 }} />
         <div className="vc-skel" style={{ height: 64 }} />
@@ -65,19 +73,19 @@ function LoadingSkeleton() {
 }
 
 /**
- * Текст карточек тарифов и пакетов — пропсом, а не импортом словаря
- * (21.09.2026). Экран клиентский: импортируй он словарь, в браузер
- * уехали бы оба языка целиком. Кабинет пока показывается только
- * по-русски, но провод уже проложен — когда дойдёт его перевод,
- * менять тут будет нечего.
+ * Подписи — пропсом, а не импортом словаря (21.09.2026). Экран
+ * клиентский: импортируй он словарь, в браузер уехали бы оба языка
+ * целиком. `cards` и `units` нужны каруселям тарифов во вкладке
+ * «Купить», `t` — самому кабинету.
  */
 interface Cards {
   locale: Locale;
   cards: Dict["cards"];
   units: Dict["units"];
+  t: T;
 }
 
-function DashboardViewInner({ cards, locale, units }: Cards) {
+function DashboardViewInner({ cards, locale, units, t }: Cards) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -170,7 +178,7 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
       if (!j.success) {
         win?.close();
         if (res.status === 409) await fetchSubscription();
-        setTgLink({ state: "error", error: j.error || "Не удалось получить ссылку. Попробуйте ещё раз." });
+        setTgLink({ state: "error", error: j.error || t.tgLinkFail });
         return;
       }
       const { url, startParam } = j.data as { url: string | null; startParam: string };
@@ -180,7 +188,7 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
       setTgLink({ state: "ready", url, startParam, mobile });
     } catch {
       win?.close();
-      setTgLink({ state: "error", error: "Нет связи с сервером. Попробуйте ещё раз." });
+      setTgLink({ state: "error", error: t.netFail });
     }
   };
 
@@ -231,34 +239,34 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
         const applied = json.data.paymentsApplied || 0;
         let text: string;
         if (applied > 0) {
-          text = applied === 1 ? "Оплата подхвачена — подписка активирована." : `Подхвачено оплат: ${applied}. Подписка активирована.`;
+          text = applied === 1 ? t.resyncOne : fill(t.resyncMany, { n: applied });
         } else if (json.data.changed) {
-          text = "Подписка обновлена — данные пересчитаны по последней оплате.";
+          text = t.resyncChanged;
         } else if (["patched", "created", "adopted"].includes(json.data.panelAction)) {
-          text = "Проверка завершена — данные и панель актуальны.";
+          text = t.resyncPanel;
         } else {
-          text = "Проверка завершена — данные актуальны.";
+          text = t.resyncOk;
         }
         setResyncStatus({ kind: "ok", text });
         await fetchSubscription();
       } else {
-        setResyncStatus({ kind: "error", text: json.error || "Не удалось обновить." });
+        setResyncStatus({ kind: "error", text: json.error || t.resyncFail });
       }
     } catch {
-      setResyncStatus({ kind: "error", text: "Ошибка сети." });
+      setResyncStatus({ kind: "error", text: t.resyncNet });
     } finally {
       setResyncing(false);
       setTimeout(() => setResyncStatus(null), 7000);
     }
   };
 
-  if (loading || !data) return <LoadingSkeleton />;
+  if (loading || !data) return <LoadingSkeleton loading={t.loading} />;
 
   // Показываем почту целиком: это и есть логин, и человек сверяет,
   // в тот ли аккаунт вошёл. Обрезанный префикс («ivan») этого не даёт.
   const name = data.email;
   const initial = (data.email.trim().charAt(0) || "A").toUpperCase();
-  const endShort = new Date(data.subscriptionEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+  const endShort = new Date(data.subscriptionEnd).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "short" });
   /**
    * Остаток обхода в плашке. Панель спрашиваем после отрисовки, и пока
    * ответа нет — строки просто нет: пустое место лучше, чем прочерк,
@@ -266,7 +274,7 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
    */
   const bypassLabel = bypass.live
     ? bypass.live.unlimited
-      ? "без лимита"
+      ? t.noLimit
       : bypass.live.remainingBytes != null
         ? formatBytes(bypass.live.remainingBytes)
         : null
@@ -287,12 +295,12 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
                 {data.telegramLinked ? (
                   <span className="vc-chip vc-chip-on">
                     <Icon name="send" size={14} />
-                    Telegram привязан
+                    {t.tgLinked}
                   </span>
                 ) : (
                   <button type="button" className="vc-chip" onClick={startTelegramLink} disabled={tgLink.state === "busy"}>
                     <Icon name="send" size={14} />
-                    {tgLink.state === "busy" ? "Открываем бот…" : "Привязать Telegram"}
+                    {tgLink.state === "busy" ? t.tgOpening : t.tgLink}
                   </button>
                 )}
               </div>
@@ -303,12 +311,12 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
                   всё равно не потратить. */}
               <span className="vc-facts">
                 <span className="vc-fact">
-                  <i>Подписка</i>
-                  <b>{data.isExpired ? "закончилась" : `до ${endShort}`}</b>
+                  <i>{t.factSub}</i>
+                  <b>{data.isExpired ? t.subEnded : fill(t.subUntil, { date: endShort })}</b>
                 </span>
                 {bypassLabel && (
                   <span className="vc-fact">
-                    <i>Обход</i>
+                    <i>{t.factBypass}</i>
                     <b>{bypassLabel}</b>
                   </span>
                 )}
@@ -319,7 +327,7 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
             type="button"
             className="v-btn v-btn-soft v-btn-sm vc-bell"
             onClick={() => setShowNotifications(true)}
-            aria-label={unreadCount > 0 ? `Уведомления: ${unreadLabel} новых` : "Уведомления"}
+            aria-label={unreadCount > 0 ? fill(t.bellNew, { n: unreadLabel }) : t.bell}
           >
             <Icon name="bell" size={16} />
             {/* Счётчик — маленький кружок в углу кнопки. Прежняя плашка
@@ -334,11 +342,11 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
         )}
 
         {/* ── Сегмент разделов ─────────────────────────────────────── */}
-        <div className="v-seg v-seg-lg vc-tabs" role="tablist" aria-label="Разделы кабинета">
-          {TABS.map((t) => (
-            <button key={t.id} type="button" role="tab" aria-selected={active === t.id} onClick={() => setActive(t.id)}>
-              <Icon name={t.icon} size={20} />
-              <span className="vc-tab-label">{t.label}</span>
+        <div className="v-seg v-seg-lg vc-tabs" role="tablist" aria-label={t.tabsLabel}>
+          {TABS.map((tab) => (
+            <button key={tab.id} type="button" role="tab" aria-selected={active === tab.id} onClick={() => setActive(tab.id)}>
+              <Icon name={tab.icon} size={20} />
+              <span className="vc-tab-label">{t.tabs[tab.id]}</span>
             </button>
           ))}
         </div>
@@ -348,6 +356,8 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
           {active === "subs" && (
             <CabinetKey
               locale={locale}
+              units={units}
+              t={t.key}
               data={data}
               resyncing={resyncing}
               resyncStatus={resyncStatus}
@@ -357,12 +367,16 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
             />
           )}
 
-          {active === "payments" && <CabinetPayments />}
+          {active === "payments" && <CabinetPayments locale={locale} t={t.payments} />}
 
-          {active === "buy" && <BuyPanel data={data} initialKind={kindParam} cards={cards} locale={locale} units={units} />}
+          {active === "buy" && <BuyPanel data={data} initialKind={kindParam} cards={cards} locale={locale} units={units} t={t} />}
 
           {active === "profile" && (
             <ProfilePanel
+              locale={locale}
+              t={t.profile}
+              tFriends={t.friends}
+              tSettings={t.settings}
               data={data}
               tgLink={tgLink}
               unlinkStep={unlinkStep}
@@ -383,14 +397,14 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
         <div className="vc-dialog" role="dialog" aria-modal="true" aria-labelledby="vc-out-h">
           <div className="vc-dialog-veil" onClick={() => !loggingOut && setShowLogoutConfirm(false)} />
           <div className="vc-dialog-card">
-            <h2 id="vc-out-h" className="v-h3">Выйти из аккаунта?</h2>
-            <p className="v-text">Чтобы войти снова, понадобится код из письма.</p>
+            <h2 id="vc-out-h" className="v-h3">{t.outTitle}</h2>
+            <p className="v-text">{t.outText}</p>
             <div className="v-actions">
               <button type="button" autoFocus onClick={() => setShowLogoutConfirm(false)} disabled={loggingOut} className="v-btn v-btn-soft">
-                Остаться
+                {t.outStay}
               </button>
               <button type="button" onClick={handleLogout} disabled={loggingOut} className="v-btn vc-btn-danger">
-                {loggingOut ? "Выходим…" : "Выйти"}
+                {loggingOut ? t.outBusy : t.outGo}
               </button>
             </div>
           </div>
@@ -408,25 +422,25 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
 }
 
 /** «Купить»: вкладки «Подписка» / «Трафик» над готовыми каруселями. */
-function BuyPanel({ data, initialKind, cards, locale, units }: { data: SubscriptionData; initialKind: "plan" | "traffic" } & Cards) {
+function BuyPanel({ data, initialKind, cards, locale, units, t }: { data: SubscriptionData; initialKind: "plan" | "traffic" } & Cards) {
   const [kind, setKind] = useState<"plan" | "traffic">(initialKind);
   const plan = data.subscriptionPlan || "trial";
-  const end = new Date(data.subscriptionEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+  const end = new Date(data.subscriptionEnd).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" });
   const offer = data.isExpired
-    ? "Подписка не активна — выберите тариф, чтобы включить доступ снова."
+    ? t.buy.expired
     : plan === "trial"
-      ? `Сейчас пробный период, осталось ${data.daysLeft} дн. — оформите тариф, чтобы не потерять доступ.`
-      : `Сейчас тариф ${plan === "plus" ? "Plus" : "Basic"}, действует до ${end} — продлите или смените тариф.`;
+      ? fill(t.buy.trial, { days: count(locale, data.daysLeft, units.day) })
+      : fill(t.buy.plan, { plan: plan === "plus" ? "Plus" : "Basic", date: end });
   return (
     <div className="vc-panel" aria-labelledby="vc-buy-h">
       <h2 id="vc-buy-h" className="vc-cab-title">
         <Icon name="grid" size={26} />
-        Купить
+        {t.buy.title}
       </h2>
       <p className="vc-lead">{offer}</p>
-      <div className="v-tabs-line vc-buy-tabs" role="tablist" aria-label="Что купить">
-        <button type="button" role="tab" aria-selected={kind === "plan"} onClick={() => setKind("plan")}>Подписка</button>
-        <button type="button" role="tab" aria-selected={kind === "traffic"} onClick={() => setKind("traffic")}>Трафик</button>
+      <div className="v-tabs-line vc-buy-tabs" role="tablist" aria-label={t.buy.tabsLabel}>
+        <button type="button" role="tab" aria-selected={kind === "plan"} onClick={() => setKind("plan")}>{t.buy.tabPlan}</button>
+        <button type="button" role="tab" aria-selected={kind === "traffic"} onClick={() => setKind("traffic")}>{t.buy.tabTraffic}</button>
       </div>
       <div key={kind} className="v-fade-in" style={{ marginTop: 24 }}>
         {kind === "plan" ? (
@@ -441,6 +455,10 @@ function BuyPanel({ data, initialKind, cards, locale, units }: { data: Subscript
 
 /** «Профиль»: настройки, Telegram, друзья, уведомления, сеть — по одной карточке. */
 function ProfilePanel({
+  locale,
+  t,
+  tFriends,
+  tSettings,
   data,
   tgLink,
   unlinkStep,
@@ -453,6 +471,10 @@ function ProfilePanel({
   unreadCount,
   onLogout,
 }: {
+  locale: Locale;
+  t: T["profile"];
+  tFriends: T["friends"];
+  tSettings: T["settings"];
   data: SubscriptionData;
   tgLink: TgLinkState;
   unlinkStep: number;
@@ -470,27 +492,27 @@ function ProfilePanel({
     <div className="vc-panel" aria-labelledby="vc-pr-h">
       <h2 id="vc-pr-h" className="vc-cab-title">
         <Icon name="user" size={26} />
-        Профиль
+        {t.title}
       </h2>
 
       <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }} aria-labelledby="vc-tg-h">
         <div className="vc-kblock-head">
           <h3 id="vc-tg-h">Telegram</h3>
-          {data.telegramLinked && <span className="v-badge v-badge-green">Привязан</span>}
+          {data.telegramLinked && <span className="v-badge v-badge-green">{t.tgBadge}</span>}
         </div>
         <p className="v-text">
-          {data.telegramLinked ? "Одна подписка и один ключ — в боте и на сайте." : "Одна подписка на бот и сайт. Тестовый режим."}
+          {data.telegramLinked ? t.tgTextOn : t.tgTextOff}
         </p>
         <div className="vc-actions">
           {!data.telegramLinked ? (
             <button type="button" onClick={onStartTelegramLink} disabled={tgLink.state === "busy"} className="v-btn v-btn-primary v-btn-sm">
               <Icon name="send" size={16} />
-              {tgLink.state === "busy" ? "Готовим ссылку…" : tgLink.state === "ready" ? "Новая ссылка" : "Привязать Telegram"}
+              {tgLink.state === "busy" ? t.tgPreparing : tgLink.state === "ready" ? t.tgNewLink : t.tgLink}
             </button>
           ) : unlinkStep === 0 ? (
-            <button type="button" onClick={() => onUnlinkStepChange(1)} className="v-btn v-btn-soft v-btn-sm">Отвязать</button>
+            <button type="button" onClick={() => onUnlinkStepChange(1)} className="v-btn v-btn-soft v-btn-sm">{t.unlink}</button>
           ) : (
-            <button type="button" onClick={() => onUnlinkStepChange(0)} className="v-btn v-btn-soft v-btn-sm">Отмена</button>
+            <button type="button" onClick={() => onUnlinkStepChange(0)} className="v-btn v-btn-soft v-btn-sm">{t.cancel}</button>
           )}
         </div>
         {/* Выбор стороны. Сначала та, на которой человек стоит: он в
@@ -498,46 +520,35 @@ function ProfilePanel({
             прямо говорят, что ключ продолжит работать, — без этого
             экран читается как «выберите, что потерять». */}
         {data.telegramLinked && unlinkStep === 1 && (
-          <div className="vc-unlink" role="group" aria-label="Где оставить подписку">
-            <p className="vc-unlink-h">Где оставить подписку?</p>
-            <p className="vc-fine">
-              Ключ продолжит работать в любом случае — перенастраивать ничего не нужно. Выберите, где вам удобнее
-              платить и видеть срок.
-            </p>
+          <div className="vc-unlink" role="group" aria-label={t.unlinkTitle}>
+            <p className="vc-unlink-h">{t.unlinkTitle}</p>
+            <p className="vc-fine">{t.unlinkText}</p>
             <div className="vc-actions">
               <button type="button" onClick={() => onUnlinkTelegram("site")} disabled={unlinking} className="v-btn v-btn-primary v-btn-sm">
-                {unlinking ? "Отвязываем…" : "Оставить на сайте"}
+                {unlinking ? t.unlinkBusy : t.keepSite}
               </button>
               <button type="button" onClick={() => onUnlinkTelegram("bot")} disabled={unlinking} className="v-btn v-btn-soft v-btn-sm">
-                Оставить в боте
+                {t.keepBot}
               </button>
             </div>
-            <p className="vc-fine">
-              Гигабайты обхода в выборе не участвуют — они остаются в боте. Бонус за повторную привязку не
-              начисляется.
-            </p>
+            <p className="vc-fine">{t.unlinkFine}</p>
           </div>
         )}
         {!data.telegramLinked && tgLink.state === "ready" && (
           tgLink.url ? (
             tgLink.mobile ? (
-              <p className="vc-fine" role="status">
-                Если Telegram не открылся — <a href={tgLink.url}>откройте бота по ссылке</a>. Ссылка одноразовая, действует 15 минут.
-              </p>
+              <p className="vc-fine" role="status">{rich(fill(t.tgFineMobile, { url: tgLink.url }), locale)}</p>
             ) : (
               <div role="status">
                 <div className="vc-qr">
                   <QRCodeSVG value={tgLink.url} size={188} level="M" marginSize={2} />
                 </div>
-                <p className="vc-fine">
-                  Бот открылся в новой вкладке. Можно и с телефона — наведите камеру на QR-код или{" "}
-                  <a href={tgLink.url} target="_blank" rel="noopener noreferrer">откройте ссылку</a>. Ссылка одноразовая, действует 15 минут.
-                </p>
+                <p className="vc-fine">{rich(fill(t.tgFineQr, { url: tgLink.url }), locale)}</p>
               </div>
             )
           ) : (
             <div className="vc-fine">
-              Ссылка на бота не настроена. Откройте бота Atlas Secure и отправьте ему команду: <code>/start {tgLink.startParam}</code>
+              {t.tgNoBot} <code>/start {tgLink.startParam}</code>
             </div>
           )
         )}
@@ -545,16 +556,17 @@ function ProfilePanel({
 
       <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }} id="vc-friends-card">
         <CabinetFriends
+          locale={locale}
+          t={tFriends}
           referralCode={data.referralCode}
           cashbackPercent={data.cashbackPercent}
-          loyaltyTier={data.loyaltyTier}
           referrals={data.referrals}
           paidReferrals={data.paidReferrals}
         />
       </div>
 
       <div className="v-card v-card-pad v-lift" style={{ marginBottom: 16 }}>
-        <CabinetSettings />
+        <CabinetSettings locale={locale} t={tSettings} />
       </div>
 
       <div className="v-card v-card-pad v-lift">
@@ -562,15 +574,15 @@ function ProfilePanel({
           <button type="button" className="v-row vc-row-btn" onClick={onOpenNotifications}>
             <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
             <span className="v-row-main">
-              <b>Уведомления</b>
-              <span className="v-small">{unreadCount > 0 ? `Новых: ${unreadLabel}` : "Новых нет"}</span>
+              <b>{t.notifTitle}</b>
+              <span className="v-small">{unreadCount > 0 ? fill(t.notifNew, { n: unreadLabel }) : t.notifNone}</span>
             </span>
             <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
           </button>
           {isAdmin && (
-            <Link href="/admin" className="v-row">
+            <Link href={localeHref("/admin", locale)} className="v-row">
               <span className="v-row-icon" aria-hidden><Icon name="shield" size={20} /></span>
-              <span className="v-row-main"><b>Админ-панель</b></span>
+              <span className="v-row-main"><b>{t.admin}</b></span>
               <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
             </Link>
           )}
@@ -579,8 +591,8 @@ function ProfilePanel({
           <button type="button" className="v-row vc-row-btn vc-row-out" onClick={onLogout}>
             <span className="v-row-icon" aria-hidden><Icon name="logout" size={20} /></span>
             <span className="v-row-main">
-              <b>Выйти из аккаунта</b>
-              <span className="v-small">Понадобится код из письма, чтобы войти снова</span>
+              <b>{t.logout}</b>
+              <span className="v-small">{t.logoutNote}</span>
             </span>
             <span className="v-row-side"><Icon name="chevron-right" size={16} /></span>
           </button>
@@ -592,7 +604,7 @@ function ProfilePanel({
 
 export default function DashboardView(copy: Cards) {
   return (
-    <Suspense fallback={<LoadingSkeleton />}>
+    <Suspense fallback={<LoadingSkeleton loading={copy.t.loading} />}>
       <DashboardViewInner {...copy} />
     </Suspense>
   );

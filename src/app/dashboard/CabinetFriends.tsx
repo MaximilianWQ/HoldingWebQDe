@@ -3,28 +3,35 @@
 import { useState } from "react";
 import Icon from "@/components/pixel/Icon";
 import { useToast } from "@/components/vps/Toast";
+import { LOYALTY_TIERS, tierName } from "@/lib/loyalty";
+import { fill, type Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 
 /**
- * Профиль · приглашения. Уровни кешбэка и расчёт шкалы — из прежней
- * ReferralSection один в один, стили — общий слой кабинета (vc-rail,
- * vc-tiers, vc-stats).
+ * Профиль · приглашения. Расчёт шкалы — из прежней ReferralSection
+ * один в один, стили — общий слой кабинета (vc-rail, vc-tiers,
+ * vc-stats).
+ *
+ * Ступени берутся из `src/lib/loyalty.ts` — там же, откуда их берёт
+ * оферта и витрина; своей копии процентов здесь нет. Название ступени
+ * тоже оттуда (`tierName`), а не из ответа API: ответ приходит
+ * по-русски, и на английской странице он был бы единственным русским
+ * словом на экране.
  */
-const TIERS = [
-  { name: "Стартовый", percent: 10, threshold: 0 },
-  { name: "Продвинутый", percent: 25, threshold: 25 },
-  { name: "Партнёр", percent: 45, threshold: 50 },
-];
+const TIERS = LOYALTY_TIERS;
 
 export default function CabinetFriends({
+  locale,
+  t,
   referralCode,
   cashbackPercent,
-  loyaltyTier,
   referrals,
   paidReferrals,
 }: {
+  locale: Locale;
+  t: Dict["cabinet"]["friends"];
   referralCode: string;
   cashbackPercent: number;
-  loyaltyTier: string;
   referrals: number;
   paidReferrals: number;
 }) {
@@ -36,9 +43,10 @@ export default function CabinetFriends({
   const idx = Math.max(0, TIERS.findIndex((t) => t.percent === cashbackPercent));
   const current = TIERS[idx];
   const next = TIERS[idx + 1];
-  const toNext = next ? Math.max(0, next.threshold - paidReferrals) : 0;
-  const seg = next ? Math.min(1, Math.max(0, (paidReferrals - current.threshold) / (next.threshold - current.threshold))) : 1;
-  const fill = next ? (idx + seg) / (TIERS.length - 1) : 1;
+  const toNext = next ? Math.max(0, next.from - paidReferrals) : 0;
+  const seg = next ? Math.min(1, Math.max(0, (paidReferrals - current.from) / (next.from - current.from))) : 1;
+  // Заливка шкалы 0…1. Имя не `fill` — так зовётся подстановка в строку.
+  const railFill = next ? (idx + seg) / (TIERS.length - 1) : 1;
 
   const copy = async (text: string) => {
     try {
@@ -52,7 +60,7 @@ export default function CabinetFriends({
       document.body.removeChild(ta);
     }
     setCopied(true);
-    toast("Ссылка скопирована");
+    toast(t.copiedToast);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -64,7 +72,7 @@ export default function CabinetFriends({
         try {
           await navigator.share({
             title: "Atlas Secure VPS",
-            text: `Присоединяйся к Atlas Secure VPS — кешбэк ${cashbackPercent}% за приглашения.`,
+            text: fill(t.shareText, { percent: cashbackPercent }),
             url: shareUrl,
           });
         } catch {
@@ -81,19 +89,19 @@ export default function CabinetFriends({
   return (
     <section id="vc-friends" aria-labelledby="vc-fr-h">
       <div className="vc-kblock-head">
-        <h3 id="vc-fr-h">Приглашайте друзей</h3>
-        <span className="v-badge">{loyaltyTier}</span>
+        <h3 id="vc-fr-h">{t.title}</h3>
+        <span className="v-badge">{tierName(current, locale)}</span>
       </div>
 
       <p className="vc-value">
-        {cashbackPercent}%<small>кешбэк с каждой оплаты друга</small>
+        {cashbackPercent}%<small>{t.cashbackCap}</small>
       </p>
 
       <div className="vc-rail" aria-hidden>
-        <i className="vc-rail-fill" style={{ "--p": fill } as React.CSSProperties} />
-        {TIERS.map((t, k) => (
+        <i className="vc-rail-fill" style={{ "--p": railFill } as React.CSSProperties} />
+        {TIERS.map((x, k) => (
           <span
-            key={t.name}
+            key={x.tier}
             className="vc-rail-stop"
             style={{ left: `${(k / (TIERS.length - 1)) * 100}%` }}
             data-on={k <= idx ? "" : undefined}
@@ -101,37 +109,37 @@ export default function CabinetFriends({
         ))}
       </div>
       <div className="vc-tiers">
-        {TIERS.map((t, k) => (
-          <span key={t.name} className="vc-tier" data-on={k <= idx ? "" : undefined}>
-            <b>{t.percent}%</b>
-            {t.name}
+        {TIERS.map((x, k) => (
+          <span key={x.tier} className="vc-tier" data-on={k <= idx ? "" : undefined}>
+            <b>{x.percent}%</b>
+            {tierName(x, locale)}
           </span>
         ))}
       </div>
 
       <div className="vc-stats v-stagger">
         <div className="vc-stat v-lift">
-          <span>Пригласили</span>
+          <span>{t.statInvited}</span>
           <b>{referrals}</b>
         </div>
         <div className="vc-stat v-lift">
-          <span>Оплатили</span>
+          <span>{t.statPaid}</span>
           <b>{paidReferrals}</b>
         </div>
         <div className="vc-stat v-lift">
-          <span>{next ? `До ${next.percent}%` : "Уровень"}</span>
-          <b>{next ? toNext : "макс."}</b>
+          <span>{next ? fill(t.statTo, { percent: next.percent }) : t.statLevel}</span>
+          <b>{next ? toNext : t.statMax}</b>
         </div>
       </div>
 
       <div className="vc-actions">
         <button type="button" onClick={handleShare} disabled={sharing} className="v-btn v-btn-primary v-btn-sm">
           <Icon name="share" size={16} />
-          Поделиться
+          {t.share}
         </button>
         <button type="button" onClick={() => copy(shareUrl)} className="v-btn v-btn-soft v-btn-sm">
           <Icon name={copied ? "check" : "copy"} size={16} />
-          {copied ? "Скопировано" : "Скопировать ссылку"}
+          {copied ? t.copied : t.copyLink}
         </button>
       </div>
     </section>

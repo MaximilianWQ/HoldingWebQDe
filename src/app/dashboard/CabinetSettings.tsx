@@ -5,6 +5,8 @@ import { startRegistration } from "@simplewebauthn/browser";
 import Link from "next/link";
 import Icon from "@/components/pixel/Icon";
 import { isIosBrowser } from "@/components/IosInstallSheet";
+import type { Dict } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 
 /**
  * Профиль · уведомления и вход. Push — логика PushToggleButton, быстрый
@@ -19,7 +21,7 @@ const urlB64 = (b: string) => {
   return a;
 };
 
-export default function CabinetSettings() {
+export default function CabinetSettings({ locale, t }: { locale: Locale; t: Dict["cabinet"]["settings"] }) {
   const [pushSupported, setPushSupported] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
@@ -157,16 +159,16 @@ export default function CabinetSettings() {
   return (
     <section aria-labelledby="vc-set-h">
       <div className="vc-kblock-head">
-        <h3 id="vc-set-h">Уведомления и вход</h3>
+        <h3 id="vc-set-h">{t.title}</h3>
       </div>
 
       <div className="v-rows v-stagger">
         <div className="v-row">
           <span className="v-row-icon" aria-hidden><Icon name="bell" size={20} /></span>
           <span className="v-row-main">
-            <b id="vc-push-l">Push-уведомления</b>
+            <b id="vc-push-l">{t.push}</b>
             <span className="v-small">
-              {!pushSupported ? "Этот браузер их не поддерживает" : pushEnabled ? "Включены — напомним о продлении" : "Выключены"}
+              {!pushSupported ? t.pushNo : pushEnabled ? t.pushOn : t.pushOff}
             </span>
           </span>
           <span className="v-row-side">
@@ -185,11 +187,11 @@ export default function CabinetSettings() {
         <div className="v-row">
           <span className="v-row-icon" aria-hidden><Icon name="send" size={20} /></span>
           <span className="v-row-main">
-            <b id="vc-news-l">Новости и предложения</b>
+            <b id="vc-news-l">{t.news}</b>
             <span className="v-small">
-              {newsOn === null ? "Загружаем…" : newsOn ? "Присылаем акции и новости на почту" : "Выключено — приходят только письма о подписке"}
+              {newsOn === null ? t.newsLoading : newsOn ? t.newsOn : t.newsOff}
             </span>
-            {newsError && <span className="v-error">Не удалось сохранить. Попробуйте ещё раз.</span>}
+            {newsError && <span className="v-error">{t.saveFail}</span>}
           </span>
           <span className="v-row-side">
             <button
@@ -208,11 +210,11 @@ export default function CabinetSettings() {
           <div className="v-row">
             <span className="v-row-icon" aria-hidden><Icon name="iphone" size={20} /></span>
             <span className="v-row-main">
-              <b>Atlas на экран «Домой»</b>
-              <span className="v-small">Кабинет как приложение и уведомления о продлении</span>
+              <b>{t.iosTitle}</b>
+              <span className="v-small">{t.iosNote}</span>
             </span>
             <span className="v-row-side">
-              <Link href="/install-ios" className="v-btn v-btn-primary v-btn-sm">Установить</Link>
+              <Link href={localeHref("/install-ios", locale)} className="v-btn v-btn-primary v-btn-sm">{t.install}</Link>
             </span>
           </div>
         )}
@@ -220,11 +222,11 @@ export default function CabinetSettings() {
         <div className="v-row">
           <span className="v-row-icon" aria-hidden><Icon name="lock" size={20} /></span>
           <span className="v-row-main">
-            <b>Быстрый вход</b>
+            <b>{t.fast}</b>
             <span className="v-small">
-              {passkeyStatus === "success" ? "Настроен" : hasPasskey ? "Face ID или Touch ID вместо кода" : "Вход без кода из письма"}
+              {passkeyStatus === "success" ? t.fastOn : hasPasskey ? t.fastHas : t.fastNo}
             </span>
-            {passkeyStatus === "error" && <span className="v-error">Не удалось. Попробуйте позже.</span>}
+            {passkeyStatus === "error" && <span className="v-error">{t.fastFail}</span>}
           </span>
           <span className="v-row-side">
             {passkeyLoading ? (
@@ -232,14 +234,14 @@ export default function CabinetSettings() {
             ) : hasPasskey ? (
               confirmRemove ? (
                 <span style={{ display: "flex", gap: 8 }}>
-                  <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(false)}>Нет</button>
-                  <button type="button" className="v-btn vc-btn-danger v-btn-sm" onClick={removePasskey}>Отвязать</button>
+                  <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(false)}>{t.no}</button>
+                  <button type="button" className="v-btn vc-btn-danger v-btn-sm" onClick={removePasskey}>{t.unlink}</button>
                 </span>
               ) : (
-                <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(true)}>Отвязать</button>
+                <button type="button" className="v-btn v-btn-soft v-btn-sm" onClick={() => setConfirmRemove(true)}>{t.unlink}</button>
               )
             ) : (
-              <button type="button" className="v-btn v-btn-primary v-btn-sm" onClick={setupPasskey}>Настроить</button>
+              <button type="button" className="v-btn v-btn-primary v-btn-sm" onClick={setupPasskey}>{t.setup}</button>
             )}
           </span>
         </div>

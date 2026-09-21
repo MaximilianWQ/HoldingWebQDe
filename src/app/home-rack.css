@@ -54,15 +54,14 @@
   position: absolute;
   left: 0;
   width: 100%;
-  /* Модуль появляется на своём месте. Без скрипта раздел показывает
-     собранную стойку — прятать нечего, класс ставит только игра. */
-  opacity: 1;
 }
 
-.vr-unit:not([data-in]) {
-  opacity: 0;
-  pointer-events: none;
-}
+/* Правила «спрятать модуль без data-in» здесь БЫЛО и его пришлось
+   убрать: после перехода на симулятор доска рисует только те модули,
+   что уже стоят в стойке, а атрибут перестала ставить. Правило
+   осталось — и скрывало ВСЮ стойку, включая заранее поставленные
+   питание и панель. Видимость теперь решается наличием элемента, а не
+   прозрачностью. */
 
 .vr-unit img {
   display: block;
@@ -70,14 +69,13 @@
   height: auto;
 }
 
-/* Въезд модуля в стойку. Движение — только transform и opacity. */
+/* Въезд модуля в стойку: он появляется чуть правее и доезжает. */
 @media (prefers-reduced-motion: no-preference) {
-  .vr-unit {
-    transition: opacity 0.18s var(--v-ease), transform 0.34s var(--v-ease);
-    transform: translateX(0);
+  @keyframes vr-slide-in {
+    from { opacity: 0; transform: translateX(7%); }
   }
-  .vr-unit:not([data-in]) {
-    transform: translateX(6%);
+  .vr-unit {
+    animation: vr-slide-in 0.34s var(--v-ease) both;
   }
 }
 
@@ -328,5 +326,208 @@
   .vr-sound {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   СИМУЛЯТОР: перетаскивание, тумблеры, шнуры, авария
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Пока в руке деталь, страница не должна прокручиваться от жеста и не
+   должна выделять текст под курсором. */
+.vr[data-dragging] {
+  user-select: none;
+  cursor: grabbing;
+}
+
+/* ─── Свободное место ─────────────────────────────────────────────── */
+
+.vr-slot {
+  position: absolute;
+  left: 8.5%;
+  width: 83%;
+  padding: 0;
+  border: 2px dashed var(--v-ink-4);
+  border-radius: 6px;
+  background: rgba(58, 133, 240, 0.06);
+  cursor: pointer;
+}
+
+.vr-slot[data-over] {
+  border-color: var(--v-blue);
+  border-style: solid;
+  background: rgba(58, 133, 240, 0.18);
+}
+
+/* ─── Деталь в руке ───────────────────────────────────────────────── */
+
+.vr-ghost {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  opacity: 0.92;
+  filter: drop-shadow(0 12px 22px rgba(16, 24, 40, 0.28));
+}
+
+.vr-ghost img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ─── Штекер ──────────────────────────────────────────────────────── */
+/* Тап-зона крупная (минимум 24 px даже на узком экране), сама деталь
+   ровно такая, какой её отрендерили. */
+
+.vr-plug {
+  position: absolute;
+  width: 7cqw;
+  height: 7cqw;
+  min-width: 28px;
+  min-height: 28px;
+  margin: -3.5cqw 0 0 -3.5cqw;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  z-index: 3;
+}
+
+.vr-plug img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.vr-plug[data-wired] {
+  cursor: pointer;
+}
+
+/* ─── Тумблер ─────────────────────────────────────────────────────── */
+
+.vr-switch {
+  position: absolute;
+  width: 4.4cqw;
+  height: 4.4cqw;
+  min-width: 30px;
+  min-height: 30px;
+  margin: -2.2cqw 0 0 -2.2cqw;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.vr-switch img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ─── Шнуры ───────────────────────────────────────────────────────── */
+
+.vr-cords {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.vr-cord {
+  fill: none;
+  stroke: var(--v-ink-2);
+  stroke-width: 9;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.vr-cord[data-live] {
+  stroke: var(--v-ink);
+  opacity: 0.85;
+}
+
+/* ─── Полка с модулями ────────────────────────────────────────────── */
+
+.vr-shelf {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.vr-card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 56px;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+  border: 1px solid var(--v-line);
+  border-radius: var(--v-r-sm);
+  background: var(--v-bg);
+  color: var(--v-ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: grab;
+  /* Без этого браузер на сенсоре начнёт прокручивать страницу вместо
+     перетаскивания и жест потеряется на первом же движении. */
+  touch-action: none;
+}
+
+.vr-card img {
+  width: 96px;
+  height: auto;
+  pointer-events: none;
+}
+
+.vr-card[data-held] {
+  border-color: var(--v-blue);
+  box-shadow: inset 0 0 0 1px var(--v-blue);
+}
+
+/* ─── Авария ──────────────────────────────────────────────────────── */
+/* Красным светится только сломанный модуль. Авария называется словом —
+   цвета одного мало и при дальтонизме, и при погашенной анимации. */
+
+.vr-unit[data-broken] .vr-led {
+  background: var(--v-red);
+  opacity: 1;
+  box-shadow: 0 0 0.6cqw rgba(229, 72, 77, 0.8);
+}
+
+.vr-hint[data-fault] {
+  color: var(--v-ink);
+}
+
+.vr-hint[data-fault] b {
+  color: var(--v-red);
+}
+
+.vr[data-phase="fault"] .vr-frame {
+  filter: saturate(0.8);
+}
+
+/* ─── Телефон ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1099px) {
+  /* Стойка остаётся картинкой: штекер и тумблер на ней мельче пальца.
+     Всё то же делается карточками и кнопками в списке под ней. */
+  .vr-plug,
+  .vr-switch,
+  .vr-slot {
+    display: none;
+  }
+  .vr-card {
+    cursor: pointer;
   }
 }

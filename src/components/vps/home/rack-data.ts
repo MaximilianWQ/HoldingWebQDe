@@ -145,11 +145,66 @@ export const RACK_UNITS: RackUnit[] = [
   { id: "patch", u: 1, slot: 7, frameH: 147, preset: true, leds: [] },
 ];
 
+/**
+ * Гнёзда на панели, откуда игрок тянет провод, — координаты сняты
+ * проекцией из самой сцены Blender, а не подобраны по картинке.
+ * Взяты не подряд: три шнура на соседних гнёздах наложились бы друг на
+ * друга, поэтому между ними по два гнезда — это 0,154 ширины кадра.
+ */
+export const PATCH_JACKS: RackAnchor[] = [
+  { name: "j2", kind: "port", x: 0.37014, y: 0.55834 },
+  { name: "j5", kind: "port", x: 0.52466, y: 0.51999 },
+  { name: "j8", kind: "port", x: 0.67917, y: 0.48163 },
+];
+
+/** Тумблеры на модуле питания. Оттуда же. */
+export const POWER_SWITCHES: RackAnchor[] = [
+  { name: "sw0", kind: "button", x: 0.70027, y: 0.566 },
+  { name: "sw1", kind: "button", x: 0.73682, y: 0.56051 },
+];
+
+/** Высота кадра рамы в долях его ширины. */
+export const RACK_H = (RACK_SLOTS + 2 * RACK_PAD_UNITS) * UNIT_PER_FRAME;
+
+/** Середина места `slot` высотой `u`, в долях ширины кадра рамы. */
+export function slotCentre(slot: number, u = 1): number {
+  return RACK_H / 2 - (-RACK_SLOTS / 2 + slot + u / 2) * UNIT_PER_FRAME;
+}
+
+/**
+ * Точка на модуле → точка на кадре рамы, в долях ЕЁ ширины.
+ *
+ * По горизонтали пересчёта нет: кадры модуля и рамы одной ширины.
+ * По вертикали доля кадра модуля умножается на его высоту — доли в
+ * манифесте считаются от габарита своего кадра, а не общего.
+ */
+export function anchorInRack(u: RackUnit, a: RackAnchor): { x: number; y: number } {
+  return { x: a.x, y: unitTop(u) + a.y * (u.frameH / FRAME_W) };
+}
+
+/** Свободные места: те, что не заняты заранее поставленными модулями. */
+export const FREE_SLOTS: number[] = (() => {
+  const taken = new Set<number>();
+  for (const u of RACK_UNITS) {
+    if (!u.preset) continue;
+    for (let i = 0; i < u.u; i += 1) taken.add(u.slot + i);
+  }
+  return Array.from({ length: RACK_SLOTS }, (_, i) => i).filter((i) => !taken.has(i));
+})();
+
 /** Те, кого ставит игрок, в порядке постановки. */
 export const PLAYABLE = RACK_UNITS.filter((u) => !u.preset);
 
-/** Адрес кадра. Версия в имени обязательна: /media кешируется на неделю. */
-export function rackSrc(id: string, w: 700 | 1400): string {
+/**
+ * Адрес кадра. Версия в имени обязательна: /media отдаётся с кешем на
+ * неделю, а файлы в `public` не хешируются — перерисовали кадр, подняли
+ * версию, иначе неделю висит старый.
+ *
+ * Ширины: стойка и модули сняты в 1400 и 700, мелкие детали (штекер,
+ * тумблер) — в 560 и 280. У них свой масштаб кадра: гонять вокруг
+ * разъёма кадр шириной со стойку значило бы возить пустоту.
+ */
+export function rackSrc(id: string, w: number): string {
   return `/media/rack/${id}.${RACK_VERSION}-${w}.webp`;
 }
 

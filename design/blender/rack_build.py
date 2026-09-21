@@ -1170,3 +1170,154 @@ def clear_units():
         if ob.type not in keep:
             bpy.data.objects.remove(ob, do_unlink=True)
     ANCHORS.clear()
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  ШТЕКЕР И ГНЕЗДО — детали, которые игрок таскает рукой
+# ═══════════════════════════════════════════════════════════════════
+#
+# ЧЕСТНОЕ ОГРАНИЧЕНИЕ, которое надо понимать. Провод, который тянется
+# за рукой, отрендерить нельзя: рендер — жёсткая картинка, а шнур
+# обязан гнуться в любую сторону на любое расстояние. Поэтому деталь
+# разделена:
+#
+#   · ШТЕКЕР — рендер. Он и есть то, что берут «в руку»: объект того же
+#     материала и под тем же светом, что вся стойка;
+#   · ШНУР — кривая в разметке, которая тянется от гнезда к штекеру.
+#     Она подкрашена под тот же материал, но она вектор, а не картинка.
+#
+# Пытаться отрендерить шнур пачкой кадров под все положения — это
+# сотни кадров ради того, что вектор делает бесплатно и точнее.
+
+def build_plug(name="plug"):
+    """
+    Штекер: корпус с защёлкой и коротким хвостом шнура.
+
+    Кадр у него свой, маленький: деталь мелкая, и гонять вокруг неё
+    кадр шириной со стойку значило бы возить пустоту.
+    """
+    parts = []
+    # Корпус — скруглённый брусок. Пропорции от настоящего разъёма:
+    # шире, чем толще, с заметной фаской спереди.
+    body = box("%s_body" % name, (0.62, 0.86, 0.46), (0, 0, 0),
+               MATS["dusk"], bevel=0.05, segments=5)
+    parts.append(body)
+
+    # Защёлка — язычок сверху. Именно по ней разъём узнаётся.
+    parts.append(box("%s_latch" % name, (0.26, 0.44, 0.10),
+                     (0, -0.10, 0.27), MATS["dusk"], bevel=0.03, segments=4))
+
+    # Контакты в торце: тонкие полоски, видны при подлёте.
+    for i in range(4):
+        parts.append(box("%s_pin%d" % (name, i), (0.07, 0.06, 0.20),
+                         (-0.21 + i * 0.14, -0.44, -0.06), MATS["steel"],
+                         bevel=0.012, segments=2))
+
+    # Хвост шнура: короткий отрезок, чтобы штекер не выглядел обрубком.
+    # Дальше шнур продолжает вектор в разметке.
+    parts.append(cyl("%s_boot" % name, 0.17, 0.34, (0, 0.52, 0),
+                     (math.radians(90), 0, 0), MATS["ink"], verts=24, bevel=0.04))
+    parts.append(cyl("%s_cord" % name, 0.10, 0.50, (0, 0.88, 0),
+                     (math.radians(90), 0, 0), MATS["ink"], verts=20, bevel=0.02))
+
+    # Кобальтовая метка — тот же язык, что у модулей: цветное пятно одно.
+    parts.append(box("%s_mark" % name, (0.30, 0.06, 0.10),
+                     (0, -0.44, 0.14), MATS["cobalt"], bevel=0.02, segments=3))
+
+    root = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(root)
+    for p in parts:
+        p.parent = root
+    return root
+
+
+def build_socket(name="socket"):
+    """
+    Гнездо отдельным кадром — подсветка цели, пока игрок тянет штекер.
+
+    На модуле гнездо уже нарисовано, но когда в руке штекер, цель
+    обязана быть видна ярче остального. Рисовать её свечением в
+    разметке нельзя: при `prefers-reduced-motion` свечение гасится, а
+    цель обязана остаться.
+    """
+    parts = [
+        box("%s_frame" % name, (0.74, 0.20, 0.58), (0, 0, 0),
+            MATS["dusk"], bevel=0.05, segments=4),
+        box("%s_hole" % name, (0.50, 0.16, 0.36), (0, -0.06, -0.04),
+            MATS["port"], bevel=0.03, segments=3),
+    ]
+    root = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(root)
+    for p in parts:
+        p.parent = root
+    return root
+
+
+def build_toggle(name="toggle", on=False):
+    """
+    Тумблер питания — кликабельная деталь.
+
+    ЗДЕСЬ Я НАРУШАЮ СОБСТВЕННОЕ ПРАВИЛО «состояние живёт в разметке, а
+    не в кадре», и вот почему. У тумблера состояний ровно два, а не
+    четыре, и разница между ними — это НАКЛОН ОБЪЁМНОГО РЫЧАГА. Плоский
+    прямоугольник в разметке поверх рендера читался бы наклейкой:
+    рычаг обязан ловить свет с той стороны, в которую опрокинут. Два
+    кадра по 8 КБ дешевле, чем испорченная деталь.
+    """
+    tilt = math.radians(20 if on else -20)
+    parts = [
+        # Рамка, утопленная в панель.
+        box("%s_bezel" % name, (0.68, 0.22, 0.86), (0, 0.06, 0),
+            MATS["dusk"], bevel=0.05, segments=4),
+        box("%s_well" % name, (0.44, 0.18, 0.62), (0, -0.02, 0),
+            MATS["port"], bevel=0.03, segments=3),
+    ]
+    # Рычаг: опрокидывается вокруг оси X, поэтому наклон читается как
+    # «вверх» или «вниз», а не как сдвиг вбок.
+    lever = box("%s_lever" % name, (0.34, 0.30, 0.52), (0, -0.14, 0),
+                MATS["bone"] if on else MATS["bone_dim"], bevel=0.06, segments=5)
+    lever.rotation_euler = (tilt, 0, 0)
+    lever.location = (0, -0.14, 0.10 if on else -0.10)
+    parts.append(lever)
+    if on:
+        # Включённый тумблер показывает кобальтовую полоску под рычагом.
+        parts.append(box("%s_lit" % name, (0.34, 0.10, 0.12),
+                         (0, -0.18, -0.26), MATS["cobalt"], bevel=0.02, segments=3))
+    root = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(root)
+    for p in parts:
+        p.parent = root
+    return root
+
+
+def render_parts(out_dir=None, samples=900):
+    """
+    Мелкие детали, которые игрок берёт рукой или щёлкает: штекер и
+    тумблер в двух положениях. У них свой масштаб кадра — гонять вокруг
+    разъёма кадр шириной со стойку значило бы возить пустоту.
+    """
+    out_dir = out_dir or OUT
+    os.makedirs(out_dir, exist_ok=True)
+    scn = bpy.context.scene
+    scn.cycles.samples = samples
+    made = []
+
+    def shoot(name, scale, build, px=560, rot=None):
+        clear_units()
+        obj = build()
+        if rot:
+            obj.rotation_euler = rot
+        cam = scn.camera
+        cam.data.ortho_scale = scale
+        aim_camera(cam, CAM_ROT)
+        scn.render.resolution_x = px
+        scn.render.resolution_y = px
+        scn.render.filepath = os.path.join(out_dir, name)
+        bpy.ops.render.render(write_still=True)
+        made.append({"id": name, "w": px, "h": px, "file": "%s.png" % name})
+
+    shoot("plug", 3.0, lambda: build_plug("plug"), rot=(0, 0, math.radians(55)))
+    shoot("switch-off", 1.7, lambda: build_toggle("t_off", on=False))
+    shoot("switch-on", 1.7, lambda: build_toggle("t_on", on=True))
+    print("детали:", [m["id"] for m in made])
+    return made

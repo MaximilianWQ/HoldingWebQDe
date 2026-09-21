@@ -340,6 +340,25 @@ export const en: Dict = {
         "This is what you are paying for. Slot a module in, plug the " +
         "cable and press start — it takes a minute.",
       how: "Tap a module below and it goes into its place.",
+      howDrag: "Grab a module with the mouse and drag it into a free slot. On a phone: tap the module, then the slot.",
+      pickUp: "Pick up",
+      dropHere: "Drop it on a free slot",
+      powerOn: "Switch the power on — the toggle on the bottom module",
+      powerOff: "Switch the power off",
+      faults: {
+        noPower: {
+          title: "No power.",
+          fix: "Flip the toggle on the bottom module — the rack has no power.",
+        },
+        unwired: {
+          title: "A module has no cable.",
+          fix: "One module is not plugged in: drag its plug down from the panel above.",
+        },
+        unplugged: {
+          title: "The cable is out.",
+          fix: "That module lost its link. Put the plug back and start the rack again.",
+        },
+      },
       rackLabel: "Rack with {total} slots",
       shelfLabel: "Modules left to fit",
       slotEmpty: "Empty slot",

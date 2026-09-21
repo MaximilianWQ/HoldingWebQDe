@@ -5,10 +5,14 @@ import { useState } from "react";
 import Carousel from "./Carousel";
 import Icon from "@/components/pixel/Icon";
 import {
-  PLANS, PERIODS, PERIOD_DAYS, PERIOD_LABEL, PLAN_CONTENT, PLAN_SPEED, DEVICE_LIMIT,
-  discountPercent, formatRub, pricePerMonth, savings, type PlanId, type Period,
+  PLANS, PERIODS, PERIOD_DAYS, PLAN_SPEED, DEVICE_LIMIT, periodLabel, planContent,
+  discountPercent, formatRub, formatDecimal, pricePerMonth, savings, type PlanId, type Period,
 } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
+import type { Dict } from "@/i18n";
+import { fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import type { Locale } from "@/lib/locale";
 
 /**
  * Карточки тарифов.
@@ -35,6 +39,11 @@ import { COUNTRY_COUNT } from "@/lib/locations";
  * Цена показана тремя способами: за месяц (её сравнивают), за период
  * (её платят) и за день (её примеряют к бытовым тратам). Все три —
  * из `src/lib/plans.ts`, ни одно число не написано руками.
+ *
+ * Компонент клиентский (переключатель тарифа и лента сроков), поэтому
+ * словарь не импортирует — текст приходит пропсом `t` от серверного
+ * родителя. Цена за день форматируется по языку: «6,6» в русском и
+ * «6.6» в английском, иначе запятая читается как разряды.
  */
 
 /** Рекомендуемый срок — тот самый «средний». */
@@ -50,39 +59,48 @@ export const POPULAR: Period = 6;
  * синяя «максимум выгоды». Жёлтая одна на весь ряд: два ярких пятна
  * рядом гасят друг друга, и выбор снова становится задачей.
  */
-const TAG: Record<Period, { text: string; tone: string }> = {
-  1: { text: "Попробовать", tone: "v-badge-soft" },
-  3: { text: "Короткий срок", tone: "v-badge-blue" },
-  6: { text: "Выгодно", tone: "v-badge-yellow v-dcard-tag-hero" },
-  12: { text: "Максимум выгоды", tone: "v-badge-solid-blue" },
+const TONE: Record<Period, string> = {
+  1: "v-badge-soft",
+  3: "v-badge-blue",
+  6: "v-badge-yellow v-dcard-tag-hero",
+  12: "v-badge-solid-blue",
 };
 
-function perDay(plan: PlanId, period: Period): string {
-  const v = PLANS[plan][period] / PERIOD_DAYS[period];
-  return v.toLocaleString("ru-RU", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+function perDay(plan: PlanId, period: Period, locale: Locale): string {
+  return formatDecimal(PLANS[plan][period] / PERIOD_DAYS[period], locale, 1);
 }
 
 export default function PlanCards({
-  cta = "Подключить",
+  locale,
+  t,
+  units,
+  cta,
   href = (plan, period) => `/subscribe?plan=${plan}&period=${period}`,
   initialPlan = "basic",
 }: {
+  locale: Locale;
+  t: Dict["cards"];
+  units: Dict["units"];
   cta?: string;
   href?: (plan: PlanId, period: Period) => string;
   initialPlan?: PlanId;
 }) {
   const [plan, setPlan] = useState<PlanId>(initialPlan);
+  const label = periodLabel(locale);
+  const content = planContent(locale);
+  const tag: Record<Period, string> = { 1: t.tagTry, 3: t.tagShort, 6: t.tagBest, 12: t.tagMax };
+  const button = cta ?? t.connect;
   return (
     <>
-      <div className="v-seg v-seg-plans" role="tablist" aria-label="Тариф">
+      <div className="v-seg v-seg-plans" role="tablist" aria-label={t.planTab}>
         {(["basic", "plus"] as PlanId[]).map((id) => (
           <button key={id} type="button" role="tab" aria-selected={plan === id} onClick={() => setPlan(id)}>
-            {PLAN_CONTENT[id].name} · {PLAN_SPEED[id]} Гбит/с
+            {content[id].name} · {PLAN_SPEED[id]} {t.speedUnit}
           </button>
         ))}
       </div>
 
-      <Carousel label={`Сроки тарифа ${PLAN_CONTENT[plan].name}`} key={plan} initial={PERIODS.indexOf(POPULAR)} wide>
+      <Carousel label={fill(t.periods, { plan: content[plan].name })} key={plan} initial={PERIODS.indexOf(POPULAR)} wide>
         {PERIODS.map((p) => {
           const off = discountPercent(plan, p);
           const pop = p === POPULAR;
@@ -91,37 +109,47 @@ export default function PlanCards({
             <article
               key={p}
               className={`v-dcard${pop ? " v-dcard-pop" : ""}`}
-              aria-label={`${PLAN_CONTENT[plan].name}, ${PERIOD_LABEL[p].full}${pop ? ", рекомендуем" : ""}`}
+              aria-label={`${content[plan].name}, ${label[p].full}${pop ? `, ${t.recommended}` : ""}`}
             >
-              <span className={`v-badge v-dcard-tag ${TAG[p].tone}`}>
+              <span className={`v-badge v-dcard-tag ${TONE[p]}`}>
                 {pop ? <Icon name="bolt" size={14} /> : null}
-                {TAG[p].text}{off > 0 ? ` · −${off}%` : ""}
+                {tag[p]}{off > 0 ? ` · −${off}%` : ""}
               </span>
 
-              <h3 className="v-dcard-title">{PERIOD_LABEL[p].full}</h3>
+              <h3 className="v-dcard-title">{label[p].full}</h3>
 
               <p className="v-dcard-price">
-                <b>{formatRub(pricePerMonth(plan, p))} ₽</b>
-                <span>в месяц</span>
+                <b>{formatRub(pricePerMonth(plan, p), locale)} ₽</b>
+                <span>{t.perMonth}</span>
               </p>
 
               <p className="v-dcard-sum">
-                {formatRub(PLANS[plan][p])} ₽ за {PERIOD_LABEL[p].accusative} · ≈ {perDay(plan, p)} ₽ в день
+                {fill(t.forPeriod, {
+                  sum: formatRub(PLANS[plan][p], locale),
+                  period: label[p].accusative,
+                  day: perDay(plan, p, locale),
+                })}
               </p>
 
               {off > 0 ? (
                 <p className="v-dcard-save">
-                  <s>{formatRub(monthly)} ₽</s> помесячно за тот же срок — <b>экономия {formatRub(savings(plan, p))} ₽</b>
+                  <s>{formatRub(monthly, locale)} ₽</s> {t.saving}{" "}
+                  <b>{fill(t.savingBold, { amount: formatRub(savings(plan, p), locale) })}</b>
                 </p>
               ) : (
-                <p className="v-dcard-save v-dcard-save-flat">Разовый платёж за месяц — попробовать без обязательств</p>
+                <p className="v-dcard-save v-dcard-save-flat">{t.oneOff}</p>
               )}
 
               <ul className="v-checks">
-                <li>До {DEVICE_LIMIT} устройств на одной подписке</li>
-                <li>Все {COUNTRY_COUNT} стран — страна меняется в приложении</li>
-                <li>Канал {PLAN_SPEED[plan]} Гбит/с</li>
-                <li>Без автосписаний — продлеваете сами</li>
+                {t.planChecks.map((line) => (
+                  <li key={line}>
+                    {fill(line, {
+                      devices: count(locale, DEVICE_LIMIT, units.device),
+                      countries: count(locale, COUNTRY_COUNT, units.country),
+                      speed: PLAN_SPEED[plan],
+                    })}
+                  </li>
+                ))}
               </ul>
 
               <Link
@@ -129,7 +157,7 @@ export default function PlanCards({
                 prefetch={false}
                 className={`v-btn v-btn-block ${pop ? "v-btn-white" : "v-btn-primary"}`}
               >
-                {cta} · {PERIOD_LABEL[p].short}
+                {button} · {label[p].short}
               </Link>
             </article>
           );

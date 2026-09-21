@@ -1,6 +1,8 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import type { Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
@@ -62,7 +64,20 @@ function LoadingSkeleton() {
   );
 }
 
-function DashboardViewInner() {
+/**
+ * Текст карточек тарифов и пакетов — пропсом, а не импортом словаря
+ * (21.09.2026). Экран клиентский: импортируй он словарь, в браузер
+ * уехали бы оба языка целиком. Кабинет пока показывается только
+ * по-русски, но провод уже проложен — когда дойдёт его перевод,
+ * менять тут будет нечего.
+ */
+interface Cards {
+  locale: Locale;
+  cards: Dict["cards"];
+  units: Dict["units"];
+}
+
+function DashboardViewInner({ cards, locale, units }: Cards) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -343,7 +358,7 @@ function DashboardViewInner() {
 
           {active === "payments" && <CabinetPayments />}
 
-          {active === "buy" && <BuyPanel data={data} initialKind={kindParam} />}
+          {active === "buy" && <BuyPanel data={data} initialKind={kindParam} cards={cards} locale={locale} units={units} />}
 
           {active === "profile" && (
             <ProfilePanel
@@ -392,7 +407,7 @@ function DashboardViewInner() {
 }
 
 /** «Купить»: вкладки «Подписка» / «Трафик» над готовыми каруселями. */
-function BuyPanel({ data, initialKind }: { data: SubscriptionData; initialKind: "plan" | "traffic" }) {
+function BuyPanel({ data, initialKind, cards, locale, units }: { data: SubscriptionData; initialKind: "plan" | "traffic" } & Cards) {
   const [kind, setKind] = useState<"plan" | "traffic">(initialKind);
   const plan = data.subscriptionPlan || "trial";
   const end = new Date(data.subscriptionEnd).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
@@ -414,9 +429,9 @@ function BuyPanel({ data, initialKind }: { data: SubscriptionData; initialKind: 
       </div>
       <div key={kind} className="v-fade-in" style={{ marginTop: 24 }}>
         {kind === "plan" ? (
-          <PlanCards href={(plan, period) => `/subscribe?plan=${plan}&period=${period}`} />
+          <PlanCards locale={locale} t={cards} units={units} href={(plan, period) => `/subscribe?plan=${plan}&period=${period}`} />
         ) : (
-          <TrafficCards />
+          <TrafficCards locale={locale} />
         )}
       </div>
     </div>
@@ -574,10 +589,10 @@ function ProfilePanel({
   );
 }
 
-export default function DashboardView() {
+export default function DashboardView(copy: Cards) {
   return (
     <Suspense fallback={<LoadingSkeleton />}>
-      <DashboardViewInner />
+      <DashboardViewInner {...copy} />
     </Suspense>
   );
 }

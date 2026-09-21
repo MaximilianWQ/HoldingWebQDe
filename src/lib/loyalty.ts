@@ -11,9 +11,14 @@
  * «+20 дней» — снято владельцем 12.09.2026.
  */
 
+import type { Locale } from "./locale";
+
 export interface LoyaltyTier {
   /** Имя ступени в кабинете. */
   tier: string;
+  /** То же по-английски. Поле обязательное: новая ступень без имени на
+   *  втором языке не соберётся. */
+  tierEn: string;
   /** Процент кешбэка с оплат приглашённых. */
   percent: number;
   /** С какого числа оплативших приглашённых действует ступень. */
@@ -22,10 +27,15 @@ export interface LoyaltyTier {
 
 /** Ступени по возрастанию порога. */
 export const LOYALTY_TIERS: readonly LoyaltyTier[] = [
-  { tier: "Стартовый", percent: 10, from: 0 },
-  { tier: "Продвинутый", percent: 25, from: 25 },
-  { tier: "Партнёр", percent: 45, from: 50 },
+  { tier: "Стартовый", tierEn: "Starter", percent: 10, from: 0 },
+  { tier: "Продвинутый", tierEn: "Advanced", percent: 25, from: 25 },
+  { tier: "Партнёр", tierEn: "Partner", percent: 45, from: 50 },
 ] as const;
+
+/** Имя ступени на языке страницы. */
+export function tierName(t: LoyaltyTier, locale: Locale): string {
+  return locale === "ru" ? t.tier : t.tierEn;
+}
 
 /** Ступень, на которой человек с таким числом оплативших приглашённых. */
 export function loyaltyTierFor(paidReferrals: number): LoyaltyTier {

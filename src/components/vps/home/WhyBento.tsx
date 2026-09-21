@@ -1,53 +1,60 @@
-import Icon from "@/components/pixel/Icon";
+import { Fragment } from "react";
+import Icon, { type IconName } from "@/components/pixel/Icon";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { DEVICE_LIMIT, PLAN_SPEED, formatRub } from "@/lib/plans";
 import { TRAFFIC_ENTRY_RUB } from "@/lib/traffic-packs";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
-import { plural } from "@/lib/ru-words";
+import { dict, fill } from "@/i18n";
+import { pluralize } from "@/i18n/plural";
+import type { Locale } from "@/lib/locale";
 
 /**
  * Бенто «Почему Atlas Secure VPS» — шесть плиток, числа только из
  * src/lib. Появление — `.v-reveal`, приподнимание под курсором —
  * `.v-lift` (оба приёма уже есть в vps.css, раздел 13a).
+ *
+ * Плитка описана здесь тремя вещами, которые от языка не зависят:
+ * значок, оформление и крупное число под текстом. Заголовок и строка
+ * под ним — из словаря, по тому же месту в списке.
  */
-export default function WhyBento() {
+const TILES: { icon: IconName; tone: string }[] = [
+  { icon: "globe", tone: " v-tile-blue" },
+  { icon: "devices", tone: "" },
+  { icon: "bolt", tone: " v-tile-dark" },
+  { icon: "clock", tone: "" },
+  { icon: "bag", tone: "" },
+  { icon: "lock", tone: " v-tile-blue" },
+];
+
+export default function WhyBento({ locale }: { locale: Locale }) {
+  const d = dict(locale);
+  const t = d.home.why;
+  // Крупная цифра под текстом плитки. У шестой её нет намеренно:
+  // шифрование числом не измеряется, а подставить туда что-нибудь
+  // ради симметрии значило бы выдумать показатель.
+  //
+  // Обёртка — Fragment, а не span: `.vh-tile-fig` это flex, и `b` со
+  // `span` обязаны остаться его ПРЯМЫМИ детьми, иначе выравнивание по
+  // базовой линии собирается в один блок.
+  const figures: (React.ReactNode | null)[] = [
+    <Fragment key="c"><b>{COUNTRY_COUNT}</b><span>{pluralize(locale, COUNTRY_COUNT, d.units.country)}</span></Fragment>,
+    <Fragment key="d"><b>{DEVICE_LIMIT}</b><span>{pluralize(locale, DEVICE_LIMIT, d.units.device)}</span></Fragment>,
+    <Fragment key="s"><b>{PLAN_SPEED.basic}–{PLAN_SPEED.plus}</b><span>{d.cards.speedUnit}</span></Fragment>,
+    <Fragment key="t"><b>{TRIAL_DAYS}</b><span>{pluralize(locale, TRIAL_DAYS, d.units.day)} {t.freeSuffix}</span></Fragment>,
+    <Fragment key="p"><b>{fill(t.fromPrice, { price: formatRub(TRAFFIC_ENTRY_RUB, locale) })}</b></Fragment>,
+    null,
+  ];
+
   return (
     <div className="v-bento vh-bento">
-      <article className="v-span-2 v-tile v-tile-blue v-lift">
-        <span className="v-tile-icon"><Icon name="globe" size={22} /></span>
-        <h3>Серверы по всему миру</h3>
-        <p>Ближайшая страна выбирается в приложении одним касанием</p>
-        <div className="vh-tile-fig"><b>{COUNTRY_COUNT}</b><span>{plural(COUNTRY_COUNT, ["страна", "страны", "стран"])}</span></div>
-      </article>
-      <article className="v-span-2 v-tile v-lift">
-        <span className="v-tile-icon"><Icon name="devices" size={22} /></span>
-        <h3>Все устройства сразу</h3>
-        <p>Телефон, ноутбук и телевизор — одной подпиской, без доплат</p>
-        <div className="vh-tile-fig"><b>{DEVICE_LIMIT}</b><span>{plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])}</span></div>
-      </article>
-      <article className="v-span-2 v-tile v-tile-dark v-lift">
-        <span className="v-tile-icon"><Icon name="bolt" size={22} /></span>
-        <h3>Высокая скорость</h3>
-        <p>Ширина канала на тарифах Basic и Plus</p>
-        <div className="vh-tile-fig"><b>{PLAN_SPEED.basic}–{PLAN_SPEED.plus}</b><span>Гбит/с</span></div>
-      </article>
-      <article className="v-span-2 v-tile v-lift">
-        <span className="v-tile-icon"><Icon name="clock" size={22} /></span>
-        <h3>Пробный доступ</h3>
-        <p>Проверьте на своих сервисах — карта не нужна</p>
-        <div className="vh-tile-fig"><b>{TRIAL_DAYS}</b><span>{plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно</span></div>
-      </article>
-      <article className="v-span-2 v-tile v-lift">
-        <span className="v-tile-icon"><Icon name="bag" size={22} /></span>
-        <h3>Пакеты трафика</h3>
-        <p>Усиленные серверы для сложных сетей — гигабайты не сгорают</p>
-        <div className="vh-tile-fig"><b>от {formatRub(TRAFFIC_ENTRY_RUB)} ₽</b></div>
-      </article>
-      <article className="v-span-2 v-tile v-tile-blue v-lift">
-        <span className="v-tile-icon"><Icon name="lock" size={22} /></span>
-        <h3>Шифрование трафика</h3>
-        <p>Закрыто на всём пути от устройства до нашего сервера</p>
-      </article>
+      {t.tiles.map((tile, i) => (
+        <article key={tile.h} className={`v-span-2 v-tile${TILES[i].tone} v-lift`}>
+          <span className="v-tile-icon"><Icon name={TILES[i].icon} size={22} /></span>
+          <h3>{tile.h}</h3>
+          <p>{tile.p}</p>
+          {figures[i] ? <div className="vh-tile-fig">{figures[i]}</div> : null}
+        </article>
+      ))}
     </div>
   );
 }

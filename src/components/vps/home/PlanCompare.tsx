@@ -1,5 +1,8 @@
-import { PLANS, PLAN_CONTENT, PLAN_SPEED, DEVICE_LIMIT, formatRub } from "@/lib/plans";
+import { PLANS, PLAN_SPEED, DEVICE_LIMIT, formatRub, planContent } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import type { Locale } from "@/lib/locale";
 
 /**
  * «Basic или Plus» — короткая таблица выбора под карточками сроков.
@@ -8,47 +11,48 @@ import { COUNTRY_COUNT } from "@/lib/locations";
  * «подумать». Шесть строк отвечают на единственный вопрос, который он
  * себе задаёт: «мне-то какой?» Числа — из `src/lib/plans.ts`.
  */
-const ROWS: { label: string; basic: string; plus: string }[] = [
-  { label: "Кому", basic: "Видео, соцсети, работа, учёба", plus: "Игры, стримы, созвоны, тяжёлые загрузки" },
-  { label: "Ширина канала", basic: `${PLAN_SPEED.basic} Гбит/с`, plus: `${PLAN_SPEED.plus} Гбит/с — приоритет` },
-  { label: "Страны", basic: `Все ${COUNTRY_COUNT}`, plus: `Все ${COUNTRY_COUNT} + выделенные серверы` },
-  { label: "Устройства", basic: `До ${DEVICE_LIMIT}`, plus: `До ${DEVICE_LIMIT}` },
-  { label: "Резервные каналы", basic: "—", plus: "Есть: доступ работает всегда" },
-  { label: "Цена от", basic: `${formatRub(PLANS.basic[1])} ₽`, plus: `${formatRub(PLANS.plus[1])} ₽` },
-];
+export default function PlanCompare({ locale }: { locale: Locale }) {
+  const d = dict(locale);
+  const c = planContent(locale);
+  const names = { a: c.basic.name, b: c.plus.name };
+  const vars = {
+    ...names,
+    basicSpeed: PLAN_SPEED.basic,
+    plusSpeed: PLAN_SPEED.plus,
+    countries: count(locale, COUNTRY_COUNT, d.units.country),
+    devices: count(locale, DEVICE_LIMIT, d.units.device),
+    basicPrice: formatRub(PLANS.basic[1], locale),
+    plusPrice: formatRub(PLANS.plus[1], locale),
+  };
 
-export default function PlanCompare() {
   return (
     <div className="vh-cmp">
       <table className="vh-cmp-table">
-        <caption className="v-sr">Сравнение тарифов {PLAN_CONTENT.basic.name} и {PLAN_CONTENT.plus.name}</caption>
+        <caption className="v-sr">{fill(d.compare.caption, names)}</caption>
         <thead>
           <tr>
-            <th scope="col"><span className="v-sr">Свойство</span></th>
+            <th scope="col"><span className="v-sr">{d.compare.property}</span></th>
             <th scope="col">
-              <b>{PLAN_CONTENT.basic.name}</b>
-              <span>{PLAN_CONTENT.basic.tagline}</span>
+              <b>{c.basic.name}</b>
+              <span>{c.basic.tagline}</span>
             </th>
             <th scope="col" className="vh-cmp-hot">
-              <b>{PLAN_CONTENT.plus.name}</b>
-              <span>{PLAN_CONTENT.plus.tagline}</span>
+              <b>{c.plus.name}</b>
+              <span>{c.plus.tagline}</span>
             </th>
           </tr>
         </thead>
         <tbody>
-          {ROWS.map((r) => (
+          {d.compare.rows.map((r) => (
             <tr key={r.label}>
               <th scope="row">{r.label}</th>
-              <td>{r.basic}</td>
-              <td className="vh-cmp-hot">{r.plus}</td>
+              <td>{fill(r.basic, vars)}</td>
+              <td className="vh-cmp-hot">{fill(r.plus, vars)}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="v-car-note">
-        Не уверены — начните с {PLAN_CONTENT.basic.name}: пробные дни одинаковые для обоих тарифов, а выбрать вы
-        успеете при первой оплате.
-      </p>
+      <p className="v-car-note">{fill(d.compare.note, names)}</p>
     </div>
   );
 }

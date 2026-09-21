@@ -9,6 +9,8 @@
  * Значения ниже — рубли за весь период (не за месяц).
  */
 
+import type { Locale } from "./locale";
+
 export const PERIODS = [1, 3, 6, 12] as const;
 export type Period = (typeof PERIODS)[number];
 export type PlanId = "basic" | "plus";
@@ -36,6 +38,29 @@ export const PERIOD_LABEL: Record<Period, { full: string; short: string; accusat
   12: { full: "12 месяцев", short: "12 мес", accusative: "год" },
 };
 
+/**
+ * Английские подписи сроков.
+ *
+ * ПОЧЕМУ ЗДЕСЬ, А НЕ В СЛОВАРЕ. Подпись срока неотделима от самого
+ * срока: добавится период — его придётся назвать обоими языками в
+ * одном месте, иначе один из них забудут. Тип общий с русским
+ * (`typeof PERIOD_LABEL`), поэтому забытый ключ роняет сборку ровно
+ * так же, как в словарях.
+ *
+ * `accusative` в английском не склоняется — это та же форма, что
+ * `full`; поле оставлено ради общей формы записи.
+ */
+const PERIOD_LABEL_EN: typeof PERIOD_LABEL = {
+  1: { full: "1 month", short: "1 mo", accusative: "1 month" },
+  3: { full: "3 months", short: "3 mo", accusative: "3 months" },
+  6: { full: "6 months", short: "6 mo", accusative: "6 months" },
+  12: { full: "12 months", short: "12 mo", accusative: "a year" },
+};
+
+export function periodLabel(locale: Locale): typeof PERIOD_LABEL {
+  return locale === "ru" ? PERIOD_LABEL : PERIOD_LABEL_EN;
+}
+
 /** Цена за месяц при выбранном периоде — то, что видит покупатель крупно. */
 export function pricePerMonth(plan: PlanId, period: Period): number {
   return Math.round(PLANS[plan][period] / period);
@@ -53,8 +78,22 @@ export function discountPercent(plan: PlanId, period: Period): number {
   return Math.round((savings(plan, period) / base) * 100);
 }
 
-export function formatRub(n: number): string {
-  return n.toLocaleString("ru-RU");
+export function formatRub(n: number, locale: Locale = "ru"): string {
+  return n.toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
+}
+
+/**
+ * Дробное число на языке страницы: «6,6» против «6.6».
+ *
+ * Десятичная запятая в английском тексте читается как разделитель
+ * разрядов — «6,6 ₽» выглядит как шестьдесят шесть. Поэтому цена за
+ * день и за гигабайт форматируются отдельно от целых сумм.
+ */
+export function formatDecimal(n: number, locale: Locale, digits = 1): string {
+  return n.toLocaleString(locale === "ru" ? "ru-RU" : "en-US", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
 /**
@@ -102,6 +141,38 @@ export const PLAN_CONTENT: Record<PlanId, { name: string; tagline: string; featu
     ],
   },
 };
+
+/**
+ * То же по-английски. Имена тарифов не переводятся: Basic и Plus —
+ * это имена, а не слова. Скорость внутри строки повторяет PLAN_SPEED
+ * ниже; менять её надо в обоих языках сразу, поэтому они рядом.
+ */
+const PLAN_CONTENT_EN: typeof PLAN_CONTENT = {
+  basic: {
+    name: "Basic",
+    tagline: "A steady connection for everyday internet",
+    features: [
+      "Carries 25 Gbit/s",
+      "Strong encryption",
+      `Up to ${DEVICE_LIMIT} devices`,
+      "The site is always reachable",
+    ],
+  },
+  plus: {
+    name: "Plus",
+    tagline: "A priority channel for games, streaming and calls",
+    features: [
+      "Carries 75 Gbit/s — priority for games and streaming",
+      "Dedicated servers in several countries",
+      "Backup routes — access keeps working",
+      "Everything in Basic",
+    ],
+  },
+};
+
+export function planContent(locale: Locale): typeof PLAN_CONTENT {
+  return locale === "ru" ? PLAN_CONTENT : PLAN_CONTENT_EN;
+}
 
 /**
  * Проверка значений, пришедших из тела запроса.

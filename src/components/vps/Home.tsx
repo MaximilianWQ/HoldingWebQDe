@@ -11,10 +11,17 @@ import ProofBar from "./home/ProofBar";
 import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
-import { BRAND, TRIAL } from "./links";
-import { DEVICE_LIMIT, PLANS, PLAN_CONTENT, formatRub, pricePerMonth } from "@/lib/plans";
+import { BRAND, SUPPORT_TG } from "./links";
+import { DEVICE_LIMIT, PLANS, formatRub, planContent, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRAFFIC_ENTRY_RUB, TRAFFIC_PACKS } from "@/lib/traffic-packs";
+import { TRIAL_DAYS } from "@/lib/brand-facts";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { rich } from "@/i18n/rich";
+import { getLocale } from "@/lib/locale-server";
+import { localeHref } from "@/lib/locale";
+import { POPULAR } from "./PlanCards";
 import "@/app/home-vps.css";
 
 /**
@@ -53,9 +60,38 @@ import "@/app/home-vps.css";
  *
  * Все числа — из `src/lib`; на витрине нет слова «VPN» и инженерных
  * терминов (CLAUDE.md, «Два языка продукта»).
+ *
+ * Текст — из словаря по языку запроса (`home.*`). Числа в него не
+ * пишутся: страница подставляет их из `src/lib` через `fill()`, чтобы
+ * у двух языков не разъехались цены и страны.
  */
 export default async function Home({ referralCode }: { referralCode?: string }) {
-  const enter = referralCode ? `/auth?ref=${encodeURIComponent(referralCode)}` : "/auth";
+  const locale = await getLocale();
+  const d = dict(locale);
+  const t = d.home;
+  const to = (href: string) => localeHref(href, locale);
+  const enter = to(referralCode ? `/auth?ref=${encodeURIComponent(referralCode)}` : "/auth");
+  const plans = planContent(locale);
+
+  // Числа, которые встречаются в нескольких строках сразу. Считаются
+  // один раз и подставляются во все — иначе «19 стран» на одном экране
+  // и «19 странах» на другом начинают жить порознь.
+  const trial = count(locale, TRIAL_DAYS, d.units.day);
+  const vars = {
+    trial,
+    brand: BRAND,
+    countries: count(locale, COUNTRY_COUNT, d.units.country),
+    countriesIn: count(locale, COUNTRY_COUNT, d.units.countryIn),
+    devices: count(locale, DEVICE_LIMIT, d.units.device),
+    month: formatRub(PLANS.basic[1], locale),
+    best: formatRub(pricePerMonth("basic", POPULAR), locale),
+    tg: SUPPORT_TG.handle,
+    tgHref: SUPPORT_TG.href,
+    a: plans.basic.name,
+    b: plans.plus.name,
+  };
+  const faq = t.faq.items.map((f) => ({ q: f.q, a: rich(fill(f.a, vars), locale) }));
+
   return (
     <VShell>
       {/* 01 · первый экран */}
@@ -63,14 +99,13 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         <div className="v-wrap vh-hero">
           <div className="vh-hero-in">
             <p className="vh-hero-kicker">
-              <span className="v-live" aria-hidden /> Серверы в {COUNTRY_COUNT} странах · пробный доступ {TRIAL}
+              <span className="v-live" aria-hidden />{" "}
+              {fill(t.hero.kicker, { ...vars, countries: vars.countriesIn })}
             </p>
             <h1 id="v-hero" className="v-h1">
-              Любимые сервисы <span className="v-accent">на максимум</span>
+              {t.hero.title} <span className="v-accent">{t.hero.titleAccent}</span>
             </h1>
-            <p className="v-lead">
-              Видео без пауз, игры без рывков, сайты открываются сразу — на телефоне, компьютере и телевизоре.
-            </p>
+            <p className="v-lead">{t.hero.lead}</p>
             {/* Знаки сервисов по бокам заголовка (владелец, 19.09.2026).
                 Только знаки, без подписей; право на использование
                 подтверждено владельцем — COMPLIANCE-CHECK.md § 1е. */}
@@ -80,12 +115,14 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
                 выравнивание само по себе на конверсию почти не влияет —
                 влияет то, видно ли действие без прокрутки. */}
             <div className="v-actions">
-              <Link href={enter} prefetch={false} className="v-btn v-btn-primary">Попробовать {TRIAL} бесплатно</Link>
-              <Link href="/pricing" className="v-btn v-btn-soft">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
+              <Link href={enter} prefetch={false} className="v-btn v-btn-primary">
+                {fill(d.common.tryFree, vars)}
+              </Link>
+              <Link href={to("/pricing")} className="v-btn v-btn-soft">
+                {fill(d.common.pricingFrom, { price: vars.month })}
+              </Link>
             </div>
-            <p className="vh-hero-note">
-              Карта не нужна. Вход по почте, ключ приходит сразу — подключение занимает минуту.
-            </p>
+            <p className="vh-hero-note">{t.hero.note}</p>
           </div>
 
           {/* Кадра с ноутбуком и телефоном здесь нет: снят 19.09.2026
@@ -94,48 +131,45 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               и public/media/hero/stage-*.v3.webp, — так что вернуть его
               можно одной строкой, не пересчитывая сцену. */}
 
-          <StoreBadges />
+          <StoreBadges availableIn={d.store.availableIn} />
         </div>
       </section>
 
       {/* 02 · возражения, которые закрывают страницу */}
-      <section className="v-section v-reveal" aria-label="Условия пробного доступа">
-        <div className="v-wrap"><ProofBar /></div>
+      <section className="v-section v-reveal" aria-label={t.proofLabel}>
+        <div className="v-wrap"><ProofBar locale={locale} /></div>
       </section>
 
       {/* 03 · бегущая строка стран */}
-      <section className="v-section v-reveal" aria-label="Страны сети">
-        <div className="v-wrap"><CountryMarquee /></div>
+      <section className="v-section v-reveal" aria-label={t.countries.section}>
+        <div className="v-wrap"><CountryMarquee locale={locale} /></div>
       </section>
 
       {/* 04 · почему Atlas Secure VPS */}
       <section className="v-section v-center v-reveal" aria-labelledby="v-why">
         <div className="v-wrap">
           <h2 id="v-why" className="v-h2">
-            Всё нужное <span className="v-accent">в одной подписке</span>
+            {t.why.title} <span className="v-accent">{t.why.titleAccent}</span>
           </h2>
-          <p className="v-lead vh-why-lead">
-            Скорость, страны и устройства входят в любой тариф — доплачивать за «расширения» не придётся.
-          </p>
-          <WhyBento />
+          <p className="v-lead vh-why-lead">{t.why.lead}</p>
+          <WhyBento locale={locale} />
         </div>
       </section>
 
       {/* 05 · тарифы */}
       <section className="v-section v-center v-reveal" id="tariffs" aria-labelledby="v-plans">
         <div className="v-wrap">
-          <h2 id="v-plans" className="v-h2">Чем длиннее срок, тем дешевле месяц</h2>
-          <p className="v-lead">
-            Мы советуем полгода: {formatRub(pricePerMonth("basic", 6))} ₽ в месяц вместо{" "}
-            {formatRub(PLANS.basic[1])} ₽ — и это не год вперёд. Пробные {TRIAL} входят в оба тарифа.
-          </p>
-          <PlanCards />
-          <PlanCompare />
+          <h2 id="v-plans" className="v-h2">{t.plans.title}</h2>
+          <p className="v-lead">{fill(t.plans.lead, vars)}</p>
+          <PlanCards locale={locale} t={d.cards} units={d.units} />
+          <PlanCompare locale={locale} />
           <div className="v-actions-col vh-plans-foot">
             <Link href={enter} prefetch={false} className="v-btn v-btn-primary v-btn-block">
-              Сначала попробовать {TRIAL} бесплатно
+              {fill(t.plans.tryFirst, vars)}
             </Link>
-            <Link href="/auth" prefetch={false} className="v-link vh-plans-login">Уже есть аккаунт — войти</Link>
+            <Link href={to("/auth")} prefetch={false} className="v-link vh-plans-login">
+              {t.plans.haveAccount}
+            </Link>
           </div>
         </div>
       </section>
@@ -144,26 +178,28 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
       <section className="v-section v-center v-reveal" id="traffic" aria-labelledby="v-traffic">
         <div className="v-wrap">
           <div className="v-stickers" aria-hidden>
-            <span className="v-sticker v-sticker-a"><small>NEW</small>новинка</span>
-            <span className="v-sticker v-sticker-b">ГБ</span>
+            <span className="v-sticker v-sticker-a"><small>NEW</small>{t.traffic.stickerNew}</span>
+            <span className="v-sticker v-sticker-b">{t.traffic.stickerGb}</span>
           </div>
-          <h2 id="v-traffic" className="v-h2">Когда обычного подключения мало</h2>
+          <h2 id="v-traffic" className="v-h2">{t.traffic.title}</h2>
           <p className="v-lead">
-            Пакеты трафика — отдельный ключ на усиленные серверы для сложных сетей: корпоративный Wi-Fi,
-            гостиница, роуминг. От {formatRub(TRAFFIC_ENTRY_RUB)} ₽, гигабайты не сгорают и складываются.
+            {fill(t.traffic.lead, { price: formatRub(TRAFFIC_ENTRY_RUB, locale) })}
           </p>
           {/* На главной — короткая подборка, а не все одиннадцать
               пакетов: длинная лента стоит ровно там, где человек
               решает, и листать её вместо решения он не будет. Места в
               лестнице выгоды считаются по полному списку, поэтому
               «лучшая цена за ГБ» не переезжает из-за подборки. */}
-          <TrafficCards ids={["gb15", "gb100", "gb300", "gb600"]} />
+          <TrafficCards locale={locale} ids={["gb15", "gb100", "gb300", "gb600"]} />
           <div className="v-actions">
-            <Link href="/pricing#traffic" className="v-btn v-btn-soft">
-              Все {TRAFFIC_PACKS.length} пакетов — до {formatRub(TRAFFIC_PACKS[TRAFFIC_PACKS.length - 1].gb)} ГБ
+            <Link href={to("/pricing#traffic")} className="v-btn v-btn-soft">
+              {fill(t.traffic.all, {
+                count: TRAFFIC_PACKS.length,
+                max: formatRub(TRAFFIC_PACKS[TRAFFIC_PACKS.length - 1].gb, locale),
+              })}
             </Link>
           </div>
-          <p className="v-car-note">Пакет работает рядом с подпиской и не заменяет её.</p>
+          <p className="v-car-note">{t.traffic.note}</p>
         </div>
       </section>
 
@@ -171,7 +207,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
       <section className="v-section v-reveal" aria-labelledby="v-ref">
         <div className="v-wrap">
           <div className="v-panel vh-ref-panel">
-            <Referral enter={enter} />
+            <Referral enter={enter} locale={locale} />
           </div>
         </div>
       </section>
@@ -179,9 +215,9 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
       {/* 08 · частые вопросы */}
       <section className="v-section v-center v-reveal" aria-labelledby="v-faq">
         <div className="v-wrap v-narrow">
-          <h2 id="v-faq" className="v-h2">Вопросы, которые задают перед покупкой</h2>
-          <p className="v-lead">Если вашего здесь нет — напишите в поддержку, ответим до оплаты.</p>
-          <FaqAccordion />
+          <h2 id="v-faq" className="v-h2">{t.faq.title}</h2>
+          <p className="v-lead">{t.faq.lead}</p>
+          <FaqAccordion items={faq} />
         </div>
       </section>
 
@@ -189,15 +225,12 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
       <section className="v-section v-reveal" aria-labelledby="v-final">
         <div className="v-wrap v-narrow">
           <div className="v-panel vh-cta">
-            <h2 id="v-final" className="v-h2">{TRIAL} ничего не стоят</h2>
-            <p>
-              Проверьте {BRAND} на своих сервисах: без карты, без автосписаний, до {DEVICE_LIMIT} устройств сразу.
-              Не подойдёт — просто не продлевайте.
-            </p>
+            <h2 id="v-final" className="v-h2">{fill(t.final.title, vars)}</h2>
+            <p>{fill(t.final.text, vars)}</p>
             <div className="v-actions">
-              <Link href={enter} prefetch={false} className="v-btn v-btn-white">Начать бесплатно</Link>
-              <Link href="/pricing" className="v-btn v-btn-ghost">
-                Посмотреть тарифы · {PLAN_CONTENT.basic.name} и {PLAN_CONTENT.plus.name}
+              <Link href={enter} prefetch={false} className="v-btn v-btn-white">{t.final.start}</Link>
+              <Link href={to("/pricing")} className="v-btn v-btn-ghost">
+                {fill(t.final.seePlans, vars)}
               </Link>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import DashboardView from "./DashboardView";
+import { dict } from "@/i18n";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /dashboard — серверная обёртка кабинета: метаданные и оболочка
@@ -15,10 +17,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const locale = await getLocale();
+  const d = dict(locale);
   return (
     <VShell work account="member">
-      <DashboardView />
+      <DashboardView locale={locale} cards={d.cards} units={d.units} />
     </VShell>
   );
 }

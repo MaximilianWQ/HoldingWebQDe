@@ -2,7 +2,9 @@ import Link from "next/link";
 import Carousel from "./Carousel";
 import Icon from "@/components/pixel/Icon";
 import { TRAFFIC_PACKS } from "@/lib/traffic-packs";
-import { formatRub } from "@/lib/plans";
+import { formatRub, formatDecimal } from "@/lib/plans";
+import { dict, fill } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 
 /**
  * Пакеты трафика.
@@ -27,7 +29,17 @@ import { formatRub } from "@/lib/plans";
  */
 const SUPER_RANKS = 3;
 
-export default function TrafficCards({ cta = "Купить", ids }: { cta?: string; ids?: string[] }) {
+export default function TrafficCards({
+  locale,
+  cta,
+  ids,
+}: {
+  locale: Locale;
+  cta?: string;
+  ids?: string[];
+}) {
+  const t = dict(locale).cards;
+  const button = cta ?? t.trafficBuy;
   const perGb = (p: (typeof TRAFFIC_PACKS)[number]) => p.priceRub / p.gb;
   const base = perGb(TRAFFIC_PACKS[0]);
   const ranked = [...TRAFFIC_PACKS].sort((a, b) => perGb(a) - perGb(b));
@@ -35,42 +47,42 @@ export default function TrafficCards({ cta = "Купить", ids }: { cta?: stri
   const shown = ids ? TRAFFIC_PACKS.filter((p) => ids.includes(p.id)) : TRAFFIC_PACKS;
 
   return (
-    <Carousel label="Пакеты трафика">
+    <Carousel label={t.trafficLabel}>
       {shown.map((p, i) => {
         const gbPrice = perGb(p);
         const off = Math.round((1 - gbPrice / base) * 100);
         const rank = rankOf(p.id);
         const isBest = rank === 0;
         const tag =
-          isBest ? { text: "Лучшая цена за ГБ", tone: "v-badge-yellow v-dcard-tag-hero" }
-          : i === 0 && p.id === TRAFFIC_PACKS[0].id ? { text: "Для старта", tone: "v-badge-soft" }
-          : rank <= SUPER_RANKS ? { text: `Супервыгодно · −${off}%`, tone: "v-badge-solid-blue" }
-          : off > 0 ? { text: `Выгодно · −${off}%`, tone: "v-badge-blue" }
-          : { text: "Пакет", tone: "v-badge-soft" };
+          isBest ? { text: t.tagBestGb, tone: "v-badge-yellow v-dcard-tag-hero" }
+          : i === 0 && p.id === TRAFFIC_PACKS[0].id ? { text: t.tagStart, tone: "v-badge-soft" }
+          : rank <= SUPER_RANKS ? { text: fill(t.tagSuper, { off }), tone: "v-badge-solid-blue" }
+          : off > 0 ? { text: fill(t.tagGood, { off }), tone: "v-badge-blue" }
+          : { text: t.tagPack, tone: "v-badge-soft" };
 
         return (
-          <article key={p.id} className={`v-dcard${isBest ? " v-dcard-pop" : ""}`} aria-label={`${p.gb} ГБ за ${p.priceRub} ₽`}>
+          <article key={p.id} className={`v-dcard${isBest ? " v-dcard-pop" : ""}`} aria-label={fill(t.trafficAria, { gb: p.gb, price: p.priceRub })}>
             <span className={`v-badge v-dcard-tag ${tag.tone}`}>
               {isBest ? <Icon name="bolt" size={14} /> : null}
               {tag.text}
             </span>
 
-            <h3 className="v-dcard-title">{formatRub(p.gb)} ГБ трафика</h3>
+            <h3 className="v-dcard-title">{fill(t.trafficTitle, { gb: formatRub(p.gb, locale) })}</h3>
 
             <p className="v-dcard-price">
-              <b>{formatRub(p.priceRub)} ₽</b>
-              <span>разово</span>
+              <b>{formatRub(p.priceRub, locale)} ₽</b>
+              <span>{t.trafficOnce}</span>
             </p>
 
             <p className="v-dcard-sum">
-              {gbPrice.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽ за гигабайт
-              {off > 0 ? ` · на ${off}% дешевле стартового пакета` : ""}
+              {fill(t.trafficPerGb, { price: formatDecimal(gbPrice, locale, 2) })}
+              {off > 0 ? fill(t.trafficCheaper, { off }) : ""}
             </p>
 
             <ul className="v-checks">
-              <li>Гигабайты без срока — не сгорают</li>
-              <li>Пакеты складываются друг с другом</li>
-              <li>Усиленные серверы для сложных сетей</li>
+              {t.trafficChecks.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
             </ul>
 
             <Link
@@ -78,7 +90,7 @@ export default function TrafficCards({ cta = "Купить", ids }: { cta?: stri
               prefetch={false}
               className={`v-btn v-btn-block ${isBest ? "v-btn-white" : "v-btn-primary"}`}
             >
-              {cta} · {formatRub(p.gb)} ГБ
+              {button} · {formatRub(p.gb, locale)} {t.stickerGbShort}
             </Link>
           </article>
         );

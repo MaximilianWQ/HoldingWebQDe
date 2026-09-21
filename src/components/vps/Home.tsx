@@ -8,6 +8,7 @@ import CountryMarquee from "./home/CountryMarquee";
 import WhyBento from "./home/WhyBento";
 import FaqAccordion from "./home/FaqAccordion";
 import ProofBar from "./home/ProofBar";
+import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
 import { BRAND, SUPPORT_TG } from "./links";
@@ -22,7 +23,6 @@ import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import { POPULAR } from "./PlanCards";
 import "@/app/home-vps.css";
-import "@/app/home-clay.css";
 
 /**
  * Главная Atlas Secure VPS.
@@ -92,85 +92,44 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
   };
   const faq = t.faq.items.map((f) => ({ q: f.q, a: rich(fill(f.a, vars), locale) }));
 
-  // Полоса фактов под плитой первого экрана. Четыре капсулы — ровно
-  // те числа, которые человек ищет до прокрутки: сколько стран,
-  // сколько устройств, сколько стоит и сколько бесплатно. Все из
-  // src/lib, ни одно не написано строкой.
-  const facts = [
-    vars.countries,
-    vars.devices,
-    fill(t.why.fromPrice, { price: vars.month }),
-    `${trial} ${t.why.freeSuffix}`,
-  ];
-
   return (
     <VShell>
-      {/* 01 · первый экран — плита и предмет.
-
-          ПЕРЕСОБРАН 21.09.2026 по разбору владельца: он прислал два
-          разворота Яндекс Практикума — «рендеры и сайт в таком стиле
-          надо». Приёмы и то, что у них НЕ взято, разобраны в шапке
-          `home-clay.css`; сам предмет собран в
-          `design/blender/clay_build.py`.
-
-          Текст остался прежним — переписывать его разбор не просили.
-          Ушли две вещи: кикер с бегущей точкой (его работу теперь
-          делает полоса фактов под плитой, и числа в ней те же) и
-          знаки сервисов по бокам заголовка — на плите они спорили с
-          предметом за внимание. */}
-      <section className="v-section vh-hero-sec" aria-labelledby="v-hero">
-        <div className="v-wrap">
-          <div className="hc-plate">
-            <div className="hc-grid">
-              <div className="hc-copy">
-                <h1 id="v-hero" className="hc-h1">
-                  {t.hero.title} <span className="v-accent">{t.hero.titleAccent}</span>
-                </h1>
-                <p className="hc-lead">{t.hero.lead}</p>
-                {/* Кнопка стоит ДО предмета. Разбор 18.09.2026: кадр
-                    высотой в пол-экрана уводил её под сгиб, а на
-                    конверсию влияет не выравнивание, а то, видно ли
-                    действие без прокрутки. */}
-                <div className="hc-actions">
-                  <Link href={enter} prefetch={false} className="v-btn v-btn-primary">
-                    {fill(d.common.tryFree, vars)}
-                  </Link>
-                  <Link href={to("/pricing")} className="v-btn v-btn-soft">
-                    {fill(d.common.pricingFrom, { price: vars.month })}
-                  </Link>
-                </div>
-                <p className="hc-note">{t.hero.note}</p>
-              </div>
-
-              {/* Предмет: матовый знак Atlas и два спутника. Формы
-                  стрелок — один в один из BrandMark, то есть из того
-                  же источника, что иконка приложения. Ширины кадра
-                  две: широкий экран и телефон. */}
-              <figure className="hc-object">
-                <img
-                  src="/media/clay/hero-1400.webp"
-                  srcSet="/media/clay/hero-900.webp 900w, /media/clay/hero-1400.webp 1400w"
-                  sizes="(min-width: 900px) 44vw, 90vw"
-                  width={1400}
-                  height={1213}
-                  alt=""
-                  /* Кадр декоративный: всё, что он сообщает, сказано
-                     заголовком и полосой фактов под плитой. Пустой alt
-                     — чтобы экранный диктор не читал его дважды. */
-                  fetchPriority="high"
-                  decoding="async"
-                />
-              </figure>
+      {/* 01 · первый экран */}
+      <section className="v-section v-center v-glow vh-hero-sec" aria-labelledby="v-hero">
+        <div className="v-wrap vh-hero">
+          <div className="vh-hero-in">
+            <p className="vh-hero-kicker">
+              <span className="v-live" aria-hidden />{" "}
+              {fill(t.hero.kicker, { ...vars, countries: vars.countriesIn })}
+            </p>
+            <h1 id="v-hero" className="v-h1">
+              {t.hero.title} <span className="v-accent">{t.hero.titleAccent}</span>
+            </h1>
+            <p className="v-lead">{t.hero.lead}</p>
+            {/* Знаки сервисов по бокам заголовка (владелец, 19.09.2026).
+                Только знаки, без подписей; право на использование
+                подтверждено владельцем — COMPLIANCE-CHECK.md § 1е. */}
+            <ServiceMarks />
+            {/* Кнопка стоит ДО кадра. Разбор 18.09.2026: в макете по
+                центру кадр высотой в пол-экрана уводил её под сгиб, а
+                выравнивание само по себе на конверсию почти не влияет —
+                влияет то, видно ли действие без прокрутки. */}
+            <div className="v-actions">
+              <Link href={enter} prefetch={false} className="v-btn v-btn-primary">
+                {fill(d.common.tryFree, vars)}
+              </Link>
+              <Link href={to("/pricing")} className="v-btn v-btn-soft">
+                {fill(d.common.pricingFrom, { price: vars.month })}
+              </Link>
             </div>
+            <p className="vh-hero-note">{t.hero.note}</p>
           </div>
 
-          {/* Полоса фактов под плитой. Числа считаются из src/lib —
-              ни одно не написано здесь руками. */}
-          <ul className="hc-facts">
-            {facts.map((f) => (
-              <li key={f} className="hc-fact">{f}</li>
-            ))}
-          </ul>
+          {/* Кадра с ноутбуком и телефоном здесь нет: снят 19.09.2026
+              по решению владельца («сами рендеры не к месту»). Сам
+              рендер и его сборка остались — design/blender/hero_build.py
+              и public/media/hero/stage-*.v3.webp, — так что вернуть его
+              можно одной строкой, не пересчитывая сцену. */}
 
           <StoreBadges availableIn={d.store.availableIn} />
         </div>

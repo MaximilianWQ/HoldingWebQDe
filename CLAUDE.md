@@ -25,7 +25,6 @@ src/
 │       │   └── verify-code/    # POST: verify code, create user + Xray UUID, set session
 │       ├── user/
 │       │   ├── subscription/   # GET: subscription status, VPN key, referral data
-│       │   ├── devices/        # GET: supported device platforms
 │       │   └── referral/       # GET: referral statistics
 │       └── vpn/
 │           └── generate-key/   # POST: regenerate VPN key (new Xray UUID)
@@ -92,7 +91,8 @@ In-memory Maps for development. **Replace with a database for production.**
 > токены в `:root` файла `src/app/atlas.css`, гарнитура — MTS Wide из
 > `src/app/atlas-fonts.ts` (переменная на `<html>`), общий слой —
 > `globals.css` (сброс, Tailwind, `.b-sr`, `.b-skip`, `.b-top`), поля
-> форм — `px-forms.css` (только /business и /contact). Текст ниже —
+> форм — `.v-input` из `vps.css` (слой `.px-*` и файл `px-forms.css`
+> удалены 21.09.2026: их не подключала ни одна страница). Текст ниже —
 > история решений, а не действующие правила.
 
 Единственный источник значений — блок токенов `:root` в
@@ -319,8 +319,9 @@ React нет. На грубом указателе и при `prefers-reduced-mo
 **Логотип не меняется:** формы в `src/components/pixel/BrandMark.tsx`
 взяты один в один из `src/app/icon.tsx`.
 
-**Формы** — общий слой `.px-field` / `.px-label` / `.px-input` /
-`.px-choice` в `globals.css`. Кегль поля на телефоне 16px не по
+**Формы** — общий слой `.v-field` / `.v-label` / `.v-input` в
+`vps.css` (прежний `.px-*` и файл `px-forms.css` удалены 21.09.2026:
+их не подключала ни одна страница). Кегль поля не ниже 16px не по
 эстетике: при меньшем Safari на iOS увеличивает страницу при фокусе.
 Проверка на клиенте и по каждому полю отдельно, ошибка живёт рядом со
 своим полем (`aria-describedby`, `aria-invalid`), фокус уходит на

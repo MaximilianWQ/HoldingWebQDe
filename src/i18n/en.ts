@@ -157,6 +157,92 @@ export const en: Dict = {
     step3: "Tap Add",
     step3note: "Opens with one tap, like any other app.",
   },
+  /** /install-happ — connecting in the Happ app, step by step. */
+  installHapp: {
+    kicker: "Happ · iPhone, Android, Mac, Windows · about a minute",
+    titleBefore: "Connecting in ",
+    titleAccent: "Happ",
+    titleAfter: ", step by step",
+    lead:
+      "Six things to do: copy the link in your account, paste it into the app " +
+      "and press the connect button.",
+    tourLabel:
+      "iPhone 17 Pro Max: every step in turn — copying the link in the account, " +
+      "“+” in Happ, importing from the clipboard, the subscription added, " +
+      "picking a country and connecting",
+    s1: {
+      t: "Copy your subscription link",
+      d: "In your account, open the “{key}” card and press “Copy” — the link goes to your clipboard.",
+      tip:
+        "You do not have to copy it by hand: your account also has an “Open in " +
+        "the app” button that hands the subscription to Happ itself.",
+    },
+    s2: { t: "Open Happ and press “+”", d: "The button sits at the top right of the profile list." },
+    s3: {
+      t: "Choose “Import from clipboard”",
+      d:
+        "Happ reads the link on its own. Next to it is “Scan QR code” — for when " +
+        "the link is open on another device.",
+    },
+    s4: {
+      t: "The subscription adds itself",
+      d:
+        "An Atlas Secure group appears with the list of countries and the traffic " +
+        "left. It refreshes automatically once an hour.",
+    },
+    s5: {
+      t: "Pick a country",
+      d:
+        "The first row is “Auto”: the app takes the fastest server itself. " +
+        "Or pick a country from the list.",
+    },
+    s6: {
+      t: "Press the connect button",
+      d:
+        "The first time, the system asks for permission to add a configuration — " +
+        "allow it. After that connecting takes a couple of seconds.",
+    },
+    ctaMember: "Open my account",
+    ctaGuest: "Get a subscription",
+    ctaApps: "Other apps",
+    getTitle: "Where to get Happ",
+    getLead:
+      "The app is free. The steps are the same on every system — only where you " +
+      "install it from differs.",
+    doneTitle: "Something went wrong?",
+    doneText:
+      "If nothing appeared after “Import from clipboard”, copy the link again and " +
+      "repeat the step: the app reads the clipboard and nothing else. Still stuck — " +
+      "write to support and we will connect it together.",
+    doneSupport: "Support",
+    doneAll: "All guides",
+    phone: {
+      cabinet: "Account",
+      active: "Active",
+      copy: "Copy",
+      copied: "Copied",
+      off: "Not connected",
+      on: "Connected",
+      profiles: "Profiles",
+      group: "Atlas Secure Group",
+      groupNote: "Updated today · auto-refresh every hour",
+      gb: "GB",
+      until: "Valid until {date}",
+      auto: "Auto · fastest servers",
+      unlimited: "Unlimited traffic",
+      sheetTitle: "Add a subscription",
+      sheetQr: "Scan QR code",
+      sheetManual: "Add manually",
+      sheetClipboard: "Import from clipboard",
+      sheetFile: "Import from file",
+    },
+    meta: {
+      title: "Connecting in Happ, step by step",
+      description:
+        "How to connect in the Happ app: copy the subscription link, import it " +
+        "from the clipboard, pick a country and press connect.",
+    },
+  },
   home: {
     hero: {
       kicker: "Servers in {countries} · {trial} free trial",

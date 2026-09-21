@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import { getSessionUser } from "@/lib/session";
 import InstallHappView from "./InstallHappView";
+import { dict } from "@/i18n";
 import { getLocale } from "@/lib/locale-server";
 import "./install-happ.css";
 import "./happ-phone.css";
@@ -21,17 +22,16 @@ import "./happ-phone.css";
  * у /install-ios (public/media/ios/shell.webp), экран — HTML/CSS
  * (happ-phone.css). Сюда ведёт /devices, когда выбрано приложение Happ.
  */
-export const metadata: Metadata = {
-  title: "Подключение в Happ по шагам",
-  description:
-    "Как подключиться в приложении Happ: скопировать ссылку подписки, импортировать её из буфера обмена, выбрать страну и нажать подключение.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { meta } = dict(await getLocale()).installHapp;
+  return { title: meta.title, description: meta.description };
+}
 
 export default async function InstallHappRoute() {
   const [member, locale] = await Promise.all([getSessionUser().then(Boolean), getLocale()]);
   return (
     <VShell account={member ? "member" : "guest"}>
-      <InstallHappView aud={member ? "member" : "guest"} locale={locale} />
+      <InstallHappView aud={member ? "member" : "guest"} locale={locale} t={dict(locale).installHapp} />
     </VShell>
   );
 }

@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import BrandMark from "@/components/pixel/BrandMark";
-import { MAIN_KEY, type KeyAudience } from "@/lib/key-names";
+import { mainKey, type KeyAudience } from "@/lib/key-names";
+import { fill, type Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 
 /**
  * iPhone 17 Pro Max с живым экраном для /install-happ (владелец,
@@ -21,6 +23,12 @@ import { MAIN_KEY, type KeyAudience } from "@/lib/key-names";
  *   5. Выбор сервера — Vienna Premium (третья строка).
  *   6. Подключение — тумблер, «Подключено», таймер сессии.
  *
+ * Подписи внутри экрана приходят пропсом `t` (словарь клиентский
+ * компонент не импортирует — уехали бы оба языка). Числа в мокапе
+ * выдуманы и остаются здесь: это не факты о продукте, а декорация
+ * нарисованного приложения. Исключение — дата: её формат у языков
+ * разный, поэтому она тоже рядом, в `UNTIL`.
+ *
  * Иконки — только общий набор src/components/pixel/Icon.tsx (масштаб —
  * CSS-классы happ-phone.css, а не проп size, тот же приём, что и у
  * прочих мокапов интерфейса на сайте). Своих логотипов Happ нет —
@@ -28,6 +36,11 @@ import { MAIN_KEY, type KeyAudience } from "@/lib/key-names";
  */
 
 type Scene = 1 | 2 | 3 | 4 | 5 | 6;
+type T = Dict["installHapp"]["phone"];
+
+/** Выдуманные показания мокапа: остаток трафика и срок ключа. */
+const GB = 398;
+const UNTIL: Record<Locale, string> = { ru: "02.06.2048", en: "2 June 2048" };
 
 const DUR: Record<Scene, number> = { 1: 4200, 2: 3400, 3: 4400, 4: 3200, 5: 3800, 6: 4200 };
 const CUT = 0.88;
@@ -63,20 +76,21 @@ function Status() {
  * Подпись ключа — из общего источника src/lib/key-names.ts: гостю
  * «Основной», вошедшему «Основной VPN» (правило витрины — без «VPN»).
  */
-function Site({ aud }: { aud: KeyAudience }) {
+function Site({ aud, locale, t }: { aud: KeyAudience; locale: Locale; t: T }) {
+  const key = mainKey(aud, locale);
   return (
     <div className="hp-l hp-site">
       <Status />
       <div className="hp-site-head">
         <span className="hp-site-mark"><BrandMark size={18} /></span>
-        <b>Кабинет</b>
+        <b>{t.cabinet}</b>
       </div>
       <div className="hp-card">
         <div className="hp-card-title">
-          <b>{MAIN_KEY[aud].title}</b>
-          <span className="hp-card-badge">Активна</span>
+          <b>{key.title}</b>
+          <span className="hp-card-badge">{t.active}</span>
         </div>
-        <p className="hp-card-sub">{MAIN_KEY[aud].text}</p>
+        <p className="hp-card-sub">{key.text}</p>
         <div className="hp-strip">
           {/* Заглушка вместо настоящего адреса подписки: свой домен в
               рендерах не показываем (владелец, 17.09.2026). */}
@@ -88,28 +102,29 @@ function Site({ aud }: { aud: KeyAudience }) {
       </div>
       <button type="button" className="hp-btn" tabIndex={-1} aria-hidden>
         <G name="copy" />
-        Скопировать
+        {t.copy}
       </button>
       <div className="hp-toast">
         <G name="check" />
-        Скопировано
+        {t.copied}
       </div>
       <span className="hp-ind" />
     </div>
   );
 }
 
-const SERVERS: { row: number; code: string; name: string; note: string }[] = [
-  { row: 0, code: "AUTO", name: "Авто · самые быстрые", note: "Безлимитный трафик" },
-  { row: 1, code: "NL", name: "Amsterdam Elite", note: "Безлимитный трафик" },
-  { row: 2, code: "AT", name: "Vienna Premium", note: "Безлимитный трафик" },
-  { row: 3, code: "EE", name: "Estonia", note: "Безлимитный трафик" },
-  { row: 4, code: "NL", name: "NL Elite", note: "Безлимитный трафик" },
-  { row: 5, code: "GB", name: "London Elite", note: "Безлимитный трафик" },
+/** Имя первой строки переводится («Авто»), остальные — имена серверов. */
+const SERVERS: { row: number; code: string; name?: string }[] = [
+  { row: 0, code: "AUTO" },
+  { row: 1, code: "NL", name: "Amsterdam Elite" },
+  { row: 2, code: "AT", name: "Vienna Premium" },
+  { row: 3, code: "EE", name: "Estonia" },
+  { row: 4, code: "NL", name: "NL Elite" },
+  { row: 5, code: "GB", name: "London Elite" },
 ];
 
 /** Приложение Happ — тумблер, шапка групп, трафик, список серверов, вкладки. */
-function Happ({ empty }: { empty: boolean }) {
+function Happ({ empty, locale, t }: { empty: boolean; locale: Locale; t: T }) {
   return (
     <div className="hp-l hp-app">
       <Status />
@@ -119,22 +134,22 @@ function Happ({ empty }: { empty: boolean }) {
         <span className="hp-toggle-on" aria-hidden><G name="bolt" /></span>
       </div>
       <p className="hp-status">
-        <span className="hp-status-off">Не подключено</span>
-        <span className="hp-status-on">Подключено</span>
+        <span className="hp-status-off">{t.off}</span>
+        <span className="hp-status-on">{t.on}</span>
       </p>
 
       <div className="hp-head">
         {empty ? (
           <div className="hp-head-empty">
-            <b>Профили</b>
+            <b>{t.profiles}</b>
             <span className="hp-plus"><G name="plus" /></span>
           </div>
         ) : (
           <div className="hp-head-group">
             <span className="hp-grp-ico"><G name="globe" /></span>
             <span className="hp-grp-t">
-              <b>Atlas Secure Group</b>
-              <span>Обновлено сегодня · автообновление 1 ч</span>
+              <b>{t.group}</b>
+              <span>{t.groupNote}</span>
             </span>
             <span className="hp-grp-acts">
               <span className="hp-iconbtn"><G name="refresh" /></span>
@@ -148,8 +163,8 @@ function Happ({ empty }: { empty: boolean }) {
 
       <div className="hp-traffic">
         <div className="hp-traffic-row">
-          <b>398 ГБ</b>
-          <span>Действует до 02.06.2048</span>
+          <b>{GB} {t.gb}</b>
+          <span>{fill(t.until, { date: UNTIL[locale] })}</span>
         </div>
         <div className="hp-bar"><i /></div>
       </div>
@@ -159,8 +174,8 @@ function Happ({ empty }: { empty: boolean }) {
           <div key={s.row} className="hp-row" data-row={s.row}>
             <span className="hp-pill">{s.code}</span>
             <span className="hp-row-t">
-              <b>{s.name}</b>
-              <span>{s.note}</span>
+              <b>{s.name ?? t.auto}</b>
+              <span>{t.unlimited}</span>
             </span>
             <span className="hp-row-check" aria-hidden><G name="check" /></span>
           </div>
@@ -192,19 +207,19 @@ function Happ({ empty }: { empty: boolean }) {
 }
 
 /** Лист импорта — снизу, «Импорт из буфера обмена» подсвечен. */
-function ImportSheet() {
+function ImportSheet({ t }: { t: T }) {
   return (
     <div className="hp-sheet">
       <div className="hp-grab" />
-      <p className="hp-sheet-title">Добавить подписку</p>
-      <div className="hp-srow"><span className="hp-srow-ico"><G name="qr" /></span>Сканировать QR-код</div>
-      <div className="hp-srow"><span className="hp-srow-ico"><G name="key" /></span>Добавить вручную</div>
+      <p className="hp-sheet-title">{t.sheetTitle}</p>
+      <div className="hp-srow"><span className="hp-srow-ico"><G name="qr" /></span>{t.sheetQr}</div>
+      <div className="hp-srow"><span className="hp-srow-ico"><G name="key" /></span>{t.sheetManual}</div>
       <div className="hp-srow is-target">
         <span className="hp-srow-hl" />
         <span className="hp-srow-ico"><G name="copy" /></span>
-        Импорт из буфера обмена
+        {t.sheetClipboard}
       </div>
-      <div className="hp-srow"><span className="hp-srow-ico"><G name="download" /></span>Импорт из файла</div>
+      <div className="hp-srow"><span className="hp-srow-ico"><G name="download" /></span>{t.sheetFile}</div>
     </div>
   );
 }
@@ -212,12 +227,17 @@ function ImportSheet() {
 export default function HappPhone({
   scene,
   label,
+  locale,
+  t,
   eager = false,
   onScene,
   audience = "guest",
 }: {
   scene: Scene | "tour";
   label: string;
+  locale: Locale;
+  /** Подписи нарисованного экрана — из словаря, отдаёт серверный родитель. */
+  t: T;
   eager?: boolean;
   /** Только в scene="tour" — какой шаг сейчас на экране (для подсветки текста рядом). */
   onScene?: (s: Scene) => void;
@@ -294,12 +314,12 @@ export default function HappPhone({
     <div ref={ref} className="hp-dev" data-scene={scene === "tour" ? 1 : scene} data-mode={scene === "tour" ? "tour" : undefined} role="img" aria-label={label}>
       <span className="hp-dev-shadow" aria-hidden />
       <div className="hp-scr" aria-hidden>
-        {isSite && <Site aud={audience} />}
+        {isSite && <Site aud={audience} locale={locale} t={t} />}
         {isHapp && (
           <>
-            <Happ empty={isEmptyHead} />
+            <Happ empty={isEmptyHead} locale={locale} t={t} />
             {hasSheet && <div className="hp-l hp-dim" />}
-            {hasSheet && <ImportSheet />}
+            {hasSheet && <ImportSheet t={t} />}
           </>
         )}
         <span className="hp-touch"><i /></span>

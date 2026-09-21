@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import { APPS, PLATFORMS, pick, type Platform } from "@/lib/apps";
-import type { Locale } from "@/lib/locale";
-import { MAIN_KEY, SWITCH_HINT, type KeyAudience } from "@/lib/key-names";
+import { localeHref, type Locale } from "@/lib/locale";
+import { mainKey, switchHint, type KeyAudience } from "@/lib/key-names";
+import { fill, type Dict } from "@/i18n";
 import HappPhone from "./HappPhone";
 
 /**
@@ -19,7 +20,11 @@ import HappPhone from "./HappPhone";
  *
  * Ссылки на приложение — только из src/lib/apps.ts (единственный
  * источник адресов магазинов и установщиков), слова про ключи — из
- * src/lib/key-names.ts (гостю без «VPN»).
+ * src/lib/key-names.ts (гостю без «VPN», на обоих языках).
+ *
+ * Подписи приходят пропсом `t` от серверного page.tsx: клиентский
+ * компонент словарь не импортирует, иначе в браузер уехали бы оба
+ * языка (21.09.2026).
  */
 
 type Scene = 1 | 2 | 3 | 4 | 5 | 6;
@@ -32,36 +37,25 @@ const PLATFORM_ICON: Record<Platform, IconName> = {
   tv: "tv",
 };
 
-const TOUR_LABEL =
-  "iPhone 17 Pro Max: по очереди показаны все шаги — копирование ссылки в кабинете, «+» в Happ, импорт из буфера обмена, добавленная подписка, выбор страны и подключение";
-
-export default function InstallHappView({ aud, locale }: { aud: KeyAudience; locale: Locale }) {
+export default function InstallHappView({
+  aud,
+  locale,
+  t,
+}: {
+  aud: KeyAudience;
+  locale: Locale;
+  t: Dict["installHapp"];
+}) {
   const [active, setActive] = useState<Scene>(1);
+  const to = (href: string) => localeHref(href, locale);
 
   const steps: { t: string; d: string; tip?: string }[] = [
-    {
-      t: "Скопируйте ссылку подписки",
-      d: `В кабинете у карточки «${MAIN_KEY[aud].name}» нажмите «Скопировать» — ссылка окажется в буфере обмена.`,
-      tip: "Ссылку можно не копировать вручную: в кабинете есть кнопка «Открыть в приложении» — она сама передаёт подписку в Happ.",
-    },
-    { t: "Откройте Happ и нажмите «+»", d: "Кнопка — в шапке списка профилей, справа." },
-    {
-      t: "Выберите «Импорт из буфера обмена»",
-      d: "Happ прочитает ссылку сам. Рядом есть «Сканировать QR-код» — если ссылка открыта на другом устройстве.",
-    },
-    {
-      t: "Подписка добавится сама",
-      d: "Появится группа Atlas Secure со списком стран и остатком трафика. Обновляется автоматически раз в час.",
-    },
-    {
-      t: "Выберите страну",
-      d: "Первая строка — «Авто»: приложение само берёт самый быстрый сервер. Или выберите страну из списка.",
-    },
-    {
-      t: "Нажмите кнопку подключения",
-      d: "В первый раз система спросит разрешение добавить конфигурацию — согласитесь. Дальше подключение занимает пару секунд.",
-      tip: SWITCH_HINT[aud],
-    },
+    { ...t.s1, d: fill(t.s1.d, { key: mainKey(aud, locale).name }) },
+    t.s2,
+    t.s3,
+    t.s4,
+    t.s5,
+    { ...t.s6, tip: switchHint(aud, locale) },
   ];
 
   return (
@@ -69,15 +63,17 @@ export default function InstallHappView({ aud, locale }: { aud: KeyAudience; loc
       <section className="v-section v-glow ih-hero" aria-labelledby="ih-title">
         <div className="v-wrap ih-grid">
           <figure className="ih-art">
-            <HappPhone scene="tour" eager audience={aud} onScene={setActive} label={TOUR_LABEL} />
+            <HappPhone scene="tour" eager audience={aud} locale={locale} onScene={setActive} label={t.tourLabel} t={t.phone} />
           </figure>
           <div className="ih-copy">
-            <p className="ih-kicker">Happ · iPhone, Android, Mac, Windows · около минуты</p>
+            <p className="ih-kicker">{t.kicker}</p>
             <h1 id="ih-title" className="v-h2" style={{ textAlign: "left" }}>
-              Подключение в <span className="v-accent">Happ</span> по шагам
+              {t.titleBefore}
+              <span className="v-accent">{t.titleAccent}</span>
+              {t.titleAfter}
             </h1>
             <p className="v-lead" style={{ textAlign: "left" }}>
-              Шесть действий: скопировать ссылку в кабинете, вставить её в приложение и нажать кнопку подключения.
+              {t.lead}
             </p>
             <ol className="v-steps ih-steps">
               {steps.map((s, k) => {
@@ -97,11 +93,11 @@ export default function InstallHappView({ aud, locale }: { aud: KeyAudience; loc
               })}
             </ol>
             <div className="v-actions" style={{ justifyContent: "flex-start" }}>
-              <Link href={aud === "member" ? "/dashboard" : "/auth"} className="v-btn v-btn-primary">
-                {aud === "member" ? "Открыть кабинет" : "Получить подписку"}
+              <Link href={to(aud === "member" ? "/dashboard" : "/auth")} className="v-btn v-btn-primary">
+                {aud === "member" ? t.ctaMember : t.ctaGuest}
               </Link>
-              <Link href="/devices" className="v-btn v-btn-soft">
-                Другие приложения
+              <Link href={to("/devices")} className="v-btn v-btn-soft">
+                {t.ctaApps}
               </Link>
             </div>
           </div>
@@ -112,10 +108,10 @@ export default function InstallHappView({ aud, locale }: { aud: KeyAudience; loc
         <div className="v-wrap">
           <div className="ih-get-head">
             <h2 id="ih-get-title" className="v-h2" style={{ textAlign: "left" }}>
-              Где скачать Happ
+              {t.getTitle}
             </h2>
             <p className="v-lead" style={{ textAlign: "left" }}>
-              Приложение бесплатное. Шаги одинаковые на всех системах — отличается только, откуда его ставить.
+              {t.getLead}
             </p>
           </div>
           <div className="ih-cards">
@@ -155,18 +151,15 @@ export default function InstallHappView({ aud, locale }: { aud: KeyAudience; loc
         <div className="v-wrap">
           <div className="ih-done-card">
             <h2 id="ih-done-title" className="ih-h2">
-              Что-то пошло не так?
+              {t.doneTitle}
             </h2>
-            <p className="ih-text">
-              Если после «Импорта из буфера обмена» ничего не появилось — скопируйте ссылку ещё раз и повторите шаг:
-              приложение читает именно буфер обмена. Не помогло — напишите в поддержку, подключим вместе.
-            </p>
+            <p className="ih-text">{t.doneText}</p>
             <div className="v-actions" style={{ justifyContent: "flex-start" }}>
-              <Link href="/support" className="v-btn v-btn-white">
-                Поддержка
+              <Link href={to("/support")} className="v-btn v-btn-white">
+                {t.doneSupport}
               </Link>
-              <Link href="/devices" className="v-btn v-btn-outline">
-                Все инструкции
+              <Link href={to("/devices")} className="v-btn v-btn-outline">
+                {t.doneAll}
               </Link>
             </div>
           </div>

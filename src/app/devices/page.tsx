@@ -3,8 +3,10 @@ import VShell from "@/components/vps/VShell";
 import DevicesView from "./DevicesView";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
-import { plural } from "@/lib/ru-words";
 import { getSessionUser } from "@/lib/session";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /devices — серверная обёртка.
@@ -21,18 +23,27 @@ import { getSessionUser } from "@/lib/session";
  * серверной, а клиентский компонент серверный внутри себя отрисовать
  * не может. Тот же порядок на /contact, /business и /subscribe.
  */
-export const metadata: Metadata = {
-  title: "Как подключить на iPhone, Android, Windows, Mac и ТВ",
-  description:
-    `Настройка за минуту на iPhone, iPad, Android, Mac, Windows и Android TV. Приложение бесплатное, ключ добавляется одной кнопкой или по QR-коду. ` +
-    `Одна подписка — до ${DEVICE_LIMIT} устройств, ${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])} бесплатно.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const d = dict(locale);
+  const vars = {
+    devices: count(locale, DEVICE_LIMIT, d.units.device),
+    trial: count(locale, TRIAL_DAYS, d.units.day),
+  };
+  return {
+    title: fill(d.devices.meta.title, vars),
+    description: fill(d.devices.meta.description, vars),
+  };
+}
 
 export default async function DevicesRoute() {
-  const hasSession = Boolean(await getSessionUser());
+  const [hasSession, locale] = await Promise.all([
+    getSessionUser().then(Boolean),
+    getLocale(),
+  ]);
   return (
     <VShell account={hasSession ? "member" : "guest"}>
-      <DevicesView hasSession={hasSession} />
+      <DevicesView hasSession={hasSession} locale={locale} t={dict(locale).devices} />
     </VShell>
   );
 }

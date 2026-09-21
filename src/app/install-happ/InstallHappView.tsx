@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Icon, { type IconName } from "@/components/pixel/Icon";
-import { APPS, PLATFORMS, type Platform } from "@/lib/apps";
+import { APPS, PLATFORMS, pick, type Platform } from "@/lib/apps";
+import type { Locale } from "@/lib/locale";
 import { MAIN_KEY, SWITCH_HINT, type KeyAudience } from "@/lib/key-names";
 import HappPhone from "./HappPhone";
 
@@ -34,7 +35,7 @@ const PLATFORM_ICON: Record<Platform, IconName> = {
 const TOUR_LABEL =
   "iPhone 17 Pro Max: по очереди показаны все шаги — копирование ссылки в кабинете, «+» в Happ, импорт из буфера обмена, добавленная подписка, выбор страны и подключение";
 
-export default function InstallHappView({ aud }: { aud: KeyAudience }) {
+export default function InstallHappView({ aud, locale }: { aud: KeyAudience; locale: Locale }) {
   const [active, setActive] = useState<Scene>(1);
 
   const steps: { t: string; d: string; tip?: string }[] = [
@@ -129,17 +130,17 @@ export default function InstallHappView({ aud }: { aud: KeyAudience }) {
                     </span>
                     <h3>{p.name}</h3>
                   </div>
-                  <p className="ih-card-note">{app.note}</p>
+                  <p className="ih-card-note">{pick(app.note, locale)}</p>
                   <div className="ih-card-links">
                     {app.links.map((l) => (
                       <a
-                        key={l.label}
+                        key={l.href}
                         className={`v-btn v-btn-sm ${l.secondary ? "v-btn-outline" : "v-btn-dark"}`}
                         href={l.href}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {l.label}
+                        {pick(l.label, locale)}
                       </a>
                     ))}
                   </div>

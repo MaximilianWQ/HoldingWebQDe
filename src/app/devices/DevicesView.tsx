@@ -4,14 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import Icon, { type IconName } from "@/components/pixel/Icon";
-import { DEVICE_LIMIT } from "@/lib/plans";
-import { TRIAL_DAYS } from "@/lib/brand-facts";
-import { plural } from "@/lib/ru-words";
-import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT, type KeyAudience } from "@/lib/key-names";
+import { BUY_TRAFFIC_HREF, bypassKey, mainKey, switchHint, type KeyAudience } from "@/lib/key-names";
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import { TRAFFIC_TRIAL_MB } from "@/lib/traffic-packs";
 import type { SubscriptionData } from "@/types";
-import { APPS, PLATFORMS, detectPlatform, type Platform } from "@/lib/apps";
+import { APPS, PLATFORMS, detectPlatform, pick, type Platform } from "@/lib/apps";
+import type { Dict } from "@/i18n";
+import { fill } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 import "./devices-vps.css";
 
 /**
@@ -24,6 +24,10 @@ import "./devices-vps.css";
  * карточками-переключателями, установка — первая ссылка крупной
  * кнопкой + остальные пилюлями, «Добавьте подписку» — открытие через
  * `app.openUrl`, «Подключитесь» — пронумерованные `app.steps`.
+ *
+ * Экран клиентский (выбор платформы, копирование ключа, QR), поэтому
+ * текст приходит пропсом `t` от серверной обёртки: импортируй он
+ * словарь сам — в браузер уехали бы оба языка.
  */
 
 const PLATFORM_ICON: Record<Platform, IconName> = {
@@ -34,12 +38,13 @@ const PLATFORM_ICON: Record<Platform, IconName> = {
   tv: "tv",
 };
 
-const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройстве", "устройствах", "устройствах"]);
-const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
-
-/** Подпись кнопки магазина: «Скачать…» уже глагол, остальные — «Открыть …». */
-function storeAction(label: string): string {
-  return /^скачать/i.test(label) ? label : `Открыть ${label}`;
+/**
+ * Подпись кнопки магазина. «Скачать для Windows» / «Download for
+ * Windows» — уже глагол, к остальным нужен свой: «Открыть App Store».
+ * Проверка по обоим языкам: список ссылок один, а подписи разные.
+ */
+function storeAction(label: string, open: string): string {
+  return /^(скачать|download)/i.test(label) ? label : fill(open, { store: label });
 }
 
 /** Значок магазина перед подписью — Apple/Google, для установщиков — стрелка загрузки. */
@@ -73,7 +78,16 @@ function prefersStill(): boolean {
 
 // ─── Main Component ─────────────────────────────────────────
 
-export default function DevicesView({ hasSession }: { hasSession: boolean }) {
+export default function DevicesView({
+  hasSession,
+  locale,
+  t,
+}: {
+  hasSession: boolean;
+  locale: Locale;
+  t: Dict["devices"];
+}) {
+  const to = (href: string) => localeHref(href, locale);
   const [platform, setPlatform] = useState<Platform>("ios");
   const [appIndex, setAppIndex] = useState(0);
 
@@ -104,6 +118,8 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
   const { live, status: liveStatus } = useBypassLive(signedIn === true && !!(bk?.known || bk?.maybe || owed > 0));
   // Слова: гостю — «Основной» / «Усиленный», вошедшему — «Основной VPN» / «Обход».
   const aud: KeyAudience = hasSession && signedIn !== false ? "member" : "guest";
+  const main = mainKey(aud, locale);
+  const bypass = bypassKey(aud, locale);
 
   const fetchKey = useCallback(async () => {
     // Гостю запрос не отправляется вовсе — иначе браузер пишет в
@@ -204,7 +220,7 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
             disabled={!url}
             className={`v-btn v-btn-sm ${n === 1 ? "v-btn-primary" : "v-btn-outline"}`}
           >
-            Открыть в {currentApp.name}<span className="v-sr"> — {what}</span>
+            {fill(t.openIn, { app: currentApp.name })}<span className="v-sr"> — {what}</span>
           </button>
         )}
         <button
@@ -216,10 +232,10 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
           {copied === n ? (
             <>
               <Icon name="check" size={16} />
-              Скопировано
+              {t.copied}
             </>
           ) : (
-            "Скопировать ссылку"
+            t.copy
           )}
           <span className="v-sr"> — {what}</span>
         </button>
@@ -230,14 +246,14 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
           aria-pressed={showQR === n}
           className="v-btn v-btn-sm v-btn-outline"
         >
-          {showQR === n ? "Скрыть QR-код" : "Показать QR-код"}
+          {showQR === n ? t.hideQr : t.showQr}
           <span className="v-sr"> — {what}</span>
         </button>
       </div>
       {showQR === n && url && (
         <figure className="vd-qr">
           <QRCodeSVG value={url} size={176} bgColor="#ffffff" fgColor="#0B0B0F" level="M" />
-          <figcaption>Наведите камеру приложения на код — ключ добавится сам.</figcaption>
+          <figcaption>{t.qrCaption}</figcaption>
         </figure>
       )}
     </>
@@ -248,15 +264,12 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
       <section className="v-section v-center" aria-labelledby="vd-title">
         <div className="v-wrap v-narrow">
           <h1 id="vd-title" className="v-h2">
-            Инструкция по <span className="v-accent">подключению</span>
+            {t.title} <span className="v-accent">{t.titleAccent}</span>
           </h1>
-          <p className="v-lead">
-            Выберите устройство — покажем, что нажать. Приложение бесплатное, одна подписка работает
-            на {DEVICE_LIMIT} {DEVICE_WORD}, первые {TRIAL} — без оплаты.
-          </p>
+          <p className="v-lead">{t.lead}</p>
 
           {/* ── Плитки устройств ─────────────────────────────────── */}
-          <div className="vd-grid v-stagger" role="group" aria-label="Устройство">
+          <div className="vd-grid v-stagger" role="group" aria-label={t.deviceGroup}>
             {PLATFORMS.map((p) => (
               <button
                 key={p.id}
@@ -280,12 +293,12 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
               <li className="v-step">
                 <div className="v-step-head">
                   <span className="v-step-check" aria-hidden><Icon name="check" size={18} /></span>
-                  <h3>Установите приложение</h3>
+                  <h3>{t.step1}</h3>
                 </div>
-                <p>{currentApp.note}</p>
+                <p>{pick(currentApp.note, locale)}</p>
 
                 {selectedApps.length > 1 && (
-                  <div className="vd-apps-grid" role="group" aria-label="Приложение">
+                  <div className="vd-apps-grid" role="group" aria-label={t.appGroup}>
                     {selectedApps.map((a, i) => (
                       <button
                         key={a.id}
@@ -295,10 +308,10 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
                         onClick={() => handleSelectApp(i)}
                       >
                         {i === 0 && (
-                          <span className="v-badge v-badge-blue vd-app-badge">Рекомендуем</span>
+                          <span className="v-badge v-badge-blue vd-app-badge">{t.recommended}</span>
                         )}
                         <span className="vd-app-name">{a.name}</span>
-                        <span className="vd-app-note">{a.note}</span>
+                        <span className="vd-app-note">{pick(a.note, locale)}</span>
                       </button>
                     ))}
                   </div>
@@ -311,22 +324,22 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
                     rel="noopener noreferrer"
                     className="v-btn v-btn-outline v-btn-block"
                   >
-                    <StoreGlyph label={currentApp.links[0].label} />
-                    {storeAction(currentApp.links[0].label)}
-                    <span className="v-sr"> (откроется в новой вкладке)</span>
+                    <StoreGlyph label={pick(currentApp.links[0].label, locale)} />
+                    {storeAction(pick(currentApp.links[0].label, locale), t.openStore)}
+                    <span className="v-sr">{t.newTab}</span>
                   </a>
                   {currentApp.links.length > 1 && (
                     <div className="vd-install-more">
                       {currentApp.links.slice(1).map((l) => (
                         <a
-                          key={l.label}
+                          key={l.href}
                           href={l.href}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="v-btn v-btn-outline v-btn-sm"
                         >
-                          <StoreGlyph label={l.label} />
-                          {l.label}
+                          <StoreGlyph label={pick(l.label, locale)} />
+                          {pick(l.label, locale)}
                         </a>
                       ))}
                     </div>
@@ -337,55 +350,53 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
               <li className="v-step">
                 <div className="v-step-head">
                   <span className="v-step-check" aria-hidden><Icon name="check" size={18} /></span>
-                  <h3>Добавьте подписку</h3>
+                  <h3>{t.step2}</h3>
                 </div>
 
                 {signedIn === false ? (
                   <div className="vd-guest">
-                    <p>
-                      Ключ появится сразу после входа по почте — вместе с {TRIAL} бесплатно. Карта не нужна.
-                    </p>
-                    <Link href="/auth" className="v-btn v-btn-primary v-btn-block">Войти и получить ключ</Link>
+                    <p>{t.guestKey}</p>
+                    <Link href={to("/auth")} className="v-btn v-btn-primary v-btn-block">{t.guestCta}</Link>
                   </div>
                 ) : (
                   <>
-                    <p className="vd-kicker">{MAIN_KEY[aud].title}</p>
-                    <p style={{ margin: "0 0 4px", color: "var(--v-ink-3)", fontSize: 15 }}>{MAIN_KEY[aud].text}</p>
+                    <p className="vd-kicker">{main.title}</p>
+                    <p style={{ margin: "0 0 4px", color: "var(--v-ink-3)", fontSize: 15 }}>{main.text}</p>
                     {keyUrl ? (
                       <div className="vd-key">{keyUrl}</div>
                     ) : (
-                      <div className="vd-key" aria-busy="true">Секунду, загружаем ключ…</div>
+                      <div className="vd-key" aria-busy="true">{t.loadingKey}</div>
                     )}
-                    {keyActions(1, keyUrl, MAIN_KEY[aud].title)}
+                    {keyActions(1, keyUrl, main.title)}
 
                     {/* Ключ 2 · Обход — только вошедшему: пробные мегабайты или купленный пакет. */}
                     {aud === "member" && (
                       <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--v-line)" }}>
-                        <p className="vd-kicker">{BYPASS_KEY[aud].title}</p>
-                        <p style={{ margin: "0 0 4px", color: "var(--v-ink-3)", fontSize: 15 }}>{BYPASS_KEY[aud].text}</p>
+                        <p className="vd-kicker">{bypass.title}</p>
+                        <p style={{ margin: "0 0 4px", color: "var(--v-ink-3)", fontSize: 15 }}>{bypass.text}</p>
                         {liveStatus === "loading" && !key2Url ? (
-                          <div className="vd-key" aria-busy="true">Секунду, проверяем ключ…</div>
+                          <div className="vd-key" aria-busy="true">{t.checkingKey}</div>
                         ) : key2Url ? (
                           <>
                             {live?.state === "ok" && !live.unlimited && (
                               <p className="vd-left">
-                                Осталось <b>{formatBytes(live.remainingBytes ?? 0)}</b> из {formatBytes(live.limitBytes ?? 0)}
+                                {t.left} <b>{formatBytes(live.remainingBytes ?? 0)}</b> {t.leftOf} {formatBytes(live.limitBytes ?? 0)}
                               </p>
                             )}
                             <div className="vd-key">{key2Url}</div>
-                            {keyActions(2, key2Url, BYPASS_KEY[aud].title)}
+                            {keyActions(2, key2Url, bypass.title)}
                             <div className="vd-actions">
-                              <Link href={BUY_TRAFFIC_HREF} className="v-btn v-btn-sm v-btn-outline">Докупить гигабайты</Link>
+                              <Link href={to(BUY_TRAFFIC_HREF)} className="v-btn v-btn-sm v-btn-outline">{t.buyGb}</Link>
                             </div>
                           </>
                         ) : owedNow > 0 ? (
                           <p style={{ color: "var(--v-ink-3)", fontSize: 15 }}>
-                            Гигабайты оплачены и зачисляются — ключ появится здесь через пару минут.
+                            {t.gbPending}
                           </p>
                         ) : (
                           <div className="vd-guest">
-                            <p>Ключа «Обход» пока нет. Купите пакет трафика — ключ появится сразу после оплаты.</p>
-                            <Link href={BUY_TRAFFIC_HREF} className="v-btn v-btn-primary v-btn-block">Получить ключ «Обход»</Link>
+                            <p>{t.noBypass}</p>
+                            <Link href={to(BUY_TRAFFIC_HREF)} className="v-btn v-btn-primary v-btn-block">{t.getBypass}</Link>
                           </div>
                         )}
                       </div>
@@ -393,49 +404,50 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
 
                     {aud === "guest" && signedIn === true && (
                       <p style={{ marginTop: 14, color: "var(--v-ink-3)", fontSize: 15 }}>
-                        Усиленный ключ появится вместе с пробным периодом — в нём {TRAFFIC_TRIAL_MB} МБ.{" "}
-                        <Link href="/pricing#traffic" className="v-link">Пакеты трафика</Link>
+                        {fill(t.boostedSoon, { mb: TRAFFIC_TRIAL_MB })}{" "}
+                        <Link href={to("/pricing#traffic")} className="v-link">{t.trafficPacks}</Link>
                       </p>
                     )}
                   </>
                 )}
                 <p className="v-sr" role="status" aria-live="polite">
-                  {copied ? `Ссылка скопирована: ${copied === 1 ? MAIN_KEY[aud].title : BYPASS_KEY[aud].title}` : ""}
+                  {copied ? fill(t.copiedLive, { what: copied === 1 ? main.title : bypass.title }) : ""}
                 </p>
               </li>
 
               <li className="v-step">
                 <div className="v-step-head">
                   <span className="v-step-check" aria-hidden><Icon name="check" size={18} /></span>
-                  <h3>Подключитесь</h3>
+                  <h3>{t.step3}</h3>
                 </div>
                 <ol className="vd-connect">
-                  {currentApp.steps.map((s, i) => (
+                  {pick(currentApp.steps, locale).map((s, i) => (
                     <li key={i}>
                       <span className="vd-connect-num" aria-hidden>{i + 1}</span>
                       <span>{s}</span>
                     </li>
                   ))}
                 </ol>
-                {aud === "member" && <p className="vd-switch">{SWITCH_HINT[aud]}</p>}
+                {aud === "member" && <p className="vd-switch">{switchHint(aud, locale)}</p>}
 
                 {/* Живая инструкция по шагам — только для Happ (/install-happ). */}
                 {currentApp.id === "happ" && (
-                  <Link href="/install-happ" className="v-link vd-walkthrough">
-                    Посмотреть по шагам на экране телефона
+                  <Link href={to("/install-happ")} className="v-link vd-walkthrough">
+                    {t.walkthrough}
                   </Link>
                 )}
 
-                <Link href="/support" className="v-btn v-btn-primary v-btn-block" style={{ marginTop: 20 }}>
-                  <Icon name="chat" size={20} /> Поддержка
+                <Link href={to("/support")} className="v-btn v-btn-primary v-btn-block" style={{ marginTop: 20 }}>
+                  <Icon name="chat" size={20} /> {t.support}
                 </Link>
               </li>
             </ol>
           </div>
 
           <p className="v-small vd-note">
-            Не нашли своё устройство?{" "}
-            <Link href="/contact" className="v-link" style={{ display: "inline-flex", alignItems: "center", minHeight: 44 }}>Напишите нам</Link> — поможем.
+            {t.notFoundBefore}{" "}
+            <Link href={to("/contact")} className="v-link" style={{ display: "inline-flex", alignItems: "center", minHeight: 44 }}>{t.notFoundLink}</Link>{" "}
+            {t.notFoundAfter}
           </p>
         </div>
       </section>

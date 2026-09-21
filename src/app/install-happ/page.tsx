@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import { getSessionUser } from "@/lib/session";
 import InstallHappView from "./InstallHappView";
+import { getLocale } from "@/lib/locale-server";
 import "./install-happ.css";
 import "./happ-phone.css";
 
@@ -27,10 +28,10 @@ export const metadata: Metadata = {
 };
 
 export default async function InstallHappRoute() {
-  const member = Boolean(await getSessionUser());
+  const [member, locale] = await Promise.all([getSessionUser().then(Boolean), getLocale()]);
   return (
     <VShell account={member ? "member" : "guest"}>
-      <InstallHappView aud={member ? "member" : "guest"} />
+      <InstallHappView aud={member ? "member" : "guest"} locale={locale} />
     </VShell>
   );
 }

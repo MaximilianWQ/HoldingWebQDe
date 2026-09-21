@@ -347,6 +347,7 @@ function DashboardViewInner({ cards, locale, units }: Cards) {
         <div key={active} className="v-fade-in">
           {active === "subs" && (
             <CabinetKey
+              locale={locale}
               data={data}
               resyncing={resyncing}
               resyncStatus={resyncStatus}

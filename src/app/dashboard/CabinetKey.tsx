@@ -9,7 +9,8 @@ import { DEVICE_LIMIT } from "@/lib/plans";
 import { plural } from "@/lib/locations";
 import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT } from "@/lib/key-names";
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
-import { APPS, detectPlatform, type AppId, type ClientApp, type Platform } from "@/lib/apps";
+import { APPS, detectPlatform, pick, type AppId, type ClientApp, type Platform } from "@/lib/apps";
+import type { Locale } from "@/lib/locale";
 import type { SubscriptionData } from "@/types";
 
 /**
@@ -78,7 +79,7 @@ function AppSwitcher({ apps, appId, onChange }: { apps: ClientApp[]; appId: AppI
   );
 }
 
-function KeyActions({ url, app, primary, what }: { url: string; app: ClientApp; primary: boolean; what: string }) {
+function KeyActions({ url, app, primary, what, locale }: { url: string; app: ClientApp; primary: boolean; what: string; locale: Locale }) {
   const [copied, setCopied] = useState(false);
   const [fallback, setFallback] = useState(false);
   const [showQr, setShowQr] = useState(false);
@@ -133,9 +134,9 @@ function KeyActions({ url, app, primary, what }: { url: string; app: ClientApp; 
       {app.links.length > 0 && (
         <div className="vc-app-links">
           {app.links.map((l) => (
-            <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer" className={`vc-app-link ${l.secondary ? "vc-app-link-sec" : ""}`}>
+            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className={`vc-app-link ${l.secondary ? "vc-app-link-sec" : ""}`}>
               <Icon name="download" size={14} />
-              {l.label}
+              {pick(l.label, locale)}
             </a>
           ))}
         </div>
@@ -191,8 +192,11 @@ export default function CabinetKey({
   onResync,
   onBuyTraffic,
   onGoProfile,
+  locale,
 }: {
   data: SubscriptionData;
+  /** Язык страницы: подписи магазинов в apps.ts лежат на обоих. */
+  locale: Locale;
   resyncing: boolean;
   resyncStatus: null | { kind: "ok" | "error"; text: string };
   onResync: () => void;
@@ -241,7 +245,7 @@ export default function CabinetKey({
     <>
       <p className="v-text" style={{ margin: "0 0 4px" }}>{main.text}</p>
       <AppSwitcher apps={apps} appId={appId} onChange={setAppId} />
-      <KeyActions url={url1} app={app} primary what={main.title} />
+      <KeyActions locale={locale} url={url1} app={app} primary what={main.title} />
     </>
   ) : data.isExpired ? (
     <>
@@ -298,7 +302,7 @@ export default function CabinetKey({
       {url2 ? (
         <>
           <AppSwitcher apps={apps} appId={appId} onChange={setAppId} />
-          <KeyActions url={url2} app={app} primary={false} what={second.title} />
+          <KeyActions locale={locale} url={url2} app={app} primary={false} what={second.title} />
           <div className="vc-actions">
             <Link href={BUY_TRAFFIC_HREF} className="v-btn v-btn-primary v-btn-sm">
               Докупить гигабайты

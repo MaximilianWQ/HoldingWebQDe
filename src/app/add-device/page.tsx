@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import AddDeviceView from "./AddDeviceView";
+import { DEVICE_LIMIT } from "@/lib/plans";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /add-device — серверная обёртка мастера подключения: только
@@ -13,16 +17,26 @@ import AddDeviceView from "./AddDeviceView";
  * Экран личный: ключ подписки на нём свой у каждого аккаунта, поэтому
  * из поиска закрыт.
  */
-export const metadata: Metadata = {
-  title: "Новое устройство",
-  description: "Подключение нового устройства к подписке Atlas Secure: приложение, QR-код и ключ.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const d = dict(await getLocale());
+  return {
+    title: d.addDevice.meta.title,
+    description: d.addDevice.meta.description,
+    robots: { index: false, follow: false },
+  };
+}
 
-export default function AddDevicePage() {
+export default async function AddDevicePage() {
+  const locale = await getLocale();
+  const d = dict(locale);
   return (
     <VShell work account="member">
-      <AddDeviceView />
+      <AddDeviceView
+        locale={locale}
+        t={d.addDevice}
+        td={d.devices}
+        lead={fill(d.addDevice.lead, { devices: count(locale, DEVICE_LIMIT, d.units.device) })}
+      />
     </VShell>
   );
 }

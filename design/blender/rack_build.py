@@ -274,6 +274,8 @@ def build_materials():
     MATS["bone"] = mat_matte("rack_bone", BONE, rough=0.24, coat=0.32, grain=GRAIN_BODY)
     MATS["bone_dim"] = mat_matte("rack_bone_dim", BONE_DIM, rough=0.30, coat=0.22, grain=GRAIN_BODY)
     MATS["shell"] = mat_matte("rack_shell", SHELL, rough=0.54, sheen=0.12, grain=GRAIN_BODY)
+    MATS["sand"] = mat_matte("rack_sand", rgb("#E3DDD0"), rough=0.26, coat=0.30, grain=GRAIN_BODY)
+    MATS["dusk"] = mat_matte("rack_dusk", rgb("#BEB9AE"), rough=0.30, coat=0.26, grain=GRAIN_BODY)
     # Решётка матовая почти до конца: отверстие не бликует.
     MATS["slot"] = mat_matte("rack_slot", SLOT, rough=0.72, grain=None)
     MATS["cobalt"] = mat_matte("rack_cobalt", COBALT, rough=0.20, coat=0.35)
@@ -339,12 +341,14 @@ def cyl(name, radius, depth, loc=(0, 0, 0), rot=(0, 0, 0), mat=None, verts=32, b
 # при 88° пропадает объём. 84° оставляет объём и отдаёт главное место
 # лицевой панели — по ней игрок и узнаёт модуль.
 CAM_ROT = (math.radians(84.0), 0.0, math.radians(-14.0))
-# Масштаб кадра. Ровно 13.0, и это НЕ произвольное число: при нём
-# монтажные 19″ (10.857) занимают 81% ширины кадра — остаётся запас на
-# уши, фаски и тень, и ничего не обрезается. Замер шага юнита сделан
-# при этом значении; меняя его, надо перезапустить `calibrate()` и
-# поправить CSS, иначе модули поедут относительно мест стойки.
-ORTHO_SCALE = 13.0
+# Масштаб кадра. Считается от САМОГО ШИРОКОГО объекта сцены — рамы
+# (`FRAME_W` = 13.5 единиц = 600 мм), плюс запас на ножки и фаски.
+# Первый набор был снят при 13.0 и раму срезало по бокам: кадр оказался
+# уже того, что в нём стоит.
+# Число входит в `U_PER_FRAME`, то есть напрямую в CSS. Меняя его, надо
+# перезапустить `calibrate()` и пересобрать манифест, иначе модули
+# поедут относительно мест стойки.
+ORTHO_SCALE = 14.6
 # Мощность ключа. 110 Вт — рабочая точка МАЛЕНЬКОЙ калибровочной сцены
 # (шар Ø 1 м, лампа в 4 м). Здесь объект в двадцать раз крупнее и лампы
 # втрое дальше, поэтому число пришлось перемерить заново — лестницей с
@@ -860,3 +864,309 @@ def emboss(name, text, size, loc, mat, depth=0.055, bevel=0.010):
     o.location = loc
     o.data.materials.append(mat)
     return o
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  НАБОР МОДУЛЕЙ
+# ═══════════════════════════════════════════════════════════════════
+#
+# Модули различаются МАТЕРИАЛОМ И НАБОРОМ ДЕТАЛЕЙ НА ПАНЕЛИ, а не
+# силуэтом. Это не экономия, а замер: во всей выборке Яндекса формы
+# простейшие, а различает объекты материал
+# (`research/08_YANDEX_3D.md`, раздел 5, пункт 6). Одинаковый силуэт
+# вдобавок обязателен технически — у всех модулей одна глубина, иначе
+# поворот камеры даст им разную ширину в пикселях.
+
+def _face_base(name, u_height, tone, with_ears=True):
+    """Корпус, лицевая панель, уши. Общее у всех модулей."""
+    h = u_height * U
+    hh = h - GAP
+    fz = -DEPTH / 2
+    parts = [
+        box("%s_body" % name, (BODY_W, DEPTH, hh), (0, 0, 0),
+            MATS["shell"], bevel=0.030, segments=5),
+        box("%s_face" % name, (BODY_W - 0.06, 0.14, hh - 0.05),
+            (0, fz - 0.05, 0), MATS[tone], bevel=0.026, segments=5),
+    ]
+    if with_ears:
+        parts += build_ears(name, h)
+    return parts, hh, fz
+
+
+def _stripe(name, hh, fz, mat="cobalt"):
+    """Метка «перёд» — единственное цветное пятно крупнее точки."""
+    return box("%s_stripe" % name, (0.28, 0.10, hh * 0.62),
+               (-4.86, fz - 0.12, 0), MATS[mat], bevel=0.018, segments=3)
+
+
+def _port(name, hh, fz, x):
+    """Гнездо под кабель плюс привязка для вёрстки."""
+    return [
+        box("%s_portwell" % name, (0.60, 0.09, hh * 0.34),
+            (x, fz - 0.10, -hh * 0.14), MATS["port"], bevel=0.020, segments=3),
+        anchor("%s.port" % name, "port", (x, fz - 0.22, -hh * 0.14)),
+    ]
+
+
+def _status(name, hh, fz, x0):
+    """Кнопка пуска и три служебных огонька. В рендере всё погашено."""
+    parts = [
+        cyl("%s_btn" % name, 0.14, 0.08, (x0 + 0.30, fz - 0.13, hh * 0.16),
+            (math.radians(90), 0, 0), MATS["bone_dim"], verts=24, bevel=0.018),
+        anchor("%s.power" % name, "button", (x0 + 0.30, fz - 0.22, hh * 0.16)),
+    ]
+    for i in range(3):
+        lx = x0 + 0.18 + i * 0.26
+        parts.append(cyl("%s_led%d" % (name, i), 0.045, 0.05, (lx, fz - 0.13, -hh * 0.26),
+                         (math.radians(90), 0, 0), MATS["off"], verts=14, bevel=0.006))
+        parts.append(anchor("%s.led%d" % (name, i), "led", (lx, fz - 0.20, -hh * 0.26)))
+    return parts
+
+
+def _sleds(name, hh, fz, x0, x1, count):
+    """
+    Салазки дисков. В 1U диск 2,5″ нельзя поставить на ребро —
+    внутренней высоты ≈40 мм не хватает, поэтому салазки ЛЕЖАТ. Именно
+    на этой раскладке чаще всего врут стоковые иллюстрации.
+    """
+    parts = []
+    step = (x1 - x0) / count
+    for i in range(count):
+        x = x0 + step * (i + 0.5)
+        parts.append(box("%s_sled%d" % (name, i), (step * 0.86, 0.10, hh * 0.70),
+                         (x, fz - 0.10, 0), MATS["bone_dim"], bevel=0.020, segments=4))
+        parts.append(box("%s_sledh%d" % (name, i), (0.10, 0.09, hh * 0.50),
+                         (x - step * 0.32, fz - 0.16, 0), MATS["steel"], bevel=0.016, segments=3))
+        parts.append(cyl("%s_sledd%d" % (name, i), 0.052, 0.05,
+                         (x + step * 0.30, fz - 0.16, hh * 0.22), (math.radians(90), 0, 0),
+                         MATS["off"], verts=16, bevel=0.008))
+        parts.append(anchor("%s.disk%d" % (name, i), "led",
+                            (x + step * 0.30, fz - 0.20, hh * 0.22)))
+    return parts
+
+
+def _jacks(name, hh, fz, x0, x1, count, rows=1):
+    """Ряд гнёзд: так выглядит и коммутатор, и панель с гнёздами."""
+    parts = []
+    step = (x1 - x0) / count
+    for r in range(rows):
+        z = 0 if rows == 1 else (hh * 0.22 if r == 0 else -hh * 0.22)
+        for i in range(count):
+            x = x0 + step * (i + 0.5)
+            parts.append(box("%s_j%d_%d" % (name, r, i), (step * 0.62, 0.10, hh * 0.34),
+                             (x, fz - 0.09, z), MATS["port"], bevel=0.018, segments=3))
+    return parts
+
+
+def build_unit(name, kind, u_height=1, label=None, tone="bone"):
+    """
+    Один модуль стойки. Вид задаётся `kind`; геометрия общая.
+
+    Раскладка панели — зонами, и зоны НЕ ПЕРЕСЕКАЮТСЯ: проверка стоит
+    прямо здесь, потому что первый заход дал надпись поверх салазки и
+    гнездо поверх решётки, и на рендере это читалось не сразу.
+    """
+    parts, hh, fz = _face_base(name, u_height, tone)
+    parts.append(_stripe(name, hh, fz))
+    used = [(-5.00, -4.72)]
+
+    def take(a, b):
+        for (l, r) in used:
+            assert b <= l or a >= r, "зона (%.2f..%.2f) в %s пересекается" % (a, b, name)
+        used.append((a, b))
+
+    label_at = None
+
+    if kind == "server":
+        take(-4.55, -2.95); parts += vent_slots(name, -4.55, -2.95, 0, hh * 0.52, 9, MATS["slot"])
+        take(-2.75, -2.15); parts += _port(name, hh, fz, -2.45)
+        label_at = -1.35
+        take(-1.95, -0.75)
+        take(-0.45, 3.35);  parts += _sleds(name, hh, fz, -0.45, 3.35, 3)
+        take(3.60, 4.95);   parts += _status(name, hh, fz, 3.60)
+
+    elif kind == "switch":
+        # Коммутатор: панель почти целиком из гнёзд, решётка узкая.
+        take(-4.55, -3.75); parts += vent_slots(name, -4.55, -3.75, 0, hh * 0.52, 4, MATS["slot"])
+        take(-3.55, -2.95); parts += _port(name, hh, fz, -3.25)
+        label_at = -2.15
+        take(-2.75, -1.55)
+        take(-1.35, 3.35);  parts += _jacks(name, hh, fz, -1.35, 3.35, 12)
+        take(3.60, 4.95);   parts += _status(name, hh, fz, 3.60)
+
+    elif kind == "shelf":
+        # Полка устройств: только салазки, гнезда нет — разговаривать
+        # с миром ей не нужно, и это видно, а не читается.
+        take(-4.55, -3.35); parts += vent_slots(name, -4.55, -3.35, 0, hh * 0.52, 6, MATS["slot"])
+        label_at = -2.55
+        take(-3.15, -1.95)
+        take(-1.75, 3.35);  parts += _sleds(name, hh, fz, -1.75, 3.35, 5)
+        take(3.60, 4.95);   parts += _status(name, hh, fz, 3.60)
+
+    elif kind == "lock":
+        # Замок: глухая панель, широкая решётка и утопленная скважина.
+        take(-4.55, -2.15); parts += vent_slots(name, -4.55, -2.15, 0, hh * 0.52, 13, MATS["slot"])
+        label_at = -1.35
+        take(-1.95, -0.75)
+        take(1.20, 2.20)
+        parts.append(cyl("%s_keyhole" % name, 0.22, 0.10, (1.70, fz - 0.10, 0),
+                         (math.radians(90), 0, 0), MATS["port"], verts=28, bevel=0.03))
+        parts.append(box("%s_keyslot" % name, (0.12, 0.10, hh * 0.34),
+                         (1.70, fz - 0.11, -hh * 0.13), MATS["port"], bevel=0.02))
+        take(3.60, 4.95);   parts += _status(name, hh, fz, 3.60)
+
+    elif kind == "power":
+        # Питание и охлаждение, 2U: четыре вентилятора и два тумблера.
+        take(-4.55, 1.85)
+        for i in range(4):
+            x = -4.25 + i * 1.55
+            parts.append(cyl("%s_fan%d" % (name, i), hh * 0.30, 0.10, (x, fz - 0.09, 0),
+                             (math.radians(90), 0, 0), MATS["slot"], verts=40, bevel=0.03))
+            parts.append(cyl("%s_hub%d" % (name, i), hh * 0.09, 0.12, (x, fz - 0.14, 0),
+                             (math.radians(90), 0, 0), MATS["bone_dim"], verts=24, bevel=0.02))
+        take(2.20, 3.35)
+        for i in range(2):
+            parts.append(box("%s_sw%d" % (name, i), (0.34, 0.10, hh * 0.22),
+                             (2.45 + i * 0.55, fz - 0.11, 0), MATS["bone_dim"],
+                             bevel=0.02, segments=3))
+        take(3.60, 4.95);   parts += _status(name, hh, fz, 3.60)
+
+    elif kind == "patch":
+        # Панель с гнёздами: два ряда, ничего больше. Ушей у неё нет —
+        # это просто планка.
+        take(-4.55, 4.95); parts += _jacks(name, hh, fz, -4.45, 4.85, 12, rows=2)
+
+    else:
+        raise ValueError("неизвестный вид модуля: %s" % kind)
+
+    if label and label_at is not None:
+        # Место надписи задаёт сам вид модуля: искать «первый свободный
+        # промежуток» нельзя — зона надписи занята ею же, и поиск
+        # ничего не находил.
+        parts.append(emboss("%s_label" % name, label, hh * 0.46,
+                            (label_at, fz - 0.10, 0), MATS[tone]))
+
+    root = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(root)
+    for p in parts:
+        p.parent = root
+    return root
+
+
+# Набор игры. Порядок снизу вверх — он же порядок мест в стойке.
+# Ключи совпадают с ключами словаря `home.rack.modules`.
+# `tone` — тон корпуса. Их три, и они идут ступенями: уже стоящие в
+# стойке модули (питание, панель гнёзд) темнее, ставимые игроком —
+# светлые. Так собранная часть видна одним взглядом, без подписей.
+# Цветной на объекте по-прежнему только один элемент — кобальтовая
+# метка «перёд»: медиана по выборке Яндекса ровно два цвета на объект.
+UNITS_SPEC = [
+    {"id": "power",     "kind": "power",  "u": 2, "label": None, "slot": 0, "preset": True,  "tone": "dusk"},
+    {"id": "countries", "kind": "server", "u": 1, "label": "19", "slot": 2, "tone": "bone"},
+    {"id": "channel",   "kind": "switch", "u": 1, "label": "75", "slot": 3, "tone": "sand"},
+    {"id": "devices",   "kind": "shelf",  "u": 1, "label": "14", "slot": 4, "tone": "bone"},
+    {"id": "power2",    "kind": "server", "u": 1, "label": "2x", "slot": 5, "tone": "sand"},
+    {"id": "lock",      "kind": "lock",   "u": 1, "label": None, "slot": 6, "tone": "bone"},
+    {"id": "patch",     "kind": "patch",  "u": 1, "label": None, "slot": 7, "preset": True,  "tone": "dusk"},
+]
+RACK_UNITS = 8
+
+
+def render_set(out_dir=None, width=1400, samples=None):
+    """
+    Рендерит раму и каждый модуль отдельным кадром одной и той же
+    камерой, плюс манифест для вёрстки.
+
+    КАДР У ВСЕХ ОДИН И ТОТ ЖЕ по ширине и по положению камеры — на этом
+    держится стыковка в вёрстке. Высота кадра у модуля своя, по его
+    юнитам: незачем возить вокруг однорядного модуля пустоту в восемь
+    рядов. Обрезка считается арифметикой от `U_PER_FRAME`, а не
+    подбирается по прозрачности: подбор дал бы у каждого модуля свой
+    край, и стык поехал бы.
+    """
+    out_dir = out_dir or OUT
+    os.makedirs(out_dir, exist_ok=True)
+    scn = bpy.context.scene
+    if samples:
+        scn.cycles.samples = samples
+
+    px_u = px_per_unit(width)
+    frame_h = int(round(px_u * RACK_UNITS))
+
+    def shoot(path, h_px, shift_units=0.0):
+        """
+        Кадр высотой `h_px`. `shift_units` сдвигает камеру по вертикали,
+        чтобы объект попал в центр укороченного кадра.
+        """
+        scn.render.resolution_x = width
+        scn.render.resolution_y = h_px
+        cam = scn.camera
+        # Ортографический масштаб привязан к БОЛЬШЕЙ стороне кадра.
+        # Ширина у всех кадров одна, значит и масштаб один — менять его
+        # при смене высоты нельзя, иначе модули станут разного размера.
+        cam.data.ortho_scale = ORTHO_SCALE * max(1.0, h_px / float(width))
+        cam.data.shift_y = 0.0
+        base = list(CAM_ROT)
+        aim_camera(cam, base)
+        if shift_units:
+            from mathutils import Euler, Vector
+            up = Euler(tuple(base), "XYZ").to_quaternion() @ Vector((0, 1, 0))
+            cam.location = cam.location + up * (shift_units * math.sin(CAM_ROT[0]))
+        scn.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+
+    made = []
+
+    # Рама выше своих восьми мест: сверху крышка, снизу цоколь с
+    # ножками. Без запаса их срезало краем кадра. Запас одинаковый
+    # сверху и снизу, поэтому центр кадра по-прежнему совпадает с
+    # центром стойки — и та же формула места работает и здесь.
+    rack_pad = int(round(px_u * RACK_PAD_U))
+    rack_h = int(round(px_u * RACK_UNITS)) + 2 * rack_pad
+    clear_units()
+    build_rack("rack", RACK_UNITS)
+    shoot(os.path.join(out_dir, "rack"), rack_h)
+    made.append({"id": "rack", "u": RACK_UNITS, "file": "rack.png",
+                 "w": width, "h": rack_h, "pad": rack_pad})
+
+    # Модули — каждый в кадре по своей высоте, объект в центре
+    for spec in UNITS_SPEC:
+        clear_units()
+        ANCHORS.clear()
+        build_unit(spec["id"], spec["kind"], spec["u"], spec.get("label"),
+                   tone=spec.get("tone", "bone"))
+        h_px = int(round(px_u * spec["u"])) + 2 * PAD_PX
+        shoot(os.path.join(out_dir, spec["id"]), h_px)
+        made.append({
+            "id": spec["id"], "kind": spec["kind"], "u": spec["u"],
+            "slot": spec["slot"], "preset": bool(spec.get("preset")),
+            "file": "%s.png" % spec["id"], "w": width, "h": h_px,
+            "anchors": [dict(name=a["name"].split(".", 1)[1], kind=a["kind"],
+                             x=project(a["object"])[0], y=project(a["object"])[1])
+                        for a in ANCHORS],
+        })
+
+    export_manifest(os.path.join(out_dir, "manifest.json"),
+                    {"units": RACK_UNITS, "pad": PAD_PX,
+                     "rackPadUnits": RACK_PAD_U, "modules": made})
+    print("готово, кадров:", len(made))
+    return made
+
+
+# Запас по краям кадра модуля. Уши и фаски вылезают за габарит юнита, и
+# без запаса их срезало бы краем. Запас одинаковый сверху и снизу —
+# значит центр кадра по-прежнему совпадает с центром юнита, и вёрстке
+# достаточно вычесть его один раз.
+PAD_PX = 26
+
+# Запас у кадра рамы, в юнитах на сторону: крышка, цоколь и ножки.
+RACK_PAD_U = 0.62
+
+
+def clear_units():
+    """Убирает модули и раму, оставляя камеру, свет и материалы."""
+    keep = {"CAMERA", "LIGHT"}
+    for ob in list(bpy.data.objects):
+        if ob.type not in keep:
+            bpy.data.objects.remove(ob, do_unlink=True)
+    ANCHORS.clear()

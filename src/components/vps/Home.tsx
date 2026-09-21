@@ -11,6 +11,7 @@ import ProofBar from "./home/ProofBar";
 import ServiceMarks from "./home/ServiceMarks";
 import PlanCompare from "./home/PlanCompare";
 import Referral from "./home/Referral";
+import RackGame from "./home/RackGame";
 import { BRAND, SUPPORT_TG } from "./links";
 import { DEVICE_LIMIT, PLANS, formatRub, planContent, pricePerMonth } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
@@ -156,7 +157,10 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
         </div>
       </section>
 
-      {/* 05 · тарифы */}
+      {/* 05 · соберите стойку — мини-игра */}
+      <RackGame locale={locale} />
+
+      {/* 06 · тарифы */}
       <section className="v-section v-center v-reveal" id="tariffs" aria-labelledby="v-plans">
         <div className="v-wrap">
           <h2 id="v-plans" className="v-h2">{t.plans.title}</h2>

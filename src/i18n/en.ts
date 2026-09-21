@@ -329,6 +329,87 @@ export const en: Dict = {
       section: "Countries in the network",
       label: "Servers in {countries}",
     },
+    // Mini-game "Build your data centre" (section 05).
+    // Module labels are an object keyed by id, NOT an array: `Dict =
+    // typeof ru` catches a missing key but not a different array
+    // length, so an index-based pairing would drift silently.
+    rack: {
+      title: "Build the rack",
+      titleAccent: "and switch it on",
+      lead:
+        "This is what you are paying for. Slot a module in, plug the " +
+        "cable and press start — it takes a minute.",
+      how: "Tap a module below and it goes into its place.",
+      rackLabel: "Rack with {total} slots",
+      shelfLabel: "Modules left to fit",
+      slotEmpty: "Empty slot",
+      slotFilled: "{name} — in place",
+      count: "{done} of {total}",
+      place: "Fit",
+      placed: "In place",
+      connect: "Plug in",
+      connected: "Plugged in",
+      auto: "Build it for me",
+      start: "Start the rack",
+      running: "The rack is running",
+      sound: "Sound",
+      soundHint: "Turn the sound on to hear the rack come alive.",
+      modules: {
+        countries: {
+          name: "Exit in {countries}",
+          hint:
+            "This is how you reach the internet from another country. " +
+            "Right now there are {countries} to choose from.",
+        },
+        channel: {
+          name: "Channel width",
+          hint:
+            "A crossroads: it hands out data so your video never " +
+            "stalls when the whole house is online at once.",
+        },
+        devices: {
+          name: "Shelf for {devices}",
+          hint:
+            "One subscription covers {devices} at once. Phone, laptop, " +
+            "TV — you add them yourself.",
+        },
+        power2: {
+          name: "Standby server",
+          hint:
+            "A stand-in. If the main one goes for maintenance you will " +
+            "not notice: the connection simply carries on.",
+        },
+        lock: {
+          name: "Encryption",
+          hint:
+            "Locks everything you send. Your provider and the owner of " +
+            "someone else's Wi-Fi see only an encrypted stream.",
+        },
+      },
+      preset: {
+        power: {
+          name: "Power and cooling",
+          hint: "Already fitted: keeps the rack powered and pushes hot air out.",
+        },
+        patch: {
+          name: "Patch panel",
+          hint: "Already fitted: this is where the cables come into the rack.",
+        },
+      },
+      done: {
+        title: "The rack is running",
+        text:
+          "Everything you fitted is part of the subscription. There is " +
+          "nothing extra to buy.",
+        bullets: [
+          "{trial} free, no card needed",
+          "No auto-charges — you renew when you decide to",
+          "{countriesIn} and up to {devices} on one subscription",
+        ],
+        cta: "Start for free",
+        again: "Build it again",
+      },
+    },
     why: {
       title: "Everything you need,",
       titleAccent: "in one subscription",

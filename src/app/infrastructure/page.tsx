@@ -44,7 +44,6 @@ export const metadata: Metadata = {
   description:
     `Как устроена сеть ${BRAND}: узлы в ${COUNTRY_COUNT} ${COUNTRY_WORD} и ${CITY_COUNT} ${CITY_WORD}, ` +
     `ширина канала до ${PLAN_SPEED.plus} Гбит/с, резервные каналы и наблюдаемость. Числа — из кода сервиса.`,
-  alternates: { canonical: "/infrastructure" },
 };
 
 const FIGURES = [

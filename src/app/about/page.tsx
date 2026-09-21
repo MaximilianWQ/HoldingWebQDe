@@ -40,7 +40,6 @@ export const metadata: Metadata = {
     `${BRAND} — VPS-ускоритель для телефона и компьютера и выделенные серверы. ` +
     `${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["страна", "страны", "стран"])}, ` +
     `до ${DEVICE_LIMIT} устройств на подписке. Во что мы верим и что можем подтвердить.`,
-  alternates: { canonical: "/about" },
 };
 
 const FACTS: Array<{ v: string; label: string; icon: IconName; tile?: "dark" | "blue"; span?: 2 | 3 }> = [

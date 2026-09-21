@@ -47,7 +47,6 @@ export const metadata: Metadata = {
   description:
     `Atlas Secure ищет инженеров и не только: ${VACANCIES.length} открытых ролей, удалённая работа, оплата в рублях. ` +
     `Инфраструктура в ${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["стране", "странах", "странах"])}.`,
-  alternates: { canonical: "/careers" },
 };
 
 /** Чем занята команда. Иконки — из собственного набора корпуса. */

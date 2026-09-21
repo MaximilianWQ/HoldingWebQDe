@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DEFAULT_LOCALE, LOCALES, LOCALE_HEADER, PATH_HEADER } from "@/lib/locale";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -24,12 +25,44 @@ const CSP = [
   "frame-ancestors 'none'",
 ].join("; ") + ";";
 
+/**
+ * Язык из адреса (21.09.2026). Русский живёт в корне, английский — под
+ * префиксом `/en`. Здесь префикс срезается, а язык уезжает дальше
+ * заголовком `x-locale`: страницы читают его через `getLocale()`.
+ *
+ * Маршруты API не трогаются: у них нет языка, они отдают данные.
+ */
+function localeFrom(pathname: string): { locale: string; rest: string } | null {
+  for (const l of LOCALES) {
+    if (l === DEFAULT_LOCALE) continue;
+    if (pathname === `/${l}`) return { locale: l, rest: "/" };
+    if (pathname.startsWith(`/${l}/`)) return { locale: l, rest: pathname.slice(l.length + 1) };
+  }
+  return null;
+}
+
 export function middleware(request: NextRequest) {
-  void request;
+  const { pathname } = request.nextUrl;
+  const hit = pathname.startsWith("/api/") ? null : localeFrom(pathname);
+  const locale = hit?.locale ?? DEFAULT_LOCALE;
+  // Язык уезжает дальше заголовком запроса: страницы читают его через
+  // `getLocale()`. Префикс `/en` при этом из адреса срезается — файлов
+  // маршрутов у английской версии своих нет.
+  const forwarded = new Headers(request.headers);
+  forwarded.set(LOCALE_HEADER, locale);
+  // Путь без префикса языка — корневому layout, чтобы он объявил обе
+  // версии страницы поисковику. Заголовок запроса, а не ответа: его
+  // читает серверный рендер, наружу он не уходит.
+  forwarded.set(PATH_HEADER, hit ? hit.rest : pathname);
+
   // Security headers for every route. (The legacy Xray /api/sub/* CORS
   // branch is gone together with the route — subscriptions are served
   // by the Remnawave panel on its own domain.)
-  const response = NextResponse.next();
+  const response = hit
+    ? NextResponse.rewrite(new URL(hit.rest + request.nextUrl.search, request.url), {
+        request: { headers: forwarded },
+      })
+    : NextResponse.next({ request: { headers: forwarded } });
 
   // Prevent clickjacking
   response.headers.set("X-Frame-Options", "DENY");

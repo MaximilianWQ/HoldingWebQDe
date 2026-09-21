@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     `Basic за ${formatRub(PLANS.basic[1])} ₽ и Plus за ${formatRub(PLANS.plus[1])} ₽ в месяц, за год дешевле. ` +
     `Отличаются только шириной канала: ${COUNTRY_COUNT} стран и до ${DEVICE_LIMIT} устройств есть в обоих. ` +
     `${TRIAL_DAYS} дня бесплатно без карты, без автосписаний.`,
-  alternates: { canonical: "/pricing" },
   openGraph: {
     title: `Тарифы Atlas — от ${formatRub(PLANS.basic[1])} ₽ в месяц`,
     description: `Два тарифа, отличаются только шириной канала. ${TRIAL_DAYS} дня бесплатно, без карты и без автосписаний.`,

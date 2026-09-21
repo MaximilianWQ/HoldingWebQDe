@@ -23,7 +23,6 @@ export const metadata: Metadata = {
   title: "Поддержка",
   description:
     `Свяжитесь с ${BRAND}: быстрее всего отвечаем в Telegram. Ответы на частые вопросы — подключение, устройства, пробный период, цены.`,
-  alternates: { canonical: "/support" },
 };
 
 const TELEGRAM = "https://t.me/atlas_suppbot";

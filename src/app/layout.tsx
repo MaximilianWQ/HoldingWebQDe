@@ -1,4 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { getLocale, getPath } from "@/lib/locale-server";
+import { alternatesFor } from "@/lib/locale";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
 import { atlasWide } from "./atlas-fonts";
 import { brand } from "./fonts";
 import { PLANS, DEVICE_LIMIT, formatRub } from "@/lib/plans";
@@ -13,51 +17,12 @@ import "./overlays.css";
 import CookieConsent from "@/components/CookieConsent";
 import PwaManager from "@/components/PwaManager";
 import IosInstallBanner from "@/components/IosInstallBanner";
-import { I18nProvider } from "@/lib/i18n";
 import SiteJsonLd from "@/components/pixel/SiteJsonLd";
 import PageTransition from "@/components/brand/PageTransition";
 import BackToTop from "@/components/brand/BackToTop";
 
-export const metadata: Metadata = {
+const BASE: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://qodev.dev"),
-  // Заголовок по умолчанию для страниц, которые не объявили свой.
-  // Шаблон добавляет имя компании к заголовку раздела — иначе в
-  // выдаче все страницы сайта выглядят одинаково.
-  // Ребрендинг 2027: продукт называется тем, чем является. Прежний
-  // заголовок («ускоритель интернета») был эвфемизмом — он заставлял
-  // читателя думать, что это другой продукт.
-  title: {
-    default: "Atlas Secure VPS — быстрый и приватный интернет",
-    template: "%s — Atlas Secure VPS",
-  },
-  // Числа собираются из источников истины, а не пишутся руками:
-  // страны — locations.ts, устройства и цена — plans.ts, срок
-  // пробного доступа — brand-facts.ts. Раньше «199 ₽» и «19 стран»
-  // стояли здесь строкой и молча разъезжались с тарифом.
-  description:
-    "Atlas Secure VPS — быстрый и приватный интернет на телефоне, компьютере и телевизоре. " +
-    "Шифрование трафика, смена страны, пакеты трафика. " +
-    `${COUNTRY_COUNT} стран, ${DEVICE_LIMIT} устройств на подписке, ` +
-    `${formatRub(PLANS.basic[1])} ₽ в месяц. ` +
-    `${TRIAL_DAYS === 3 ? "Три дня" : `${TRIAL_DAYS} дня`} бесплатно, без карты.`,
-  // Аббревиатура на витрине — VPS. Решение владельца от 8 сентября
-  // 2026: тексты остаются написанными про то же самое, меняется
-  // только слово. Риск зафиксирован в docs/QUESTIONS.md №3: VPS —
-  // общепринятое имя виртуального сервера, а выделенные серверы мы
-  // тут же и продаём.
-  keywords: [
-    "Atlas Secure VPS",
-    "Atlas VPS",
-    "VPS",
-    "VPS для телефона",
-    "быстрый VPS",
-    // «VPS без логов» убран 18.09.2026: обещание, которого нет ни в
-    // политике конфиденциальности, ни в коде. Ключевое слово в выдаче
-    // — такое же публичное утверждение, как строка на странице.
-    "VPS с шифрованием",
-    "VPS 19 стран",
-    "VPS подписка",
-  ],
   icons: {
     icon: [
       { url: "/icon", type: "image/png", sizes: "32x32" },
@@ -68,29 +33,73 @@ export const metadata: Metadata = {
     shortcut: "/icon",
   },
   manifest: "/manifest.json",
-  openGraph: {
-    // Описание повторяет числа страниц, а не живёт своей жизнью:
-    // страны — src/lib/locations.ts, устройства и цена —
-    // src/lib/plans.ts, срок пробного доступа — src/lib/brand-facts.ts.
-    title: "Atlas Secure VPS — быстрый и приватный интернет",
-    description:
-      // РЕШЕНИЕ ВЛАДЕЛЬЦА 19.09.2026, принятое с озвученным риском.
-      // Формулировку снимали: реклама средств доступа к ресурсам с
-      // ограничениями в РФ запрещена (норма с 01.03.2024, прямой
-      // запрет с 01.09.2025, штраф юрлицу 200–500 тыс. ₽; первое
-      // решение ФАС — январь 2026), а description уходит в сниппет
-      // выдачи и превью в соцсетях, то есть работает как объявление.
-      // Владелец вернул: «это же норм, наша ЦА» — строка называет ту
-      // боль, с которой человек приходит, и заменить её один в один
-      // нечем. Подробности и альтернативы — COMPLIANCE-CHECK.md § 1д.
-      "Шифрует трафик, меняет страну, открывает то, что перестало открываться. " +
-      `${COUNTRY_COUNT} стран, ${DEVICE_LIMIT} устройств, ${formatRub(PLANS.basic[1])} ₽ в месяц. ` +
-      `${TRIAL_DAYS === 3 ? "Три дня" : `${TRIAL_DAYS} дня`} бесплатно, без карты.`,
-    type: "website",
-    locale: "ru_RU",
-    siteName: "Atlas Secure VPS",
-  },
 };
+
+/**
+ * Метаданные страницы: общая часть плюс пара ссылок на другую языковую
+ * версию (21.09.2026).
+ *
+ * `alternates.languages` объявляется ОДИН РАЗ НА ВЕСЬ САЙТ, здесь.
+ * Страница своего адреса корневому layout не сообщает — его кладёт в
+ * заголовок middleware. Альтернативой было дописать пару в каждый из
+ * двух десятков `generateMetadata`, и однажды кто-нибудь завёл бы
+ * страницу без неё: для поиска это две несвязанные страницы, которые
+ * конкурируют друг с другом в выдаче.
+ *
+ * `x-default` — куда вести того, чей язык нам неизвестен. Это русская
+ * версия: основной рынок русскоязычный, английская — вторая.
+ *
+ * ПОЭТОМУ У СТРАНИЦ СВОЕГО `alternates` БЫТЬ НЕ ДОЛЖНО. Метаданные
+ * страницы замещают одноимённое поле слоя выше ЦЕЛИКОМ, а не
+ * дополняют его: строка `alternates: { canonical: … }` на странице
+ * стирает вместе с собой обе `hreflang`, и для поиска русская и
+ * английская версии становятся двумя конкурирующими страницами. Так и
+ * было первые полчаса после правки — отсюда и этот абзац. Канонический
+ * адрес страницы совпадает с её путём, и считается он здесь же.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [locale, path] = await Promise.all([getLocale(), getPath()]);
+  const d = dict(locale);
+  const languages = alternatesFor(path);
+  // Канонический адрес — СВОЙ У КАЖДОГО ЯЗЫКА. Первая версия ставила
+  // сюда русский путь на обеих, то есть английская страница сама
+  // просила поиск индексировать вместо себя русскую. Поймано
+  // проверкой выдачи `/en/pricing` перед выкладкой.
+  const self = languages[locale];
+  // Числа собираются из источников истины, а не пишутся руками: страны
+  // — locations.ts, устройства и цена — plans.ts, срок пробного
+  // доступа — brand-facts.ts. Раньше «199 ₽» и «19 стран» стояли в
+  // описании строкой и молча разъезжались с тарифом.
+  const facts = {
+    countries: count(locale, COUNTRY_COUNT, d.units.country),
+    devices: count(locale, DEVICE_LIMIT, d.units.device),
+    price: formatRub(PLANS.basic[1]),
+    trial: count(locale, TRIAL_DAYS, d.units.day),
+  };
+  return {
+    ...BASE,
+    // Шаблон добавляет имя компании к заголовку раздела — иначе в
+    // выдаче все страницы сайта выглядят одинаково. Заголовок по
+    // умолчанию — для страниц, не объявивших свой.
+    title: { default: d.meta.title, template: "%s — Atlas Secure VPS" },
+    description: fill(d.meta.description, facts),
+    // Аббревиатура на витрине — VPS (решение владельца от 8 сентября
+    // 2026). Риск зафиксирован в docs/QUESTIONS.md №3: VPS —
+    // общепринятое имя виртуального сервера, а выделенные серверы мы
+    // тут же и продаём.
+    keywords: [...d.meta.keywords, fill("VPS {countries}", facts)],
+    alternates: { canonical: self, languages: { ...languages, "x-default": languages.ru } },
+    openGraph: {
+      title: d.meta.title,
+      description: fill(d.meta.ogDescription, facts),
+      type: "website",
+      locale: d.meta.ogLocale,
+      alternateLocale: dict(locale === "ru" ? "en" : "ru").meta.ogLocale,
+      siteName: "Atlas Secure VPS",
+      url: self,
+    },
+  };
+}
 
 /* Корпус «Атлас-издание»: класс `.a-js` (или `data-static` при
    ?static=1) ставится во время разбора HTML, до первой отрисовки —
@@ -128,13 +137,14 @@ export const viewport: Viewport = {
  * и подписи «наверх»; файл приезжает, когда элемент показан. Sofia Sans
  * Condensed убрана: ей не набрано ни одного видимого знака.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
   return (
-    <html lang="ru" className={`${atlasWide.variable} ${brand.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${atlasWide.variable} ${brand.variable}`} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: ATLAS_BOOT }} />
         {/* Структурированные данные всего сайта: организация, её
@@ -142,24 +152,22 @@ export default function RootLayout({
             иначе поиск получает несколько расходящихся карточек одной
             компании. */}
         <SiteJsonLd />
-        <I18nProvider>
-          <div className="relative min-h-dvh flex flex-col">
-            {children}
-          </div>
-          <CookieConsent />
-          {/* Курсор бренда и зерно (`.b-cursor`, `.b-grain`) убраны
-              13.09.2026: оба включались только при `.b-root` на
-              странице, а чернильной оболочки нет ни на одной — курсор
-              вешал слушатель и рисовал пустой div, зерно было
-              display: none. */}
-          {/* Возврат к первому экрану: страница высокая, а закреплённые
-              сцены забирают по несколько экранов прокрутки каждая. */}
-          <BackToTop />
-          {/* Смена страницы как монтажная склейка. */}
-          <PageTransition />
-          <PwaManager />
-          <IosInstallBanner />
-        </I18nProvider>
+        <div className="relative min-h-dvh flex flex-col">
+          {children}
+        </div>
+        <CookieConsent />
+        {/* Курсор бренда и зерно (`.b-cursor`, `.b-grain`) убраны
+            13.09.2026: оба включались только при `.b-root` на
+            странице, а чернильной оболочки нет ни на одной — курсор
+            вешал слушатель и рисовал пустой div, зерно было
+            display: none. */}
+        {/* Возврат к первому экрану: страница высокая, а закреплённые
+            сцены забирают по несколько экранов прокрутки каждая. */}
+        <BackToTop />
+        {/* Смена страницы как монтажная склейка. */}
+        <PageTransition />
+        <PwaManager />
+        <IosInstallBanner />
       </body>
     </html>
   );

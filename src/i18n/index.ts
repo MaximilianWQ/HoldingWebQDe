@@ -1,0 +1,36 @@
+import { DEFAULT_LOCALE, type Locale } from "@/lib/locale";
+import { ru } from "./ru";
+import { en } from "./en";
+
+/**
+ * Словари сайта (21.09.2026).
+ *
+ * УСТРОЙСТВО. Русский словарь — источник структуры: английский обязан
+ * повторять его форму, и TypeScript это проверяет (`Dict` выводится из
+ * `ru`). Забыли перевести ключ — сборка не пройдёт. Это и есть ответ
+ * на «любые изменения текста впредь должны быть и для английского»:
+ * забыть нельзя, компилятор не даст.
+ *
+ * ЧТО СЮДА НЕ КЛАДЁТСЯ: числа и факты. Цены, число стран, лимит
+ * устройств и срок пробного периода живут в `src/lib` и подставляются
+ * в строки — иначе у двух языков разойдутся цифры, а это хуже, чем
+ * непереведённая строка.
+ *
+ * ИМЕНА КЛЮЧЕЙ — по месту на экране, а не по смыслу текста:
+ * `home.hero.title`, а не `fast-internet`. Текст меняют, место — нет.
+ */
+export type Dict = typeof ru;
+
+const DICTS: Record<Locale, Dict> = { ru, en };
+
+export function dict(locale: Locale): Dict {
+  return DICTS[locale] ?? DICTS[DEFAULT_LOCALE];
+}
+
+/**
+ * Подстановка в строку: `t("Привет, {name}", { name: "Иван" })`.
+ * Нужна там, где в текст попадает число из `src/lib`.
+ */
+export function fill(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
+}

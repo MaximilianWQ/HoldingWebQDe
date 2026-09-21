@@ -19,7 +19,6 @@ export const metadata: Metadata = {
     "договор с юридическим лицом",
     "безналичный расчёт",
   ],
-  alternates: { canonical: "/business" },
   openGraph: {
     title: "Для бизнеса — Atlas Secure VPS",
     description:

@@ -1,0 +1,83 @@
+/**
+ * Язык страницы — единственный источник (владелец, 21.09.2026:
+ * «добавляем корректно English локализацию всего сайта»).
+ *
+ * УСТРОЙСТВО. Русский живёт в корне (`/pricing`), английский — под
+ * префиксом (`/en/pricing`). Префикс срезает middleware и кладёт язык
+ * в заголовок запроса `x-locale`; страницы читают его отсюда.
+ *
+ * ПОЧЕМУ НЕ СЕГМЕНТ `[lang]`. Это канонический способ, но он требует
+ * перенести 24 файла маршрутов и переписать каждую внутреннюю ссылку
+ * на сайте. Перенос такого объёма — это поломки в местах, которые
+ * никто не заметит до жалобы. Переписывание адреса в middleware даёт
+ * те же настоящие адреса (а значит и индексацию обеих версий), но без
+ * переезда файлов.
+ *
+ * ЭТОТ ФАЙЛ ЧИСТЫЙ — без `next/headers`. Им пользуется и
+ * переключатель языка, который работает в браузере: модуль с
+ * `next/headers` в клиентском компоненте Next не собирает вовсе.
+ * Чтение заголовка живёт отдельно — `src/lib/locale-server.ts`.
+ *
+ * ЦЕНА РЕШЕНИЯ, ЗАМЕРЕННАЯ: чтение заголовка делает страницу
+ * динамической, и одиннадцать витринных страниц перестали собираться
+ * заранее (`○ Static` → `ƒ Dynamic` в отчёте сборки). Замер на
+ * production-сборке, медиана из 12 запросов: /pricing 6,6 мс,
+ * /vds 4,2 мс, /support 3,8 мс, /en/pricing 4,5 мс. Данных эти
+ * страницы не запрашивают — они собираются из констант, поэтому
+ * «динамический» здесь стоит единицы миллисекунд. Для сравнения,
+ * ответ боевого сервера — 239 мс, он и решает.
+ *
+ * Статику можно было бы сохранить только сегментом `[lang]` с
+ * `generateStaticParams` — то есть переездом всех страниц. За четыре
+ * миллисекунды такой переезд не окупается.
+ */
+export const LOCALES = ["ru", "en"] as const;
+export type Locale = (typeof LOCALES)[number];
+export const DEFAULT_LOCALE: Locale = "ru";
+
+export const LOCALE_HEADER = "x-locale";
+
+/**
+ * Путь БЕЗ префикса языка, положенный middleware в заголовок запроса.
+ *
+ * Нужен корневому layout, чтобы объявить обе версии страницы
+ * (`alternates.languages`) в одном месте на весь сайт. Сам layout
+ * адреса страницы не знает: Next передаёт его только страницам.
+ * Альтернатива — дописывать alternates в каждый из двух десятков
+ * `generateMetadata`, и забыть один из них было бы вопросом времени.
+ */
+export const PATH_HEADER = "x-path";
+
+export function isLocale(v: unknown): v is Locale {
+  return typeof v === "string" && (LOCALES as readonly string[]).includes(v);
+}
+
+/**
+ * Адрес внутри сайта с учётом языка: русский без префикса, английский
+ * с `/en`. Внешние ссылки, якоря и `mailto:` не трогаются.
+ */
+export function localeHref(href: string, locale: Locale): string {
+  if (locale === DEFAULT_LOCALE) return href;
+  if (!href.startsWith("/") || href.startsWith("//")) return href;
+  if (href.startsWith(`/${locale}/`) || href === `/${locale}`) return href;
+  return href === "/" ? `/${locale}` : `/${locale}${href}`;
+}
+
+/** Обратная операция: путь без префикса языка — для переключателя. */
+export function stripLocale(pathname: string): string {
+  for (const l of LOCALES) {
+    if (l === DEFAULT_LOCALE) continue;
+    if (pathname === `/${l}`) return "/";
+    if (pathname.startsWith(`/${l}/`)) return pathname.slice(l.length + 1);
+  }
+  return pathname;
+}
+
+/**
+ * Адреса обеих версий страницы — для `alternates.languages` в
+ * метаданных. Без этого поисковик не знает, что это одна страница на
+ * двух языках, и считает их разными.
+ */
+export function alternatesFor(path: string): Record<string, string> {
+  return { ru: path, en: localeHref(path, "en") };
+}

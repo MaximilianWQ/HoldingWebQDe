@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   title: "Подключение в Happ по шагам",
   description:
     "Как подключиться в приложении Happ: скопировать ссылку подписки, импортировать её из буфера обмена, выбрать страну и нажать подключение.",
-  alternates: { canonical: "/install-happ" },
 };
 
 export default async function InstallHappRoute() {

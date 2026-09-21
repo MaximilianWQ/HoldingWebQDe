@@ -30,7 +30,6 @@ export const metadata: Metadata = {
   description:
     "Для входа нужна только почта. Не храним ни посещённых сайтов, ни DNS-запросов, " +
     "ни истории подключений, ни IP-адреса. Оба списка — что храним и что нет — целиком на странице.",
-  alternates: { canonical: "/security" },
 };
 
 const STORED = [

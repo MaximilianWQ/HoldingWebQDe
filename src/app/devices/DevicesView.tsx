@@ -11,7 +11,6 @@ import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT, type KeyAudience }
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import { TRAFFIC_TRIAL_MB } from "@/lib/traffic-packs";
 import type { SubscriptionData } from "@/types";
-import VShell from "@/components/vps/VShell";
 import { APPS, PLATFORMS, detectPlatform, type Platform } from "@/lib/apps";
 import "./devices-vps.css";
 
@@ -245,7 +244,7 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
   );
 
   return (
-    <VShell account={hasSession ? "member" : "guest"}>
+    <>
       <section className="v-section v-center" aria-labelledby="vd-title">
         <div className="v-wrap v-narrow">
           <h1 id="vd-title" className="v-h2">
@@ -440,6 +439,6 @@ export default function DevicesView({ hasSession }: { hasSession: boolean }) {
           </p>
         </div>
       </section>
-    </VShell>
+    </>
   );
 }

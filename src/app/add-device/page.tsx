@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import VShell from "@/components/vps/VShell";
 import AddDeviceView from "./AddDeviceView";
 
 /**
  * /add-device — серверная обёртка мастера подключения: только
- * метаданные. Оболочка (VShell, рабочий экран) собирается внутри
- * клиентского AddDeviceView — корпус Atlas Secure VPS.
+ * метаданные и оболочка (VShell, рабочий экран — короткий подвал).
+ *
+ * Оболочка стоит ЗДЕСЬ, а не внутри клиентского AddDeviceView
+ * (21.09.2026): она определяет язык запроса и потому обязана быть
+ * серверной.
  *
  * Экран личный: ключ подписки на нём свой у каждого аккаунта, поэтому
  * из поиска закрыт.
@@ -16,5 +20,9 @@ export const metadata: Metadata = {
 };
 
 export default function AddDevicePage() {
-  return <AddDeviceView />;
+  return (
+    <VShell work account="member">
+      <AddDeviceView />
+    </VShell>
+  );
 }

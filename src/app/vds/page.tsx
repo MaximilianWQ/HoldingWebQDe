@@ -35,7 +35,6 @@ export const metadata: Metadata = {
     `${capitalize(wordsFeminine(SERVERS.length))} ${plural(SERVERS.length, ["конфигурация", "конфигурации", "конфигураций"])} ` +
     `выделенных серверов Atlas Secure VPS от ${formatUsd(SERVER_ENTRY_USD)} в месяц. Сервер целиком ваш — ` +
     "цена, память, диски и скорость порта указаны на странице, ещё до заявки.",
-  alternates: { canonical: "/vds" },
 };
 
 const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;

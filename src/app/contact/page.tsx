@@ -11,7 +11,6 @@ import ContactView from "./ContactView";
 export const metadata: Metadata = {
   title: "Контакты",
   description: `Напишите ${BRAND}: выберите тему, оставьте почту — ответим письмом.`,
-  alternates: { canonical: "/contact" },
 };
 
 export default function ContactRoute() {

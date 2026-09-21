@@ -28,7 +28,6 @@ import "./ios-phone.css";
 export const metadata: Metadata = {
   title: "Atlas на iPhone",
   description: "Как добавить кабинет Atlas на экран «Домой» iPhone и iPad — пять касаний в Safari.",
-  alternates: { canonical: "/install-ios" },
 };
 
 export default function InstallIosPage() {

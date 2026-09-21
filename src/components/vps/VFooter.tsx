@@ -1,11 +1,14 @@
 import Link from "next/link";
 import Logo from "./Logo";
-import { FOOT_LINKS, FOOT_APPS, LEGAL, SUPPORT_TG, BRAND, TRIAL } from "./links";
+import { FOOT_LINKS, FOOT_APPS, LEGAL, SUPPORT_TG, BRAND } from "./links";
 import { SUPPORT_DESK } from "@/lib/contacts";
 import { COUNTRY_COUNT, CITY_COUNT } from "@/lib/locations";
 import { FOUNDED } from "@/lib/nav";
 import { PLANS, formatRub } from "@/lib/plans";
-import { plural } from "@/lib/ru-words";
+import { TRIAL_DAYS } from "@/lib/brand-facts";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { localeHref, type Locale } from "@/lib/locale";
 
 /**
  * Подвал — чёрная плита.
@@ -22,23 +25,31 @@ import { plural } from "@/lib/ru-words";
  *
  * `slim` — рабочие экраны (кабинет, оплата, вход): только реквизиты и
  * документы, без разделов.
+ *
+ * Компонент серверный, поэтому словарь читает сам: в браузер он не
+ * уезжает. Клиентская шапка получает подписи пропсами — см. `VShell`.
  */
-export default function VFooter({ slim = false }: { slim?: boolean }) {
+export default function VFooter({ slim = false, locale }: { slim?: boolean; locale: Locale }) {
+  const d = dict(locale);
+  const to = (href: string) => localeHref(href, locale);
   const year = new Date().getFullYear();
   const span = year > FOUNDED ? `${FOUNDED}–${year}` : String(FOUNDED);
-  const where = `${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["стране", "странах", "странах"])}`;
+
+  const base = (
+    <div className="v-foot-base">
+      <p>© {span} {BRAND} · {d.footer.rights}</p>
+      <p className="v-foot-legal">
+        {LEGAL.map((l) => (
+          <Link key={l.href} href={to(l.href)} prefetch={false}>{d.links[l.k]}</Link>
+        ))}
+      </p>
+    </div>
+  );
 
   if (slim) {
     return (
       <footer className="v-foot v-foot-slim">
-        <div className="v-wrap v-foot-base">
-          <p>© {span} {BRAND} · часть группы QoDev, Гонконг (SAR)</p>
-          <p className="v-foot-legal">
-            {LEGAL.map((l) => (
-              <Link key={l.href} href={l.href} prefetch={false}>{l.label}</Link>
-            ))}
-          </p>
-        </div>
+        <div className="v-wrap">{base}</div>
       </footer>
     );
   }
@@ -48,30 +59,33 @@ export default function VFooter({ slim = false }: { slim?: boolean }) {
       <div className="v-wrap">
         <div className="v-foot-top">
           <div className="v-foot-brand">
-            <Logo />
+            <Logo href={to("/")} home={d.a11y.toHome} />
             <p className="v-foot-pitch">
-              Ускоритель интернета для телефона, компьютера и телевизора.{" "}
-              <span>Видео, сайты и игры открываются сразу.</span>
+              {d.footer.pitch} <span>{d.footer.claim}</span>
             </p>
             <div className="v-foot-cta">
-              <Link href="/auth" prefetch={false} className="v-btn v-btn-white">Попробовать {TRIAL} бесплатно</Link>
-              <Link href="/pricing" className="v-btn v-btn-ghost">Тарифы от {formatRub(PLANS.basic[1])} ₽</Link>
+              <Link href={to("/auth")} prefetch={false} className="v-btn v-btn-white">
+                {fill(d.common.tryFree, { trial: count(locale, TRIAL_DAYS, d.units.day) })}
+              </Link>
+              <Link href={to("/pricing")} className="v-btn v-btn-ghost">
+                {fill(d.common.pricingFrom, { price: formatRub(PLANS.basic[1]) })}
+              </Link>
             </div>
             <p className="v-foot-support">
-              Вопрос перед покупкой? Пишите в Telegram{" "}
+              {d.footer.askBefore}{" "}
               <a href={SUPPORT_TG.href} target="_blank" rel="noopener noreferrer">{SUPPORT_TG.handle}</a>{" "}
-              или на почту{" "}
+              {d.footer.orMail}{" "}
               <a href={`mailto:${SUPPORT_DESK.email}`}>{SUPPORT_DESK.email}</a>
             </p>
           </div>
 
-          <nav className="v-foot-cols" aria-label="Разделы сайта">
+          <nav className="v-foot-cols" aria-label={d.a11y.siteSections}>
             {FOOT_LINKS.map((group, i) => (
               <div key={group.title} style={{ ["--i" as string]: i }}>
-                <p className="v-foot-group-title">{group.title}</p>
+                <p className="v-foot-group-title">{d.groups[group.title]}</p>
                 <ul className="v-foot-links">
                   {group.links.map((l) => (
-                    <li key={l.href}><Link href={l.href} prefetch={false}>{l.label}</Link></li>
+                    <li key={l.href}><Link href={to(l.href)} prefetch={false}>{d.links[l.k]}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -80,8 +94,11 @@ export default function VFooter({ slim = false }: { slim?: boolean }) {
         </div>
 
         <p className="v-foot-apps">
-          Работает в приложениях <b>{FOOT_APPS}</b> · серверы в {where}, {CITY_COUNT}{" "}
-          {plural(CITY_COUNT, ["город", "города", "городов"])}
+          {d.footer.worksIn} <b>{FOOT_APPS}</b> ·{" "}
+          {fill(d.footer.serversIn, {
+            countries: count(locale, COUNTRY_COUNT, d.units.countryIn),
+            cities: count(locale, CITY_COUNT, d.units.city),
+          })}
         </p>
 
         {/* Контурное имя во всю ширину — тот приём из прошлой версии,
@@ -90,14 +107,7 @@ export default function VFooter({ slim = false }: { slim?: boolean }) {
           <p>atlas secure</p>
         </div>
 
-        <div className="v-foot-base">
-          <p>© {span} {BRAND} · часть группы QoDev, Гонконг (SAR)</p>
-          <p className="v-foot-legal">
-            {LEGAL.map((l) => (
-              <Link key={l.href} href={l.href} prefetch={false}>{l.label}</Link>
-            ))}
-          </p>
-        </div>
+        {base}
       </div>
     </footer>
   );

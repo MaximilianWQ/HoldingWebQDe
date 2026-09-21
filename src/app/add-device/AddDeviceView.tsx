@@ -9,7 +9,6 @@ import { plural } from "@/lib/ru-words";
 import { BUY_TRAFFIC_HREF, BYPASS_KEY, MAIN_KEY, SWITCH_HINT } from "@/lib/key-names";
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import type { SubscriptionData } from "@/types";
-import VShell from "@/components/vps/VShell";
 import { APPS, PLATFORMS, detectPlatform, type Platform } from "@/lib/apps";
 import "./add-device-vps.css";
 
@@ -217,7 +216,7 @@ export default function AddDeviceView() {
   );
 
   return (
-    <VShell work account="member">
+    <>
       <section className="v-section vad-top" aria-labelledby="vad-title">
         <div className="v-wrap v-narrow">
           <Link href="/dashboard" className="vad-back">
@@ -381,6 +380,6 @@ export default function AddDeviceView() {
           </div>
         </div>
       </section>
-    </VShell>
+    </>
   );
 }

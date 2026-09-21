@@ -1,23 +1,52 @@
 /**
  * Ссылки и подписи корпуса Atlas Secure VPS — единственный источник для
  * шапки, меню и подвала (структура сайта — src/lib/nav.ts).
+ *
+ * ПОДПИСЕЙ ЗДЕСЬ БОЛЬШЕ НЕТ (21.09.2026, английская версия сайта).
+ * Раздел описывается ключом и адресом; слово берётся из словаря
+ * (`src/i18n`). Иначе у нас было бы два списка разделов — русский и
+ * английский, — и новый раздел неизбежно появился бы в одном.
+ *
+ * Разворачивает ключи в слова `labelAll()` — на сервере, где язык
+ * запроса уже известен. В браузер уезжают готовые подписи, а не оба
+ * словаря.
  */
+import type { Dict } from "@/i18n";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { plural } from "@/lib/ru-words";
 import { APPS, STORE as APP_STORE } from "@/lib/apps";
 
 export const BRAND = "Atlas Secure VPS";
+
+/**
+ * Срок пробного периода словами, по-русски.
+ *
+ * Остаётся для страниц, которые ещё не переведены: они набраны
+ * по-русски целиком, и подсовывать им английское «3 days» было бы
+ * хуже, чем оставить как есть. Переведённая страница берёт срок через
+ * `count(locale, TRIAL_DAYS, d.units.day)`.
+ */
 export const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
 
-export interface VLink { label: string; href: string }
+/** Ключ подписи в словаре: `links.vds` и так далее. */
+export type LinkKey = keyof Dict["links"];
+
+/** Раздел до перевода: ключ и адрес. */
+export interface VLink { k: LinkKey; href: string }
+/** Раздел после перевода: то, что рисует компонент. */
+export interface VItem { label: string; href: string }
+
+export function labelAll(d: Dict, list: VLink[]): VItem[] {
+  return list.map((l) => ({ label: d.links[l.k], href: l.href }));
+}
 
 /** Шапка на широком экране. */
 export const HEAD_LINKS: VLink[] = [
-  { label: "Главная", href: "/" },
-  { label: "Тарифы", href: "/pricing" },
-  { label: "Устройства", href: "/devices" },
-  { label: "Выделенные серверы", href: "/vds" },
-  { label: "Поддержка", href: "/support" },
+  { k: "home", href: "/" },
+  { k: "pricing", href: "/pricing" },
+  { k: "devices", href: "/devices" },
+  { k: "vds", href: "/vds" },
+  { k: "support", href: "/support" },
 ];
 
 /**
@@ -31,23 +60,30 @@ export const HEAD_LINKS: VLink[] = [
  * разделов, куда вошедшему действительно есть смысл идти.
  */
 export const WORK_HEAD_LINKS: VLink[] = [
-  { label: "Тарифы", href: "/pricing" },
-  { label: "Устройства", href: "/devices" },
-  { label: "Выделенные серверы", href: "/vds" },
-  { label: "Поддержка", href: "/support" },
+  { k: "pricing", href: "/pricing" },
+  { k: "devices", href: "/devices" },
+  { k: "vds", href: "/vds" },
+  { k: "support", href: "/support" },
 ];
 
 /** Меню на телефоне. */
 export const MENU_LINKS: VLink[] = [
-  { label: "Главная", href: "/" },
-  { label: "Тарифы", href: "/pricing" },
-  { label: "Пакеты трафика", href: "/pricing#traffic" },
-  { label: "Инструкции", href: "/devices" },
-  { label: "Выделенные серверы", href: "/vds" },
-  { label: "Для бизнеса", href: "/business" },
-  { label: "Поддержка", href: "/support" },
-  { label: "Вакансии", href: "/careers" },
-  { label: "Контакты", href: "/contact" },
+  { k: "home", href: "/" },
+  { k: "pricing", href: "/pricing" },
+  { k: "traffic", href: "/pricing#traffic" },
+  { k: "guides", href: "/devices" },
+  { k: "vds", href: "/vds" },
+  { k: "business", href: "/business" },
+  { k: "support", href: "/support" },
+  { k: "careers", href: "/careers" },
+  { k: "contact", href: "/contact" },
+];
+
+/** Разделы, которых нет ни в шапке, ни в меню телефона. */
+export const EXTRA_SECTIONS: VLink[] = [
+  { k: "infrastructure", href: "/infrastructure" },
+  { k: "about", href: "/about" },
+  { k: "security", href: "/security" },
 ];
 
 /**
@@ -57,22 +93,18 @@ export const MENU_LINKS: VLink[] = [
  * (владелец, 19.09.2026: «бар должен корректно отображаться под
  * конкретный экран»). Если открытого раздела в шапке нет — он
  * добавляется в неё отдельным пунктом.
+ *
+ * Работает уже с переведённым списком: путь сравнивается с адресом, а
+ * адрес от языка не зависит (префикс `/en` снимается до сравнения —
+ * см. `VHeader`).
  */
-export function currentSection(pathname: string): VLink | null {
-  const known = [...HEAD_LINKS, ...MENU_LINKS, ...EXTRA_SECTIONS];
-  const hit = known.find((l) => l.href === pathname);
+export function currentSection(pathname: string, all: VItem[], head: VItem[]): VItem | null {
+  const hit = all.find((l) => l.href === pathname);
   if (!hit) return null;
-  return HEAD_LINKS.some((l) => l.href === pathname) ? null : hit;
+  return head.some((l) => l.href === pathname) ? null : hit;
 }
 
-/** Разделы, которых нет ни в шапке, ни в меню телефона. */
-const EXTRA_SECTIONS: VLink[] = [
-  { label: "Инфраструктура", href: "/infrastructure" },
-  { label: "О компании", href: "/about" },
-  { label: "Безопасность", href: "/security" },
-];
-
-export interface VLinkGroup { title: string; links: VLink[] }
+export interface VLinkGroup { title: keyof Dict["groups"]; links: VLink[] }
 
 /**
  * Подвал — четыре группы ссылок (владелец, 18.09.2026: «низ сайта как в
@@ -81,46 +113,46 @@ export interface VLinkGroup { title: string; links: VLink[] }
  */
 export const FOOT_LINKS: VLinkGroup[] = [
   {
-    title: "Продукт",
+    title: "product",
     links: [
-      { label: "Тарифы", href: "/pricing" },
-      { label: "Пакеты трафика", href: "/pricing#traffic" },
-      { label: "Устройства и приложения", href: "/devices" },
-      { label: "Выделенные серверы", href: "/vds" },
+      { k: "pricing", href: "/pricing" },
+      { k: "traffic", href: "/pricing#traffic" },
+      { k: "devicesApps", href: "/devices" },
+      { k: "vds", href: "/vds" },
     ],
   },
   {
-    title: "Помощь",
+    title: "help",
     links: [
-      { label: "Поддержка", href: "/support" },
-      { label: "Частые вопросы", href: "/support#faq" },
-      { label: "Установка на iPhone", href: "/install-ios" },
-      { label: "Контакты", href: "/contact" },
+      { k: "support", href: "/support" },
+      { k: "faq", href: "/support#faq" },
+      { k: "installIos", href: "/install-ios" },
+      { k: "contact", href: "/contact" },
     ],
   },
   {
-    title: "Компания",
+    title: "company",
     links: [
-      { label: "О компании", href: "/about" },
-      { label: "Инфраструктура", href: "/infrastructure" },
-      { label: "Вакансии", href: "/careers" },
-      { label: "Безопасность", href: "/security" },
-      { label: "Для бизнеса", href: "/business" },
+      { k: "about", href: "/about" },
+      { k: "infrastructure", href: "/infrastructure" },
+      { k: "careers", href: "/careers" },
+      { k: "security", href: "/security" },
+      { k: "business", href: "/business" },
     ],
   },
   {
-    title: "Документы",
+    title: "docs",
     links: [
-      { label: "Пользовательское соглашение", href: "/terms" },
-      { label: "Политика конфиденциальности", href: "/privacy" },
+      { k: "termsFull", href: "/terms" },
+      { k: "privacyFull", href: "/privacy" },
     ],
   },
 ];
 
 /** Правовые ссылки отдельной строкой внизу подвала. */
 export const LEGAL: VLink[] = [
-  { label: "Соглашение", href: "/terms" },
-  { label: "Конфиденциальность", href: "/privacy" },
+  { k: "terms", href: "/terms" },
+  { k: "privacy", href: "/privacy" },
 ];
 
 /** Поддержка — адреса берём из единственного источника. */

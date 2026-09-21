@@ -391,7 +391,52 @@ html:has(.v), body:has(.v) { background: var(--v-bg); }
 }
 .v-head-cta {
   display: none;
+  align-items: center;
+  gap: 4px;
   margin-left: 8px;
+}
+
+/* Переключатель языка (21.09.2026).
+
+   ТИХИЙ, НО НЕ СПРЯТАННЫЙ. Рядом стоит главное действие — синяя
+   пилюля «Войти». Сделать переключатель второй пилюлей значило бы
+   поставить рядом две кнопки равного веса и заставить выбирать между
+   ними; покрасить его — отнять у синего цвета единственное значение.
+   Поэтому он набран как подпись: два знака, серым, без фона. Фон
+   появляется только под рукой.
+
+   ШИРИНА ПОСТОЯННАЯ. «EN» и «RU» — по два знака, но в разных
+   гарнитурных ширинах, и без `min-width` капсула шапки дёргалась бы
+   на пиксель при смене языка. */
+.v-lang {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--v-ink-3);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: color 160ms var(--v-ease), background-color 160ms var(--v-ease);
+}
+.v-lang:hover { color: var(--v-ink); background: var(--v-soft); }
+.v-lang:active { background: var(--v-line); }
+
+/* В меню телефона — строка во всю ширину вместе с кнопками: там у
+   переключателя есть место на слово целиком, и «Русский» понятнее
+   двух букв тому, кто зашёл не на свой язык. */
+.v-lang-block {
+  min-height: 48px;
+  width: 100%;
+  justify-items: start;
+  padding: 0 14px;
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--v-ink-2);
+  background: var(--v-soft);
 }
 .v-head-cta .v-btn { min-height: 44px; padding: 0 20px; border-radius: 999px; font-size: 15px; }
 .v-burger {

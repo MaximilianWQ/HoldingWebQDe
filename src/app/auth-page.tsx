@@ -219,6 +219,30 @@ function CodeField({
   inputRef: RefObject<HTMLInputElement | null>;
 }) {
   const active = Math.min(value.length, 5);
+
+  /**
+   * Каретка ставится В КОНЕЦ набранного, а не выделяет всё: при
+   * выделении первая же цифра стирала бы то, что уже введено.
+   *
+   * Наводить фокус руками НЕ НАДО, и это оплачено ошибкой. Сначала тут
+   * висел `onPointerDown` с `preventDefault()` и своим `focus()` —
+   * мышью работало, а пальцем нет: мобильные браузеры открывают
+   * клавиатуру только по родному наведению фокуса, а `preventDefault`
+   * его и отменял. Достаточно того, что клетки не ловят нажатие
+   * (`pointer-events: none`), а поле лежит на всю область: браузер сам
+   * наводит фокус и сам открывает клавиатуру.
+   */
+  const caretToEnd = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    const end = el.value.length;
+    try {
+      el.setSelectionRange(end, end);
+    } catch {
+      /* поле ещё не в разметке — ничего страшного */
+    }
+  };
+
   return (
     <div className="v-field">
       <label className="v-label" htmlFor={id}>{label}</label>
@@ -233,7 +257,8 @@ function CodeField({
           enterKeyHint="done"
           value={value}
           onChange={onChange}
-          onFocus={(e) => e.target.select()}
+          onFocus={caretToEnd}
+          onClick={caretToEnd}
           className="av-code-input"
           aria-invalid={invalid ? true : undefined}
           aria-describedby={describedBy}

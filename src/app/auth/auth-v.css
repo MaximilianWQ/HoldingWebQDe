@@ -130,9 +130,16 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px;
+  /* По клеткам видно, что сюда пишут, — и курсор это подтверждает. */
+  cursor: text;
 }
 .av-cell {
   position: relative;
+  /* Клетки НЕ ЛОВЯТ НАЖАТИЕ. Они лежат в разметке после поля ввода и
+     рисуются поверх него, поэтому раньше забирали нажатие себе, и
+     клавиатура не открывалась: попасть в поле было физически некуда.
+     Наводит фокус сама обёртка. */
+  pointer-events: none;
   display: grid;
   place-items: center;
   height: 56px;
@@ -181,7 +188,18 @@
   background: transparent;
   color: transparent;
   caret-color: transparent;
+  /* 16px не по эстетике: при меньшем Safari на iOS увеличивает
+     страницу при фокусе. */
   font-size: 16px;
+}
+
+/* Своей рамки у поля нет — фокус показывает активная клетка: синее
+   кольцо, подъём и мигающая каретка. Браузерная рамка обводила бы
+   весь ряд поверх этого, то есть один и тот же фокус показывался бы
+   дважды. Замена равноценная, поэтому правило допустимо. */
+.av-code-input:focus,
+.av-code-input:focus-visible {
+  outline: none;
 }
 .av-code-input::selection { background: transparent; }
 .av-code:focus-within { outline: none; }

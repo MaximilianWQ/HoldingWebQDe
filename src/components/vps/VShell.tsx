@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import VHeader from "./VHeader";
 import VFooter from "./VFooter";
 import ToastProvider from "./Toast";
+import HtmlLang from "./HtmlLang";
 import { HEAD_LINKS, WORK_HEAD_LINKS, MENU_LINKS, EXTRA_SECTIONS, labelAll } from "./links";
 import { dict, fill } from "@/i18n";
 import { count } from "@/i18n/plural";
@@ -39,6 +40,7 @@ export default async function VShell({
   return (
     <div className="v">
       <ToastProvider>
+        <HtmlLang locale={locale} />
         <a href="#main" className="b-skip">{d.a11y.skip}</a>
         <VHeader
           account={account}

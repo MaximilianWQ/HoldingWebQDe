@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_LOCALE, LOCALES, LOCALE_HEADER, PATH_HEADER } from "@/lib/locale";
+import { DEFAULT_LOCALE, LOCALES, LOCALE_HEADER, LOCALE_PARAM, PATH_HEADER } from "@/lib/locale";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -58,11 +58,20 @@ export function middleware(request: NextRequest) {
   // Security headers for every route. (The legacy Xray /api/sub/* CORS
   // branch is gone together with the route — subscriptions are served
   // by the Remnawave panel on its own domain.)
-  const response = hit
-    ? NextResponse.rewrite(new URL(hit.rest + request.nextUrl.search, request.url), {
-        request: { headers: forwarded },
-      })
-    : NextResponse.next({ request: { headers: forwarded } });
+  // Адрес назначения помечается языком. Без метки `/en/pricing` и
+  // `/pricing` — один маршрут, и клиентский роутер Next не считал
+  // переход переходом: адрес в строке менялся, страница оставалась
+  // русской (замер 21.09.2026). В адресной строке метки не видно —
+  // перезапись адрес не меняет.
+  let response: NextResponse;
+  if (hit) {
+    const dest = new URL(hit.rest, request.url);
+    dest.search = request.nextUrl.search;
+    dest.searchParams.set(LOCALE_PARAM, hit.locale);
+    response = NextResponse.rewrite(dest, { request: { headers: forwarded } });
+  } else {
+    response = NextResponse.next({ request: { headers: forwarded } });
+  }
 
   // Prevent clickjacking
   response.headers.set("X-Frame-Options", "DENY");

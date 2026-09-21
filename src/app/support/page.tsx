@@ -6,7 +6,11 @@ import { BRAND } from "@/components/vps/links";
 import { DEVICE_LIMIT, PLANS, formatRub } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
-import { plural } from "@/lib/ru-words";
+import { dict, fill } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { rich } from "@/i18n/rich";
+import { getLocale } from "@/lib/locale-server";
+import { localeHref } from "@/lib/locale";
 import "@/app/vps-info.css";
 
 /**
@@ -19,93 +23,61 @@ import "@/app/vps-info.css";
  * Формы на этой странице нет и не было — письмо отправляется на
  * /contact.
  */
-export const metadata: Metadata = {
-  title: "Поддержка",
-  description:
-    `Свяжитесь с ${BRAND}: быстрее всего отвечаем в Telegram. Ответы на частые вопросы — подключение, устройства, пробный период, цены.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const d = dict(await getLocale());
+  return {
+    title: d.support.meta.title,
+    description: fill(d.support.meta.description, { brand: BRAND }),
+  };
+}
 
 const TELEGRAM = "https://t.me/atlas_suppbot";
-const TRIAL = `${TRIAL_DAYS} ${plural(TRIAL_DAYS, ["день", "дня", "дней"])}`;
-const DEVICE_WORD = plural(DEVICE_LIMIT, ["устройстве", "устройствах", "устройствах"]);
 
-const CHANNELS: { name: string; note: string; href: string; external: boolean; icon: IconName; live?: boolean }[] = [
-  { name: "Telegram", note: "Отвечаем быстрее всего", href: TELEGRAM, external: true, icon: "chat", live: true },
-  { name: "ВКонтакте", note: "Сообщество Atlas Secure", href: "https://vk.com/atlassecure", external: true, icon: "users" },
-  { name: "Письмом", note: "Форма обратной связи", href: "/contact", external: false, icon: "send" },
+/**
+ * Способы связи. Адрес и значок от языка не зависят, подпись и
+ * пояснение берутся из словаря по тому же месту в списке.
+ */
+const CHANNELS: { href: string; external: boolean; icon: IconName; live?: boolean }[] = [
+  { href: TELEGRAM, external: true, icon: "chat", live: true },
+  { href: "https://vk.com/atlassecure", external: true, icon: "users" },
+  { href: "/contact", external: false, icon: "send" },
 ];
 
-const FAQ: { q: string; a: React.ReactNode }[] = [
-  {
-    q: "Как подключить?",
-    a: (
-      <>
-        Откройте <Link href="/devices" className="v-link">страницу устройств</Link>, выберите своё — три
-        коротких шага, ключ ждёт в личном кабинете.
-      </>
-    ),
-  },
-  {
-    q: "Сколько устройств можно подключить?",
-    a: <>Одна подписка работает на {DEVICE_LIMIT} {DEVICE_WORD}.</>,
-  },
-  {
-    q: "Можно попробовать бесплатно?",
-    a: (
-      <>
-        Да, {TRIAL} без карты — достаточно войти по почте. Автосписаний нет: не понравится —
-        просто не продлевайте.
-      </>
-    ),
-  },
-  {
-    q: "Сколько стоит?",
-    a: (
-      <>
-        От {formatRub(PLANS.basic[1])} ₽ в месяц. Все тарифы и цены — на{" "}
-        <Link href="/pricing" className="v-link">странице тарифов</Link>.
-      </>
-    ),
-  },
-  {
-    q: "Сайт всё равно не открывается",
-    a: (
-      <>
-        Переключитесь на другую страну в приложении — их {COUNTRY_COUNT}. Не помогло — напишите в
-        Telegram, какой сайт и на каком устройстве.
-      </>
-    ),
-  },
-  {
-    q: "Как сменить устройство?",
-    a: <>Поставьте приложение на новое устройство и добавьте тот же ключ из личного кабинета.</>,
-  },
-];
-
-export default function SupportPage() {
+export default async function SupportPage() {
+  const locale = await getLocale();
+  const d = dict(locale);
+  const t = d.support;
+  const to = (href: string) => localeHref(href, locale);
+  const vars = {
+    devices: count(locale, DEVICE_LIMIT, d.units.device),
+    trial: count(locale, TRIAL_DAYS, d.units.day),
+    price: formatRub(PLANS.basic[1], locale),
+    countriesN: COUNTRY_COUNT,
+  };
+  const channels = CHANNELS.map((c, i) => ({ ...c, ...t.channels[i] }));
   return (
     <VShell>
       <section className="v-section v-center v-glow" aria-labelledby="v-support-title">
         <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-support-title" className="v-h1">
-            Чем <span className="v-accent">помочь?</span>
+            {t.title} <span className="v-accent">{t.titleAccent}</span>
           </h1>
-          <p className="v-lead">Не подключается, вопрос по оплате — напишите нам. Быстрее всего отвечаем в Telegram.</p>
+          <p className="v-lead">{t.lead}</p>
           <div className="v-actions">
             <a href={TELEGRAM} target="_blank" rel="noopener noreferrer" className="v-btn v-btn-primary">
-              Написать в Telegram
-              <span className="v-sr"> (откроется в новой вкладке)</span>
+              {t.writeTg}
+              <span className="v-sr">{t.newTab}</span>
             </a>
-            <Link href="#faq" className="v-btn v-btn-soft">Частые вопросы</Link>
+            <Link href="#faq" className="v-btn v-btn-soft">{t.faqLink}</Link>
           </div>
-          <p className="vp-live-row"><span className="v-live" aria-hidden /> <b>Отвечаем сейчас</b> в Telegram</p>
+          <p className="vp-live-row"><span className="v-live" aria-hidden /> <b>{t.answering}</b> {t.answeringIn}</p>
         </div>
       </section>
 
-      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label="Способы связи">
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label={t.channelsLabel}>
         <div className="v-wrap v-narrow">
           <div className="vp-channels">
-            {CHANNELS.map((c) => {
+            {channels.map((c) => {
               const inner = (
                 <>
                   <span className="vp-channel-icon" aria-hidden><Icon name={c.icon} size={22} /></span>
@@ -117,12 +89,12 @@ export default function SupportPage() {
                 </>
               );
               return c.external ? (
-                <a key={c.name} href={c.href} target="_blank" rel="noopener noreferrer" className="v-card v-card-field vp-channel v-lift">
+                <a key={c.href} href={c.href} target="_blank" rel="noopener noreferrer" className="v-card v-card-field vp-channel v-lift">
                   {inner}
-                  <span className="v-sr"> (откроется в новой вкладке)</span>
+                  <span className="v-sr">{t.newTab}</span>
                 </a>
               ) : (
-                <Link key={c.name} href={c.href} className="v-card v-card-field vp-channel v-lift">{inner}</Link>
+                <Link key={c.href} href={to(c.href)} className="v-card v-card-field vp-channel v-lift">{inner}</Link>
               );
             })}
           </div>
@@ -131,15 +103,15 @@ export default function SupportPage() {
 
       <section className="v-section v-center v-reveal" id="faq" aria-labelledby="v-faq-title">
         <div className="v-wrap v-narrow">
-          <h2 id="v-faq-title" className="v-h2">Частые вопросы</h2>
+          <h2 id="v-faq-title" className="v-h2">{t.faqTitle}</h2>
           <div className="vp-faq">
-            {FAQ.map((f) => (
+            {t.faq.map((f) => (
               <details key={f.q} className="v-card v-card-field vp-faq-item">
                 <summary>
                   <span className="vp-faq-q">{f.q}</span>
                   <span className="vp-faq-mark" aria-hidden><Icon name="chevron-down" size={16} /></span>
                 </summary>
-                <p className="vp-faq-a"><span>{f.a}</span></p>
+                <p className="vp-faq-a"><span>{rich(fill(f.a, vars), locale)}</span></p>
               </details>
             ))}
           </div>

@@ -12,27 +12,43 @@
  * COMPLIANCE-CHECK.md § 1 — решать его нужно доменом, а не сноской.
  */
 
+import type { Locale } from "./locale";
+
 export interface ContactDesk {
   /** Кому писать. */
   title: string;
   email: string;
   /** Что именно решает этот адрес — одна строка. */
   note: string;
+  /** То же по-английски. Поля обязательные — новый адрес без перевода
+   *  не соберётся, и на английской странице не окажется русской
+   *  строки посреди списка. */
+  titleEn: string;
+  noteEn: string;
 }
 
 export const SUPPORT_DESK: ContactDesk = {
   title: "Техническая поддержка",
   email: "support@atlassecure.uk",
   note: "Подключение, оплата, ключи — проекты Atlas Secure и QoDev",
+  titleEn: "Technical support",
+  noteEn: "Connecting, payments, keys — Atlas Secure and QoDev projects",
 };
 
 export const SALES_DESK: ContactDesk = {
   title: "Отдел продаж",
   email: "sales@atlassecure.uk",
   note: "Выделенные серверы и инфраструктурные решения Atlas Secure",
+  titleEn: "Sales",
+  noteEn: "Dedicated servers and infrastructure from Atlas Secure",
 };
 
 export const DESKS: ContactDesk[] = [SUPPORT_DESK, SALES_DESK];
+
+/** Подпись и пояснение адреса на языке страницы. */
+export function deskText(d: ContactDesk, locale: Locale): { title: string; note: string } {
+  return locale === "ru" ? { title: d.title, note: d.note } : { title: d.titleEn, note: d.noteEn };
+}
 
 /** Поддержка в Telegram — тот же адрес, что на /support и в подвале. */
 export const TELEGRAM_SUPPORT = { handle: "@atlas_suppbot", href: "https://t.me/atlas_suppbot" };
@@ -65,10 +81,10 @@ export const OFFICE = {
  * нужен ни им, ни нам.
  */
 export const VISITOR_ROLES = [
-  { value: "employee", label: "Сотрудник" },
-  { value: "head", label: "Руководитель" },
-  { value: "partner", label: "Партнёр" },
-  { value: "other", label: "Другое" },
+  { value: "employee", label: "Сотрудник", labelEn: "Employee" },
+  { value: "head", label: "Руководитель", labelEn: "Manager" },
+  { value: "partner", label: "Партнёр", labelEn: "Partner" },
+  { value: "other", label: "Другое", labelEn: "Other" },
 ] as const;
 
 /**
@@ -82,6 +98,17 @@ export const VISITOR_ROLES = [
  * латиницей и тип документа.
  */
 export const VISITOR_DOCS = [
-  { value: "passport", label: "Паспорт" },
-  { value: "hkid", label: "HKID (удостоверение Гонконга)" },
+  { value: "passport", label: "Паспорт", labelEn: "Passport" },
+  { value: "hkid", label: "HKID (удостоверение Гонконга)", labelEn: "HKID (Hong Kong identity card)" },
 ] as const;
+
+/**
+ * Подпись варианта на языке страницы.
+ *
+ * ВАЖНО: в заявку, которую читает администратор, по-прежнему уезжает
+ * РУССКОЕ `label` — админка русская, и переключать её язык вслед за
+ * языком посетителя незачем.
+ */
+export function optionLabel(o: { label: string; labelEn: string }, locale: Locale): string {
+  return locale === "ru" ? o.label : o.labelEn;
+}

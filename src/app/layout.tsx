@@ -143,6 +143,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const locale = await getLocale();
+  // Нижние карточки — клиентские и живут вне страницы, поэтому текст им
+  // отдаёт layout: сами словарь они не читают, иначе в браузер уехали бы
+  // оба языка (см. CLAUDE.md, «Сайт на двух языках»).
+  const d = dict(locale);
   return (
     <html lang={locale} className={`${atlasWide.variable} ${brand.variable}`} suppressHydrationWarning>
       <body className="antialiased" suppressHydrationWarning>
@@ -155,7 +159,7 @@ export default async function RootLayout({
         <div className="relative min-h-dvh flex flex-col">
           {children}
         </div>
-        <CookieConsent />
+        <CookieConsent t={d.cookie} />
         {/* Курсор бренда и зерно (`.b-cursor`, `.b-grain`) убраны
             13.09.2026: оба включались только при `.b-root` на
             странице, а чернильной оболочки нет ни на одной — курсор
@@ -163,11 +167,11 @@ export default async function RootLayout({
             display: none. */}
         {/* Возврат к первому экрану: страница высокая, а закреплённые
             сцены забирают по несколько экранов прокрутки каждая. */}
-        <BackToTop />
+        <BackToTop label={d.a11y.toTop} short={d.a11y.toTopShort} />
         {/* Смена страницы как монтажная склейка. */}
         <PageTransition />
         <PwaManager />
-        <IosInstallBanner />
+        <IosInstallBanner t={d.install} />
       </body>
     </html>
   );

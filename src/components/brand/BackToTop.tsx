@@ -37,7 +37,7 @@ import { scrollToTop } from "./scroll-top";
  * data-атрибут, а не в состояние React: перерисовывать дерево на
  * каждом кадре прокрутки ради одного логического значения незачем.
  */
-export default function BackToTop() {
+export default function BackToTop({ label, short }: { label: string; short: string }) {
   const ref = useRef<HTMLButtonElement>(null);
   // Порог считается заново на каждой странице: после перехода
   // прокрутка сбрасывается, и кнопка обязана исчезнуть.
@@ -87,14 +87,14 @@ export default function BackToTop() {
       className="b-top"
       data-on="false"
       tabIndex={-1}
-      aria-label="Вернуться к первому экрану"
+      aria-label={label}
       onClick={() => scrollToTop()}
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square" aria-hidden>
         <path d="M12 20V5" />
         <path d="M5 12l7-7 7 7" />
       </svg>
-      <span className="b-top-label">наверх</span>
+      <span className="b-top-label">{short}</span>
     </button>
   );
 }

@@ -5,6 +5,7 @@ import {
   announceConsentSettled, hasCookieConsent, rememberCookieConsent, requestOverlay, releaseOverlay,
 } from "@/lib/overlay-queue";
 import { holdScroll } from "@/lib/scroll-lock";
+import type { Dict } from "@/i18n";
 
 /**
  * Согласие на cookie — первое в очереди нижних карточек.
@@ -21,7 +22,10 @@ import { holdScroll } from "@/lib/scroll-lock";
  * которая его открыла.
  *
  * Правовой текст сохранён дословно — он согласован и не является
- * предметом редизайна.
+ * предметом редизайна. С 21.09.2026 он живёт в словарях (`src/i18n`,
+ * раздел `cookie`) и приходит сюда пропсом: компонент клиентский, и
+ * импортируй он словарь сам — в браузер уехали бы оба языка. Язык
+ * определяет корневой layout, он же и передаёт текст.
  *
  * 11.09.2026 (владелец: «каждый раз, когда пользователь заходит на сайт,
  * он должен соглашаться; маленькое корректное уведомление»): выбор
@@ -30,7 +34,7 @@ import { holdScroll } from "@/lib/scroll-lock";
  * сайт работает и так (cookie строго необходимые), отказ тоже закрывает
  * карточку до конца визита и отпускает очередь.
  */
-export default function CookieConsent() {
+export default function CookieConsent({ t }: { t: Dict["cookie"] }) {
   const [visible, setVisible] = useState(false);
   const [details, setDetails] = useState(false);
   const moreRef = useRef<HTMLButtonElement>(null);
@@ -49,11 +53,12 @@ export default function CookieConsent() {
       return;
     }
     let cancel = () => {};
-    const t = window.setTimeout(() => {
+    // Не `t`: так зовётся проп со словарём.
+    const timer = window.setTimeout(() => {
       cancel = requestOverlay("cookie", () => setVisible(true));
     }, 1200);
     return () => {
-      window.clearTimeout(t);
+      window.clearTimeout(timer);
       cancel();
     };
   }, []);
@@ -89,20 +94,17 @@ export default function CookieConsent() {
 
   return (
     <>
-      <div className="ov-card ov-card-cookie" role="region" aria-label="Использование cookie" hidden={details}>
-        <p className="ov-text">
-          Мы используем только необходимые cookie — для входа и защиты аккаунта. Рекламных и
-          аналитических нет.
-        </p>
+      <div className="ov-card ov-card-cookie" role="region" aria-label={t.region} hidden={details}>
+        <p className="ov-text">{t.short}</p>
         <div className="ov-actions">
           <button type="button" onClick={accept} className="ov-btn ov-btn-primary">
-            Принять
+            {t.accept}
           </button>
           <button type="button" onClick={decline} className="ov-btn ov-btn-text">
-            Отклонить
+            {t.decline}
           </button>
           <button ref={moreRef} type="button" onClick={() => setDetails(true)} className="ov-btn ov-btn-text">
-            Подробнее
+            {t.more}
           </button>
         </div>
       </div>
@@ -117,26 +119,22 @@ export default function CookieConsent() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="ov-dialog-head">
-              <h2 id="cookie-policy-title" className="ov-title">Политика использования cookie</h2>
-              <button ref={closeRef} type="button" onClick={() => setDetails(false)} className="ov-x" aria-label="Закрыть">
+              <h2 id="cookie-policy-title" className="ov-title">{t.title}</h2>
+              <button ref={closeRef} type="button" onClick={() => setDetails(false)} className="ov-x" aria-label={t.close}>
                 <Cross />
               </button>
             </div>
 
             <div className="ov-dialog-body">
               <section>
-                <h3 className="ov-h">Какие данные мы обрабатываем</h3>
-                <p className="ov-note">
-                  Atlas Secure использует исключительно функциональные cookie-файлы, необходимые
-                  для корректной работы сервиса. Мы не собираем и не обрабатываем данные в рекламных
-                  или маркетинговых целях.
-                </p>
+                <h3 className="ov-h">{t.whatH}</h3>
+                <p className="ov-note">{t.whatP}</p>
               </section>
 
               <section>
-                <h3 className="ov-h">Типы используемых cookie</h3>
+                <h3 className="ov-h">{t.typesH}</h3>
                 <ul className="ov-list">
-                  {COOKIE_TYPES.map((c) => (
+                  {t.types.map((c) => (
                     <li key={c.name} className="ov-item">
                       <div className="ov-item-head">
                         <span className="ov-item-name">{c.name}</span>
@@ -149,41 +147,31 @@ export default function CookieConsent() {
               </section>
 
               <section>
-                <h3 className="ov-h">Чего мы не делаем</h3>
+                <h3 className="ov-h">{t.neverH}</h3>
                 <ul className="ov-never">
-                  {NEVER.map((t) => (
-                    <li key={t}>
+                  {t.never.map((line) => (
+                    <li key={line}>
                       <Cross small />
-                      {t}
+                      {line}
                     </li>
                   ))}
                 </ul>
               </section>
 
               <section>
-                <h3 className="ov-h">Правовое основание</h3>
-                <p className="ov-note">
-                  Обработка данных осуществляется на основании законного интереса оператора в обеспечении
-                  функционирования сервиса (статья 6(1)(f) GDPR). Используемые cookie являются строго
-                  необходимыми для предоставления запрошенной вами услуги и не требуют отдельного
-                  согласия в соответствии с рекомендациями ePrivacy Directive. Ваше согласие запрашивается
-                  в информационных целях для обеспечения прозрачности обработки данных.
-                </p>
+                <h3 className="ov-h">{t.legalH}</h3>
+                <p className="ov-note">{t.legalP}</p>
               </section>
 
               <section>
-                <h3 className="ov-h">Управление cookie</h3>
-                <p className="ov-note">
-                  Вы можете в любой момент удалить cookie через настройки вашего браузера. Обратите
-                  внимание, что удаление сессионного cookie приведёт к необходимости повторной
-                  авторизации в сервисе.
-                </p>
+                <h3 className="ov-h">{t.manageH}</h3>
+                <p className="ov-note">{t.manageP}</p>
               </section>
             </div>
 
             <div className="ov-dialog-foot">
               <button type="button" onClick={accept} className="ov-btn ov-btn-primary">
-                Принять и закрыть
+                {t.acceptClose}
               </button>
             </div>
           </div>
@@ -192,31 +180,6 @@ export default function CookieConsent() {
     </>
   );
 }
-
-const COOKIE_TYPES = [
-  {
-    name: "Сессионный cookie",
-    tag: "Обязательный",
-    text: "Идентифицирует вашу авторизованную сессию. Без него вход в личный кабинет невозможен. Хранится 3 часа и автоматически удаляется. Передаётся только по защищённому HTTPS-соединению.",
-  },
-  {
-    name: "Cookie верификации",
-    tag: "Обязательный",
-    text: "Временный cookie для процесса подтверждения email. Хранится 10 минут и удаляется сразу после завершения верификации.",
-  },
-  {
-    name: "Согласие на cookie",
-    tag: "Локальное",
-    text: "Сохраняется в sessionStorage вашего браузера до его закрытия — при следующем визите мы спросим снова. Не передаётся на сервер.",
-  },
-];
-
-const NEVER = [
-  "Не используем рекламные или аналитические cookie",
-  "Не отслеживаем поведение пользователей на сайте",
-  "Не передаём данные третьим лицам и рекламным сетям",
-  "Не используем пиксели отслеживания и фингерпринтинг",
-];
 
 /** Собственный глиф крестика — вместо типографского ✗, который в ОС рисуется по-разному. */
 function Cross({ small = false }: { small?: boolean }) {

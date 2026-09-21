@@ -514,6 +514,11 @@ export async function initDb(): Promise<void> {
     // campaigns go only to consent IS NOT NULL AND opt_out IS NULL.
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS privacy_consent_at TIMESTAMPTZ",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS privacy_consent_version TEXT",
+    // Язык человека — тот, на котором он зарегистрировался (21.09.2026,
+    // вместе с английской версией сайта). Нужен письмам: сайт двуязычный,
+    // а письмо уходит без запроса, и спросить язык в этот момент негде.
+    // NULL = русский: у всех, кто завёлся до этой колонки, язык был один.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS locale TEXT",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_at TIMESTAMPTZ",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_source TEXT",
     // `grant` is a reserved word in Postgres — the column is grant_spec

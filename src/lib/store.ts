@@ -32,6 +32,13 @@ export interface UserRecord {
   email: string;
   passwordHash: string | null;
   createdAt: string;
+  /**
+   * Язык, на котором человек зарегистрировался. Нужен письмам: сайт
+   * двуязычный, а письмо уходит без запроса — спросить язык в этот
+   * момент негде. `null` у всех, кто завёлся до английской версии;
+   * читатели трактуют его как русский.
+   */
+  locale: string | null;
   subscriptionEnd: string;
   /** Legacy Xray fields — no longer written; kept so old rows still map. */
   vpnKey: string | null;
@@ -100,6 +107,7 @@ export function rowToUser(row: any): UserRecord {
     id: row.id,
     email: row.email,
     passwordHash: row.password_hash ?? null,
+    locale: row.locale ?? null,
     createdAt: new Date(row.created_at).toISOString(),
     subscriptionEnd: new Date(row.subscription_end).toISOString(),
     vpnKey: row.vpn_key ?? null,
@@ -157,13 +165,21 @@ export function isPlaceholderEmail(email: string | null | undefined): boolean {
  */
 export async function insertUserRow(
   c: Queryable,
-  input: { email: string; referredBy?: string | null; ip?: string | null; fingerprint?: string | null; id?: string }
+  input: {
+    email: string;
+    referredBy?: string | null;
+    ip?: string | null;
+    fingerprint?: string | null;
+    id?: string;
+    /** Язык страницы, с которой человек вошёл. */
+    locale?: string | null;
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any | null> {
   const inserted = await c.query(
     `INSERT INTO users (id, email, created_at, subscription_end, referral_code, referred_by,
-                        telegram_link_token, registration_ip, device_fingerprint, public_id)
-     VALUES ($1, $2, $3, $3, $4, $5, $6, $7, $8, 'ST' || LPAD(NEXTVAL('user_public_id_seq')::text, 8, '0'))
+                        telegram_link_token, registration_ip, device_fingerprint, locale, public_id)
+     VALUES ($1, $2, $3, $3, $4, $5, $6, $7, $8, $9, 'ST' || LPAD(NEXTVAL('user_public_id_seq')::text, 8, '0'))
      ON CONFLICT (email) DO NOTHING
      RETURNING *`,
     [
@@ -175,6 +191,7 @@ export async function insertUserRow(
       generateTelegramLinkToken(),
       input.ip || null,
       input.fingerprint || null,
+      input.locale || null,
     ]
   );
   return inserted.rows[0] ?? null;
@@ -317,7 +334,7 @@ export async function getOrCreateUser(
    * granted exactly when the trial is (same anti-abuse). The bot's
    * /api/bot/register passes false: the bot gives its own trial traffic.
    */
-  opts: { bypassTrial?: boolean } = {}
+  opts: { bypassTrial?: boolean; locale?: string | null } = {}
 ): Promise<NewUserResult> {
   await waitForDb(); // user creation must not race the startup migrations
   const existing = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -327,7 +344,7 @@ export async function getOrCreateUser(
 
   return withTransaction(async (c) => {
     const id = uuidv4();
-    const inserted = await insertUserRow(c, { id, email, referredBy: referredByCode, ip, fingerprint });
+    const inserted = await insertUserRow(c, { id, email, referredBy: referredByCode, ip, fingerprint, locale: opts.locale });
     if (!inserted) {
       // Lost a race with a concurrent sign-in for the same email.
       const again = await c.query("SELECT * FROM users WHERE email = $1", [email]);

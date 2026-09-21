@@ -3,6 +3,7 @@ import { completeEmailSignIn } from "@/lib/auth-flow";
 import { clientIpFrom } from "@/lib/client-ip";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { setSessionCookie, startSession } from "@/lib/session";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * JSON variant of the email sign-in. Delegates to the same shared
@@ -36,6 +37,8 @@ export async function POST(request: NextRequest) {
       fingerprint: fingerprint ? String(fingerprint) : undefined,
       ip,
       consent: { privacy: consentParts.includes("privacy"), marketing: consentParts.includes("marketing") },
+      // Язык страницы входа — он же язык будущих писем.
+      locale: await getLocale(),
     });
     if (!result.ok) {
       return NextResponse.json({ success: false, error: result.error }, { status: 400 });

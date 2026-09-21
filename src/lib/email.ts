@@ -240,3 +240,240 @@ export async function sendRefundAdminAlertEmail(params: {
     )
   );
 }
+
+// ─── Подарок от администратора ───────────────────────────────────
+
+/**
+ * Письмо о выданной подписке (владелец, 21.09.2026: «админ выдаёт
+ * пользователю подписку — пусть приходит оповещение, что вам выдан
+ * подарок, перейдите в кабинет установить ключ»).
+ *
+ * ОФОРМЛЕНИЕ — вариант «Плита», выбранный владельцем из трёх макетов:
+ * лавандовая плита с перфорацией, крупное число дней, синяя кнопка,
+ * капсулы фактов и три шага. Тот же язык, что на первом экране сайта,
+ * — письмо и сайт должны читаться одним продуктом.
+ *
+ * ПОЧЕМУ ТАБЛИЦАМИ, А НЕ FLEX. Outlook на Windows рисует письма
+ * движком Word: он не знает ни flex, ни grid, ни `border-radius`, ни
+ * `gap`. Разметка на них разваливается в колонку. Таблицы с
+ * `role="presentation"` — единственное, что держится во всех клиентах;
+ * скругления и капсулы там, где их нет, просто станут прямыми углами,
+ * и письмо останется читаемым.
+ *
+ * ПОЧЕМУ КЛЮЧА В ПИСЬМЕ НЕТ. Письмо пересылают, письма лежат в
+ * архивах и в чужих почтовых клиентах. Ключ — это доступ; его место в
+ * кабинете, за входом. Отсюда единственное действие письма — кнопка
+ * «Открыть кабинет».
+ *
+ * ЯЗЫК берётся из `users.locale` — того, на котором человек
+ * зарегистрировался. Спросить его в момент выдачи негде: выдаёт
+ * администратор, а письмо уходит само.
+ */
+export interface GiftEmailParams {
+  email: string;
+  /**
+   * Сколько минут добавлено. Именно минуты, а не дни: у выдачи есть
+   * пресеты короче суток, и «+0 дней» в письме было бы враньём.
+   */
+  minutes: number;
+  /** До какого числа теперь работает подписка. */
+  until: Date;
+  dashboardUrl: string;
+  locale: "ru" | "en";
+  /** Сколько устройств на подписке и сколько стран — из src/lib. */
+  devices: number;
+  countries: number;
+}
+
+/** Форма слова после числа: русскому нужно три, английскому хватает двух. */
+/**
+ * Срок словами.
+ *
+ * У выдачи есть пресеты короче суток («30m», «1h», «12h»). Раньше
+ * письмо показало бы их как есть — «Вам подарили 30m Atlas Secure
+ * VPS»: это не по-русски и не по-английски. Поэтому минуты
+ * переводятся в слова на языке письма.
+ */
+function spellDuration(minutes: number, locale: "ru" | "en"): string {
+  const word = (n: number, ru: [string, string, string], en: [string, string]) => {
+    if (locale === "en") return n === 1 ? en[0] : en[1];
+    const m10 = n % 10;
+    const m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return ru[0];
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ru[1];
+    return ru[2];
+  };
+  const days = Math.floor(minutes / (24 * 60));
+  if (days >= 1) return `${days} ${word(days, ["день", "дня", "дней"], ["day", "days"])}`;
+  const hours = Math.floor(minutes / 60);
+  if (hours >= 1) return `${hours} ${word(hours, ["час", "часа", "часов"], ["hour", "hours"])}`;
+  return `${minutes} ${word(minutes, ["минута", "минуты", "минут"], ["minute", "minutes"])}`;
+}
+
+const GIFT_COPY = {
+  ru: {
+    subject: (amount: string) => `Вам подарили ${amount} Atlas Secure VPS`,
+    badge: "Подарок от Atlas",
+    lead: (amount: string) =>
+      `Мы продлили вашу подписку на&nbsp;${amount}. Ключ уже готов — осталось вставить его в приложение, и VPN заработает.`,
+    cta: "Открыть кабинет и забрать ключ",
+    note: "Вход по той же почте, на которую пришло письмо. Карта не нужна.",
+    until: (date: string) => `Подписка работает до ${date}`,
+    pills: (devices: number, countries: number) => ["Ключ готов", `${devices} устройств`, `${countries} стран`],
+    steps: [
+      ["Откройте кабинет", "ключ лежит там, копируется одной кнопкой."],
+      ["Поставьте приложение", "Happ или Incy, бесплатно, ссылки в кабинете."],
+      ["Вставьте ключ", "и нажмите подключение. Обычно это минута."],
+    ] as [string, string][],
+    footer:
+      "Письмо служебное — оно про вашу подписку, и отписка на такие не действует.<br>" +
+      "Atlas Secure VPS · часть группы QoDev, Гонконг (SAR)",
+  },
+  en: {
+    subject: (amount: string) => `You have been given ${amount} of Atlas Secure VPS`,
+    badge: "A gift from Atlas",
+    lead: (amount: string) =>
+      `We have extended your subscription by&nbsp;${amount}. Your key is ready — add it to the app and the VPN starts working.`,
+    cta: "Open your account and get the key",
+    note: "Sign in with the same email this letter came to. No card needed.",
+    until: (date: string) => `Your subscription runs until ${date}`,
+    pills: (devices: number, countries: number) => ["Key ready", `${devices} devices`, `${countries} countries`],
+    steps: [
+      ["Open your account", "the key is there, copied with one button."],
+      ["Install the app", "Happ or Incy, free, links are in your account."],
+      ["Add the key", "and press connect. It usually takes a minute."],
+    ] as [string, string][],
+    footer:
+      "This is a service email about your subscription; unsubscribing does not apply to it.<br>" +
+      "Atlas Secure VPS · part of the QoDev group, Hong Kong (SAR)",
+  },
+} as const;
+
+/**
+ * Разметка письма отдельно от отправки — чтобы её можно было собрать и
+ * посмотреть, ничего не отправляя (`scripts/preview-gift-email.ts`).
+ */
+export function renderGiftEmail(p: GiftEmailParams): { subject: string; html: string } {
+  const t = GIFT_COPY[p.locale];
+  // Срок словами: «7 дней», «12 часов», «30 минут». Крупная строка
+  // письма разбирается на число и слово — число набрано вдвое крупнее.
+  const amount = spellDuration(p.minutes, p.locale);
+  const [bigNumber, ...restWords] = amount.split(" ");
+  const big = `+${bigNumber}`;
+  const bigUnit = restWords.join(" ");
+  const date = p.until.toLocaleDateString(p.locale === "ru" ? "ru-RU" : "en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const url = escHtml(p.dashboardUrl);
+  // Знак картинкой, а не SVG: Gmail вырезает встроенный SVG из письма,
+  // и на его месте остаётся пустота. PNG отдаёт сам сайт (`/icon-192`),
+  // поэтому знак не может разойтись с иконкой приложения.
+  const site = url.replace(/\/dashboard\/?$/, "");
+  const mark = `${site}/icon-192`;
+
+  // Перфорация по верхней кромке плиты — та деталь, ради которой
+  // владелец и выбрал этот вариант. Нарисована ячейками: белый кружок
+  // в каждой. Outlook на Windows не знает скруглений и покажет
+  // квадратики — рисунок «отрывного листа» при этом сохраняется.
+  const punch =
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
+    Array.from({ length: 9 })
+      .map(
+        () =>
+          `<td align="center" style="padding:0 0 22px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>` +
+          `<td width="18" height="18" style="background:#ffffff;border-radius:999px;font-size:0;line-height:0">&nbsp;</td>` +
+          `</tr></table></td>`
+      )
+      .join("") +
+    `</tr></table>`;
+
+  const pill = (text: string) =>
+    `<td style="padding:0 8px 0 0"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>` +
+    `<td style="background:#EFF1F7;border-radius:999px;padding:12px 18px;font:700 11px/1 Arial,Helvetica,sans-serif;` +
+    `letter-spacing:0.07em;text-transform:uppercase;color:#0B0B0F;white-space:nowrap">${escHtml(text)}</td>` +
+    `</tr></table></td>`;
+
+  const step = (n: number, [head, tail]: [string, string]) =>
+    `<tr><td width="26" valign="top" style="padding:0 14px 12px 0">` +
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>` +
+    `<td width="26" height="26" align="center" style="background:#0B0B0F;border-radius:999px;` +
+    `font:700 13px/26px Arial,Helvetica,sans-serif;color:#ffffff">${n}</td></tr></table></td>` +
+    `<td valign="top" style="padding:0 0 12px;font:15px/1.45 Arial,Helvetica,sans-serif;color:#3A3A42">` +
+    `<b style="color:#0B0B0F">${escHtml(head)}</b> — ${escHtml(tail)}</td></tr>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="${p.locale}"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">
+<title>${escHtml(t.subject(amount))}</title></head>
+<body style="margin:0;padding:0;background:#ffffff">
+<!-- Строка предпросмотра: её показывает список входящих рядом с темой.
+     Скрыта от глаз, но не от клиента — иначе туда попадает начало
+     разметки. -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${escHtml(t.note)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff">
+<tr><td align="center" style="padding:32px 16px">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px">
+
+  <tr><td style="padding:0 0 22px">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td width="30"><img src="${mark}" width="30" height="30" alt=""
+        style="display:block;width:30px;height:30px;border:0;border-radius:9px"></td>
+      <td style="padding-left:10px;font:600 16px/1 Arial,Helvetica,sans-serif;color:#0B0B0F">Atlas Secure VPS</td>
+    </tr></table>
+  </td></tr>
+
+  <tr><td style="background:#EFF1F7;border-radius:26px;padding:22px 32px 32px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td>${punch}</td></tr>
+      <tr><td style="padding:0 0 20px">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="background:#ffffff;border-radius:999px;padding:8px 15px;font:700 11px/1 Arial,Helvetica,sans-serif;
+            letter-spacing:0.09em;text-transform:uppercase;color:#0B0B0F">${escHtml(t.badge)}</td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:0 0 4px;font:800 76px/0.9 Arial,Helvetica,sans-serif;letter-spacing:-0.04em;color:#0B0B0F">
+        ${escHtml(big)}${bigUnit ? ` <span style="font:700 28px/1 Arial,Helvetica,sans-serif;color:#3A85F0">${escHtml(bigUnit)}</span>` : ""}
+      </td></tr>
+      <tr><td style="padding:14px 0 0;font:17px/1.45 Arial,Helvetica,sans-serif;color:#5A6177">${t.lead(amount)}</td></tr>
+      <tr><td style="padding:10px 0 0;font:14px/1.5 Arial,Helvetica,sans-serif;color:#6B7284">${escHtml(t.until(date))}</td></tr>
+      <tr><td style="padding:26px 0 0">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="background:#3A85F0;border-radius:999px">
+            <a href="${url}" style="display:block;padding:17px 30px;font:600 16px/1 Arial,Helvetica,sans-serif;
+              color:#ffffff;text-decoration:none">${escHtml(t.cta)}</a>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td style="padding:14px 0 0;font:13px/1.5 Arial,Helvetica,sans-serif;color:#6B7284">${escHtml(t.note)}</td></tr>
+    </table>
+  </td></tr>
+
+  <tr><td style="padding:22px 0 0">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      ${t.pills(p.devices, p.countries).map(pill).join("")}
+    </tr></table>
+  </td></tr>
+
+  <tr><td style="padding:24px 0 0">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      ${t.steps.map((s, i) => step(i + 1, s)).join("")}
+    </table>
+  </td></tr>
+
+  <tr><td style="padding:20px 0 0;border-top:1px solid #E4E7EC;
+    font:12px/1.6 Arial,Helvetica,sans-serif;color:#7D8390">${t.footer}</td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+
+  return { subject: t.subject(amount), html };
+}
+
+export async function sendGiftGrantedEmail(p: GiftEmailParams): Promise<boolean> {
+  const { subject, html } = renderGiftEmail(p);
+  return sendTransactional(p.email, subject, html);
+}

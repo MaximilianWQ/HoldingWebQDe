@@ -28,6 +28,13 @@ export async function completeEmailSignIn(input: {
   ip: string | null;
   /** Отметки с шага почты: Политика (обязательная в UI) и рассылки (по желанию). */
   consent?: { privacy: boolean; marketing: boolean };
+  /**
+   * Язык страницы, с которой человек вошёл. Записывается только при
+   * СОЗДАНИИ аккаунта: перезаписывать его при каждом входе нельзя —
+   * человек, однажды заглянувший на английскую версию, получал бы
+   * английские письма навсегда.
+   */
+  locale?: string | null;
 }): Promise<SignInResult> {
   const email = input.email.trim().toLowerCase();
   if (isDisposableEmail(email)) return { ok: false, error: DISPOSABLE_EMAIL_ERROR };
@@ -45,7 +52,11 @@ export async function completeEmailSignIn(input: {
       return null;
     });
   }
-  const user = adopted ?? (await getOrCreateUser(email, input.referralCode || undefined, input.ip || undefined, input.fingerprint || undefined));
+  const user =
+    adopted ??
+    (await getOrCreateUser(email, input.referralCode || undefined, input.ip || undefined, input.fingerprint || undefined, {
+      locale: input.locale ?? null,
+    }));
   const wasAdopted = !!adopted && adopted.isNew;
 
   // Согласия (владелец, 13.09.2026): Политика — версия и момент отметки;

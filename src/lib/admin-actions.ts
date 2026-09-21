@@ -7,6 +7,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { applySubscriptionEvent, DAY, withTransaction } from "./subscription-ledger";
 import { createAuditLog, getUserById } from "./store";
+import { sendGiftGrantedEmail } from "./email";
+import { DEVICE_LIMIT } from "./plans";
+import { COUNTRY_COUNT } from "./locations";
+import { isLocale } from "./locale";
 import { deleteAllHwidDevices, deleteHwidDevice, describeRwError, HwidDevice, PANEL_ERROR } from "./remnawave";
 
 type Fail = { ok: false; status: number; error: string };
@@ -70,7 +74,44 @@ export async function adminGrant(userId: string, input: GrantInput): Promise<{ o
       meta: { label: g.label, minutes: g.minutes },
     })
   );
+
+  // Письмо о подарке (владелец, 21.09.2026). Отправка НЕ в транзакции и
+  // НЕ блокирует ответ: выдача уже записана в журнал, и если почта
+  // недоступна, откатывать подписку из-за письма нельзя. Сбой уходит в
+  // журнал сервера — администратор видит результат выдачи сразу.
+  void sendGrantEmail(userId, g.minutes).catch((err) =>
+    console.warn("[ADMIN] gift email failed:", err instanceof Error ? err.message : err)
+  );
+
   return { ok: true, newEnd: led.newEnd.toISOString(), plan: g.plan, label: g.label };
+}
+
+/**
+ * Письмо о выданной подписке. Вынесено отдельно, потому что у выдачи и
+ * у письма разные требования: выдача обязана быть атомарной, письмо —
+ * не обязано уйти вовсе.
+ *
+ * Аккаунты бота (`telegram_<id>@tg.…`) письма не получают: адрес у них
+ * служебный и почтового ящика за ним нет. Им приходит уведомление в
+ * самом боте — тем же путём, что и всё остальное.
+ */
+async function sendGrantEmail(userId: string, minutes: number): Promise<void> {
+  const user = await getUserById(userId);
+  if (!user) return;
+  if (/@tg\./i.test(user.email)) return;
+
+  const baseUrl = (process.env.SITE_BASE_URL || "https://qodev.dev").replace(/\/+$/, "");
+  await sendGiftGrantedEmail({
+    email: user.email,
+    minutes,
+    until: new Date(user.subscriptionEnd),
+    dashboardUrl: `${baseUrl}/dashboard`,
+    // Язык тот, на котором человек зарегистрировался. NULL у всех, кто
+    // завёлся до английской версии, — для них русский.
+    locale: isLocale(user.locale) ? user.locale : "ru",
+    devices: DEVICE_LIMIT,
+    countries: COUNTRY_COUNT,
+  });
 }
 
 // ─── Plan change without extension ──────────────────────────────

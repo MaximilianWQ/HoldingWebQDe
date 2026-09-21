@@ -5,6 +5,7 @@ import { saveCode, userHasPassword } from "@/lib/store";
 import { isDisposableEmail } from "@/lib/disposable-emails";
 import { checkRateLimit, rateLimitByEmail, rateLimitByIp, rateLimitEmailDaily } from "@/lib/rate-limit";
 import { completeEmailSignIn, DISPOSABLE_EMAIL_ERROR } from "@/lib/auth-flow";
+import { getLocale } from "@/lib/locale-server";
 import { clientIpFrom } from "@/lib/client-ip";
 import { setSessionCookieInStore, startSession } from "@/lib/session";
 import { cookies, headers } from "next/headers";
@@ -157,7 +158,8 @@ export async function verifyCodeAction(
     // Согласия с шага почты (cookie pending_consent из sendCodeAction).
     const consentParts = ((await cookies()).get("pending_consent")?.value ?? "").split(",");
     const consent = { privacy: consentParts.includes("privacy"), marketing: consentParts.includes("marketing") };
-    const result = await completeEmailSignIn({ email, code, referralCode: refCode, fingerprint, ip, consent });
+    // Язык страницы входа — он же язык будущих писем.
+    const result = await completeEmailSignIn({ email, code, referralCode: refCode, fingerprint, ip, consent, locale: await getLocale() });
     if (!result.ok) {
       return { success: false, error: result.error };
     }

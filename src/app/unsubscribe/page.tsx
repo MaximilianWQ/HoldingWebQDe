@@ -3,6 +3,8 @@ import VShell from "@/components/vps/VShell";
 import { waitForDb } from "@/lib/db";
 import { findByUnsubscribeToken, isUnsubscribeTokenShape, maskEmail } from "@/lib/unsubscribe";
 import UnsubscribeView, { type UnsubscribeState } from "./UnsubscribeView";
+import { dict } from "@/i18n";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /unsubscribe?t=… — отписка от рекламных писем по ссылке из подвала
@@ -12,19 +14,22 @@ import UnsubscribeView, { type UnsubscribeState } from "./UnsubscribeView";
  *
  * Страница служебная — из поиска закрыта.
  */
-export const metadata: Metadata = {
-  title: "Отписка от рассылки",
-  description: "Отписка от новостей и предложений Atlas Secure.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = dict(await getLocale()).unsubscribe;
+  return {
+    title: t.metaTitle,
+    description: t.metaDescription,
+    robots: { index: false, follow: false },
+  };
+}
 
 interface PageProps {
   searchParams: Promise<{ t?: string | string[] }>;
 }
 
 export default async function UnsubscribePage({ searchParams }: PageProps) {
-  const { t } = await searchParams;
-  const token = typeof t === "string" ? t.trim() : "";
+  const [{ t: tokenParam }, locale] = await Promise.all([searchParams, getLocale()]);
+  const token = typeof tokenParam === "string" ? tokenParam.trim() : "";
   let state: UnsubscribeState = "invalid";
   let email: string | null = null;
   if (isUnsubscribeTokenShape(token)) {
@@ -42,7 +47,13 @@ export default async function UnsubscribePage({ searchParams }: PageProps) {
   }
   return (
     <VShell work>
-      <UnsubscribeView token={state === "invalid" ? "" : token} initial={state} email={email} />
+      <UnsubscribeView
+        token={state === "invalid" ? "" : token}
+        initial={state}
+        email={email}
+        locale={locale}
+        t={dict(locale).unsubscribe}
+      />
     </VShell>
   );
 }

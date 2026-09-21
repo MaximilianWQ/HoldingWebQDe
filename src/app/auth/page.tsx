@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import VShell from "@/components/vps/VShell";
 import AuthPage from "../auth-page";
+import { dict } from "@/i18n";
+import { count } from "@/i18n/plural";
+import { TRIAL_DAYS } from "@/lib/brand-facts";
+import { getLocale } from "@/lib/locale-server";
 
 /**
  * /auth — серверная обёртка входа: метаданные и оболочка корпуса VPS.
@@ -10,11 +14,10 @@ import AuthPage from "../auth-page";
  *
  * Экран входа из поиска закрыт.
  */
-export const metadata: Metadata = {
-  title: "Вход",
-  description: "Вход и регистрация в Atlas Secure по коду из письма или паролю.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const m = dict(await getLocale()).auth.meta;
+  return { title: m.title, description: m.description, robots: { index: false, follow: false } };
+}
 
 interface PageProps {
   searchParams: Promise<{ step?: string; ref?: string; next?: string }>;
@@ -39,8 +42,7 @@ function safeNext(v: unknown): string | undefined {
 }
 
 export default async function Auth({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const cookieStore = await cookies();
+  const [params, cookieStore, locale] = await Promise.all([searchParams, cookies(), getLocale()]);
   const pendingEmail = cookieStore.get("pending_email")?.value || "";
   const initialStep = params.step === "code" && pendingEmail ? "code" : "email";
 
@@ -51,6 +53,9 @@ export default async function Auth({ searchParams }: PageProps) {
         initialEmail={pendingEmail}
         referralCode={params.ref}
         next={safeNext(params.next)}
+        locale={locale}
+        t={dict(locale).auth}
+        trial={count(locale, TRIAL_DAYS, dict(locale).units.day)}
       />
     </VShell>
   );

@@ -8,7 +8,7 @@ import { useToast } from "@/components/vps/Toast";
 import { BRAND } from "@/components/vps/links";
 import { sendCodeAction, verifyCodeAction, type SendCodeState, type VerifyCodeState } from "./actions";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import "./auth/auth-v.css";
 

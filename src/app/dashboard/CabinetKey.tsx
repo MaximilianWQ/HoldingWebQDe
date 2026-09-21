@@ -9,8 +9,9 @@ import { DEVICE_LIMIT } from "@/lib/plans";
 import { BUY_TRAFFIC_HREF, bypassKey, mainKey, switchHint } from "@/lib/key-names";
 import { formatBytes, useBypassLive, withJsonFormat } from "@/lib/use-bypass";
 import { APPS, detectPlatform, pick, type AppId, type ClientApp, type Platform } from "@/lib/apps";
-import { fill, type Dict } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
+import { count, pluralize } from "@/lib/text/plural";
 import { localeHref, type Locale } from "@/lib/locale";
 import type { SubscriptionData } from "@/types";
 

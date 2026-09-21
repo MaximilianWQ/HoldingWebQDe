@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import BrandMark from "@/components/pixel/BrandMark";
 import { mainKey, type KeyAudience } from "@/lib/key-names";
-import { fill, type Dict } from "@/i18n";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import type { Locale } from "@/lib/locale";
 
 /**

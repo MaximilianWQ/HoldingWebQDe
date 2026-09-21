@@ -4,7 +4,8 @@ import { useState } from "react";
 import Icon from "@/components/pixel/Icon";
 import { useToast } from "@/components/vps/Toast";
 import { LOYALTY_TIERS, tierName } from "@/lib/loyalty";
-import { fill, type Dict } from "@/i18n";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import type { Locale } from "@/lib/locale";
 
 /**

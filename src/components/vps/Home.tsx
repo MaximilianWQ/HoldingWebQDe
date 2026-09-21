@@ -16,8 +16,8 @@ import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRAFFIC_ENTRY_RUB, TRAFFIC_PACKS } from "@/lib/traffic-packs";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
-import { rich } from "@/i18n/rich";
+import { count } from "@/lib/text/plural";
+import { rich } from "@/lib/text/rich";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import { POPULAR } from "./PlanCards";
@@ -231,7 +231,7 @@ export default async function Home({ referralCode }: { referralCode?: string }) 
               решает, и листать её вместо решения он не будет. Места в
               лестнице выгоды считаются по полному списку, поэтому
               «лучшая цена за ГБ» не переезжает из-за подборки. */}
-          <TrafficCards locale={locale} ids={["gb15", "gb100", "gb300", "gb600"]} />
+          <TrafficCards locale={locale} t={d.cards} ids={["gb15", "gb100", "gb300", "gb600"]} />
           <div className="v-actions">
             <Link href={to("/pricing#traffic")} className="v-btn v-btn-soft">
               {fill(t.traffic.all, {

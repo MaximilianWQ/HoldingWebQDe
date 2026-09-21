@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Icon from "@/components/pixel/Icon";
 import { PLAN_CONTENT, type PlanId } from "@/lib/plans";
 import { trafficPackById } from "@/lib/traffic-packs";
-import { fill, type Dict } from "@/i18n";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import type { Locale } from "@/lib/locale";
 
 type T = Dict["cabinet"]["payments"];

@@ -21,7 +21,7 @@ import {
   type PlanId,
 } from "@/lib/plans";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import {
   TRAFFIC_PACKS,

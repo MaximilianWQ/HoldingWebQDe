@@ -10,7 +10,7 @@ import { TRAFFIC_TRIAL_MB } from "@/lib/traffic-packs";
 import type { SubscriptionData } from "@/types";
 import { APPS, PLATFORMS, detectPlatform, pick, type Platform } from "@/lib/apps";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import "./devices-vps.css";
 

@@ -7,7 +7,7 @@ import { DEVICE_LIMIT } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { dict, fill } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import { count, pluralize } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import "@/app/vps-info.css";

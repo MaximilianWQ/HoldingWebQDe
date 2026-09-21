@@ -5,7 +5,7 @@ import { DEVICE_LIMIT, PLAN_SPEED, formatRub } from "@/lib/plans";
 import { TRAFFIC_ENTRY_RUB } from "@/lib/traffic-packs";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { dict, fill } from "@/i18n";
-import { pluralize } from "@/i18n/plural";
+import { pluralize } from "@/lib/text/plural";
 import type { Locale } from "@/lib/locale";
 
 /**

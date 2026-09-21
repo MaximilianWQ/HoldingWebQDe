@@ -10,8 +10,8 @@ import {
 } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { fill } from "@/lib/text/fill";
+import { count } from "@/lib/text/plural";
 import type { Locale } from "@/lib/locale";
 
 /**

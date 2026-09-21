@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { getLocale, getPath } from "@/lib/locale-server";
 import { alternatesFor } from "@/lib/locale";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { atlasWide } from "./atlas-fonts";
 import { brand } from "./fonts";
 import { PLANS, DEVICE_LIMIT, formatRub } from "@/lib/plans";

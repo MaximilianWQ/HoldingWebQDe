@@ -9,7 +9,7 @@ import { SERVER_ENTRY_USD, formatUsd } from "@/lib/servers";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { FOUNDED } from "@/lib/nav";
 import { dict, fill } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import { count, pluralize } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import "./about-vps.css";

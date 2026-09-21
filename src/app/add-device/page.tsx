@@ -3,7 +3,7 @@ import VShell from "@/components/vps/VShell";
 import AddDeviceView from "./AddDeviceView";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 
 /**

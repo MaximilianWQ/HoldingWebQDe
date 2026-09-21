@@ -2,7 +2,7 @@ import Link from "next/link";
 import Icon from "@/components/pixel/Icon";
 import { LOYALTY_TIERS, CASHBACK_MAX, CASHBACK_START, tierName } from "@/lib/loyalty";
 import { dict, fill } from "@/i18n";
-import { pluralize } from "@/i18n/plural";
+import { pluralize } from "@/lib/text/plural";
 import type { Locale } from "@/lib/locale";
 
 /**

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import VShell from "@/components/vps/VShell";
 import AuthPage from "../auth-page";
 import { dict } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { getLocale } from "@/lib/locale-server";
 

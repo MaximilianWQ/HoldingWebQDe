@@ -5,7 +5,7 @@ import { useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/pixel/Icon";
 import { RESUME_ACCEPT, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@/lib/careers";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import { TELEGRAM_SUPPORT } from "@/lib/contacts";
 

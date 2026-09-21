@@ -6,7 +6,8 @@ import Icon, { type IconName } from "@/components/pixel/Icon";
 import { APPS, PLATFORMS, pick, type Platform } from "@/lib/apps";
 import { localeHref, type Locale } from "@/lib/locale";
 import { mainKey, switchHint, type KeyAudience } from "@/lib/key-names";
-import { fill, type Dict } from "@/i18n";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import HappPhone from "./HappPhone";
 
 /**

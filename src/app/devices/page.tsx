@@ -5,7 +5,7 @@ import { DEVICE_LIMIT } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { getSessionUser } from "@/lib/session";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 
 /**

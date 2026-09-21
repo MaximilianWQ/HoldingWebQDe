@@ -6,7 +6,7 @@ import Icon from "@/components/pixel/Icon";
 import { DESKS, SUPPORT_DESK, TELEGRAM_SUPPORT, OFFICE, deskText } from "@/lib/contacts";
 import OfficePassForm from "./OfficePassForm";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import "@/app/vps-info.css";
 

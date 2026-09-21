@@ -22,7 +22,7 @@
 import type { Locale } from "./locale";
 import { COUNTRY_COUNT } from "./locations";
 import { plural } from "./ru-words";
-import { pluralize } from "@/i18n/plural";
+import { pluralize } from "@/lib/text/plural";
 
 export type KeyAudience = "guest" | "member";
 

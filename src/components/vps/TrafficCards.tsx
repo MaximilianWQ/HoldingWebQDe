@@ -3,7 +3,8 @@ import Carousel from "./Carousel";
 import Icon from "@/components/pixel/Icon";
 import { TRAFFIC_PACKS } from "@/lib/traffic-packs";
 import { formatRub, formatDecimal } from "@/lib/plans";
-import { dict, fill } from "@/i18n";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import type { Locale } from "@/lib/locale";
 
 /**
@@ -31,14 +32,24 @@ const SUPER_RANKS = 3;
 
 export default function TrafficCards({
   locale,
+  t,
   cta,
   ids,
 }: {
   locale: Locale;
+  /**
+   * Подписи приходят пропсом, а не берутся словарём здесь.
+   *
+   * Компонент серверный, но его рисует и КЛИЕНТСКИЙ кабинет
+   * (`DashboardView` → «Что купить» → «Трафик»). Пока он звал
+   * `dict()` сам, в браузер вместе с ним уезжали оба словаря — чанк
+   * 292 КБ в первой загрузке кабинета (замер 21.09.2026). Ровно то,
+   * от чего предостерегает правило в CLAUDE.md.
+   */
+  t: Dict["cards"];
   cta?: string;
   ids?: string[];
 }) {
-  const t = dict(locale).cards;
   const button = cta ?? t.trafficBuy;
   const perGb = (p: (typeof TRAFFIC_PACKS)[number]) => p.priceRub / p.gb;
   const base = perGb(TRAFFIC_PACKS[0]);

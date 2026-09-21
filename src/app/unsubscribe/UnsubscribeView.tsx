@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 import "./unsubscribe.css";
 

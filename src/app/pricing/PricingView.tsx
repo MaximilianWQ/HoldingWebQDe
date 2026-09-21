@@ -9,7 +9,7 @@ import { DEVICE_LIMIT, PLAN_SPEED, formatRub, planContent, pricePerMonth } from 
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { dict, fill } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import { count, pluralize } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import "./pricing-vps.css";
@@ -171,7 +171,7 @@ export default async function PricingView() {
         <div className="v-wrap">
           <h2 id="vp-traffic" className="v-h2">{t.traffic.title}</h2>
           <p className="v-lead">{t.traffic.lead}</p>
-          <TrafficCards locale={locale} />
+          <TrafficCards locale={locale} t={d.cards} />
         </div>
       </section>
 

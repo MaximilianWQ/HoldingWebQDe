@@ -17,7 +17,7 @@ import {
   type ServerTier,
 } from "@/lib/servers";
 import { dict, fill, type Dict } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import { count, pluralize } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref, type Locale } from "@/lib/locale";
 import "@/app/vps-info.css";

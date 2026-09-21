@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SERVER_POINTS, LOCATIONS, countryName } from "@/lib/locations";
-import { pluralize } from "@/i18n/plural";
+import { pluralize } from "@/lib/text/plural";
 import type { Dict } from "@/i18n";
 import type { Locale } from "@/lib/locale";
 import { WORLD_ROWS, CELL, MAP_W, MAP_H, project } from "@/lib/world-map";

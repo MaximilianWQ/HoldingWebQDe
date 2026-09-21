@@ -1,9 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { fill, type Dict } from "@/i18n";
-import { count } from "@/i18n/plural";
-import { rich } from "@/i18n/rich";
+import type { Dict } from "@/i18n";
+import { fill } from "@/lib/text/fill";
+import { count } from "@/lib/text/plural";
+import { rich } from "@/lib/text/rich";
 import { localeHref, type Locale } from "@/lib/locale";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -446,7 +447,7 @@ function BuyPanel({ data, initialKind, cards, locale, units, t }: { data: Subscr
         {kind === "plan" ? (
           <PlanCards locale={locale} t={cards} units={units} href={(plan, period) => `/subscribe?plan=${plan}&period=${period}`} />
         ) : (
-          <TrafficCards locale={locale} />
+          <TrafficCards locale={locale} t={cards} />
         )}
       </div>
     </div>

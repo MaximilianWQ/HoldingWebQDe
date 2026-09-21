@@ -1,6 +1,6 @@
 import { LOCATIONS, COUNTRY_COUNT, countryName } from "@/lib/locations";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import type { Locale } from "@/lib/locale";
 
 /**

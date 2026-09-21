@@ -5,7 +5,7 @@ import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { COUNTRY_COUNT } from "@/lib/locations";
 import { faqByIds } from "@/lib/faq";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 
 /**

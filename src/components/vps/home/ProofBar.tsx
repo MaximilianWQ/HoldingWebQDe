@@ -1,7 +1,7 @@
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import { SUPPORT_TG } from "../links";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import type { Locale } from "@/lib/locale";
 

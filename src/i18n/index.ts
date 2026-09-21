@@ -3,6 +3,14 @@ import { ru } from "./ru";
 import { en } from "./en";
 
 /**
+ * `fill` живёт в `src/lib/text/` и здесь только переэкспортируется —
+ * серверным потребителям удобно брать всё из одного места. КЛИЕНТСКИЕ
+ * компоненты обязаны импортировать её ОТТУДА напрямую: через этот файл
+ * к ним приедут оба словаря.
+ */
+export { fill } from "@/lib/text/fill";
+
+/**
  * Словари сайта (21.09.2026).
  *
  * УСТРОЙСТВО. Русский словарь — источник структуры: английский обязан
@@ -27,10 +35,3 @@ export function dict(locale: Locale): Dict {
   return DICTS[locale] ?? DICTS[DEFAULT_LOCALE];
 }
 
-/**
- * Подстановка в строку: `t("Привет, {name}", { name: "Иван" })`.
- * Нужна там, где в текст попадает число из `src/lib`.
- */
-export function fill(template: string, vars: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? String(vars[k]) : m));
-}

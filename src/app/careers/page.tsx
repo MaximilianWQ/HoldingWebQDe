@@ -10,7 +10,7 @@ import { TELEGRAM_SUPPORT } from "@/lib/contacts";
 import { COUNTRY_COUNT, CITY_COUNT } from "@/lib/locations";
 import { FOUNDED } from "@/lib/nav";
 import { dict, fill } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
+import { count, pluralize } from "@/lib/text/plural";
 import { getLocale } from "@/lib/locale-server";
 import { localeHref } from "@/lib/locale";
 import "@/app/tech.css";

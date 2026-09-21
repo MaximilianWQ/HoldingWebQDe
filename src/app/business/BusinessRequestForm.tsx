@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Icon from "@/components/pixel/Icon";
 import { SALES_DESK } from "@/lib/contacts";
 import type { Dict } from "@/i18n";
-import { fill } from "@/i18n";
+import { fill } from "@/lib/text/fill";
 import { localeHref, type Locale } from "@/lib/locale";
 
 /**

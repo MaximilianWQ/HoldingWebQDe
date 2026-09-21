@@ -3,8 +3,8 @@ import LegalDoc, { legalDate, type LegalSection } from "../terms/LegalDoc";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
 import { dict, fill, type Dict } from "@/i18n";
-import { count } from "@/i18n/plural";
-import { rich } from "@/i18n/rich";
+import { count } from "@/lib/text/plural";
+import { rich } from "@/lib/text/rich";
 import { getLocale } from "@/lib/locale-server";
 import type { Locale } from "@/lib/locale";
 

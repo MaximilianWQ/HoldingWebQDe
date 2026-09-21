@@ -6,8 +6,8 @@ import { LOYALTY_TIERS, tierName } from "@/lib/loyalty";
 import { TRAFFIC_TRIAL_MB } from "@/lib/traffic-packs";
 import { SUPPORT_DESK, TELEGRAM_SUPPORT } from "@/lib/contacts";
 import { dict, fill, type Dict } from "@/i18n";
-import { count, pluralize } from "@/i18n/plural";
-import { rich } from "@/i18n/rich";
+import { count, pluralize } from "@/lib/text/plural";
+import { rich } from "@/lib/text/rich";
 import { getLocale } from "@/lib/locale-server";
 import type { Locale } from "@/lib/locale";
 

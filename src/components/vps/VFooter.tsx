@@ -7,7 +7,7 @@ import { FOUNDED } from "@/lib/nav";
 import { PLANS, formatRub } from "@/lib/plans";
 import { TRIAL_DAYS } from "@/lib/brand-facts";
 import { dict, fill } from "@/i18n";
-import { count } from "@/i18n/plural";
+import { count } from "@/lib/text/plural";
 import { localeHref, type Locale } from "@/lib/locale";
 
 /**

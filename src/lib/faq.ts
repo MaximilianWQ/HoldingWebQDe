@@ -2,7 +2,7 @@ import type { Locale } from "./locale";
 import { DEVICE_LIMIT } from "./plans";
 import { TRIAL_DAYS } from "./brand-facts";
 import { plural } from "./ru-words";
-import { pluralize } from "@/i18n/plural";
+import { pluralize } from "@/lib/text/plural";
 
 /**
  * Вопросы и ответы — единственный источник.

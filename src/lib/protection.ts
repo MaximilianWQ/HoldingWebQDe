@@ -20,7 +20,23 @@
  * не подтверждал, и они прямо спорили с тем, что защита на всех
  * серверах одна. Поле удалено из `servers.ts`.
  */
-export const PROTECTION = {
+
+import type { Locale } from "./locale";
+
+/**
+ * `as const` здесь НЕ ставится: он сделал бы значения литеральными
+ * типами, и английский набор перестал бы подходить под тот же тип.
+ * Нужна форма — набор полей, — а не конкретные строки. Та же причина,
+ * что у словарей (см. src/i18n/ru.ts).
+ */
+export interface ProtectionText {
+  name: string;
+  row: string;
+  plain: string;
+  scope: string;
+}
+
+export const PROTECTION: ProtectionText = {
   /** Имя защиты — ровно так, как его называет владелец. */
   name: "Enterprise Spectrum Protection",
 
@@ -34,4 +50,24 @@ export const PROTECTION = {
 
   /** Охват — чтобы не пришлось объяснять, «а на моём тарифе есть?». */
   scope: "Защита стоит на всех наших серверах и входит в цену: отдельной услугой её покупать не нужно.",
-} as const;
+};
+
+/**
+ * То же по-английски. Имя защиты не переводится: это название, а не
+ * слово. Числа и уровни фильтрации не появились и здесь — их нечем
+ * подтвердить ни на одном языке (COMPLIANCE-CHECK.md).
+ */
+export const PROTECTION_EN: ProtectionText = {
+  name: PROTECTION.name,
+  row: "Enterprise Spectrum Protection, on every tier in the range",
+  plain:
+    "An attack is absorbed on the way to the site — it never reaches the server, " +
+    "and the people using it notice nothing.",
+  scope:
+    "The protection is on every one of our servers and is included in the price: " +
+    "there is nothing extra to buy.",
+};
+
+export function protection(locale: Locale): ProtectionText {
+  return locale === "ru" ? PROTECTION : PROTECTION_EN;
+}

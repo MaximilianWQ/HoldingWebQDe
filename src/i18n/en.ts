@@ -490,6 +490,148 @@ export const en: Dict = {
       "We will arrange the pass and reply to the email you gave. On the day of your visit bring the " +
       "document you selected — the name will be checked at the desk.",
   },
+  vds: {
+    title: "Dedicated servers",
+    titleAccent: "from {price}",
+    lead: "The server is yours entirely: the processor, the memory and the port are shared with nobody.",
+    pick: "Find me a server",
+    plansLink: "Accelerator plans",
+    engineer: "An engineer replies, not a sales department.",
+    tiles: { steps: "Tiers in the range", port: "Port up to", entry: "Starting price" },
+    speedUnit: "Gbit/s",
+    configsTitle: "{count} {word}",
+    configWord: ["configuration", "configurations", "configurations"],
+    configsLead:
+      "The wider the port, the more data the server can send at once — " +
+      "so the range grows by port speed, not by core count.",
+    carouselLabel: "Dedicated server configurations",
+    specsLabel: "Specifications",
+    spec: {
+      cpu: "Processor",
+      ram: "Memory",
+      disks: "Disks",
+      port: "Port",
+      protection: "Attack protection",
+    },
+    ramUnit: "{n} GB ECC",
+    portMetered: "traffic metered",
+    portUnmetered: "traffic unmetered",
+    confirmPrefix: "Still being confirmed:",
+    from: "from",
+    perMonth: "a month",
+    guaranteeTitle: "What we answer for",
+    guaranteeLead:
+      "An honestly named boundary is more reassuring than generalities: here is what you get for " +
+      "your money, and here is where our stretch of the road ends.",
+    weDo: "We answer for",
+    notUs: "Not up to us",
+    pickTitle: "Just want fast internet?",
+    pickLead: "For yourself — VPS accelerator plans from {price} ₽ a month. The first {trial} are free.",
+    pickCta: "See pricing",
+    meta: {
+      title: "Dedicated servers from {price} a month",
+      description:
+        "{count} {word} of Atlas Secure VPS dedicated servers from {price} a month. " +
+        "The server is yours entirely — price, memory, disks and port speed are on the page, before you even ask.",
+      metaWord: ["configuration", "configurations", "configurations"],
+    },
+  },
+  business: {
+    title: "Internet and servers",
+    titleAccent: "for your team",
+    lead:
+      "Connections for your staff and servers for your workloads — under contract, on one invoice. " +
+      "A quote within four working hours.",
+    cta: "Get a quote",
+    includedLabel: "What is included",
+    points: [
+      {
+        title: "Countries to choose from",
+        text: "Staff pick the country themselves, or an administrator assigns it — depending on the services they need.",
+      },
+      {
+        title: "Devices per person",
+        text: "Laptop, phone, tablet, work computer — one seat covers all of an employee's devices.",
+      },
+      {
+        title: "One invoice for the whole team",
+        text: "Connections live in the company's shared account. Contract, acceptance certificates and invoices by bank transfer.",
+      },
+      {
+        title: "Access management",
+        text: "The company administrator grants and revokes access themselves — the same day, across every device.",
+      },
+    ],
+    formTitle: "Tell us about your team",
+    formLead: "We will reply by email with a quote and a draft contract.",
+    needs: [
+      { value: "access", label: "Connections for staff" },
+      { value: "servers", label: "Dedicated servers" },
+      { value: "both", label: "Both" },
+    ],
+    sizes: [
+      { value: "5-20", label: "5–20 people" },
+      { value: "21-100", label: "21–100 people" },
+      { value: "101-500", label: "101–500 people" },
+      { value: "500+", label: "More than 500 people" },
+    ],
+    nameLabel: "What should we call you",
+    nameError: "Tell us what to call you",
+    emailLabel: "Work email",
+    emailEmpty: "Enter your work email",
+    emailBad: "Check the address: it looks like there is a typo",
+    companyLabel: "Company",
+    companyError: "Enter the company name",
+    sizeLabel: "Team size",
+    sizePlaceholder: "Pick a size",
+    sizeError: "Pick your team size",
+    needLabel: "What you need",
+    needPlaceholder: "Pick an option",
+    needError: "Pick what you need",
+    messageLabel: "Your task (optional)",
+    messagePlaceholder: "How many staff and where they work, which services need to open, whether there are deadlines",
+    sending: "Sending…",
+    submit: "Get a quote",
+    consentBefore: "By sending this request you agree to the",
+    consentLink: "privacy policy",
+    failServer: "The request did not go through — something broke on our side. Try again or write to {mail}",
+    failNetwork: "No connection to the server. Check your connection or write to {mail}",
+    doneTitle: "Request received",
+    doneBefore:
+      "We will come back within four working hours to the email you gave — with a quote and a draft " +
+      "contract. If it is urgent, write to",
+    meta: {
+      title: "Internet and servers for companies, under contract",
+      description:
+        "Connections for staff and server infrastructure under contract, paid by bank transfer. " +
+        "One invoice, access management, priority support. " +
+        "We answer requests within 4 working hours.",
+      keywords: [
+        "internet for business",
+        "connections for staff",
+        "servers for a company",
+        "contract with a legal entity",
+        "bank transfer",
+      ],
+      ogTitle: "For business — Atlas Secure VPS",
+      ogDescription:
+        "Connections for your team and servers under contract. One invoice, access management, " +
+        "priority support. Requests answered within 4 working hours.",
+    },
+  },
+  lost: {
+    kicker: "Error 404",
+    title: "Page",
+    titleAccent: "not found",
+    lead:
+      "There is no such address on this site — most likely a typo, or the page has moved. " +
+      "Your connection is fine, by the way — start from the home page.",
+    home: "Go to home page",
+    pricing: "Pricing",
+    noteBefore: "{trial} free, no card. Cannot find what you need —",
+    noteLink: "write to support",
+    metaTitle: "Page not found",
+  },
   compare: {
     caption: "{a} and {b} plans compared",
     property: "Feature",

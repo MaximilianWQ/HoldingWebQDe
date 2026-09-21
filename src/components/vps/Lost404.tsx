@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type CSSProperties } from "react";
-import { TRIAL } from "./links";
+import type { Dict } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 import "@/app/not-found-404.css";
 
 /**
@@ -49,7 +50,17 @@ function Digit({ ch, tone }: { ch: string; tone: "blue" | "grey" }) {
   );
 }
 
-export default function Lost404() {
+export default function Lost404({
+  locale,
+  t,
+  note,
+}: {
+  locale: Locale;
+  t: Dict["lost"];
+  /** Первая часть сноски со вставленным сроком пробного периода. */
+  note: string;
+}) {
+  const to = (href: string) => localeHref(href, locale);
   const stage = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,26 +102,23 @@ export default function Lost404() {
     <section className="v4" aria-labelledby="v4-title">
       <div className="v-wrap v4-grid">
         <div className="v4-text v-stagger">
-          <span className="v4-kicker">Ошибка 404</span>
+          <span className="v4-kicker">{t.kicker}</span>
           <h1 id="v4-title" className="v-h1 v4-h1">
-            Страница <span className="v4-accent">не найдена</span>
+            {t.title} <span className="v4-accent">{t.titleAccent}</span>
           </h1>
-          <p className="v-lead v4-lead">
-            Такого адреса на сайте нет: скорее всего, опечатка или страница переехала.
-            Связь при этом в порядке — начните с главной.
-          </p>
+          <p className="v-lead v4-lead">{t.lead}</p>
           <div className="v-actions v4-actions">
-            <Link href="/" className="v-btn v-btn-primary">
-              На главную
+            <Link href={to("/")} className="v-btn v-btn-primary">
+              {t.home}
             </Link>
-            <Link href="/pricing" className="v-btn v-btn-soft">
-              Тарифы
+            <Link href={to("/pricing")} className="v-btn v-btn-soft">
+              {t.pricing}
             </Link>
           </div>
           <p className="v-small v4-note">
-            {TRIAL} бесплатно, без карты. Не нашли нужное —{" "}
-            <Link href="/support" className="v-link">
-              напишите в поддержку
+            {note}{" "}
+            <Link href={to("/support")} className="v-link">
+              {t.noteLink}
             </Link>
             .
           </p>

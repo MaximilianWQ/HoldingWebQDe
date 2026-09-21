@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import Icon from "@/components/pixel/Icon";
+import { SALES_DESK } from "@/lib/contacts";
+import type { Dict } from "@/i18n";
+import { fill } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 
 /**
  * Форма корпоративной заявки — корпус Atlas Secure VPS (владелец,
@@ -20,6 +24,11 @@ import Icon from "@/components/pixel/Icon";
  * { name, email, interest, message } — не менялся, поэтому
  * корпоративные поля (компания, размер команды, что нужно)
  * складываются в message структурированными строками (buildMessage).
+ *
+ * В ЗАЯВКУ УХОДЯТ РУССКИЕ ПОДПИСИ, даже если форму заполнили на
+ * английской странице: её читает администратор, а админка русская.
+ * Значения (`access`, `both`, `5-20`) при этом одни на обоих языках —
+ * переводится только то, что человек видит на экране.
  */
 const NEEDS: Array<{ value: string; label: string }> = [
   { value: "access", label: "Подключения для сотрудников" },
@@ -52,14 +61,14 @@ interface FormState {
 
 const EMPTY: FormState = { name: "", email: "", company: "", size: "", need: "", message: "" };
 
-function validate(v: FormState): Errors {
+function validate(v: FormState, t: Dict["business"]): Errors {
   const e: Errors = {};
-  if (!v.name.trim()) e.name = "Укажите, как к вам обращаться";
-  if (!v.email.trim()) e.email = "Укажите рабочую почту";
-  else if (!EMAIL_RE.test(v.email.trim())) e.email = "Проверьте адрес: похоже, в нём опечатка";
-  if (!v.company.trim()) e.company = "Укажите название компании";
-  if (!v.size) e.size = "Выберите размер команды";
-  if (!v.need) e.need = "Выберите, что нужно";
+  if (!v.name.trim()) e.name = t.nameError;
+  if (!v.email.trim()) e.email = t.emailEmpty;
+  else if (!EMAIL_RE.test(v.email.trim())) e.email = t.emailBad;
+  if (!v.company.trim()) e.company = t.companyError;
+  if (!v.size) e.size = t.sizeError;
+  if (!v.need) e.need = t.needError;
   return e;
 }
 
@@ -78,7 +87,7 @@ function buildMessage(v: FormState): string {
     .join("\n");
 }
 
-export default function BusinessRequestForm() {
+export default function BusinessRequestForm({ locale, t }: { locale: Locale; t: Dict["business"] }) {
   const [v, setV] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
@@ -97,7 +106,7 @@ export default function BusinessRequestForm() {
     e.preventDefault();
     setFailure("");
 
-    const found = validate(v);
+    const found = validate(v, t);
     setErrors(found);
     const first = (Object.keys(found) as FieldName[])[0];
     if (first) {
@@ -124,10 +133,10 @@ export default function BusinessRequestForm() {
         setSent(true);
         setTimeout(() => doneRef.current?.focus(), 30);
       } else {
-        setFailure("Заявка не ушла — сбой на нашей стороне. Попробуйте ещё раз или напишите на sales@atlas.secure");
+        setFailure(fill(t.failServer, { mail: SALES_DESK.email }));
       }
     } catch {
-      setFailure("Нет связи с сервером. Проверьте соединение или напишите на sales@atlas.secure");
+      setFailure(fill(t.failNetwork, { mail: SALES_DESK.email }));
     } finally {
       setSending(false);
     }
@@ -137,11 +146,10 @@ export default function BusinessRequestForm() {
     return (
       <div className="v-card v-card-field vp-done" role="status">
         <span className="vp-done-mark" aria-hidden><Icon name="check" size={26} /></span>
-        <h3 ref={doneRef} tabIndex={-1} className="v-h3">Заявка принята</h3>
+        <h3 ref={doneRef} tabIndex={-1} className="v-h3">{t.doneTitle}</h3>
         <p>
-          Вернёмся в течение четырёх рабочих часов на указанную почту — с расчётом и проектом
-          договора. Если задача срочная, напишите на{" "}
-          <a href="mailto:sales@atlas.secure" className="v-link">sales@atlas.secure</a>.
+          {t.doneBefore}{" "}
+          <a href={`mailto:${SALES_DESK.email}`} className="v-link">{SALES_DESK.email}</a>.
         </p>
       </div>
     );
@@ -150,7 +158,7 @@ export default function BusinessRequestForm() {
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate className="v-form" aria-labelledby="request-title">
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-name">Как к вам обращаться</label>
+        <label className="v-label" htmlFor="rq-name">{t.nameLabel}</label>
         <input
           id="rq-name"
           data-field="name"
@@ -167,7 +175,7 @@ export default function BusinessRequestForm() {
       </div>
 
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-email">Рабочая почта</label>
+        <label className="v-label" htmlFor="rq-email">{t.emailLabel}</label>
         <input
           id="rq-email"
           data-field="email"
@@ -185,7 +193,7 @@ export default function BusinessRequestForm() {
       </div>
 
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-company">Компания</label>
+        <label className="v-label" htmlFor="rq-company">{t.companyLabel}</label>
         <input
           id="rq-company"
           data-field="company"
@@ -202,7 +210,7 @@ export default function BusinessRequestForm() {
       </div>
 
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-size">Размер команды</label>
+        <label className="v-label" htmlFor="rq-size">{t.sizeLabel}</label>
         <select
           id="rq-size"
           data-field="size"
@@ -213,8 +221,8 @@ export default function BusinessRequestForm() {
           aria-describedby={errors.size ? "rq-size-err" : undefined}
           aria-required="true"
         >
-          <option value="" disabled>Выберите размер</option>
-          {SIZES.map((s) => (
+          <option value="" disabled>{t.sizePlaceholder}</option>
+          {t.sizes.map((s) => (
             <option key={s.value} value={s.value}>{s.label}</option>
           ))}
         </select>
@@ -222,7 +230,7 @@ export default function BusinessRequestForm() {
       </div>
 
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-need">Что нужно</label>
+        <label className="v-label" htmlFor="rq-need">{t.needLabel}</label>
         <select
           id="rq-need"
           data-field="need"
@@ -233,8 +241,8 @@ export default function BusinessRequestForm() {
           aria-describedby={errors.need ? "rq-need-err" : undefined}
           aria-required="true"
         >
-          <option value="" disabled>Выберите вариант</option>
-          {NEEDS.map((n) => (
+          <option value="" disabled>{t.needPlaceholder}</option>
+          {t.needs.map((n) => (
             <option key={n.value} value={n.value}>{n.label}</option>
           ))}
         </select>
@@ -242,7 +250,7 @@ export default function BusinessRequestForm() {
       </div>
 
       <div className="v-field">
-        <label className="v-label" htmlFor="rq-message">Задача (необязательно)</label>
+        <label className="v-label" htmlFor="rq-message">{t.messageLabel}</label>
         <textarea
           id="rq-message"
           className="v-input"
@@ -250,7 +258,7 @@ export default function BusinessRequestForm() {
           style={{ minHeight: 120, paddingBlock: 14, resize: "vertical" }}
           value={v.message}
           onChange={(e) => set("message")(e.target.value)}
-          placeholder="Сколько сотрудников и где работают, какие сервисы должны открываться, есть ли сроки"
+          placeholder={t.messagePlaceholder}
         />
       </div>
 
@@ -258,11 +266,11 @@ export default function BusinessRequestForm() {
       <p role="alert" aria-live="assertive" style={{ margin: 0, color: "var(--v-red)", fontSize: 14 }}>{failure}</p>
 
       <button type="submit" className="v-btn v-btn-primary v-btn-block" disabled={sending}>
-        {sending ? "Отправляем…" : "Получить расчёт"}
+        {sending ? t.sending : t.submit}
       </button>
       <p className="v-small" style={{ textAlign: "center" }}>
-        Отправляя заявку, вы соглашаетесь с{" "}
-        <Link href="/privacy" className="v-link">политикой конфиденциальности</Link>.
+        {t.consentBefore}{" "}
+        <Link href={localeHref("/privacy", locale)} className="v-link">{t.consentLink}</Link>.
       </p>
     </form>
   );

@@ -4,7 +4,9 @@ import Icon, { type IconName } from "@/components/pixel/Icon";
 import BusinessRequestForm from "./BusinessRequestForm";
 import { DEVICE_LIMIT } from "@/lib/plans";
 import { COUNTRY_COUNT } from "@/lib/locations";
-import { plural } from "@/lib/ru-words";
+import { SALES_DESK } from "@/lib/contacts";
+import type { Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 import "@/app/vps-info.css";
 
 /**
@@ -16,56 +18,38 @@ import "@/app/vps-info.css";
  * Цен на странице нет — корпоративный расчёт зависит от числа мест.
  * Форма и есть финальное действие страницы.
  */
-const POINTS: Array<{ icon: IconName; title: string; text: string; tile?: "dark" | "blue"; num?: string }> = [
-  {
-    icon: "globe",
-    title: "Стран на выбор",
-    text: "Страну выбирает сотрудник или назначает администратор — в зависимости от нужных сервисов.",
-    tile: "blue",
-    num: String(COUNTRY_COUNT),
-  },
-  {
-    icon: "devices",
-    title: "Устройств на человека",
-    text: "Ноутбук, телефон, планшет, рабочий компьютер — одно место закрывает все устройства сотрудника.",
-    tile: "dark",
-    num: String(DEVICE_LIMIT),
-  },
-  {
-    icon: "receipt",
-    title: "Один счёт на всю команду",
-    text: "Подключения — в общем аккаунте компании. Договор, акты и счета-фактуры по безналичному расчёту.",
-  },
-  {
-    icon: "key",
-    title: "Управление доступами",
-    text: "Администратор компании выдаёт и отзывает доступ сам — в тот же день, вместе со всеми устройствами.",
-  },
+/**
+ * Плитки «что входит». Значок, оформление и число от языка не зависят;
+ * заголовок и текст берутся из словаря по тому же месту в списке.
+ */
+const POINTS: Array<{ icon: IconName; tile?: "dark" | "blue"; num?: string }> = [
+  { icon: "globe", tile: "blue", num: String(COUNTRY_COUNT) },
+  { icon: "devices", tile: "dark", num: String(DEVICE_LIMIT) },
+  { icon: "receipt" },
+  { icon: "key" },
 ];
 
-export default function BusinessView() {
+export default function BusinessView({ locale, t }: { locale: Locale; t: Dict["business"] }) {
+  const points = POINTS.map((p, i) => ({ ...p, ...t.points[i] }));
   return (
     <>
       <section className="v-section v-center v-glow" aria-labelledby="v-business-title">
         <div className="v-wrap v-narrow v-stagger">
           <h1 id="v-business-title" className="v-h1">
-            Интернет и серверы <span className="v-accent">для команды</span>
+            {t.title} <span className="v-accent">{t.titleAccent}</span>
           </h1>
-          <p className="v-lead">
-            Подключения для сотрудников и серверы под задачи — по договору, на одном счёте. Расчёт —
-            в течение четырёх рабочих часов.
-          </p>
+          <p className="v-lead">{t.lead}</p>
           <div className="v-actions">
-            <a href="#request" className="v-btn v-btn-primary">Получить расчёт</a>
-            <a href="mailto:sales@atlas.secure" className="v-btn v-btn-soft">sales@atlas.secure</a>
+            <a href="#request" className="v-btn v-btn-primary">{t.cta}</a>
+            <a href={`mailto:${SALES_DESK.email}`} className="v-btn v-btn-soft">{SALES_DESK.email}</a>
           </div>
         </div>
       </section>
 
-      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label="Что входит">
+      <section className="v-section v-reveal" style={{ paddingTop: 0 }} aria-label={t.includedLabel}>
         <div className="v-wrap v-narrow">
           <div className="v-bento">
-            {POINTS.map((p) => (
+            {points.map((p) => (
               <div key={p.title} className={`v-tile v-span-3${p.tile ? ` v-tile-${p.tile}` : ""}`}>
                 <span className="v-tile-icon" aria-hidden><Icon name={p.icon} size={22} /></span>
                 <h3>{p.title}</h3>
@@ -79,10 +63,10 @@ export default function BusinessView() {
 
       <section className="v-section v-center v-reveal" id="request" aria-labelledby="request-title">
         <div className="v-wrap v-narrow">
-          <h2 id="request-title" className="v-h2">Расскажите про команду</h2>
-          <p className="v-lead" style={{ marginBottom: 8 }}>Ответим письмом с расчётом и проектом договора.</p>
+          <h2 id="request-title" className="v-h2">{t.formTitle}</h2>
+          <p className="v-lead" style={{ marginBottom: 8 }}>{t.formLead}</p>
           <div style={{ marginTop: 32, textAlign: "left" }}>
-            <BusinessRequestForm />
+            <BusinessRequestForm locale={locale} t={t} />
           </div>
         </div>
       </section>

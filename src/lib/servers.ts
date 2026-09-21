@@ -33,6 +33,8 @@
  * требующие уточнения, а не как обещание.
  */
 
+import type { Locale } from "./locale";
+
 export type ServerId = "meridian" | "parallel" | "azimuth" | "zenith";
 
 export interface ServerTier {
@@ -41,6 +43,8 @@ export interface ServerTier {
   name: string;
   /** Одна строка о том, для чего эта ступень. */
   role: string;
+  /** То же по-английски — поле обязательное. */
+  roleEn: string;
   /** Доллары в месяц. `from: true` — «от», конфигурация собирается. */
   usd: number;
   from?: boolean;
@@ -49,11 +53,15 @@ export interface ServerTier {
   /** Трафик считается или нет. */
   meteredTraffic: boolean;
   cpu: string;
+  cpuEn: string;
   ramGb: number;
   disks: string;
+  disksEn: string;
   ip: string;
+  ipEn: string;
   /** Поля, которые ещё не подтверждены владельцем. */
   confirm: string[];
+  confirmEn: string[];
 }
 
 export const SERVERS: ServerTier[] = [
@@ -61,54 +69,74 @@ export const SERVERS: ServerTier[] = [
     id: "meridian",
     name: "Meridian",
     role: "Один проект: сайт, база данных, панель управления",
+    roleEn: "A single project: a site, a database, a control panel",
     usd: 300,
     portGbps: 1,
     meteredTraffic: false,
     cpu: "8–12 физических ядер",
+    cpuEn: "8–12 physical cores",
     ramGb: 64,
     disks: "2 × 1,92 ТБ NVMe, зеркало",
+    disksEn: "2 × 1.92 TB NVMe, mirrored",
     ip: "IPv4 + подсеть IPv6",
+    ipEn: "IPv4 + an IPv6 subnet",
     confirm: ["поколение процессора", "порог fair use", "срок выдачи"],
+    confirmEn: ["processor generation", "fair use threshold", "delivery time"],
   },
   {
     id: "parallel",
     name: "Parallel",
     role: "Проект с большим трафиком",
+    roleEn: "A project with heavy traffic",
     usd: 550,
     portGbps: 10,
     meteredTraffic: true,
     cpu: "16–24 ядра",
+    cpuEn: "16–24 cores",
     ramGb: 128,
     disks: "2 × 3,84 ТБ NVMe, зеркало",
+    disksEn: "2 × 3.84 TB NVMe, mirrored",
     ip: "IPv4 + подсеть IPv6, до /29 опцией",
+    ipEn: "IPv4 + an IPv6 subnet, up to /29 as an option",
     confirm: ["гарантированная полоса", "лимит трафика или 95-й перцентиль"],
+    confirmEn: ["guaranteed bandwidth", "traffic cap or 95th percentile"],
   },
   {
     id: "azimuth",
     name: "Azimuth",
     role: "Полная скорость порта без учёта трафика",
+    roleEn: "Full port speed with traffic unmetered",
     usd: 900,
     portGbps: 10,
     meteredTraffic: false,
     cpu: "32 ядра",
+    cpuEn: "32 cores",
     ramGb: 256,
     disks: "4 × 3,84 ТБ NVMe, RAID 10",
+    disksEn: "4 × 3.84 TB NVMe, RAID 10",
     ip: "IPv4 + подсеть IPv6, приватный VLAN",
+    ipEn: "IPv4 + an IPv6 subnet, a private VLAN",
     confirm: ["доступность в конкретных площадках"],
+    confirmEn: ["availability in specific data centres"],
   },
   {
     id: "zenith",
     name: "Zenith",
     role: "Собирается под задачу",
+    roleEn: "Built to order",
     usd: 1800,
     from: true,
     portGbps: 25,
     meteredTraffic: false,
     cpu: "до 64 ядер, два сокета",
+    cpuEn: "up to 64 cores, dual socket",
     ramGb: 1024,
     disks: "до 8 × NVMe, RAID 10",
+    disksEn: "up to 8 × NVMe, RAID 10",
     ip: "по спецификации",
+    ipEn: "to specification",
     confirm: ["доступность порта 25 Гбит/с", "сроки поставки железа"],
+    confirmEn: ["availability of a 25 Gbit/s port", "hardware delivery times"],
   },
 ];
 
@@ -118,8 +146,15 @@ export const SERVER_ENTRY_USD = Math.min(...SERVERS.map((s) => s.usd));
 /** Верхняя точка оси полосы — по ней строится шкала на странице. */
 export const SERVER_MAX_GBPS = Math.max(...SERVERS.map((s) => s.portGbps));
 
-export function formatUsd(n: number): string {
-  return "$" + n.toLocaleString("ru-RU");
+export function formatUsd(n: number, locale: Locale = "ru"): string {
+  return "$" + n.toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
+}
+
+/** Характеристики ступени на языке страницы. */
+export function serverText(s: ServerTier, locale: Locale) {
+  return locale === "ru"
+    ? { role: s.role, cpu: s.cpu, disks: s.disks, ip: s.ip, confirm: s.confirm }
+    : { role: s.roleEn, cpu: s.cpuEn, disks: s.disksEn, ip: s.ipEn, confirm: s.confirmEn };
 }
 
 /**
@@ -143,7 +178,9 @@ export interface GuaranteeItem {
   note: string;
 }
 
-export const GUARANTEES: { own: GuaranteeItem[]; outside: GuaranteeItem[] } = {
+type Guarantees = { own: GuaranteeItem[]; outside: GuaranteeItem[] };
+
+export const GUARANTEES: Guarantees = {
   own: [
     {
       t: "Скорость порта",
@@ -174,9 +211,57 @@ export const GUARANTEES: { own: GuaranteeItem[]; outside: GuaranteeItem[] } = {
   ],
 };
 
+/**
+ * То же по-английски. Граница обязана называться одинаково на обоих
+ * языках: это не украшение страницы, а то, что человек получает по
+ * счёту.
+ */
+const GUARANTEES_EN: Guarantees = {
+  own: [
+    {
+      t: "Port speed",
+      note: "The one in the configuration — it is yours in full and shared with nobody.",
+    },
+    {
+      t: "Memory and disks",
+      note: "The amount and type from the card: not “up to”, not “on average”, but exactly that.",
+    },
+    {
+      t: "Protection from attacks",
+      note: "Enterprise Spectrum Protection is on every tier in the range and is included in the price — there is nothing extra to pay.",
+    },
+    {
+      t: "Delivery time",
+      note: "The server is delivered within the stated time from payment — a time named in advance, not “in the order of the queue”.",
+    },
+  ],
+  outside: [
+    {
+      t: "Speed to other people's sites and services",
+      note: "That depends on their network, not ours. Our stretch of the road runs to our port, and for that we answer.",
+    },
+    {
+      t: "How your software runs on the server",
+      note: "What you install is your business. With the server itself and the network we will help at any time.",
+    },
+  ],
+};
+
+export function guarantees(locale: Locale): Guarantees {
+  return locale === "ru" ? GUARANTEES : GUARANTEES_EN;
+}
+
 /** Что смотреть в договоре — вместо колонки «уточняем» на витрине. */
 export const CONTRACT_NOTE =
   "Порог справедливого использования и условия компенсации за простой прописаны в договоре — пришлём его до оплаты, спросите поддержку.";
+
+const CONTRACT_NOTE_EN =
+  "The fair use threshold and the terms of compensation for downtime are set out in the contract — " +
+  "we will send it before you pay; just ask support.";
+
+export function contractNote(locale: Locale): string {
+  return locale === "ru" ? CONTRACT_NOTE : CONTRACT_NOTE_EN;
+}
 
 /** Скидки за срок. Сдержанные: «−70%» и таймеры запрещены. */
 export const SERVER_TERMS: Array<{ months: number; discount: number }> = [

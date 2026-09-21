@@ -20,6 +20,8 @@
  * «туннельные протоколы», а не эвфемизм.
  */
 
+import type { Locale } from "./locale";
+
 export interface Vacancy {
   id: string;
   title: string;
@@ -37,6 +39,23 @@ export interface Vacancy {
   /** Что будет плюсом. */
   plus: string[];
   /** Формат работы — без единицы: «₽/мес» подписывается к вилке. */
+  mode: string;
+  /**
+   * То же по-английски. Поле ОБЯЗАТЕЛЬНОЕ: вакансия без перевода не
+   * соберётся, и на английской странице не окажется русского текста.
+   * Вилка, id и порядок — общие: это не слова, а данные.
+   */
+  en: VacancyText;
+}
+
+/** Переводимая часть вакансии. */
+export interface VacancyText {
+  title: string;
+  tags: string[];
+  about: string;
+  tasks: string[];
+  need: string[];
+  plus: string[];
   mode: string;
 }
 
@@ -67,6 +86,34 @@ export const VACANCIES: Vacancy[] = [
       "Опыт найма и наставничества",
     ],
     mode: "удалённо",
+    en: {
+      title: "Head of ML",
+      tags: [
+        "a team from scratch",
+        "anti-fraud",
+        "roadmap",
+      ],
+      about: "Build the ML function from a blank page: from the first model to the team that maintains it.",
+      tasks: [
+        "Build the team and set up the process: from hypothesis to a model in production",
+        "Set the roadmap: anti-fraud on payments, anomalies in traffic, automatic node selection for users",
+        "Answer to the owner for the function's metrics, not for the number of experiments",
+        "Choose the training and deployment infrastructure and keep it from turning into a zoo",
+      ],
+      need: [
+        "Two years or more leading an ML team, with a strong engineering background of your own",
+        "Production ML systems you took all the way into operation, not ones that stopped on a laptop",
+        "Python and the classic stack (scikit-learn, XGBoost/LightGBM), a grasp of binary classification metrics",
+        "The ability to explain to the business why a model is wrong, and what that costs in money",
+      ],
+      plus: [
+        "Anti-fraud or payment scoring",
+        "Streaming data: Kafka, windowed aggregation, real-time inference",
+        "MLOps: Docker, Kubernetes, Airflow, MLflow",
+        "Experience hiring and mentoring",
+      ],
+      mode: "remote",
+    },
   },
   {
     id: "ml",
@@ -94,6 +141,33 @@ export const VACANCIES: Vacancy[] = [
       "Публикации, Kaggle, открытый код",
     ],
     mode: "удалённо",
+    en: {
+      title: "ML engineer",
+      tags: [
+        "anomaly detection",
+        "automatic server selection",
+      ],
+      about: "Teach the service to spot the odd thing in traffic and pick the best node for a user by itself.",
+      tasks: [
+        "Build anomaly detection models on connection and payment logs",
+        "Build automatic server selection: predict where a person will be faster",
+        "Take a model all the way to production and watch it degrade, rather than filing it away",
+        "Prepare the data: marts, features, labelling",
+      ],
+      need: [
+        "Python and the ML stack: scikit-learn, XGBoost/LightGBM; PyTorch where the task calls for it",
+        "Confident SQL and experience with large volumes of unstructured data: raw logs, event streams",
+        "A grasp of quality metrics and the ability to pick a threshold against the business cost of an error",
+        "Git, code review, reproducible experiments",
+      ],
+      plus: [
+        "Experience with network or payment data",
+        "Airflow and pipeline orchestration",
+        "Docker and shipping models as a service",
+        "Publications, Kaggle, open source",
+      ],
+      mode: "remote",
+    },
   },
   {
     id: "devops",
@@ -121,6 +195,34 @@ export const VACANCIES: Vacancy[] = [
       "Опыт дежурств и постмортемов",
     ],
     mode: "удалённо",
+    en: {
+      title: "DevOps engineer",
+      tags: [
+        "hosting and VPS infrastructure",
+        "CI/CD",
+        "monitoring",
+      ],
+      about: "Keep running the infrastructure the nodes in 19 countries, the panel and the site all live on.",
+      tasks: [
+        "Deploy and maintain nodes: configuration, updates, automating the routine",
+        "Run CI/CD: build, deploy, roll back with no manual steps and no heroics at night",
+        "Set up observability — metrics, logs, alerts, incident on-call",
+        "Count what the infrastructure costs and bring it down without losing headroom",
+      ],
+      need: [
+        "Linux at the level of “I will work the incident out myself”, networks at the level of routes and NAT",
+        "Kubernetes and containers in production, Terraform or OpenTofu, Ansible",
+        "Prometheus and Grafana (or VictoriaMetrics), sensible alerts instead of a wall of graphs",
+        "One language for automation: Go or Python",
+      ],
+      plus: [
+        "Experience with tunnelling protocols and network services under load",
+        "Several clouds and bare metal at the same time",
+        "Security: secrets, access, audit",
+        "Experience with on-call rotas and postmortems",
+      ],
+      mode: "remote",
+    },
   },
   {
     id: "network",
@@ -148,6 +250,34 @@ export const VACANCIES: Vacancy[] = [
       "Скрипты и автоматика на Python или Go",
     ],
     mode: "удалённо",
+    en: {
+      title: "Network engineer",
+      tags: [
+        "WireGuard",
+        "load balancing",
+        "data centres",
+      ],
+      about: "Own the thing people actually pay for: the speed and stability of the connection.",
+      tasks: [
+        "Configure and maintain nodes: routing, balancing, fault tolerance",
+        "Work out degradations: where packets were lost and why latency grew",
+        "Work with the sites: connections, links, expansion plans",
+        "Measure and document — so that the promises on the site are backed by a measurement",
+      ],
+      need: [
+        "Networks in earnest: TCP/IP, BGP, routing, NAT, MTU and everything that breaks in practice",
+        "WireGuard and tunnelling protocols, iptables/nftables",
+        "Linux, configuration automation, tcpdump and reading traffic",
+        "Willingness to take on-call shifts along with the team",
+      ],
+      plus: [
+        "Experience running a network across several data centres and countries",
+        "Anycast, L4/L7 load balancers",
+        "Experience with high-load proxy services",
+        "Scripts and automation in Python or Go",
+      ],
+      mode: "remote",
+    },
   },
   {
     id: "support",
@@ -175,6 +305,34 @@ export const VACANCIES: Vacancy[] = [
       "Умение писать инструкции так, чтобы по ним делали",
     ],
     mode: "сменный график, удалённо",
+    en: {
+      title: "Support engineer",
+      tags: [
+        "helping users",
+        "shift work",
+        "remote",
+      ],
+      about: "Be the person people come to when “it will not connect” — and solve it in one conversation.",
+      tasks: [
+        "Answer on Telegram and by email: work through connections, payments, devices",
+        "Reproduce the problem and hand engineers a clear report, not “it does not work for a customer”",
+        "Write and maintain guides, so the next question like it never arrives",
+        "Notice repeat requests and bring them to the product as a task",
+      ],
+      need: [
+        "Written Russian that is calm and human — no officialese",
+        "An everyday understanding of how the internet and networks work: IP, DNS, router, Wi-Fi",
+        "Experience supporting users, or a strong wish to get into it",
+        "Willingness to work shifts, including weekends on a rota",
+      ],
+      plus: [
+        "Experience with tunnelling clients and configuring network applications",
+        "English for correspondence with vendors",
+        "Experience in SaaS or hosting support",
+        "The knack of writing instructions people actually follow",
+      ],
+      mode: "shift work, remote",
+    },
   },
   {
     id: "hr",
@@ -202,8 +360,43 @@ export const VACANCIES: Vacancy[] = [
       "Опыт построения HR-процессов с нуля",
     ],
     mode: "удалённо",
+    en: {
+      title: "HR manager",
+      tags: [
+        "hiring in IT",
+        "onboarding",
+        "employer brand",
+      ],
+      about: "Fill engineering roles and make this a place people want to come to.",
+      tasks: [
+        "Run hiring from request to offer: sourcing, screening, coordinating interviews",
+        "Own onboarding: the first day, the first month, feedback",
+        "Grow the employer brand: job texts, channels, presence in the right communities",
+        "Measure the hiring funnel and talk about it in numbers",
+      ],
+      need: [
+        "Experience hiring in IT and an understanding of the difference between DevOps, ML and support",
+        "The ability to write job posts people read, and rejections that leave the relationship intact",
+        "Self-direction: the team is distributed and nobody stands over you",
+        "Care with data: ATS, deadlines, candidate statuses",
+      ],
+      plus: [
+        "Experience in a distributed team",
+        "Knowledge of the remote market and its grades",
+        "English for working with candidates outside Russia",
+        "Experience building HR processes from scratch",
+      ],
+      mode: "remote",
+    },
   },
 ];
+
+/** Переводимая часть вакансии на языке страницы. */
+export function vacancyText(v: Vacancy, locale: Locale): VacancyText {
+  return locale === "ru"
+    ? { title: v.title, tags: v.tags, about: v.about, tasks: v.tasks, need: v.need, plus: v.plus, mode: v.mode }
+    : v.en;
+}
 
 /** Куда писать откликом. Почта — из единого источника контактов. */
 export const CAREERS_SUBJECT = "Вакансия";

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { SERVER_POINTS, LOCATIONS } from "@/lib/locations";
-import { plural } from "@/lib/ru-words";
+import { SERVER_POINTS, LOCATIONS, countryName } from "@/lib/locations";
+import { pluralize } from "@/i18n/plural";
+import type { Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 import { WORLD_ROWS, CELL, MAP_W, MAP_H, project } from "@/lib/world-map";
 
 /**
@@ -37,7 +39,16 @@ function arc(from: { lat: number; lon: number }, to: { lat: number; lon: number 
   return `M${a.x.toFixed(1)},${a.y.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}`;
 }
 
-export default function NetMap() {
+export default function NetMap({
+  locale,
+  hint,
+  cityWord,
+}: {
+  locale: Locale;
+  /** «наведите на узел» — подпись под числом городов. */
+  hint: string;
+  cityWord: Dict["units"]["city"];
+}) {
   const [hover, setHover] = useState<string | null>(null);
 
   const land: string[] = [];
@@ -48,7 +59,8 @@ export default function NetMap() {
   });
 
   const active = hover ? SERVER_POINTS.find((p) => p.city === hover) : null;
-  const country = active ? LOCATIONS.find((l) => l.code === active.code)?.country : null;
+  const hit = active ? LOCATIONS.find((l) => l.code === active.code) : null;
+  const country = hit ? countryName(hit, locale) : null;
 
   return (
     <figure className="ti-map">
@@ -101,8 +113,8 @@ export default function NetMap() {
           </>
         ) : (
           <>
-            <b>{SERVER_POINTS.length} {plural(SERVER_POINTS.length, ["город", "города", "городов"])}</b>
-            <span>наведите на узел</span>
+            <b>{SERVER_POINTS.length} {pluralize(locale, SERVER_POINTS.length, cityWord)}</b>
+            <span>{hint}</span>
           </>
         )}
       </figcaption>

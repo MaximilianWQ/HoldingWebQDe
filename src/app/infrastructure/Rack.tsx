@@ -18,30 +18,32 @@ import { useState } from "react";
  */
 interface Unit {
   id: string;
-  name: string;
-  note: string;
   /** Сколько «дисков» рисовать в юните. */
   bays: number;
   tone?: "accent" | "lime";
 }
 
+/** Имя и пояснение юнита приходят пропсом — компонент клиентский. */
+export interface UnitText { name: string; note: string }
+
 const UNITS: Unit[] = [
-  { id: "edge", name: "Пограничный узел", note: "Принимает соединение и держит туннель до устройства", bays: 8, tone: "accent" },
-  { id: "balance", name: "Балансировка", note: "Раскидывает подключения между машинами площадки", bays: 6 },
-  { id: "panel", name: "Панель управления", note: "Ключи, сроки, устройства — состояние каждой подписки", bays: 4, tone: "lime" },
-  { id: "db", name: "База и журнал", note: "Источник правды по срокам и оплатам, события пишутся один раз", bays: 6 },
-  { id: "watch", name: "Наблюдаемость", note: "Метрики, логи, алерты — дежурный видит инцидент раньше вас", bays: 5 },
-  { id: "backup", name: "Резерв", note: "Запасные каналы и копии: площадка выпадает — доступ остаётся", bays: 7 },
+  { id: "edge", bays: 8, tone: "accent" },
+  { id: "balance", bays: 6 },
+  { id: "panel", bays: 4, tone: "lime" },
+  { id: "db", bays: 6 },
+  { id: "watch", bays: 5 },
+  { id: "backup", bays: 7 },
 ];
 
-export default function Rack() {
-  const [active, setActive] = useState<string>(UNITS[0].id);
-  const unit = UNITS.find((u) => u.id === active) ?? UNITS[0];
+export default function Rack({ units }: { units: UnitText[] }) {
+  const rows = UNITS.map((u, i) => ({ ...u, ...units[i] }));
+  const [active, setActive] = useState<string>(rows[0].id);
+  const unit = rows.find((u) => u.id === active) ?? rows[0];
 
   return (
     <div className="ti-rack">
       <div className="ti-rack-body" role="list">
-        {UNITS.map((u, i) => (
+        {rows.map((u, i) => (
           <button
             key={u.id}
             type="button"

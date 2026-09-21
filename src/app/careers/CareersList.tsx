@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Icon from "@/components/pixel/Icon";
-import { VACANCIES } from "@/lib/careers";
+import { VACANCIES, vacancyText } from "@/lib/careers";
+import type { Dict } from "@/i18n";
+import type { Locale } from "@/lib/locale";
 import { TELEGRAM_SUPPORT } from "@/lib/contacts";
 import ApplyForm from "./ApplyForm";
 
@@ -15,7 +17,18 @@ import ApplyForm from "./ApplyForm";
  * Раскрытая строка — одна: сравнивать вакансии всё равно приходится по
  * вилке и названию, а читают их по очереди.
  */
-export default function CareersList() {
+export default function CareersList({
+  locale,
+  t,
+  tf,
+  hint,
+}: {
+  locale: Locale;
+  t: Dict["careers"]["list"];
+  tf: Dict["careers"]["form"];
+  /** Подпись под полем резюме со вставленным пределом в мегабайтах. */
+  hint: string;
+}) {
   const [open, setOpen] = useState<string | null>(null);
   // Форма раскрывается отдельно от вакансии: человек может читать
   // требования и не собираться откликаться прямо сейчас.
@@ -43,6 +56,7 @@ export default function CareersList() {
       {VACANCIES.map((v) => {
         const isOpen = open === v.id;
         const isApplying = applying === v.id;
+        const x = vacancyText(v, locale);
         return (
           <article key={v.id} id={`vac-${v.id}`} className="tc-row" data-open={isOpen ? "" : undefined}>
             <h3 className="tc-row-head">
@@ -60,13 +74,13 @@ export default function CareersList() {
                   {/* Единица стоит под вилкой, как на макете: «350–450k»
                       без «₽/мес» читается как что угодно — от рублей в
                       год до долларов. */}
-                  <span className="tc-pay-unit t-mono">₽/мес · {v.mode}</span>
+                  <span className="tc-pay-unit t-mono">{t.payUnit} · {x.mode}</span>
                 </span>
                 <span className="tc-row-main">
-                  <b className="tc-row-title">{v.title}</b>
+                  <b className="tc-row-title">{x.title}</b>
                   <span className="tc-row-tags">
-                    {v.tags.map((t) => (
-                      <span key={t} className="tc-row-tag">{t}</span>
+                    {x.tags.map((tag) => (
+                      <span key={tag} className="tc-row-tag">{tag}</span>
                     ))}
                   </span>
                 </span>
@@ -78,37 +92,37 @@ export default function CareersList() {
 
             <div className="tc-panel" id={`tc-panel-${v.id}`} role="region">
               <div className="tc-panel-in">
-                <p className="tc-about">{v.about}</p>
+                <p className="tc-about">{x.about}</p>
                 <div className="tc-cols">
                   <div>
-                    <p className="t-label">Что делать</p>
+                    <p className="t-label">{t.tasks}</p>
                     <ul className="tc-ul">
-                      {v.tasks.map((t) => <li key={t}>{t}</li>)}
+                      {x.tasks.map((line) => <li key={line}>{line}</li>)}
                     </ul>
                   </div>
                   <div>
-                    <p className="t-label">Что ждём</p>
+                    <p className="t-label">{t.need}</p>
                     <ul className="tc-ul">
-                      {v.need.map((t) => <li key={t}>{t}</li>)}
+                      {x.need.map((line) => <li key={line}>{line}</li>)}
                     </ul>
                   </div>
                   <div>
-                    <p className="t-label">Будет плюсом</p>
+                    <p className="t-label">{t.plus}</p>
                     <ul className="tc-ul tc-ul-plus">
-                      {v.plus.map((t) => <li key={t}>{t}</li>)}
+                      {x.plus.map((line) => <li key={line}>{line}</li>)}
                     </ul>
                   </div>
                 </div>
                 {isApplying ? (
-                  <ApplyForm vacancyId={v.id} vacancyTitle={v.title} />
+                  <ApplyForm vacancyId={v.id} vacancyTitle={x.title} locale={locale} t={tf} hint={hint} />
                 ) : (
                   <div className="t-actions">
                     <button type="button" className="t-btn" onClick={() => setApplying(v.id)}>
-                      Откликнуться
+                      {t.apply}
                       <Icon name="arrow-right" size={16} />
                     </button>
                     <a className="t-btn t-btn-accent" href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">
-                      Написать в Telegram
+                      {t.telegram}
                     </a>
                   </div>
                 )}

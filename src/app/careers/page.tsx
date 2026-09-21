@@ -5,11 +5,14 @@ import BrandMark from "@/components/pixel/BrandMark";
 import Icon, { type IconName } from "@/components/pixel/Icon";
 import CareersList from "./CareersList";
 import TeamFigures from "./TeamFigures";
-import { VACANCIES } from "@/lib/careers";
+import { VACANCIES, RESUME_MAX_MB, vacancyText } from "@/lib/careers";
 import { TELEGRAM_SUPPORT } from "@/lib/contacts";
 import { COUNTRY_COUNT, CITY_COUNT } from "@/lib/locations";
 import { FOUNDED } from "@/lib/nav";
-import { plural } from "@/lib/ru-words";
+import { dict, fill } from "@/i18n";
+import { count, pluralize } from "@/i18n/plural";
+import { getLocale } from "@/lib/locale-server";
+import { localeHref } from "@/lib/locale";
 import "@/app/tech.css";
 import "./careers.css";
 
@@ -42,45 +45,29 @@ import "./careers.css";
  * витрины действует и в найме. Инфраструктура называется
  * «VPS-инфраструктурой», технология — «туннельными протоколами».
  */
-export const metadata: Metadata = {
-  title: "Вакансии",
-  description:
-    `Atlas Secure ищет инженеров и не только: ${VACANCIES.length} открытых ролей, удалённая работа, оплата в рублях. ` +
-    `Инфраструктура в ${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["стране", "странах", "странах"])}.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const d = dict(locale);
+  return {
+    title: d.careers.meta.title,
+    description: fill(d.careers.meta.description, {
+      count: VACANCIES.length,
+      word: pluralize(locale, VACANCIES.length, d.careers.meta.metaWord),
+      countriesIn: count(locale, COUNTRY_COUNT, d.units.countryIn),
+    }),
+  };
+}
 
-/** Чем занята команда. Иконки — из собственного набора корпуса. */
-const WORK: Array<{ icon: IconName; t: string }> = [
-  { icon: "globe", t: "Узлы и маршруты" },
-  { icon: "shield", t: "Защита и антифрод" },
-  { icon: "receipt", t: "Биллинг и платежи" },
-  { icon: "devices", t: "Приложения" },
-  { icon: "chat", t: "Поддержка" },
-  { icon: "grid", t: "Панель и админка" },
-];
+export default async function CareersPage() {
+  const locale = await getLocale();
+  const d = dict(locale);
+  const t = d.careers;
+  const to = (href: string) => localeHref(href, locale);
+  const roleWord = pluralize(locale, VACANCIES.length, t.roleWord);
 
-/**
- * Что мы даём. Каждая строка — то, что можно проверить в первом же
- * разговоре. Ни «обучения за счёт компании», ни «ДМС», ни
- * «печенек»: обещать то, чего у нас нет, здесь дороже, чем на
- * витрине — человек придёт и увидит.
- */
-const OFFER = [
-  { t: "Удалённо и в рублях", d: "Команда распределена с " + FOUNDED + " года. Место работы выбираете вы." },
-  { t: "Вилка на первом созвоне", d: "Называем её до задач и тестовых, чтобы никто не тратил время впустую." },
-  { t: "Свой участок целиком", d: "Команда маленькая: у каждого направления один ответственный, а не половина роли." },
-  { t: "Решения без комитетов", d: "От идеи до боевой выкладки — дни, а не кварталы. Это видно по истории изменений." },
-];
+  /** Чем занята команда. Иконки — из собственного набора корпуса. */
+  const WORK_ICONS: IconName[] = ["globe", "shield", "receipt", "devices", "chat", "grid"];
 
-const STEPS = [
-  { n: "01", t: "Отклик", d: "Форма на этой странице: имя, почта и резюме файлом." },
-  { n: "02", t: "Знакомство", d: "Созвон на полчаса: чем занимаемся мы, чем хотите заниматься вы." },
-  { n: "03", t: "Техническое интервью", d: "Разбор реальных задач направления, без головоломок на смекалку." },
-  { n: "04", t: "Оффер", d: "Вилка обсуждается на первом созвоне, так что сюрприза в конце не будет." },
-];
-
-export default function CareersPage() {
-  const roleWord = plural(VACANCIES.length, ["роль", "роли", "ролей"]);
   return (
     <VShell>
       <div className="t tc">
@@ -91,26 +78,27 @@ export default function CareersPage() {
               <div className="tc-hero-left">
                 <p className="t-label tc-mark">
                   <span className="tc-mark-logo" aria-hidden><BrandMark size={16} /></span>
-                  Atlas Secure · вакансии
+                  {t.kicker}
                 </p>
                 <h1 id="tc-title" className="tc-display">
-                  Приходи<br />в команду
+                  {t.title1}<br />{t.title2}
                 </h1>
                 <TeamFigures />
               </div>
 
               <div className="tc-hero-right">
                 <p className="tc-hero-text">
-                  Мы держим сеть в {COUNTRY_COUNT} {plural(COUNTRY_COUNT, ["стране", "странах", "странах"])} и{" "}
-                  {CITY_COUNT} {plural(CITY_COUNT, ["городе", "городах", "городах"])}, панель, биллинг и поддержку.
-                  Команда распределённая, работаем удалённо и платим в рублях.
+                  {fill(t.heroText, {
+                    countriesIn: count(locale, COUNTRY_COUNT, d.units.countryIn),
+                    citiesIn: count(locale, CITY_COUNT, d.units.cityIn),
+                  })}
                 </p>
-                <p className="t-label tc-hero-label">Открытые роли:</p>
+                <p className="t-label tc-hero-label">{t.openRolesLabel}</p>
                 <ul className="tc-pills">
                   {VACANCIES.map((v) => (
                     <li key={v.id}>
                       <a className="tc-pill" href={`#vac-${v.id}`}>
-                        <span>{v.title}</span>
+                        <span>{vacancyText(v, locale).title}</span>
                         <Icon name="arrow-right" size={18} />
                       </a>
                     </li>
@@ -125,12 +113,12 @@ export default function CareersPage() {
         <section className="t-sec t-reveal" aria-labelledby="tc-work">
           <div className="t-wrap">
             <div className="t-split">
-              <h2 id="tc-work" className="t-split-title">Над чем работаем</h2>
+              <h2 id="tc-work" className="t-split-title">{t.workTitle}</h2>
               <ul className="tc-work">
-                {WORK.map((w) => (
-                  <li key={w.t} className="tc-work-item">
-                    <span className="tc-work-icon" aria-hidden><Icon name={w.icon} size={30} /></span>
-                    <b>{w.t}</b>
+                {t.work.map((label, i) => (
+                  <li key={label} className="tc-work-item">
+                    <span className="tc-work-icon" aria-hidden><Icon name={WORK_ICONS[i]} size={30} /></span>
+                    <b>{label}</b>
                   </li>
                 ))}
               </ul>
@@ -142,12 +130,12 @@ export default function CareersPage() {
         <section className="t-sec t-reveal" aria-labelledby="tc-offer">
           <div className="t-wrap">
             <div className="t-split">
-              <h2 id="tc-offer" className="t-split-title">Что даём</h2>
+              <h2 id="tc-offer" className="t-split-title">{t.offerTitle}</h2>
               <ul className="tc-offer">
-                {OFFER.map((o) => (
+                {t.offer.map((o) => (
                   <li key={o.t} className="tc-offer-item">
                     <b>{o.t}</b>
-                    <span>{o.d}</span>
+                    <span>{fill(o.d, { founded: FOUNDED })}</span>
                   </li>
                 ))}
               </ul>
@@ -160,11 +148,16 @@ export default function CareersPage() {
           <div className="t-wrap">
             <div className="t-split">
               <h2 id="tc-open" className="t-split-title">
-                Открытые роли
+                {t.openTitle}
                 <span className="tc-count t-mono">{VACANCIES.length}</span>
               </h2>
               <div>
-                <CareersList />
+                <CareersList
+                  locale={locale}
+                  t={t.list}
+                  tf={t.form}
+                  hint={fill(t.form.hint, { mb: RESUME_MAX_MB })}
+                />
               </div>
             </div>
           </div>
@@ -174,13 +167,15 @@ export default function CareersPage() {
         <section className="t-sec t-reveal" aria-labelledby="tc-how">
           <div className="t-wrap">
             <div className="t-split">
-              <h2 id="tc-how" className="t-split-title">Как к нам попасть</h2>
+              <h2 id="tc-how" className="t-split-title">{t.howTitle}</h2>
               <ol className="tc-steps">
-                {STEPS.map((s) => (
-                  <li key={s.n} className="tc-step">
-                    <b className="t-num tc-step-num">{s.n}</b>
-                    <b className="tc-step-t">{s.t}</b>
-                    <span>{s.d}</span>
+                {t.steps.map((step, i) => (
+                  <li key={step.t} className="tc-step">
+                    {/* Номер считается, а не пишется: шаги нумеруются
+                        порядком, и на двух языках он один. */}
+                    <b className="t-num tc-step-num">{String(i + 1).padStart(2, "0")}</b>
+                    <b className="tc-step-t">{step.t}</b>
+                    <span>{step.d}</span>
                   </li>
                 ))}
               </ol>
@@ -189,12 +184,12 @@ export default function CareersPage() {
         </section>
 
         {/* 06 · полоса-призыв */}
-        <section className="t-sec t-reveal" aria-label="Перейти к вакансиям">
+        <section className="t-sec t-reveal" aria-label={t.barLabel}>
           <div className="t-wrap">
             <div className="tc-bar">
-              <p className="tc-bar-t">Все {VACANCIES.length} {roleWord} — выше</p>
+              <p className="tc-bar-t">{fill(t.barText, { count: VACANCIES.length, word: roleWord })}</p>
               <a className="tc-bar-btn" href="#roles">
-                Перейти к вакансиям
+                {t.goToRoles}
                 <Icon name="arrow-right" size={16} />
               </a>
             </div>
@@ -205,21 +200,18 @@ export default function CareersPage() {
         <section className="t-sec t-reveal" aria-labelledby="tc-final">
           <div className="t-wrap">
             <div className="tc-final">
-              <h2 id="tc-final" className="t-h2">Не нашли свою роль?</h2>
-              <p className="t-lead">
-                Откликнитесь на самую близкую и напишите в паре слов, чем хотели бы заниматься. Если вы делаете сети,
-                данные или продукт лучше, чем мы умеем сейчас, — роль найдётся.
-              </p>
+              <h2 id="tc-final" className="t-h2">{t.finalTitle}</h2>
+              <p className="t-lead">{t.finalLead}</p>
               <div className="t-actions">
                 <a className="t-btn" href="#roles">
-                  Выбрать вакансию
+                  {t.pickRole}
                   <Icon name="arrow-right" size={16} />
                 </a>
                 <a className="t-btn t-btn-accent" href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">
                   {TELEGRAM_SUPPORT.handle}
                 </a>
-                <Link className="t-btn t-btn-accent" href="/infrastructure">
-                  С чем придётся работать
+                <Link className="t-btn t-btn-accent" href={to("/infrastructure")}>
+                  {t.infraLink}
                 </Link>
               </div>
             </div>

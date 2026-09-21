@@ -5,13 +5,17 @@ import BrandMark from "@/components/pixel/BrandMark";
 import Icon from "@/components/pixel/Icon";
 import NetMap from "./NetMap";
 import Rack from "./Rack";
-import { BRAND, TRIAL } from "@/components/vps/links";
-import { COUNTRY_COUNT, CITY_COUNT, LOCATIONS } from "@/lib/locations";
+import { BRAND } from "@/components/vps/links";
+import { COUNTRY_COUNT, CITY_COUNT } from "@/lib/locations";
 import { PLAN_SPEED, DEVICE_LIMIT } from "@/lib/plans";
 import { SERVERS, SERVER_ENTRY_USD, formatUsd } from "@/lib/servers";
-import { PROTECTION } from "@/lib/protection";
+import { protection } from "@/lib/protection";
 import { VACANCIES } from "@/lib/careers";
-import { plural } from "@/lib/ru-words";
+import { TRIAL_DAYS } from "@/lib/brand-facts";
+import { dict, fill } from "@/i18n";
+import { count, pluralize } from "@/i18n/plural";
+import { getLocale } from "@/lib/locale-server";
+import { localeHref } from "@/lib/locale";
 import "@/app/tech.css";
 import "./infra.css";
 
@@ -36,59 +40,54 @@ import "./infra.css";
  * COMPLIANCE-CHECK.md; на странице его нет: покупателю не показывают
  * внутреннюю сверку.
  */
-const COUNTRY_WORD = plural(COUNTRY_COUNT, ["страна", "страны", "стран"]);
-const CITY_WORD = plural(CITY_COUNT, ["город", "города", "городов"]);
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const d = dict(locale);
+  return {
+    title: fill(d.infra.meta.title, {
+      countriesIn: count(locale, COUNTRY_COUNT, d.units.countryIn),
+    }),
+    description: fill(d.infra.meta.description, {
+      brand: BRAND,
+      countries: count(locale, COUNTRY_COUNT, d.units.country),
+      cities: count(locale, CITY_COUNT, d.units.city),
+      speed: PLAN_SPEED.plus,
+    }),
+  };
+}
 
-export const metadata: Metadata = {
-  title: `Инфраструктура: узлы в ${COUNTRY_COUNT} ${plural(COUNTRY_COUNT, ["стране", "странах", "странах"])}`,
-  description:
-    `Как устроена сеть ${BRAND}: узлы в ${COUNTRY_COUNT} ${COUNTRY_WORD} и ${CITY_COUNT} ${CITY_WORD}, ` +
-    `ширина канала до ${PLAN_SPEED.plus} Гбит/с, резервные каналы и наблюдаемость. Числа — из кода сервиса.`,
-};
+export default async function InfrastructurePage() {
+  const locale = await getLocale();
+  const d = dict(locale);
+  const t = d.infra;
+  const to = (href: string) => localeHref(href, locale);
+  const countries = count(locale, COUNTRY_COUNT, d.units.country);
+  const cities = count(locale, CITY_COUNT, d.units.city);
 
-const FIGURES = [
-  { n: String(COUNTRY_COUNT), cap: `${COUNTRY_WORD} на выбор — страна меняется в приложении, а не покупается отдельно` },
-  { n: String(CITY_COUNT), cap: `${CITY_WORD} с узлами: чем ближе узел, тем меньше дорога до сервиса` },
-  { n: `${PLAN_SPEED.plus}`, cap: `Гбит/с — ширина канала на тарифе Plus, ${PLAN_SPEED.basic} Гбит/с на Basic` },
-  { n: String(DEVICE_LIMIT), cap: `${plural(DEVICE_LIMIT, ["устройство", "устройства", "устройств"])} на одной подписке, каждое со своим ключом` },
-];
+  // Крупные числа — из кода, подписи — из словаря по тому же месту.
+  const FIGURES = [
+    { n: String(COUNTRY_COUNT), cap: fill(t.figures[0], { word: pluralize(locale, COUNTRY_COUNT, d.units.country) }) },
+    { n: String(CITY_COUNT), cap: fill(t.figures[1], { word: pluralize(locale, CITY_COUNT, d.units.city) }) },
+    { n: `${PLAN_SPEED.plus}`, cap: fill(t.figures[2], { basic: PLAN_SPEED.basic }) },
+    { n: String(DEVICE_LIMIT), cap: fill(t.figures[3], { word: pluralize(locale, DEVICE_LIMIT, d.units.device) }) },
+  ];
 
-/**
- * Слои. Защита идёт первой и во всю ширину дорожки (`ti-layer-wide`):
- * из пяти слоёв она единственный, у которого есть имя, а не описание,
- * — и единственный, о котором спрашивают до покупки. Имя и текст — из
- * `protection.ts`, на странице их руками не пишем.
- */
-const LAYERS = [
-  {
-    icon: "shield" as const,
-    t: "Защита от атак",
-    d: `${PROTECTION.name}. ${PROTECTION.plain} ${PROTECTION.scope}`,
-    wide: true,
-  },
-  {
-    icon: "globe" as const,
-    t: "Сеть",
-    d: "Узлы в разных странах, балансировка внутри площадки и резервные каналы между ними.",
-  },
-  {
-    icon: "key" as const,
-    t: "Ключи и доступ",
-    d: "Каждому устройству свой ключ. Отозвать один — остальные продолжают работать.",
-  },
-  {
-    icon: "receipt" as const,
-    t: "Биллинг",
-    d: "Срок подписки — событие в журнале, а не поле в базе: историю можно проследить целиком.",
-  },
-  {
-    icon: "bell" as const,
-    t: "Наблюдаемость",
-    d: "Метрики и алерты на каждом участке: инцидент видит дежурный, а не пользователь.",
-  },
-];
+  /**
+   * Слои. Защита идёт первой и во всю ширину дорожки (`ti-layer-wide`):
+   * из пяти слоёв она единственный, у которого есть имя, а не описание,
+   * — и единственный, о котором спрашивают до покупки. Её текст
+   * собирается из `protection.ts` и в словаре оставлен пустым: имя
+   * защиты и её описание живут в одном месте на весь сайт.
+   */
+  const pr = protection(locale);
+  const LAYERS = [
+    { icon: "shield" as const, t: t.layers[0].t, d: `${pr.name}. ${pr.plain} ${pr.scope}`, wide: true },
+    { icon: "globe" as const, t: t.layers[1].t, d: t.layers[1].d },
+    { icon: "key" as const, t: t.layers[2].t, d: t.layers[2].d },
+    { icon: "receipt" as const, t: t.layers[3].t, d: t.layers[3].d },
+    { icon: "bell" as const, t: t.layers[4].t, d: t.layers[4].d },
+  ];
 
-export default function InfrastructurePage() {
   return (
     <VShell>
       <div className="t">
@@ -97,22 +96,19 @@ export default function InfrastructurePage() {
           <div className="t-wrap">
             <p className="t-label ti-mark">
               <span className="ti-mark-logo" aria-hidden><BrandMark size={16} /></span>
-              Инфраструктура
+              {t.kicker}
             </p>
             <h1 id="ti-title" className="t-h1">
-              Сеть, на которой всё держится
+              {t.title}
             </h1>
-            <p className="t-lead">
-              Узлы в {COUNTRY_COUNT} {COUNTRY_WORD} и {CITY_COUNT} {CITY_WORD}, панель, биллинг и дежурство. Ниже —
-              как это устроено и что из этого можно проверить.
-            </p>
+            <p className="t-lead">{fill(t.lead, { countries, cities })}</p>
             <div className="t-actions">
-              <Link className="t-btn" href="/auth" prefetch={false}>
-                Попробовать {TRIAL} бесплатно
+              <Link className="t-btn" href={to("/auth")} prefetch={false}>
+                {fill(d.common.tryFree, { trial: count(locale, TRIAL_DAYS, d.units.day) })}
                 <Icon name="arrow-right" size={16} />
               </Link>
-              <Link className="t-btn t-btn-accent" href="/careers">
-                Вакансии · {VACANCIES.length}
+              <Link className="t-btn t-btn-accent" href={to("/careers")}>
+                {t.vacancies} · {VACANCIES.length}
               </Link>
             </div>
           </div>
@@ -122,7 +118,7 @@ export default function InfrastructurePage() {
         <section className="t-sec t-reveal" aria-labelledby="ti-figures">
           <div className="t-wrap">
             <div className="t-split">
-              <h2 id="ti-figures" className="t-split-title">Статистика</h2>
+              <h2 id="ti-figures" className="t-split-title">{t.figuresTitle}</h2>
               <div className="t-figures">
                 {FIGURES.map((f) => (
                   <div key={f.cap} className="ti-figure">
@@ -140,17 +136,11 @@ export default function InfrastructurePage() {
           <div className="t-wrap">
             <div className="t-split">
               <div>
-                <h2 id="ti-map-h" className="t-split-title">Карта узлов</h2>
-                <p className="t-text">
-                  Города берутся из того же списка, по которому приложение показывает страны. Дуги — не украшение:
-                  так выглядит обмен между опорным узлом и дальними площадками.
-                </p>
-                <p className="t-text">
-                  Отклик по городам на странице не пишем: сейчас это расчёт по расстоянию, а не замер. Появится
-                  замер — появится число.
-                </p>
+                <h2 id="ti-map-h" className="t-split-title">{t.mapTitle}</h2>
+                <p className="t-text">{t.mapText1}</p>
+                <p className="t-text">{t.mapText2}</p>
               </div>
-              <NetMap />
+              <NetMap locale={locale} hint={t.mapHint} cityWord={d.units.city} />
             </div>
           </div>
         </section>
@@ -160,13 +150,10 @@ export default function InfrastructurePage() {
           <div className="t-wrap">
             <div className="t-split">
               <div>
-                <h2 id="ti-rack-h" className="t-split-title">Что стоит за подключением</h2>
-                <p className="t-text">
-                  Наведите на юнит — увидите, за что он отвечает. Это схема состава, а не фотография помещения:
-                  снимков наших площадок мы не публикуем, а чужие показывать нечестно.
-                </p>
+                <h2 id="ti-rack-h" className="t-split-title">{t.rackTitle}</h2>
+                <p className="t-text">{t.rackText}</p>
               </div>
-              <Rack />
+              <Rack units={t.rackUnits} />
             </div>
           </div>
         </section>
@@ -175,7 +162,7 @@ export default function InfrastructurePage() {
         <section className="t-sec t-reveal" aria-labelledby="ti-layers-h">
           <div className="t-wrap">
             <div className="t-split">
-              <h2 id="ti-layers-h" className="t-split-title">Из чего собрано</h2>
+              <h2 id="ti-layers-h" className="t-split-title">{t.layersTitle}</h2>
               <div className="t-cards t-cards-2">
                 {LAYERS.map((l) => (
                   <article key={l.t} className={`t-panel ti-layer${"wide" in l && l.wide ? " ti-layer-wide" : ""}`}>
@@ -194,23 +181,26 @@ export default function InfrastructurePage() {
           <div className="t-wrap">
             <div className="ti-final">
               <div>
-                <h2 id="ti-vds-h" className="t-h2">Нужен сервер целиком?</h2>
+                <h2 id="ti-vds-h" className="t-h2">{t.vdsTitle}</h2>
                 <p className="t-lead">
-                  {SERVERS.length} {plural(SERVERS.length, ["конфигурация", "конфигурации", "конфигураций"])} по
-                  ширине канала, от {formatUsd(SERVER_ENTRY_USD)} в месяц. Железо ни с кем не делится.
+                  {fill(t.vdsLead, {
+                    count: SERVERS.length,
+                    word: pluralize(locale, SERVERS.length, d.vds.configWord),
+                    price: formatUsd(SERVER_ENTRY_USD, locale),
+                  })}
                 </p>
                 <div className="t-actions">
-                  <Link className="t-btn" href="/vds">
-                    Выделенные серверы
+                  <Link className="t-btn" href={to("/vds")}>
+                    {t.vdsCta}
                     <Icon name="arrow-right" size={16} />
                   </Link>
-                  <Link className="t-btn t-btn-accent" href="/careers">
-                    Идите к нам работать
+                  <Link className="t-btn t-btn-accent" href={to("/careers")}>
+                    {t.careersCta}
                   </Link>
                 </div>
               </div>
               <p className="ti-final-note t-mono">
-                {LOCATIONS.length} {COUNTRY_WORD} · {CITY_COUNT} {CITY_WORD} · до {PLAN_SPEED.plus} Гбит/с
+                {fill(t.footNote, { countries, cities, speed: PLAN_SPEED.plus })}
               </p>
             </div>
           </div>

@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/pixel/Icon";
-import { RESUME_ACCEPT, RESUME_EXTENSIONS, RESUME_HINT, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@/lib/careers";
+import { RESUME_ACCEPT, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "@/lib/careers";
+import type { Dict } from "@/i18n";
+import { fill } from "@/i18n";
+import { localeHref, type Locale } from "@/lib/locale";
 import { TELEGRAM_SUPPORT } from "@/lib/contacts";
 
 /**
@@ -35,7 +38,20 @@ type Errors = Partial<Record<"name" | "email" | "resume" | "consent" | "form", s
 
 const MAX_MESSAGE = 2000;
 
-export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: string; vacancyTitle: string }) {
+export default function ApplyForm({
+  vacancyId,
+  vacancyTitle,
+  locale,
+  t,
+  hint,
+}: {
+  vacancyId: string;
+  vacancyTitle: string;
+  locale: Locale;
+  t: Dict["careers"]["form"];
+  /** Подпись под полем резюме — предел в мегабайтах уже вставлен. */
+  hint: string;
+}) {
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [fileName, setFileName] = useState<string | null>(null);
@@ -61,22 +77,22 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
     const consent = data.get("consent") === "yes";
 
     const found: Errors = {};
-    if (!name) found.name = "Как к вам обращаться?";
-    if (!email) found.email = "Без почты мы не сможем ответить.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) found.email = "Проверьте адрес: похоже, есть опечатка.";
+    if (!name) found.name = t.nameError;
+    if (!email) found.email = t.emailEmpty;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) found.email = t.emailBad;
 
     if (!(file instanceof File) || file.size === 0) {
-      found.resume = "Приложите резюме файлом.";
+      found.resume = t.resumeEmpty;
     } else if (file.size > RESUME_MAX_BYTES) {
       found.resume = `Файл больше ${RESUME_MAX_MB} МБ. Сохраните резюме в PDF — станет легче.`;
     } else {
       const dot = file.name.lastIndexOf(".");
       const ext = dot === -1 ? "" : file.name.slice(dot).toLowerCase();
       if (!(RESUME_EXTENSIONS as readonly string[]).includes(ext)) {
-        found.resume = "Такой формат мы не принимаем. Подойдёт PDF или DOCX.";
+        found.resume = t.resumeBad;
       }
     }
-    if (!consent) found.consent = "Без согласия мы не вправе хранить резюме.";
+    if (!consent) found.consent = t.consentError;
 
     if (Object.keys(found).length) {
       setErrors(found);
@@ -93,13 +109,13 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.success) {
         setStatus("idle");
-        setErrors({ form: json?.error || "Не удалось отправить отклик. Попробуйте ещё раз." });
+        setErrors({ form: json?.error || t.failGeneric });
         return;
       }
       setStatus("sent");
     } catch {
       setStatus("idle");
-      setErrors({ form: "Отклик не ушёл — похоже, пропала связь. Попробуйте ещё раз." });
+      setErrors({ form: t.failNetwork });
     }
   };
 
@@ -107,11 +123,10 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
     return (
       <div className="tc-f-done" role="status">
         <span className="tc-f-done-mark" aria-hidden><Icon name="check" size={20} /></span>
-        <p className="tc-f-done-h">Отклик у нас</p>
+        <p className="tc-f-done-h">{t.doneTitle}</p>
         <p className="tc-f-done-t">
-          Резюме на вакансию «{vacancyTitle}» доставлено. Прочитаем и ответим на указанную почту. Если
-          хочется быстрее —{" "}
-          <a href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">напишите в Telegram</a>.
+          {fill(t.doneText, { vacancy: vacancyTitle })}{" "}
+          <a href={TELEGRAM_SUPPORT.href} target="_blank" rel="noopener noreferrer">{t.doneLink}</a>.
         </p>
       </div>
     );
@@ -119,11 +134,11 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
 
   return (
     <form ref={formRef} className="tc-form" onSubmit={onSubmit} noValidate>
-      <p className="t-label">Отклик на вакансию</p>
+      <p className="t-label">{t.title}</p>
 
       <div className="tc-f-grid">
         <div className="tc-f">
-          <label className="tc-f-label" htmlFor={`f-name-${uid}`}>Имя</label>
+          <label className="tc-f-label" htmlFor={`f-name-${uid}`}>{t.name}</label>
           <input
             id={`f-name-${uid}`}
             name="name"
@@ -139,7 +154,7 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
         </div>
 
         <div className="tc-f">
-          <label className="tc-f-label" htmlFor={`f-email-${uid}`}>Почта</label>
+          <label className="tc-f-label" htmlFor={`f-email-${uid}`}>{t.email}</label>
           <input
             id={`f-email-${uid}`}
             name="email"
@@ -157,7 +172,7 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
 
         <div className="tc-f">
           <label className="tc-f-label" htmlFor={`f-contact-${uid}`}>
-            Telegram или телефон <span className="tc-f-opt">— если так удобнее</span>
+            {t.contact} <span className="tc-f-opt">{t.contactOpt}</span>
           </label>
           <input
             id={`f-contact-${uid}`}
@@ -170,7 +185,7 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
         </div>
 
         <div className="tc-f tc-f-wide">
-          <span className="tc-f-label" id={`l-resume-${uid}`}>Резюме</span>
+          <span className="tc-f-label" id={`l-resume-${uid}`}>{t.resume}</span>
           <div className="tc-f-file">
             <input
               id={`f-resume-${uid}`}
@@ -189,17 +204,17 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
             />
             <label className="tc-f-file-btn" htmlFor={`f-resume-${uid}`}>
               <Icon name="download" size={16} />
-              {fileName ? "Заменить файл" : "Выбрать файл"}
+              {fileName ? t.replaceFile : t.pickFile}
             </label>
-            <span className="tc-f-file-name">{fileName ?? "Файл не выбран"}</span>
+            <span className="tc-f-file-name">{fileName ?? t.noFile}</span>
           </div>
-          <p className="tc-f-hint" id={`h-resume-${uid}`}>{RESUME_HINT}</p>
+          <p className="tc-f-hint" id={`h-resume-${uid}`}>{hint}</p>
           {errors.resume && <p className="tc-f-err" id={`e-resume-${uid}`}>{errors.resume}</p>}
         </div>
 
         <div className="tc-f tc-f-wide">
           <label className="tc-f-label" htmlFor={`f-msg-${uid}`}>
-            Пара слов о себе <span className="tc-f-opt">— необязательно</span>
+            {t.about} <span className="tc-f-opt">{t.aboutOpt}</span>
           </label>
           <textarea
             id={`f-msg-${uid}`}
@@ -207,7 +222,7 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
             className="tc-f-input tc-f-area"
             rows={4}
             maxLength={MAX_MESSAGE}
-            placeholder="Над чем работали, что получилось лучше всего"
+            placeholder={t.aboutPlaceholder}
           />
         </div>
       </div>
@@ -224,8 +239,8 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
           onChange={() => errors.consent && setErrors((p) => ({ ...p, consent: undefined }))}
         />
         <label htmlFor={`f-consent-${uid}`}>
-          Согласен на обработку данных резюме для рассмотрения на эту вакансию —{" "}
-          <Link href="/privacy" target="_blank">как мы их храним</Link>.
+          {t.consentBefore}{" "}
+          <Link href={localeHref("/privacy", locale)} target="_blank">{t.consentLink}</Link>.
         </label>
       </div>
       {errors.consent && <p className="tc-f-err" id={`e-consent-${uid}`}>{errors.consent}</p>}
@@ -234,7 +249,7 @@ export default function ApplyForm({ vacancyId, vacancyTitle }: { vacancyId: stri
 
       <div className="t-actions">
         <button type="submit" className="t-btn" disabled={status === "sending"}>
-          {status === "sending" ? "Отправляем…" : "Отправить отклик"}
+          {status === "sending" ? t.sending : t.submit}
           {status === "sending" ? null : <Icon name="arrow-right" size={16} />}
         </button>
       </div>

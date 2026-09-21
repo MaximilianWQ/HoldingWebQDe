@@ -632,6 +632,287 @@ export const en: Dict = {
     noteLink: "write to support",
     metaTitle: "Page not found",
   },
+  security: {
+    title: "What do we know about you?",
+    titleAccent: "Your email. That is all.",
+    lead:
+      "Below are both lists in full: what sits in the {brand} database and what does not. " +
+      "What we do not have cannot be stolen or handed over.",
+    listsHeading: "What we keep and what we do not",
+    stored: "We keep",
+    notStored: "We do not keep",
+    storedList: [
+      "Your email address",
+      "The date your subscription ends",
+      "An internal number the key is issued against",
+      "Your referral code, if you use one",
+    ],
+    notStoredList: [
+      "The sites you visit",
+      "Your requests for site addresses (DNS requests)",
+      "Connection history: when, from where, for how long",
+      "The IP address you connect from",
+      "Your first, middle or last name",
+      "Your phone number",
+      "Your postal address",
+      "Your card details — they stay with the payment provider",
+      "The contents of your traffic",
+    ],
+    seeTitle: "What your provider sees",
+    seeText:
+      "Without {brand}, your provider sees which site you opened and what you asked for there. " +
+      "With {brand} it sees only a connection to our server — not what is inside it.",
+    seenList: ["Which site you opened", "What you asked for there"],
+    hidden: "hidden",
+    factsHeading: "In numbers",
+    facts: {
+      stored: "fields about you in the database",
+      notStored: "things that are not there",
+      trial: "{word} free, no card",
+      devices: "{word} on one subscription",
+      countries: "{word} to choose from",
+    },
+    noCerts:
+      "There are no names of standards, audits or certifications on this page — " +
+      "they will appear together with the documents themselves.",
+    finalTitle: "All you need to sign in is an email",
+    finalLead: "{trial} free, no card. If you do not like it, simply do not renew.",
+    tryFree: "Try it free",
+    privacyLink: "Privacy policy",
+    meta: {
+      title: "Security: what we keep about you",
+      description:
+        "All you need to sign in is an email. We keep no visited sites, no DNS requests, " +
+        "no connection history and no IP address. Both lists — what we keep and what we do not — are on the page in full.",
+    },
+  },
+  infra: {
+    kicker: "Infrastructure",
+    title: "The network everything rests on",
+    lead: "Nodes in {countries} and {cities}, the panel, billing and an on-call rota. Below — how it is built, and what of it you can check.",
+    vacancies: "Jobs",
+    figuresTitle: "By the numbers",
+    figures: [
+      "{word} to choose from — the country changes in the app, it is not bought separately",
+      "{word} with nodes: the closer the node, the shorter the road to the service",
+      "Gbit/s — what the connection carries on Plus, {basic} Gbit/s on Basic",
+      "{word} on one subscription, each with its own key",
+    ],
+    mapTitle: "Map of nodes",
+    mapText1:
+      "The cities come from the same list the app uses to show countries. " +
+      "The arcs are not decoration: that is what traffic between the hub and the distant sites looks like.",
+    mapText2:
+      "We do not print per-city latency here: right now it is calculated from distance, not measured. " +
+      "When there is a measurement, there will be a number.",
+    mapHint: "hover over a node",
+    rackTitle: "What sits behind a connection",
+    rackText:
+      "Hover over a unit to see what it does. This is a diagram of what the system is made of, not a " +
+      "photograph of a room: we do not publish pictures of our sites, and showing someone else's would be dishonest.",
+    rackUnits: [
+      { name: "Edge node", note: "Accepts the connection and holds the tunnel to your device" },
+      { name: "Load balancing", note: "Spreads connections across the machines at the site" },
+      { name: "Control panel", note: "Keys, dates, devices — the state of every subscription" },
+      { name: "Database and ledger", note: "The source of truth for dates and payments; events are written once" },
+      { name: "Observability", note: "Metrics, logs, alerts — the on-call engineer sees an incident before you do" },
+      { name: "Redundancy", note: "Spare routes and copies: a site drops out, access stays" },
+    ],
+    layersTitle: "What it is built from",
+    layers: [
+      { t: "Attack protection", d: "" },
+      { t: "Network", d: "Nodes in different countries, balancing inside each site and backup routes between them." },
+      { t: "Keys and access", d: "Every device gets its own key. Revoke one and the rest keep working." },
+      { t: "Billing", d: "A subscription's end date is an event in a ledger, not a field in a table: the whole history can be traced." },
+      { t: "Observability", d: "Metrics and alerts at every step: an incident is seen by the on-call engineer, not by the user." },
+    ],
+    vdsTitle: "Need a whole server?",
+    vdsLead: "{count} {word} by bandwidth, from {price} a month. The hardware is shared with nobody.",
+    vdsCta: "Dedicated servers",
+    careersCta: "Come and work with us",
+    footNote: "{countries} · {cities} · up to {speed} Gbit/s",
+    meta: {
+      title: "Infrastructure: nodes in {countriesIn}",
+      description:
+        "How the {brand} network is built: nodes in {countries} and {cities}, carrying up to {speed} Gbit/s, " +
+        "with backup routes and observability. The numbers come from the service's own code.",
+    },
+  },
+  about: {
+    title: "Internet that",
+    titleAccent: "simply works",
+    lead:
+      "{brand} is a VPS accelerator for your phone and computer, and dedicated servers for projects. " +
+      "Here is what we believe and what we can back up.",
+    storyTitle: "How Atlas Secure came about",
+    story: [
+      "There are two of us. One finished the Department of Information Engineering at the Chinese University " +
+        "of Hong Kong (CUHK); the other read Information Technology in International Business at MGIMO. " +
+        "One saw networks as an engineering problem, the other as a market. It turned out to be the same problem.",
+      "In the autumn of {year}, while one of us was studying in Hong Kong, it became clear what that problem " +
+        "was made of. On 28 September mainland China blocked Instagram — because of photographs from Hong Kong " +
+        "streets. And a week and a half earlier a link to a “coordination app” called Code4HK had spread " +
+        "through messengers: for those who installed it, strangers were reading their messages, their contact " +
+        "list and their call history, and watching a dot on a map. People were cut off from the world in one " +
+        "move — and read in the same moment.",
+      "That is not where we started. First there was a small shop: network hardware and digital goods. " +
+        "It fed two people and taught us what no specification does — people pay for a thing they understand, " +
+        "one that works without a manual. Only later, for ourselves and for friends, did we put together our " +
+        "first protected connection. It turned out to be needed more than the shop.",
+      "Then came investment, several attempts that came to nothing, and one more round. For that round we came " +
+        "back to that same thought from {year} — and in {founded} we registered Atlas Secure in Hong Kong. " +
+        "Today it is part of the QoDev group: an internet accelerator, dedicated servers and traffic packs.",
+    ],
+    sources: "What this was:",
+    source1: "Instagram blocked, 28 September 2014",
+    source2: "the HKCERT bulletin on the fake Code4HK app",
+    timeline: [
+      { b: "{year}", t: "Hong Kong. Sites are blocked, phones are read. The thing everything else came from." },
+      { b: "The shop", t: "Network hardware and digital goods — the first thing the two of us did together." },
+      { b: "The first connection", t: "Built for ourselves and for friends — a protected channel instead of someone else's Wi-Fi. Demand turned out to be bigger." },
+      { b: "{founded}", t: "Investment, attempts that failed, a new round — and a company in Hong Kong." },
+      {
+        b: "Today",
+        t: "Part of the QoDev group: servers in {countriesIn}, up to {devices} on one subscription, dedicated servers and traffic packs.",
+      },
+    ],
+    missionKicker: "Mission",
+    missionTitle: "To make protected internet",
+    missionAccent: "an ordinary thing",
+    missionLead:
+      "Not a skill, not a separate purchase, not a reason to learn settings. You open the app and everything " +
+      "works the way it should by default: sites open, video plays, and what you do online stays your business.",
+    missionList: [
+      {
+        b: "Freedom and protection come as a pair",
+        t: "Access is what lets you use the internet. Encryption is what keeps that use yours. We do not sell them separately.",
+      },
+      {
+        b: "By default, not for an extra fee",
+        t: "Encryption is in every plan and on every device. There is no “security” line on the invoice, and there never will be.",
+      },
+      {
+        b: "We promise only what we can show",
+        t: "The numbers on this site come from the same code the service runs on. What we do not have, we keep quiet about.",
+      },
+    ],
+    factsHeading: "Atlas in numbers",
+    facts: {
+      countries: "{word} to choose from",
+      devices: "{word} on one subscription",
+      cities: "{word} with servers",
+      speed: "Gbit/s on the Plus plan",
+      trial: "{word} free",
+    },
+    makeTitle: "What we do",
+    makeVps: "VPS accelerator",
+    makeVpsText: "For your phone and computer: sites, video and apps run at full speed.",
+    makeVds: "Dedicated servers",
+    makeVdsText: "A whole server: the hardware is shared with nobody, and you choose the bandwidth.",
+    from: "from",
+    perMonth: "a month",
+    forTeamBefore: "For a team —",
+    forTeamLink: "connections under contract",
+    dataBefore: ". How we handle data —",
+    dataLink: "security",
+    finalTitle: "Choose your plan",
+    finalLead: "Two plans, up to {devices} and all {countries} in each.",
+    seePlans: "See pricing",
+    meta: {
+      title: "About us",
+      description:
+        "{brand} is a VPS accelerator for your phone and computer, plus dedicated servers. " +
+        "{countries}, up to {devices} on one subscription. What we believe and what we can back up.",
+    },
+  },
+  careers: {
+    kicker: "Atlas Secure · jobs",
+    title1: "Join",
+    title2: "the team",
+    heroText:
+      "We run the network across {countriesIn} and {citiesIn}, plus the panel, billing and support. " +
+      "The team is distributed, we work remotely and we pay in roubles.",
+    openRolesLabel: "Open roles:",
+    workTitle: "What we work on",
+    work: [
+      "Nodes and routes",
+      "Protection and anti-fraud",
+      "Billing and payments",
+      "Apps",
+      "Support",
+      "Panel and admin",
+    ],
+    offerTitle: "What we offer",
+    offer: [
+      { t: "Remote, paid in roubles", d: "The team has been distributed since {founded}. You choose where you work." },
+      { t: "The range on the first call", d: "We name it before any tasks or tests, so nobody wastes their time." },
+      { t: "A whole area of your own", d: "The team is small: every area has one owner, not half a role." },
+      { t: "Decisions without committees", d: "From an idea to production is days, not quarters. You can see it in the change history." },
+    ],
+    openTitle: "Open roles",
+    howTitle: "How to join us",
+    steps: [
+      { t: "Apply", d: "The form on this page: your name, your email and your CV as a file." },
+      { t: "Getting to know you", d: "A half-hour call: what we do, and what you would like to do." },
+      { t: "Technical interview", d: "Working through real problems from the area, with no riddles." },
+      { t: "Offer", d: "The range is discussed on the first call, so there is no surprise at the end." },
+    ],
+    barLabel: "Go to the roles",
+    barText: "All {count} {word} are above",
+    roleWord: ["role", "roles", "roles"],
+    goToRoles: "Go to the roles",
+    finalTitle: "Cannot find your role?",
+    finalLead:
+      "Apply for the closest one and write a couple of words about what you would like to do. " +
+      "If you do networks, data or product better than we manage today, a role will be found.",
+    pickRole: "Pick a role",
+    infraLink: "What you would be working with",
+    list: {
+      payUnit: "₽/month",
+      tasks: "What you will do",
+      need: "What we expect",
+      plus: "Nice to have",
+      apply: "Apply",
+      telegram: "Message us on Telegram",
+    },
+    form: {
+      title: "Apply for this role",
+      name: "Name",
+      nameError: "What should we call you?",
+      email: "Email",
+      emailEmpty: "Without an email we cannot reply.",
+      emailBad: "Check the address: it looks like there is a typo.",
+      contact: "Telegram or phone",
+      contactOpt: "— if that suits you better",
+      resume: "CV",
+      resumeEmpty: "Attach your CV as a file.",
+      resumeBad: "We do not accept that format. PDF or DOCX will do.",
+      pickFile: "Choose a file",
+      replaceFile: "Replace the file",
+      noFile: "No file chosen",
+      about: "A couple of words about yourself",
+      aboutOpt: "— optional",
+      aboutPlaceholder: "What you have worked on, and what came out best",
+      consentBefore: "I agree to my CV being processed so it can be considered for this role —",
+      consentLink: "how we store it",
+      consentError: "Without your consent we may not store a CV.",
+      failGeneric: "The application could not be sent. Please try again.",
+      failNetwork: "The application did not go through — the connection seems to have dropped. Try again.",
+      sending: "Sending…",
+      submit: "Send application",
+      doneTitle: "We have got it",
+      doneText: "Your CV for the “{vacancy}” role has arrived. We will read it and reply to the email you gave. If you would like it sooner —",
+      doneLink: "message us on Telegram",
+      hint: "PDF, DOC, DOCX, RTF, ODT, TXT or a screenshot — up to {mb} MB",
+    },
+    meta: {
+      title: "Jobs",
+      description:
+        "Atlas Secure is hiring engineers and more: {count} open {word}, remote work, paid in roubles. " +
+        "Infrastructure across {countriesIn}.",
+      metaWord: ["role", "roles", "roles"],
+    },
+  },
   compare: {
     caption: "{a} and {b} plans compared",
     property: "Feature",
@@ -710,6 +991,7 @@ export const en: Dict = {
     rights: "part of the QoDev group, Hong Kong (SAR)",
   },
   units: {
+    cityIn: ["city", "cities", "cities"],
     day: ["day", "days", "days"],
     country: ["country", "countries", "countries"],
     device: ["device", "devices", "devices"],

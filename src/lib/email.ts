@@ -353,7 +353,7 @@ const GIFT_COPY = {
  * Разметка письма отдельно от отправки — чтобы её можно было собрать и
  * посмотреть, ничего не отправляя (`scripts/preview-gift-email.ts`).
  */
-export function renderGiftEmail(p: GiftEmailParams): { subject: string; html: string } {
+export function renderGiftEmail(p: GiftEmailParams): { subject: string; html: string; text: string } {
   const t = GIFT_COPY[p.locale];
   // Срок словами: «7 дней», «12 часов», «30 минут». Крупная строка
   // письма разбирается на число и слово — число набрано вдвое крупнее.
@@ -470,7 +470,27 @@ export function renderGiftEmail(p: GiftEmailParams): { subject: string; html: st
 </td></tr></table>
 </body></html>`;
 
-  return { subject: t.subject(amount), html };
+  // Текстовая версия. Нужна рассылке: письмо без text/plain чаще
+  // попадает в спам, а в почтовых клиентах без HTML читатель увидел бы
+  // пустое место. Собирается из тех же строк, что и разметка, —
+  // второго набора слов у письма нет.
+  const plain = (s: string) => s.replace(/&nbsp;/g, " ").replace(/<[^>]+>/g, "");
+  const text = [
+    plain(t.badge),
+    "",
+    `${big} ${bigUnit}`,
+    plain(t.lead(amount)),
+    plain(t.until(date)),
+    "",
+    `${plain(t.cta)}: ${p.dashboardUrl}`,
+    plain(t.note),
+    "",
+    ...t.steps.map(([head, tail], i) => `${i + 1}. ${plain(head)} — ${plain(tail)}`),
+    "",
+    plain(t.footer.replace(/<br\s*\/?>/g, "\n")),
+  ].join("\n");
+
+  return { subject: t.subject(amount), html, text };
 }
 
 export async function sendGiftGrantedEmail(p: GiftEmailParams): Promise<boolean> {

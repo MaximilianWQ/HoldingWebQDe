@@ -18,6 +18,7 @@ import {
   type UsersStats,
 } from "@/app/admin/admin-shared";
 import { BlockError } from "./Viz";
+import BulkGrant from "./BulkGrant";
 
 /**
  * «Пользователи» — поиск и фильтры на сервере:
@@ -74,6 +75,11 @@ export default function UsersSection({ selectedId, onSelect, reloadKey, onChange
   const [more, setMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<UserInfo | null>(null);
+  // Режим выбора. Отметки живут отдельно от списка: человек может
+  // отметить кого-то, подгрузить следующую страницу и отметить ещё —
+  // страница при этом не перерисовывает галочки заново.
+  const [pick, setPick] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
   const seq = useRef(0);
   const detailRef = useRef<HTMLDivElement>(null);
 
@@ -172,10 +178,23 @@ export default function UsersSection({ selectedId, onSelect, reloadKey, onChange
       <section className="ak-card adm-list-card adm-still" data-sheet="24" style={{ "--i": 1 } as CSSProperties} aria-labelledby="adm-users-h">
         <div className="ak-card-head">
           <h2 id="adm-users-h" className="ak-eyebrow">Пользователи</h2>
-          <p className="ak-plan a-num" aria-live="polite">
-            {loading && <Spin />} Найдено: {num(total)}
-            {all ? ` из ${num(all)}` : ""}
-          </p>
+          <div className="adm-users-head">
+            <p className="ak-plan a-num" aria-live="polite">
+              {loading && <Spin />} Найдено: {num(total)}
+              {all ? ` из ${num(all)}` : ""}
+            </p>
+            <button
+              type="button"
+              className="adm-chip"
+              aria-pressed={pick}
+              onClick={() => {
+                setPick((v) => !v);
+                if (pick) setPicked(new Set());
+              }}
+            >
+              {pick ? "Выйти из выбора" : "Выдать массово"}
+            </button>
+          </div>
         </div>
 
         {error && <BlockError title="Список не загрузился" text={error} />}
@@ -219,6 +238,26 @@ export default function UsersSection({ selectedId, onSelect, reloadKey, onChange
           ))}
         </div>
 
+        {pick && (
+          <BulkGrant
+            scope={{
+              ids: [...picked],
+              filter,
+              q: qd,
+              total,
+              filterLabel: FILTERS.find((f) => f.key === filter)?.label ?? "Все",
+            }}
+            loadedCount={users.length}
+            onSelectAllLoaded={() => setPicked(new Set(users.map((u) => u.id)))}
+            onClearIds={() => setPicked(new Set())}
+            onClose={() => {
+              setPick(false);
+              setPicked(new Set());
+            }}
+            onDone={onChanged}
+          />
+        )}
+
         {loading && users.length === 0 ? (
           <div className="ak-skel adm-rows-skel" aria-hidden />
         ) : users.length === 0 ? (
@@ -234,7 +273,7 @@ export default function UsersSection({ selectedId, onSelect, reloadKey, onChange
               <span>TG</span>
               <span>IP регистрации</span>
             </div>
-            <ul className="adm-rows">
+            <ul className="adm-rows" data-pick={pick ? "" : undefined}>
               {users.map((u) => {
                 const planKey = u.isActive ? u.subscriptionPlan : "expired";
                 const on = selectedId === u.id;
@@ -242,6 +281,23 @@ export default function UsersSection({ selectedId, onSelect, reloadKey, onChange
                 const syncErr = u.panelSyncState === "error";
                 return (
                   <li key={u.id}>
+                    {pick && (
+                      <label className="adm-pick">
+                        <input
+                          type="checkbox"
+                          checked={picked.has(u.id)}
+                          onChange={(e) => {
+                            setPicked((prev) => {
+                              const next = new Set(prev);
+                              if (e.target.checked) next.add(u.id);
+                              else next.delete(u.id);
+                              return next;
+                            });
+                          }}
+                        />
+                        <span className="b-sr">Отметить {u.email}</span>
+                      </label>
+                    )}
                     <button type="button" className="adm-row" aria-pressed={on} onClick={() => onSelect(on ? null : u.id)}>
                       <span className="adm-c-id a-num">{u.publicId || "—"}</span>
                       <span className="adm-c-mail">{u.email}</span>

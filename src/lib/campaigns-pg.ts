@@ -60,6 +60,7 @@ export function rowToCampaign(r: any): Campaign {
     channel: r.channel,
     subject: r.subject,
     bodyMd: r.body_md,
+    template: r.template === "gift" ? "gift" : "markdown",
     audience: json<Audience>(r.audience),
     grant: toGrant(r.grant_spec),
     status: r.status,
@@ -86,6 +87,7 @@ function rowToDelivery(r: any): DeliveryRow {
     plan: r.subscription_plan ?? null,
     grantedAt: r.granted_at ? new Date(r.granted_at) : null,
     notifiedAt: r.notified_at ? new Date(r.notified_at) : null,
+    locale: r.locale ?? null,
   };
 }
 
@@ -135,7 +137,7 @@ function recipients(aud: Audience, kind: CampaignKind, channel: CampaignChannel)
 }
 
 const DELIVERY_COLS = `d.user_id, d.email, d.status, d.attempts, d.batch_id, d.granted_at, d.notified_at,
-       u.unsubscribe_token, u.subscription_end, u.subscription_plan`;
+       u.unsubscribe_token, u.subscription_end, u.subscription_plan, u.locale`;
 const OPEN_STATUSES = "('queued', 'skipped_invalid', 'skipped_placeholder')";
 
 // ─── Репозиторий ─────────────────────────────────────────────────
@@ -143,18 +145,19 @@ const OPEN_STATUSES = "('queued', 'skipped_invalid', 'skipped_placeholder')";
 export const pgCampaignRepo: CampaignRepo = {
   async create(input: CampaignInput, createdBy: string | null) {
     const r = await pool.query(
-      `INSERT INTO email_campaigns (id, kind, subject, body_md, audience, channel, grant_spec, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [uuidv4(), input.kind, input.subject, input.bodyMd, JSON.stringify(input.audience), input.channel, input.grant ? JSON.stringify(input.grant) : null, createdBy]
+      `INSERT INTO email_campaigns (id, kind, subject, body_md, audience, channel, grant_spec, created_by, template)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [uuidv4(), input.kind, input.subject, input.bodyMd, JSON.stringify(input.audience), input.channel, input.grant ? JSON.stringify(input.grant) : null, createdBy, input.template ?? "markdown"]
     );
     return rowToCampaign(r.rows[0]);
   },
 
   async updateDraft(id: string, input: CampaignInput) {
     const r = await pool.query(
-      `UPDATE email_campaigns SET kind = $2, subject = $3, body_md = $4, audience = $5, channel = $6, grant_spec = $7, updated_at = NOW()
+      `UPDATE email_campaigns SET kind = $2, subject = $3, body_md = $4, audience = $5, channel = $6, grant_spec = $7,
+         template = $8, updated_at = NOW()
        WHERE id = $1 AND status = 'draft' RETURNING *`,
-      [id, input.kind, input.subject, input.bodyMd, JSON.stringify(input.audience), input.channel, input.grant ? JSON.stringify(input.grant) : null]
+      [id, input.kind, input.subject, input.bodyMd, JSON.stringify(input.audience), input.channel, input.grant ? JSON.stringify(input.grant) : null, input.template ?? "markdown"]
     );
     return r.rows[0] ? rowToCampaign(r.rows[0]) : null;
   },

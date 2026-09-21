@@ -540,6 +540,12 @@ export async function initDb(): Promise<void> {
        counts JSONB,
        last_error TEXT
      )`,
+    // Вид письма кампании (21.09.2026). NULL и 'markdown' — прежнее
+    // поведение: тело набирается ограниченным Markdown. 'gift' —
+    // утверждённый владельцем макет письма о подарке
+    // (`renderGiftEmail`); тело Markdown тогда не используется, и
+    // сообщение собирается из срока, даты и языка получателя.
+    "ALTER TABLE email_campaigns ADD COLUMN IF NOT EXISTS template TEXT",
     "CREATE INDEX IF NOT EXISTS idx_email_campaigns_status ON email_campaigns(status, created_at)",
     // One row per (campaign, person): the primary key is what makes «one
     // letter per person per campaign» hold across retries and restarts.

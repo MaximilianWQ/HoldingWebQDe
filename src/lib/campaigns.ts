@@ -50,6 +50,9 @@ import {
 } from "./campaign-email";
 import { siteBaseUrl, unsubscribeLinks } from "./unsubscribe";
 import { GB, formatTraffic } from "./traffic-packs";
+import { renderGiftEmail } from "./email";
+import { DEVICE_LIMIT } from "./plans";
+import { COUNTRY_COUNT } from "./locations";
 
 // ─── Модель ──────────────────────────────────────────────────────
 
@@ -73,6 +76,19 @@ export interface GrantSpec {
   trafficGb: number | null;
 }
 
+/**
+ * Вид письма.
+ *
+ * `markdown` — тело кампании, набранное ограниченным Markdown: так
+ * работали все рассылки до 21.09.2026.
+ * `gift` — утверждённый владельцем макет письма о подарке (вариант
+ * «Плита»). Тема и тело при этом собираются из срока и языка
+ * получателя, а `subject`/`bodyMd` не используются: у письма о
+ * подарке нет свободного текста, иначе два места правки разойдутся.
+ */
+export const CAMPAIGN_TEMPLATES = ["markdown", "gift"] as const;
+export type CampaignTemplate = (typeof CAMPAIGN_TEMPLATES)[number];
+
 export interface CampaignInput {
   kind: CampaignKind;
   channel: CampaignChannel;
@@ -80,6 +96,8 @@ export interface CampaignInput {
   bodyMd: string;
   audience: Audience;
   grant: GrantSpec | null;
+  /** Отсутствует у прежних кампаний — читается как `markdown`. */
+  template?: CampaignTemplate;
 }
 
 export interface DeliveryCounts {
@@ -345,6 +363,8 @@ export interface DeliveryRow {
   plan: string | null;
   grantedAt: Date | null;
   notifiedAt: Date | null;
+  /** Язык письма. NULL у всех, кто завёлся до английской версии. */
+  locale: string | null;
 }
 
 export interface AudiencePreview {
@@ -460,7 +480,30 @@ function varsFor(r: { email: string; subscriptionEnd: Date; plan: string | null 
   return recipientVars(r, now, siteBaseUrl());
 }
 
-export function composeEmail(c: Pick<CampaignInput, "subject" | "bodyMd" | "kind">, r: DeliveryRow, now: Date): OutgoingEmail {
+export function composeEmail(
+  c: Pick<CampaignInput, "subject" | "bodyMd" | "kind" | "template" | "grant">,
+  r: DeliveryRow,
+  now: Date
+): OutgoingEmail {
+  if (c.template === "gift") {
+    // Макет подарка собирается из срока и языка получателя, а не из
+    // тела кампании: слова у письма одни на всю рассылку, и подставлять
+    // в них нечего. Срок берётся из выдачи, дата — из подписки, уже
+    // продлённой: начисление проходит раньше отправки (`runSideEffects`).
+    const days = c.grant?.days ?? 0;
+    const { subject, html, text } = renderGiftEmail({
+      email: r.email,
+      minutes: days * 24 * 60,
+      until: r.subscriptionEnd,
+      dashboardUrl: `${siteBaseUrl()}/dashboard`,
+      locale: r.locale === "en" ? "en" : "ru",
+      devices: DEVICE_LIMIT,
+      countries: COUNTRY_COUNT,
+    });
+    // Отписки у служебного письма нет — заголовков List-Unsubscribe
+    // тоже: они обещали бы читателю то, чего письмо не делает.
+    return { to: r.email, subject, html, text, headers: {} };
+  }
   const mail = buildCampaignEmail({ subject: c.subject, bodyMd: c.bodyMd, kind: c.kind, vars: varsFor(r, now), links: unsubscribeLinks(r.token ?? "") });
   return { to: r.email, ...mail };
 }
@@ -758,6 +801,7 @@ export async function previewCampaign(
     plan,
     grantedAt: null,
     notifiedAt: null,
+    locale: null,
   };
   const mail = composeEmail(input, row, now);
   const vars = varsFor(row, now);
@@ -829,6 +873,7 @@ export async function sendTestEmail(
     plan: src?.plan ?? "plus",
     grantedAt: null,
     notifiedAt: null,
+    locale: null,
   };
   const mail = composeEmail(input, row, now);
   const res = await mailer.sendBatch([{ ...mail, subject: `[Тест] ${mail.subject}` }], `test-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);

@@ -1,0 +1,80 @@
+[
+ {
+  "file": "g_base.png",
+  "png_hp": 0.402,
+  "png_signal": 0.0,
+  "q70_hp": 0.224,
+  "q70_bytes": 6394,
+  "q80_hp": 0.232,
+  "q80_bytes": 7248,
+  "q90_hp": 0.23,
+  "q90_bytes": 12510,
+  "q100_hp": 0.402,
+  "q100_bytes": 687164
+ },
+ {
+  "file": "g_height_s240_d2.0_di0.0_h0.0005_dn1.png",
+  "png_hp": 0.475,
+  "png_signal": 0.252,
+  "q70_hp": 0.227,
+  "q70_bytes": 6572,
+  "q80_hp": 0.223,
+  "q80_bytes": 7976,
+  "q90_hp": 0.235,
+  "q90_bytes": 17994,
+  "q100_hp": 0.475,
+  "q100_bytes": 658130
+ },
+ {
+  "file": "g_height_s240_d2.0_di0.0_h0.001_dn1.png",
+  "png_hp": 0.64,
+  "png_signal": 0.498,
+  "q70_hp": 0.227,
+  "q70_bytes": 7888,
+  "q80_hp": 0.237,
+  "q80_bytes": 11490,
+  "q90_hp": 0.293,
+  "q90_bytes": 34288,
+  "q100_hp": 0.64,
+  "q100_bytes": 765278
+ },
+ {
+  "file": "g_height_s240_d2.0_di0.0_h0.002_dn1.png",
+  "png_hp": 1.058,
+  "png_signal": 0.978,
+  "q70_hp": 0.274,
+  "q70_bytes": 15380,
+  "q80_hp": 0.338,
+  "q80_bytes": 25142,
+  "q90_hp": 0.598,
+  "q90_bytes": 62488,
+  "q100_hp": 1.058,
+  "q100_bytes": 842870
+ },
+ {
+  "file": "g_height_s240_d2.0_di0.0_h0.005_dn1.png",
+  "png_hp": 2.611,
+  "png_signal": 2.58,
+  "q70_hp": 1.38,
+  "q70_bytes": 41664,
+  "q80_hp": 1.823,
+  "q80_bytes": 62666,
+  "q90_hp": 2.427,
+  "q90_bytes": 130348,
+  "q100_hp": 2.611,
+  "q100_bytes": 981592
+ },
+ {
+  "file": "g_scale_s480_d2.0_di0.0_h0.002_dn1.png",
+  "png_hp": 1.486,
+  "png_signal": 1.431,
+  "q70_hp": 0.29,
+  "q70_bytes": 19178,
+  "q80_hp": 0.462,
+  "q80_bytes": 34804,
+  "q90_hp": 0.95,
+  "q90_bytes": 94434,
+  "q100_hp": 1.486,
+  "q100_bytes": 913290
+ }
+]

@@ -1226,3 +1226,65 @@ html[data-static] .adm-ring { display: none; }
 .adm-push-err { color: var(--a-red, #E5484D); font-size: 13px; }
 .adm-push-note { align-items: baseline; color: var(--a-ink-2, #55606e); font-size: 13px; line-height: 1.5; }
 .adm-push-note a { color: var(--a-cobalt, #3A85F0); }
+
+/* ─── Массовая выдача ───────────────────────────────────────────────
+   Галочка стоит СЛЕВА ОТ строки, а не внутри неё: строка — кнопка
+   (открывает карточку), и вложенный в кнопку checkbox не кликается.
+   Колонка появляется только в режиме выбора, ширина её фиксирована —
+   иначе сетка строки съезжала бы при каждом включении режима. */
+.adm-rows[data-pick] > li { display: flex; align-items: stretch; }
+.adm-rows[data-pick] > li > .adm-row { flex: 1 1 auto; min-width: 0; }
+.adm-pick {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  border-right: 1px solid var(--a-g100);
+  cursor: pointer;
+}
+.adm-pick input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--a-cobalt);
+  cursor: pointer;
+}
+.adm-pick:has(input:focus-visible) { outline: 2px solid var(--a-cobalt); outline-offset: -2px; }
+
+.adm-users-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+.adm-users-head .ak-plan { margin: 0; }
+
+.adm-bulk {
+  margin-bottom: 0.9rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--a-ink);
+  border-radius: 16px;
+  background: var(--a-g50);
+}
+.adm-bulk-who { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+.adm-bulk-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--a-cobalt);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.adm-bulk-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+@media (min-width: 720px) {
+  .adm-bulk-form { grid-template-columns: 8rem 6rem 9rem minmax(0, 1fr); align-items: end; }
+}
+.adm-bulk-f { display: grid; gap: 0.25rem; min-width: 0; }
+.adm-bulk-f > span { font-size: 0.75rem; color: var(--a-ink-3); }
+.adm-bulk-f > span > i { font-style: normal; opacity: 0.7; }
+.adm-bulk-go { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.adm-bulk-go .a-btn { min-height: 44px; }
+.adm-bulk-presets { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.6rem; }
+.adm-bulk-note { margin: 0.7rem 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--a-ink-3); }
+.adm-bulk-err { margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--ak-rock); }

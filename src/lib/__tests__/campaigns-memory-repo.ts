@@ -92,6 +92,7 @@ export class MemoryCampaignRepo implements CampaignRepo {
       plan: u.subscription_plan ?? null,
       grantedAt: d.granted_at,
       notifiedAt: d.notified_at,
+      locale: u.locale ?? null,
     };
   }
 

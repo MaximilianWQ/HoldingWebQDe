@@ -1675,6 +1675,354 @@ export const en: Dict = {
       p141: "For any question: the support Telegram bot [[{tgHref}|{tgHandle}]] and email [[mailto:{email}|{email}]].",
     },
   },
+  /** /privacy — Privacy Policy. Ключи названы по номеру пункта оригинала. */
+  privacy: {
+    sheetTitle: "Privacy",
+    title: "Privacy Policy",
+    tocLabel: "Sections of the Policy",
+    meta: {
+      title: "Privacy Policy",
+      description:
+        "What data Atlas Secure collects, why and on what legal basis, how long it is kept, who it is shared with " +
+        "and how to exercise your rights. The Service keeps no logs of network activity.",
+    },
+    s01: {
+      t: "Introduction",
+      p11:
+        "1.1. This Policy sets out how information about the Users of the Atlas Secure secure-connection service " +
+        "(the “Service”) is collected, processed, stored and protected.",
+      p12:
+        "1.2. The Service works on the principle of data minimisation: only what is indispensable for providing the " +
+        "service, accepting payment and protecting the Service from abuse is collected.",
+      p13:
+        "1.3. The Policy is an integral part of the [[/terms|Terms of Use]]. The terms “Account”, “Subscription”, " +
+        "“Access key”, “Traffic pack”, “Device” and “Balance” are used with the meanings given in the Agreement.",
+      p14:
+        "1.4. The User confirms their agreement with the Policy on registration. Where registration is through " +
+        "Telegram, starting the bot and beginning to use the Service counts as agreement. A User who does not agree " +
+        "with the Policy must stop using the Service.",
+      p15:
+        "1.5. The Policy applies on the website, in the account area, in the Service’s Telegram bot and when " +
+        "connecting to the Service’s infrastructure. It does not extend to third-party websites, client " +
+        "applications and payment services, which have their own data processing rules.",
+    },
+    s02: {
+      t: "No logs of network activity are kept",
+      p21: "2.1. The Service does not record, store or track:",
+      l21: [
+        "the content of internet traffic and destination addresses;",
+        "information about the resources visited;",
+        "DNS queries and their resolution logs;",
+        "browsing history linked to a User.",
+      ],
+      p22:
+        "2.2. The Service is technically unable to reconstruct a User’s browsing history and cannot provide it to " +
+        "anyone, because no such data exists — including in response to a mandatory request (clause 7.4).",
+      p23:
+        "2.3. This does not remove the processing of the operational and account data without which the service " +
+        "does not work. Sections 03 and 05 list it in full and without omissions: the state of the connection and " +
+        "the node it was made to; the volume of a Traffic pack used up; the address from which registration and " +
+        "sign-in were made; events in the Account.",
+    },
+    s03: {
+      t: "What data the Service processes",
+      p31: "3.1. Account credentials:",
+      l31: [
+        {
+          term: "Email address",
+          def: "identifying the Account, sign-in codes, service notices. Kept for as long as the Account exists.",
+          dash: true,
+        },
+        {
+          term: "Password, if the User has set one, and passkeys",
+          def:
+            "signing in without a code. A password is stored only as an irreversible hash (bcrypt); signing in with " +
+            "a code from an email works without a password.",
+          dash: true,
+        },
+        {
+          term: "Telegram ID and username",
+          def: "on registration through the bot or when claiming the bonus for linking.",
+          dash: true,
+        },
+        {
+          term: "Subscription term and plan, Device limit, Access key identifiers",
+          def: "provision of the service.",
+          dash: true,
+        },
+        {
+          term: "Referral code, the “inviter — invited” link, Balance operations",
+          def: "running the Referral programme.",
+          dash: true,
+        },
+        {
+          term: "The address from which registration was made",
+          def:
+            "protection against obtaining the trial period repeatedly through the same channel and against mass " +
+            "registration of Accounts.",
+          dash: true,
+        },
+      ],
+      p32: "3.2. Payment and operational data:",
+      l32: [
+        {
+          term: "Payment metadata",
+          def:
+            "transaction identifier, amount, date, status, payment method. Kept for the period set by law for " +
+            "financial documents.",
+          dash: false,
+        },
+        {
+          term: "Account event log",
+          def:
+            "sign-in, issue and change of an Access key, payment, change of plan, blocking — with the date and the " +
+            "network address the action was taken from. Needed to resolve disputes and investigate fraud, kept for " +
+            "no longer than 12 months.",
+          dash: false,
+        },
+        {
+          term: "Support requests",
+          def: "the text of the correspondence and attachments — up to 2 years from the closure of the request.",
+          dash: false,
+        },
+        {
+          term: "Records of consents and of opting out of mailings",
+          def: "evidence that processing is lawful.",
+          dash: true,
+        },
+        {
+          term: "Information about breaches and blocking",
+          def: "up to 3 years from the blocking, so that a blocked User does not register again.",
+          dash: true,
+        },
+      ],
+      p33: "3.3. The Service neither receives nor stores bank card details — they are processed by the payment operator.",
+      p34:
+        "3.4. The Service does not ask for a name, postal address, identity documents or phone number. The exception " +
+        "is verifying that a payment belongs to the User where fraud is suspected: in that case the Service may ask " +
+        "for confirmation, which is deleted after the check.",
+      p35: "3.5. The User may use a separate email address created only for the Service.",
+      p37a:
+        "3.7. Office pass request. By submitting the form on the “Contacts” page, a visitor provides their first and " +
+        "last name in Latin script, an email address, the date and purpose of the visit, the type of document they " +
+        "will show at the entrance and, optionally, their company and a contact. This information is passed to the " +
+        "management company of the business centre: without it no pass is issued. The legal basis is the visitor’s " +
+        "consent, given by a separate tick in the form.",
+      p37b: "The Service neither asks for nor stores the document number",
+      p37c:
+        "the document is checked at the desk on entry. The request is kept for no longer than 6 months from the " +
+        "date of the visit, after which it is deleted.",
+      p36:
+        "3.6. Job application. By submitting the form on the “Careers” page, a candidate provides their name, an " +
+        "email address, optionally a contact and a covering message, and a CV file. The basis for processing is the " +
+        "candidate’s consent, given by a separate tick in the form and withdrawn by writing to the support address. " +
+        "The data is used only to consider the application, is available to the staff making the hiring decision, " +
+        "and is kept for no longer than 6 months from the date of the application, after which it is deleted " +
+        "together with the file. A candidate is not a User of the Service, and an application does not create an " +
+        "Account.",
+    },
+    s04: {
+      t: "Purposes and legal bases of processing",
+      p41: "4.1. The Service processes data on the following bases:",
+      l41: [
+        {
+          term: "Performance of the Agreement",
+          def:
+            "providing the services, signing in to the Account, managing Subscriptions and Traffic packs, support, " +
+            "running the Referral programme, service notices.",
+        },
+        {
+          term: "Performance of the Agreement and legal requirements",
+          def: "processing payments, refunds, accounting.",
+        },
+        {
+          term: "Legitimate interest of the Service",
+          def:
+            "preventing fraud, abuse and breaches of the Agreement, protecting the infrastructure, defending the " +
+            "Service’s rights in disputes.",
+        },
+        { term: "Separate voluntary consent", def: "news and special offers." },
+      ],
+      p42: "4.2. Service notices are not advertising and are sent regardless of consent to mailings.",
+      p43:
+        "4.3. The Service sends news and special offers only with separate consent. Consent is not a condition of " +
+        "using the Service and can be withdrawn at any time: through the “Unsubscribe” link in every email or in " +
+        "the account area.",
+      p44:
+        "4.4. The Service does not sell data, does not use it for advertising profiling and does not pass it to " +
+        "third parties for their advertising.",
+      p45:
+        "4.5. The Service does not take decisions producing legal effects on the basis of automated processing, " +
+        "except for the technical protection measures under section 05. The User may appeal against such measures " +
+        "through support.",
+    },
+    s05: {
+      t: "Connection data and protection against abuse",
+      p51:
+        "5.1. So that the connection works and the plan’s Device limit is observed, the Service’s infrastructure " +
+        "processes operational data about the connection:",
+      l51: [
+        "the identifier of the Access key and of the Account;",
+        "the state of the connection and the node it was made to;",
+        "the network address the connection was established from, and the technical identifier of the Device if the client application sends it;",
+        "the time the session status last changed.",
+      ],
+      p52:
+        "5.2. This data relates to the current and the last connection and does not add up to a browsing history: " +
+        "it cannot establish which resources the User opened. It contains no information about the content of " +
+        "traffic or about DNS queries.",
+      p53:
+        "5.3. For Traffic packs the Service keeps a counter of the volume used up per Access key: without it there " +
+        "is no way to show the remaining gigabytes and to stop service once they run out. The counter holds only " +
+        "the volume, with no information about where that volume went.",
+      p54:
+        "5.4. From the operational data the Service determines the number of Devices using one Access key at the " +
+        "same time. Where the limit is exceeded, a new connection may be rejected automatically.",
+      p55:
+        "5.5. If the system records signs of a breach of section 08 of the Terms of Use — simultaneous connections " +
+        "from many addresses, publication of an Access key in open sources, resale — a note of the breach is kept " +
+        "in the Account: its type, the date and the number of simultaneous connections.",
+      p56:
+        "5.6. To protect against unjustified chargebacks, the Service stores a flag of whether the Subscription was " +
+        "used during the paid period.",
+      p57:
+        "5.7. The Service monitors open sources — channels, chats, forums, repositories — for published Access " +
+        "keys. What is processed there is the published key itself and the address of the publication, not data " +
+        "about the User’s network activity.",
+    },
+    s06: {
+      t: "Storage and protection",
+      p61:
+        "6.1. Account credentials are held on protected servers with encryption in transit and at rest. Access to " +
+        "them is given only to staff who need it for their work, on confidential terms.",
+      p62:
+        "6.2. Passwords are stored solely as irreversible hashes. The account session is a random token in a cookie " +
+        "with the httpOnly, Secure and SameSite=Lax flags; only its hash is stored on the server. The session is " +
+        "revoked on sign-out and on a password change.",
+      p63:
+        "6.3. The credentials database is separated from the servers that carry Users’ connections. The connection " +
+        "servers store no credentials and no payment data.",
+      p64:
+        "6.4. Retention periods are set out in section 03. Once the period expires, the data is deleted or " +
+        "anonymised. Backups are overwritten within 30 days.",
+      p65:
+        "6.5. After an Account is deleted, the Service may keep the minimum of data required by law or needed to " +
+        "protect against abuse: payment metadata, a record of blocking and a hash of the identifier, so that the " +
+        "trial period and bonuses are not obtained again.",
+      p66:
+        "6.6. The Service’s servers are located in different jurisdictions. By using the Service, the User agrees " +
+        "that their data may be processed outside their country of residence.",
+      p67:
+        "6.7. No method of storing and transmitting data gives an absolute guarantee. In the event of an incident " +
+        "affecting User data, the Service will notify the affected Users and the competent authority within the " +
+        "periods set by applicable law.",
+      p68:
+        "6.8. The User is responsible for keeping their password, Access keys and access to their email and " +
+        "Telegram account safe.",
+    },
+    s07: {
+      t: "Disclosure to third parties",
+      p71: "7.1. The Service does not sell, rent out or pass information to third parties for commercial purposes.",
+      p72: "7.2. Disclosure is possible only to the following recipients and only to the extent stated:",
+      l72: [
+        {
+          term: "Payment operator",
+          def: "the amount, the order identifier, the email address for the receipt: processing the transaction, refunds, payment disputes.",
+        },
+        {
+          term: "Email delivery service",
+          def: "the email address and the text of the message: delivery of sign-in codes and notices.",
+        },
+        { term: "Telegram", def: "the messages the User sends to the bot themselves: operation of the bot and of support." },
+        { term: "Hosting providers and data centres", def: "hosting the infrastructure." },
+        {
+          term: "Competent authorities",
+          def: "only the data the Service actually holds, and only on a mandatory request.",
+        },
+        {
+          term: "The Service’s successor",
+          def: "Account data upon reorganisation or transfer of the business, on terms no worse than this Policy.",
+        },
+      ],
+      p73:
+        "7.3. The Service answers only requests that are mandatory for it under the law of the jurisdiction of its " +
+        "registration and that are made in the established form. Unofficial and improperly made requests are " +
+        "rejected.",
+      p74:
+        "7.4. Because no logs of network activity are kept (section 02), the Service cannot provide information " +
+        "about the resources visited, the content of traffic or DNS queries — even on a mandatory request. Only the " +
+        "data listed in sections 03 and 05 can be provided.",
+      p75:
+        "7.5. The Service may disclose Account data to the payment operator and to competent authorities where this " +
+        "is necessary to protect against fraud, to contest an unjustified chargeback or to defend the Service’s " +
+        "rights in a dispute with the User.",
+      p76:
+        "7.6. Third-party client applications, app stores and payment services process data under their own rules. " +
+        "The Service is not responsible for their actions.",
+    },
+    s08: {
+      t: "Cookies",
+      p81:
+        "8.1. The Service uses functional cookies only: the session cookie (signing in to the account area) and " +
+        "operational ones needed to protect forms and confirm an email address. Signing in is impossible without " +
+        "them, so separate consent for them is not requested.",
+      p82:
+        "8.2. Analytics, advertising and cross-site tracking cookies, third-party trackers and pixels are not used.",
+    },
+    s09: {
+      t: "The User’s rights",
+      p91: "9.1. The User may at any time:",
+      l91: [
+        "request a copy of all data connected with the Account;",
+        "receive the data in a machine-readable format;",
+        "correct inaccurate data;",
+        "demand deletion of the Account and connected data;",
+        "withdraw consent to the processing of data;",
+        "opt out of news and offers — through the link in an email or in the account area;",
+        "object to processing based on the Service’s legitimate interest;",
+        "lodge a complaint with the competent data protection authority.",
+      ],
+      p92:
+        "9.2. The request is sent from the email address or Telegram account linked to the Account. The Service may " +
+        "ask for confirmation that the Account belongs to the requester and reject the request where this is not " +
+        "confirmed.",
+      p93:
+        "9.3. The response time is up to 30 days. The first request for a copy of the data is free; for manifestly " +
+        "unfounded or repetitive requests the Service may charge a reasonable fee or refuse.",
+      p94:
+        "9.4. Deleting the Account and withdrawing consent to processing make it impossible to provide the " +
+        "services. The Subscription then terminates, money for the unused period is not refunded, and the Balance, " +
+        "bonuses and the remaining volume of Traffic packs are cancelled.",
+      p95:
+        "9.5. The Service may refuse deletion or postpone it for the data it is obliged to keep by law, or which is " +
+        "needed to resolve a dispute, contest a payment or prevent a blocked infringer from registering again " +
+        "(clause 6.5).",
+    },
+    s10: {
+      t: "Age",
+      p101:
+        "The Service is intended for persons aged 18 and over. The Service does not knowingly collect data about " +
+        "minors; a minor’s Account is deleted once identified. The {trial} trial period and payment are likewise " +
+        "available only to adults.",
+    },
+    s11: {
+      t: "Changes to the Policy",
+      p111:
+        "11.1. The Service may amend the Policy. A new version is published in the Service stating its version " +
+        "number and the date it takes effect.",
+      p112:
+        "11.2. The Service gives notice of material changes — new categories of data, purposes or recipients — by " +
+        "email or in Telegram at least 7 days before they take effect. Continued use of the Service after that date " +
+        "means agreement with the new version.",
+    },
+    s12: {
+      t: "Contacts",
+      p121:
+        "The data controller is Atlas Secure, part of the QoDev group, Hong Kong Special Administrative Region of " +
+        "the PRC. For questions about data processing and the exercise of rights: [[mailto:{email}|{email}]] and " +
+        "the Telegram bot [[{tgHref}|{tgHandle}]].",
+    },
+  },
   compare: {
     caption: "{a} and {b} plans compared",
     property: "Feature",

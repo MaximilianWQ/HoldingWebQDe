@@ -405,7 +405,9 @@ export default function PrivacyPage() {
         <time key="e" dateTime="2026-09-19">Действует с 19 сентября 2026</time>,
         "Версия 2.7",
       ]}
+      notice=""
       tocLabel="Разделы политики"
+      tocHead="Содержание"
       sections={SECTIONS}
     />
   );

@@ -1261,6 +1261,420 @@ export const en: Dict = {
       description: "Paying for an Atlas Secure subscription or traffic pack.",
     },
   },
+  /**
+   * Подписи правового каркаса. `notice` у английской версии — та самая
+   * оговорка: перевод дан для удобства, силу имеет русский текст.
+   */
+  legal: {
+    toc: "Contents",
+    notice: "This is a translation provided for convenience. The Russian version is the binding one.",
+    updated: "Updated {date}",
+    effective: "Effective {date}",
+    version: "Version {v}",
+  },
+  /** /terms — Terms of Use. Ключи названы по номеру пункта оригинала. */
+  terms: {
+    sheetTitle: "Terms",
+    title: "Terms of Use",
+    tocLabel: "Sections of the Agreement",
+    meta: {
+      title: "Terms of Use",
+      description:
+        "Terms of use for Atlas Secure: account, plans and bonuses, payment and refunds, prohibited use, " +
+        "the personal nature of the subscription, suspension, service quality, liability of the parties.",
+    },
+    deviceForms: [
+      "simultaneously connected device",
+      "simultaneously connected devices",
+      "simultaneously connected devices",
+    ],
+    s01: {
+      t: "General provisions",
+      p11:
+        "1.1. These Terms of Use (the “Agreement”) govern the relationship between Atlas Secure (the “Service”) and " +
+        "any person using the Service (the “User”).",
+      p12:
+        "1.2. The Agreement is a public offer. Registration, use of the Service, activation of the trial period or " +
+        "payment for a subscription constitute full and unconditional acceptance of the Agreement. A User who does " +
+        "not agree with any condition must stop using the Service.",
+      p13:
+        "1.3. The User confirms that they are 18 years old, or of the age of full legal capacity under the law of " +
+        "their jurisdiction, and are entitled to enter into the Agreement.",
+      p14: "1.4. Terms used in the Agreement:",
+      defs: [
+        { term: "Account", def: "the User’s record in the Service, including a linked Telegram profile." },
+        {
+          term: "Subscription",
+          def:
+            "the right of access to the Service for a defined period under a plan, either paid for or granted free " +
+            "of charge.",
+        },
+        {
+          term: "Access key",
+          def:
+            "a configuration, subscription link, QR code, token or other data that makes it possible to connect to " +
+            "the Service’s infrastructure.",
+        },
+        {
+          term: "Traffic pack",
+          def: "a separately paid volume of data for the reinforced-server key, with no expiry date.",
+        },
+        { term: "Device", def: "any equipment from which the User connects to the Service." },
+        {
+          term: "Balance",
+          def:
+            "an internal account ledger to which bonuses, referral credits and compensation are added. The Balance " +
+            "is not money, an electronic wallet or a payment instrument.",
+        },
+      ],
+      p15:
+        "1.5. The [[/privacy|Privacy Policy]], the [[/pricing|Pricing]] page and the Referral programme rules " +
+        "published in the Service form an integral part of the Agreement.",
+      p16:
+        "1.6. The Agreement is drawn up in Russian. Any translation is provided for convenience; in the event of " +
+        "any discrepancy the Russian text prevails.",
+    },
+    s02: {
+      t: "Subject of the Agreement",
+      p21:
+        "2.1. The Service provides the User with access to a secure network connection technology intended to ensure " +
+        "the confidentiality and security of transmitted data, including when working in public and untrusted " +
+        "networks.",
+      p22: "2.2. The services comprise:",
+      l22: [
+        "encryption of network traffic using the VLESS/Reality, VMess and Trojan protocols;",
+        "protection of the User’s network address from disclosure to third parties;",
+        "access to the Service’s server infrastructure located in various jurisdictions;",
+        "technical support within the limits of the chosen plan.",
+      ],
+      p23:
+        "2.3. The Service is a technical data-protection tool. The Service does not provide access to any content, " +
+        "does not host, store or moderate third-party content, does not control or determine which resources the " +
+        "User visits, and is not a means of committing unlawful acts.",
+      p24:
+        "2.4. The User alone determines the purposes for which the Service is used and must make sure that such use " +
+        "complies with the law of the country where they are located. All responsibility for compliance with " +
+        "applicable law rests with the User.",
+      p25:
+        "2.5. The Service may at any time change the set of servers, locations, protocols and features, provided " +
+        "this does not materially degrade the service already paid for.",
+    },
+    s03: {
+      t: "Registration and Account",
+      p31:
+        "3.1. To access the Service the User registers with a valid email address and/or through a Telegram account. " +
+        "The User must provide accurate information.",
+      p32:
+        "3.2. One User may hold one Account. Creating several Accounts, including in order to obtain the trial " +
+        "period, bonuses or referral credits again, is prohibited.",
+      p33:
+        "3.3. The User is responsible for keeping their credentials and Access keys safe. Every action taken using " +
+        "the Account or the Access keys is deemed to have been taken by the User.",
+      p34:
+        "3.4. If credentials or Access keys are suspected to have leaked, the User must notify support immediately " +
+        "and reissue the Access key in their account.",
+      p35:
+        "3.5. The Service may request confirmation that an Account or a payment belongs to the User. Access may be " +
+        "suspended until such confirmation is received.",
+      p36:
+        "3.6. An Account may not be sold, given away or otherwise transferred to a third party without the Service’s " +
+        "written consent.",
+      p37:
+        "3.7. The User may stop using the Service at any time and request deletion of the Account through support. " +
+        "Deleting the Account terminates the Subscription, the Balance and all credits; money for the unused period " +
+        "is not refunded, unless section 05 provides otherwise.",
+    },
+    s04: {
+      t: "Plans, devices, bonuses and the Referral programme",
+      p41:
+        "4.1. The price, term, limit on simultaneously connected Devices and other characteristics of the plans are " +
+        "published on the [[/pricing|Pricing]] page. The Service may change prices at any time; changes do not " +
+        "affect periods already paid for.",
+      p42:
+        "4.2. One Subscription is intended for no more than {devices}. The Service may limit the number of " +
+        "connections and unlink Devices above the limit.",
+      p43b: "There is no automatic renewal and no recurring charge.",
+      p43:
+        "Payment is a one-off charge for the chosen term; once it expires, access stops until the next payment. The " +
+        "Service does not store payment details for repeat charges.",
+      p44: "4.4. Free access and bonuses:",
+      l44: [
+        "trial period — {trial} free of charge, once per User, including {mb} MB of traffic for the reinforced-server key;",
+        "bonus for linking Telegram — {tg}, once per User.",
+      ],
+      p45: "4.5. Referral programme — cashback to the Balance from every payment made by an invited User:",
+      loyaltyFirst: "from the first payment of an invited User",
+      loyaltyFrom: "from {n} or more invited Users who have paid",
+      p46:
+        "4.6. Funds on the Balance may only be used to pay for the Service. They cannot be withdrawn, exchanged for " +
+        "money or transferred to other Users, unless the Referral programme rules expressly provide otherwise.",
+      p47:
+        "4.7. Abuse of bonuses and of the Referral programme is prohibited: self-invitation, multiple accounts, " +
+        "fake registrations, use of bots, inflating numbers, paying and then charging back, misleading advertising " +
+        "and spamming a referral link.",
+      p48:
+        "4.8. Where abuse is found, the Service may cancel bonuses, the trial period and credits, write off any " +
+        "Balance obtained improperly, and block all connected Accounts.",
+      p49:
+        "4.9. The Service may change or discontinue bonuses and the Referral programme at any time, giving notice " +
+        "within the Service.",
+    },
+    s05: {
+      t: "Traffic packs",
+      p51:
+        "5.1. A traffic pack is a separate product: a paid volume of data for the reinforced-server key. A pack does " +
+        "not replace a Subscription and does not extend its term.",
+      p52:
+        "5.2. The volume of a pack has no expiry date and does not burn out. Packs that are bought add up to the " +
+        "volume already held.",
+      p53:
+        "5.3. Gigabytes are used up as data is transferred. Volume that has been used up is neither refunded nor " +
+        "restored; the remaining volume is not exchanged for money.",
+      p54:
+        "5.4. Paid volume is credited automatically; if the infrastructure is unavailable, it is credited once the " +
+        "infrastructure is restored. A delay in crediting is not grounds for a refund.",
+      p55:
+        "5.5. When a website Account is linked to the Service’s Telegram bot, the remaining traffic is added " +
+        "together, and of the two Subscriptions the longer one is kept. The bonus for linking is granted once.",
+    },
+    s06: {
+      t: "Payment and refunds",
+      p61:
+        "6.1. Payment is made through an authorised payment operator. The Service neither stores nor processes " +
+        "payment card details.",
+      p62: "6.2. The payment window is 15 minutes from the creation of the payment session. After that the session is cancelled.",
+      p63:
+        "6.3. The Subscription is activated automatically once the operator confirms the payment. Payment system and " +
+        "bank fees are borne by the User.",
+      p64:
+        "6.4. A refund is possible within 14 days of payment if the service has been terminated or was not provided " +
+        "through the fault of the Service. The request is submitted through support from the same contact the " +
+        "Account is linked to. Refunds are handled manually.",
+      p65:
+        "6.5. A refund is made by the same method as the payment, less the payment operator’s fees where applicable " +
+        "law permits. Where the paid term has been partly used, the value of the unused whole days is refunded.",
+      p66: "6.6. No refund is made:",
+      l66: [
+        "where the Account is blocked for a breach of the Agreement (sections 07–09);",
+        "for free and bonus periods, or for funds on the Balance;",
+        "for the volume of traffic packs already used up;",
+        "where unavailability is caused by the User, their provider, their device or third parties;",
+        "where the User gives up the Subscription after the period stated in clause 6.4 has expired.",
+      ],
+      p67:
+        "6.7. A chargeback initiated by the User without first contacting support is treated as a breach of the " +
+        "Agreement and results in immediate blocking of the Account. Paying with someone else’s or stolen payment " +
+        "instruments is prohibited. The Service may claim reimbursement of the costs incurred by an unjustified " +
+        "chargeback.",
+    },
+    s07: {
+      t: "Prohibited use",
+      p71:
+        "7.1. The User is prohibited from using the Service for any unlawful act, including but not limited to " +
+        "those listed below.",
+      p72: "7.2. Fraud and financial crime:",
+      l72: [
+        "fraud in any form, including phishing, social engineering, fake websites and deception in sales;",
+        "carding, use of stolen payment details, accounts and personal data;",
+        "money laundering, evasion of financial controls, running pyramid schemes;",
+        "identity theft, forgery of documents, creating accounts in someone else’s name.",
+      ],
+      p73: "7.3. Attacks and malicious activity:",
+      l73: [
+        "unauthorised access to other people’s systems, networks, devices and accounts;",
+        "DoS/DDoS attacks, exploitation of vulnerabilities, brute force, credential stuffing;",
+        "scanning ports and networks without their owners’ permission;",
+        "creating, distributing and operating malware, botnets and ransomware, hosting command-and-control servers;",
+        "intercepting other people’s traffic and data.",
+      ],
+      p74: "7.4. Prohibited content and violence:",
+      l74: [
+        "distributing, storing and obtaining child sexual abuse material and any sexual exploitation of minors;",
+        "promotion of terrorism and extremism, recruitment, financing such activity;",
+        "threats, blackmail, extortion, stalking, harassment, publishing other people’s personal data;",
+        "human trafficking, illegal trade in drugs, weapons and other prohibited goods and services.",
+      ],
+      p75: "7.5. Spam and unfair automation:",
+      l75: [
+        "bulk sending of spam and unsolicited advertising through any channel;",
+        "inflating metrics, click fraud, advertising fraud, mass registration of accounts;",
+        "automated data collection in breach of third-party resources’ rules;",
+        "buying up tickets and goods with bots, manipulating votes and reviews.",
+      ],
+      p76: "7.6. Infringement of third-party rights:",
+      l76: [
+        "infringement of copyright and related rights, distribution of pirated content;",
+        "impersonating another person or organisation;",
+        "breaching the rules and terms of use of third-party services where this causes them harm.",
+      ],
+      p77: "7.7. Abuse of the Service’s infrastructure:",
+      l77: [
+        "excessive load that degrades the Service for other Users;",
+        "cryptocurrency mining, running public proxies, exit nodes of anonymity networks, relays and servers through the Service’s infrastructure;",
+        "attempts to break into, penetration-test, reverse-engineer or circumvent the limits and technical restrictions of the Service;",
+        "acts that lead to the Service’s addresses being blocked or blacklisted.",
+      ],
+      p78:
+        "7.8. Any other use that breaches the law of the User’s jurisdiction, the law of the jurisdiction where the " +
+        "server is located, or applicable international rules, is prohibited.",
+      p79: "7.9. The Service alone assesses whether an act is a breach. The list is not exhaustive.",
+    },
+    s08: {
+      t: "The personal nature of the Subscription",
+      p81:
+        "8.1. A Subscription is granted for personal, non-commercial use by one User on the number of Devices set by " +
+        "the plan.",
+      p82: "8.2. The User is prohibited from:",
+      l82: [
+        "passing Access keys and credentials to third parties, including free of charge, beyond the Device limit of their plan;",
+        "publishing Access keys, subscription links and QR codes in open sources: in channels and chats, on forums, in social networks, in code repositories, in aggregators and “giveaways”;",
+        "reselling, renting out or sublicensing the Subscription or access to the Service, or including them in their own paid or free products;",
+        "organising shared use of one Subscription by a group of people (“whip-rounds”, shared accounts);",
+        "exceeding the limit on simultaneously connected Devices, including by technical means that hide their actual number;",
+        "using the name, logo and materials of the Service to sell access in their own name.",
+      ],
+      p83: "8.3. Resale and partner distribution are permitted only under a separate written contract with the Service.",
+      p84:
+        "8.4. The Service may apply automatic controls: analysis of the number of simultaneous connections, Devices, " +
+        "network addresses and the geography of connections, as well as monitoring of open sources for published " +
+        "Access keys.",
+      p85:
+        "8.5. Where a breach of this section is found, the Service may without warning revoke and reissue the Access " +
+        "key, limit the number of connections, block the Account without a refund, and claim damages equal to the " +
+        "price of a Subscription for each person who obtained access improperly.",
+    },
+    s09: {
+      t: "Suspension and blocking of access",
+      p91:
+        "9.1. The Service may at any time, without prior notice, suspend, restrict or terminate the User’s access to " +
+        "the Service and block the Account if the Service has grounds to believe that:",
+      l91: [
+        "the User is committing fraudulent or other unlawful acts listed in section 07;",
+        "the User has breached section 08 on the personal nature of the Subscription;",
+        "the payment was made using someone else’s or stolen payment instruments, or a chargeback has been initiated on it;",
+        "abuse of the trial period, bonuses or the Referral programme has been found;",
+        "the User has provided inaccurate information or has refused to confirm that the Account belongs to them;",
+        "the Account’s activity threatens the security, stability or reputation of the Service or of other Users;",
+        "a complaint has been received from a rights holder, a hosting provider or a payment operator, or a demand from a competent authority;",
+        "the User insults support staff, threatens them or spreads knowingly false information about the Service.",
+      ],
+      p92:
+        "9.2. The Service is not obliged to disclose how breaches are detected, the evidence or the sources of " +
+        "information. The data of the Service’s automatic control systems is accepted as sufficient grounds for " +
+        "taking measures.",
+      p93:
+        "9.3. The Service chooses the measure at its own discretion: a warning, reissue of the Access key, a limit " +
+        "on speed or on the number of connections, temporary suspension, final blocking of the Account and of all " +
+        "Accounts connected to it.",
+      p94:
+        "9.4. Where the Account is blocked for a breach of the Agreement, the money paid is not refunded, and the " +
+        "unused Subscription term, the Balance, bonuses, referral credits and the remaining volume of traffic packs " +
+        "are cancelled.",
+      p95:
+        "9.5. Where access is terminated for reasons unrelated to a breach by the User, the Service refunds the " +
+        "value of the unused paid period.",
+      p96:
+        "9.6. The User may appeal against blocking through support within 14 days. The Service considers the appeal " +
+        "within 10 working days. The Service’s decision on the appeal is final.",
+      p97:
+        "9.7. A blocked User is prohibited from registering new Accounts. The Service may refuse registration or " +
+        "service to any person.",
+      p98:
+        "9.8. The Service may pass information about unlawful acts to competent authorities and payment operators to " +
+        "the extent provided for by law and by the [[/privacy|Privacy Policy]].",
+    },
+    s10: {
+      t: "Quality of service",
+      p101:
+        "10.1. The Service is provided “as is” and “as available”. The target availability of the infrastructure is " +
+        "99.98% per calendar month.",
+      p102:
+        "10.2. The Service makes reasonable efforts to ensure continuity, but does not guarantee uninterrupted " +
+        "operation, any particular speed, the availability of specific servers and locations, or that the Service " +
+        "will work in a particular network, country or with a particular third-party resource.",
+      p103:
+        "10.3. Unavailability means the complete impossibility of connecting to all servers of the plan, confirmed " +
+        "by the Service’s monitoring data. If the target is missed, the User may within 30 days contact support for " +
+        "compensation in the form of Subscription days or funds on the Balance. Such compensation is the User’s sole " +
+        "remedy in connection with unavailability of the Service.",
+      p104:
+        "10.4. The availability calculation excludes: planned works announced in advance; restrictions and blocks by " +
+        "telecom operators, providers and state authorities; failures at hosting providers and backbone operators; " +
+        "faults in the User’s device, software and network; events of force majeure.",
+      p105:
+        "10.5. The Service may carry out technical works, replace servers and addresses, and limit speed during " +
+        "abnormal load in order to protect the infrastructure.",
+    },
+    s11: {
+      t: "Liability of the parties",
+      p111:
+        "11.1. The Service’s aggregate liability on any claim is limited to the amount paid by the User for the " +
+        "current Subscription period.",
+      p112: "11.2. The Service is not liable for:",
+      l112: [
+        "the User’s acts committed using the Service and their consequences;",
+        "indirect losses, lost profit, loss of data, reputation and business opportunities;",
+        "the blocking or restriction of the User’s accounts on third-party resources;",
+        "the operation of third-party services, client applications, payment operators and telecom operators;",
+        "an inability to use the Service because of restrictions in the User’s country or network;",
+        "the consequences of credentials and Access keys leaking through the User’s fault.",
+      ],
+      p113:
+        "11.3. The User undertakes to reimburse the Service for losses, including fines, legal costs and the costs of " +
+        "servers and addresses being blocked, arising from the User’s breach of the Agreement or of the law.",
+      p114:
+        "11.4. If third parties bring claims against the Service because of the User’s acts, the User must settle " +
+        "them independently and at their own expense.",
+      p115:
+        "11.5. The parties are released from liability in events of force majeure: acts and instruments of state " +
+        "authorities, blocking and restriction of communication networks, failures at providers and in data centres, " +
+        "cyberattacks, natural disasters, military action.",
+      p116:
+        "11.6. The Service is not a telecom operator. The Service may suspend or cease operation in a particular " +
+        "country or region where the law or the security of the infrastructure requires it.",
+      p117:
+        "11.7. The limitations in this section apply to the fullest extent permitted by applicable law and do not " +
+        "affect consumer rights that cannot be waived by law.",
+    },
+    s12: {
+      t: "Intellectual property",
+      p121:
+        "12.1. All rights in the software, the website, the bot, the design, the name and the Atlas Secure logo " +
+        "belong to the Service. The User is granted a limited, non-exclusive, non-transferable right of use for the " +
+        "term of the Subscription.",
+      p122:
+        "12.2. Copying, modifying, decompiling and reverse-engineering the Service’s software is prohibited, as is " +
+        "creating derivative products and clone services using its materials.",
+    },
+    s13: {
+      t: "Changes to the terms and final provisions",
+      p131:
+        "13.1. The Service may amend the Agreement unilaterally. A new version takes effect from the date stated on " +
+        "publication. Continued use of the Service after that date means agreement with the changes.",
+      p132:
+        "13.2. The User agrees to receive legally significant notices by email, in Telegram and in the Service’s " +
+        "interface. A notice is deemed received on the day it is sent.",
+      p133: "13.3. Data is processed in accordance with the [[/privacy|Privacy Policy]].",
+      p134:
+        "13.4. A pre-action complaint procedure is mandatory before going to court: the complaint is sent to the " +
+        "support address and answered within 30 calendar days.",
+      p135:
+        "13.5. The Agreement is governed by the law of the Hong Kong Special Administrative Region of the PRC. " +
+        "Disputes are heard by the courts of Hong Kong, unless mandatory consumer-protection rules of the User’s " +
+        "country of residence provide otherwise.",
+      p136:
+        "13.6. The invalidity of an individual provision of the Agreement does not render the rest invalid. The " +
+        "Service’s failure to apply any measure is not a waiver of the right to apply it later.",
+      p137:
+        "13.7. The Service may assign its rights and obligations under the Agreement to a third party upon " +
+        "reorganisation or transfer of the business. The User may not assign their rights without the Service’s " +
+        "consent.",
+    },
+    s14: {
+      t: "Contacts",
+      p141: "For any question: the support Telegram bot [[{tgHref}|{tgHandle}]] and email [[mailto:{email}|{email}]].",
+    },
+  },
   compare: {
     caption: "{a} and {b} plans compared",
     property: "Feature",

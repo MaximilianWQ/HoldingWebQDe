@@ -1,5 +1,22 @@
 import VShell from "@/components/vps/VShell";
+import type { Locale } from "@/lib/locale";
 import "./legal-vps.css";
+
+/**
+ * Дата редакции словами на языке страницы. Источник даты один — ISO в
+ * файле документа, формат выбирает язык: «19 сентября 2026» против
+ * «19 September 2026». Хвост «г.», который приписывает русская
+ * локаль, здесь лишний — в пилюле рядом с «Обновлено» он не нужен.
+ */
+export function legalDate(iso: string, locale: Locale): string {
+  const f = new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return f.format(new Date(`${iso}T00:00:00Z`)).replace(/\s*г\.$/, "");
+}
 
 /**
  * Правовая страница на корпусе Atlas Secure VPS — общий каркас /terms и
@@ -8,6 +25,11 @@ import "./legal-vps.css";
  * Заголовок и лид по центру, дата и версия — компактными пилюлями,
  * оглавление — горизонтальный ряд чипов (а не боковая колонка прежней
  * версии), текст читается в колонке ~720px, кегль 17px.
+ *
+ * `notice` — оговорка о языке (21.09.2026). Русский текст согласован и
+ * имеет силу, английский дан для удобства, и английская версия обязана
+ * сказать это первой строкой. На русской странице строка пустая, и
+ * тогда её нет вовсе.
  */
 export type LegalSection = { n: string; t: string; body: React.ReactNode };
 
@@ -15,13 +37,18 @@ export default function LegalDoc({
   sheetTitle,
   title,
   meta,
+  notice,
   tocLabel,
+  tocHead,
   sections,
 }: {
   sheetTitle: string;
   title: string;
   meta: React.ReactNode[];
+  /** Пустая строка — оговорки нет (русская версия). */
+  notice: string;
   tocLabel: string;
+  tocHead: string;
   sections: LegalSection[];
 }) {
   return (
@@ -36,6 +63,7 @@ export default function LegalDoc({
               <li key={i}>{m}</li>
             ))}
           </ul>
+          {notice && <p className="vl-notice">{notice}</p>}
         </div>
       </section>
 
@@ -43,7 +71,7 @@ export default function LegalDoc({
       <section className="v-section" aria-label={tocLabel} style={{ paddingTop: 0 }}>
         <div className="v-wrap">
           <nav className="vl-toc" aria-label={tocLabel}>
-            <p className="v-small vl-toc-head">Содержание</p>
+            <p className="v-small vl-toc-head">{tocHead}</p>
             <ol>
               {sections.map((s) => (
                 <li key={s.n}>

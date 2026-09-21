@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { Dict } from "@/i18n";
 import BrandMark from "@/components/pixel/BrandMark";
 
 /**
@@ -14,6 +15,11 @@ import BrandMark from "@/components/pixel/BrandMark";
  * снимком кабинета public/media/ios/dash.webp. Размеры экрана — в пунктах
  * iPhone (440 × 956), единица --u = 100cqw / 440, стили — ios-phone.css.
  *
+ * Подписи внутри нарисованного Safari приходят пропсом `t`: словарь
+ * клиентский компонент не импортирует, иначе в браузер уехали бы оба
+ * языка. Английские строки в словаре — те, что показывает сама iOS,
+ * а не перевод русских.
+ *
  * Сцены 1–5 — шаги инструкции, каждая — петля на CSS-ключах (только
  * transform и opacity). Скрипт делает две вещи: включает data-play, пока
  * телефон в кадре и вкладка видна, и в режиме "tour" (первый экран) ведёт
@@ -22,6 +28,7 @@ import BrandMark from "@/components/pixel/BrandMark";
  */
 
 type Scene = 1 | 2 | 3 | 4 | 5;
+type T = Dict["installIos"]["phone"];
 
 // Длительности петель — те же, что --D в ios-phone.css.
 const DUR: Record<Scene, number> = { 1: 4400, 2: 4600, 3: 5400, 4: 4800, 5: 5200 };
@@ -107,30 +114,30 @@ function Web({ bar }: { bar: boolean }) {
   );
 }
 
-function Menu() {
+function Menu({ t }: { t: T }) {
   return (
     <div className="iosp-menu iosp-glass">
-      <div className="iosp-mrow is-t"><span className="iosp-hl" />Поделиться <G d="share" /></div>
+      <div className="iosp-mrow is-t"><span className="iosp-hl" />{t.menuShare} <G d="share" /></div>
       <div className="iosp-sep" />
-      <div className="iosp-mrow">Добавить закладку <G d="book" /></div>
-      <div className="iosp-mrow">Добавить в Избранное <G d="star" /></div>
-      <div className="iosp-mrow">Найти на странице <G d="search" /></div>
+      <div className="iosp-mrow">{t.menuBookmark} <G d="book" /></div>
+      <div className="iosp-mrow">{t.menuFavorite} <G d="star" /></div>
+      <div className="iosp-mrow">{t.menuFind} <G d="search" /></div>
       <div className="iosp-sep" />
-      <div className="iosp-mrow">Новая вкладка <G d="plus" /></div>
+      <div className="iosp-mrow">{t.menuNewTab} <G d="plus" /></div>
     </div>
   );
 }
 
-function Share() {
+function Share({ t }: { t: T }) {
   return (
     <div className="iosp-share">
       <div className="iosp-grab" />
       <div className="iosp-shd">
         <AtlasIcon className="iosp-ico" />
         <div className="iosp-shd-t">
-          <b>Кабинет — Atlas Secure</b>
+          <b>{t.shareTitle}</b>
           <span>qodev.dev</span>
-          <em>Параметры ›</em>
+          <em>{t.shareOptions}</em>
         </div>
         <span className="iosp-x"><G d="close" /></span>
       </div>
@@ -141,29 +148,29 @@ function Share() {
         {[0, 1, 2, 3, 4].map((k) => <span key={k} className="iosp-cell"><i className="iosp-sq" /><i className="iosp-lbl" /></span>)}
       </div>
       <div className="iosp-grp">
-        <div className="iosp-srow">Скопировать <G d="copy" /></div>
+        <div className="iosp-srow">{t.shareCopy} <G d="copy" /></div>
       </div>
       <div className="iosp-grp">
-        <div className="iosp-srow">Добавить в Список для чтения <G d="glasses" /></div>
-        <div className="iosp-srow">Добавить закладку <G d="book" /></div>
-        <div className="iosp-srow">Добавить в Избранное <G d="star" /></div>
-        <div className="iosp-srow">Найти на странице <G d="search" /></div>
-        <div className="iosp-srow is-t"><span className="iosp-hl" />На экран «Домой» <G d="home" /></div>
-        <div className="iosp-srow">Разметка <G d="markup" /></div>
-        <div className="iosp-srow">Напечатать <G d="print" /></div>
+        <div className="iosp-srow">{t.shareReading} <G d="glasses" /></div>
+        <div className="iosp-srow">{t.menuBookmark} <G d="book" /></div>
+        <div className="iosp-srow">{t.menuFavorite} <G d="star" /></div>
+        <div className="iosp-srow">{t.menuFind} <G d="search" /></div>
+        <div className="iosp-srow is-t"><span className="iosp-hl" />{t.shareHome} <G d="home" /></div>
+        <div className="iosp-srow">{t.shareMarkup} <G d="markup" /></div>
+        <div className="iosp-srow">{t.sharePrint} <G d="print" /></div>
       </div>
       <i className="iosp-ind" />
     </div>
   );
 }
 
-function Add() {
+function Add({ t }: { t: T }) {
   return (
     <div className="iosp-add">
       <div className="iosp-nav">
-        <span className="iosp-cap">Отменить</span>
-        <b>На экран «Домой»</b>
-        <span className="iosp-cap is-ok">Добавить</span>
+        <span className="iosp-cap">{t.addCancel}</span>
+        <b>{t.addTitle}</b>
+        <span className="iosp-cap is-ok">{t.addConfirm}</span>
       </div>
       <div className="iosp-card">
         <AtlasIcon className="iosp-ico is-l" />
@@ -174,16 +181,16 @@ function Add() {
       </div>
       <div className="iosp-tgl">
         <span className="iosp-ring" />
-        Открыть как веб-приложение
+        {t.addToggle}
         <span className="iosp-sw" />
       </div>
-      <p className="iosp-note">На экран «Домой» будет добавлен значок, чтобы Вы могли быстро открывать этот веб-сайт.</p>
+      <p className="iosp-note">{t.addNote}</p>
       <i className="iosp-ind" />
     </div>
   );
 }
 
-function Home() {
+function Home({ t }: { t: T }) {
   return (
     <div className="iosp-l iosp-home">
       <div className="iosp-wall" />
@@ -200,7 +207,7 @@ function Home() {
           ),
         )}
       </div>
-      <span className="iosp-srch"><G d="search" />Поиск</span>
+      <span className="iosp-srch"><G d="search" />{t.homeSearch}</span>
       <div className="iosp-dock"><i className="iosp-tile" /><i className="iosp-tile" /><i className="iosp-tile" /><i className="iosp-tile" /></div>
       <i className="iosp-ind" />
     </div>
@@ -220,11 +227,14 @@ function App() {
 export default function IosPhone({
   scene,
   label,
+  t,
   eager = false,
   onScene,
 }: {
   scene: Scene | "tour";
   label: string;
+  /** Подписи нарисованного Safari — из словаря, отдаёт серверный родитель. */
+  t: T;
   eager?: boolean;
   /** Только в scene="tour" — какой шаг сейчас на экране (для подсветки текста рядом). */
   onScene?: (s: Scene) => void;
@@ -297,12 +307,12 @@ export default function IosPhone({
     <div ref={ref} className="ios-dev" data-scene={scene === "tour" ? 1 : scene} data-mode={scene === "tour" ? "tour" : undefined} role="img" aria-label={label}>
       <span className="ios-dev-shadow" aria-hidden />
       <div className="iosp-scr" aria-hidden>
-        {has("home") && <Home />}
+        {has("home") && <Home t={t} />}
         <Web bar={barred} />
         <div className="iosp-l iosp-dim" />
-        {has("menu") && <Menu />}
-        {has("share") && <Share />}
-        {has("add") && <Add />}
+        {has("menu") && <Menu t={t} />}
+        {has("share") && <Share t={t} />}
+        {has("add") && <Add t={t} />}
         {has("home") && <App />}
         <span className="iosp-touch"><i /></span>
         <span className="iosp-glare" />

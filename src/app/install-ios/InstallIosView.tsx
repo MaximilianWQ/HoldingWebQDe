@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { localeHref, type Locale } from "@/lib/locale";
+import type { Dict } from "@/i18n";
 import IosPhone from "./IosPhone";
 
 /**
@@ -13,57 +15,37 @@ import IosPhone from "./IosPhone";
  * читаем текущий шаг тура через `onScene`, чтобы подсветить чек-лист в
  * такт анимации; клиентский компонент — чтобы держать это состояние,
  * метаданные страницы остаются в серверном page.tsx.
+ *
+ * Подписи приходят пропсом `t` оттуда же: клиентский компонент словарь
+ * не импортирует, иначе в браузер уехали бы оба языка (21.09.2026).
  */
 
 type Scene = 1 | 2 | 3 | 4 | 5;
 
-const STEPS: { t: string; d: string; tip?: string }[] = [
-  {
-    t: "Откройте меню Safari",
-    d: "Внизу справа, рядом с адресной строкой, нажмите «•••».",
-    tip: "В iOS 18 и раньше этот шаг не нужен: кнопка «Поделиться» стоит прямо в нижней панели Safari.",
-  },
-  {
-    t: "Нажмите «Поделиться»",
-    d: "Первый пункт меню — с квадратом и стрелкой вверх.",
-  },
-  {
-    t: "Выберите «На экран „Домой“»",
-    d: "Пункт с плюсом в квадрате. Не видно — потяните лист вверх и прокрутите список.",
-  },
-  {
-    t: "Нажмите «Добавить»",
-    d: "Оставьте включённым «Открыть как веб-приложение» — так Atlas откроется во весь экран.",
-  },
-  {
-    t: "Готово",
-    d: "На экране «Домой» появилась иконка Atlas. Нажмите её — сразу откроется кабинет.",
-  },
-];
-
-const TOUR_LABEL =
-  "iPhone 17 Pro Max: кабинет Atlas в Safari, по очереди показаны все пять шагов — «•••», «Поделиться», «На экран „Домой“», «Добавить» и иконка на экране «Домой»";
-
-export default function InstallIosView() {
+export default function InstallIosView({ locale, t }: { locale: Locale; t: Dict["installIos"] }) {
   const [active, setActive] = useState<Scene>(1);
+  const to = (href: string) => localeHref(href, locale);
+  const steps: { t: string; d: string; tip?: string }[] = [t.s1, t.s2, t.s3, t.s4, t.s5];
 
   return (
     <>
       <section className="v-section v-glow" aria-labelledby="vi-title">
         <div className="v-wrap vi-grid">
           <figure className="vi-hero-art">
-            <IosPhone scene="tour" eager onScene={setActive} label={TOUR_LABEL} />
+            <IosPhone scene="tour" eager onScene={setActive} label={t.tourLabel} t={t.phone} />
           </figure>
           <div className="vi-copy">
-            <p className="vi-kicker">Для iPhone и iPad · Safari · около 30 секунд</p>
+            <p className="vi-kicker">{t.kicker}</p>
             <h1 id="vi-title" className="v-h2" style={{ textAlign: "left" }}>
-              Atlas на экран «<span className="v-accent">Домой</span>»
+              {t.titleBefore}
+              <span className="v-accent">{t.titleAccent}</span>
+              {t.titleAfter}
             </h1>
             <p className="v-lead" style={{ textAlign: "left" }}>
-              Пять касаний — кабинет открывается как приложение: во весь экран, без адресной строки.
+              {t.lead}
             </p>
             <ol className="v-steps vi-steps">
-              {STEPS.map((s, k) => {
+              {steps.map((s, k) => {
                 const n = (k + 1) as Scene;
                 return (
                   <li key={s.t} className="v-step vi-step" data-active={active === n ? "true" : undefined}>
@@ -80,8 +62,8 @@ export default function InstallIosView() {
               })}
             </ol>
             <div className="v-actions" style={{ justifyContent: "flex-start" }}>
-              <Link href="/dashboard" className="v-btn v-btn-soft">
-                Вернуться в кабинет
+              <Link href={to("/dashboard")} className="v-btn v-btn-soft">
+                {t.back}
               </Link>
             </div>
           </div>
@@ -92,18 +74,15 @@ export default function InstallIosView() {
         <div className="v-wrap">
           <div className="vi-done-card">
             <h2 id="vi-done-title" className="vi-h2">
-              Не получилось?
+              {t.doneTitle}
             </h2>
-            <p className="vi-text">
-              Пункт «На экран „Домой“» есть только в Safari. Если кабинет открыт в другом браузере — скопируйте
-              адрес и откройте его в Safari. Остались вопросы — напишите в поддержку, поможем.
-            </p>
+            <p className="vi-text">{t.doneText}</p>
             <div className="v-actions" style={{ justifyContent: "flex-start" }}>
-              <Link href="/dashboard" className="v-btn v-btn-white">
-                Открыть кабинет
+              <Link href={to("/dashboard")} className="v-btn v-btn-white">
+                {t.doneCabinet}
               </Link>
-              <Link href="/support" className="v-btn v-btn-outline">
-                Поддержка
+              <Link href={to("/support")} className="v-btn v-btn-outline">
+                {t.doneSupport}
               </Link>
             </div>
           </div>

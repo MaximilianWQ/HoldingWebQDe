@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import VShell from "@/components/vps/VShell";
 import InstallIosView from "./InstallIosView";
+import { dict } from "@/i18n";
+import { getLocale } from "@/lib/locale-server";
 import "./install-ios.css";
 import "./ios-phone.css";
 
@@ -25,15 +27,16 @@ import "./ios-phone.css";
  * (public/media/ios/shell.webp, design/blender/iphone_shell.py) и живой
  * экран на HTML/CSS поверх снимка кабинета (public/media/ios/dash.webp).
  */
-export const metadata: Metadata = {
-  title: "Atlas на iPhone",
-  description: "Как добавить кабинет Atlas на экран «Домой» iPhone и iPad — пять касаний в Safari.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { meta } = dict(await getLocale()).installIos;
+  return { title: meta.title, description: meta.description };
+}
 
-export default function InstallIosPage() {
+export default async function InstallIosPage() {
+  const locale = await getLocale();
   return (
     <VShell work account="member">
-      <InstallIosView />
+      <InstallIosView locale={locale} t={dict(locale).installIos} />
     </VShell>
   );
 }

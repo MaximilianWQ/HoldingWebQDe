@@ -243,6 +243,71 @@ export const en: Dict = {
         "from the clipboard, pick a country and press connect.",
     },
   },
+  /**
+   * /install-ios. Строки `phone` — как их показывает сама iOS
+   * по-английски, а не перевод русских: иначе читатель не узнает на
+   * своём телефоне то, что видит на рисунке.
+   */
+  installIos: {
+    kicker: "For iPhone and iPad · Safari · about 30 seconds",
+    titleBefore: "Atlas on the ",
+    titleAccent: "Home Screen",
+    titleAfter: "",
+    lead: "Five taps and your account opens like an app: full screen, no address bar.",
+    tourLabel:
+      "iPhone 17 Pro Max: the Atlas account in Safari, all five steps in turn — " +
+      "“•••”, “Share”, “Add to Home Screen”, “Add” and the icon on the Home Screen",
+    s1: {
+      t: "Open the Safari menu",
+      d: "Bottom right, next to the address bar, tap “•••”.",
+      tip: "On iOS 18 and earlier this step is unnecessary: the Share button sits in Safari’s bottom bar.",
+    },
+    s2: { t: "Tap “Share”", d: "The first item in the menu — a square with an arrow pointing up." },
+    s3: {
+      t: "Choose “Add to Home Screen”",
+      d: "The item with a plus in a square. Not there — pull the sheet up and scroll the list.",
+    },
+    s4: {
+      t: "Tap “Add”",
+      d: "Leave “Open as Web App” switched on — that is what makes Atlas open full screen.",
+    },
+    s5: {
+      t: "Done",
+      d: "The Atlas icon is on your Home Screen. Tap it and your account opens straight away.",
+    },
+    back: "Back to my account",
+    doneTitle: "Did not work?",
+    doneText:
+      "“Add to Home Screen” exists in Safari only. If your account is open in another " +
+      "browser, copy the address and open it in Safari. Still stuck — write to support " +
+      "and we will help.",
+    doneCabinet: "Open my account",
+    doneSupport: "Support",
+    phone: {
+      menuShare: "Share",
+      menuBookmark: "Add Bookmark",
+      menuFavorite: "Add to Favorites",
+      menuFind: "Find on Page",
+      menuNewTab: "New Tab",
+      shareTitle: "Account — Atlas Secure",
+      shareOptions: "Options ›",
+      shareCopy: "Copy",
+      shareReading: "Add to Reading List",
+      shareHome: "Add to Home Screen",
+      shareMarkup: "Markup",
+      sharePrint: "Print",
+      addCancel: "Cancel",
+      addTitle: "Add to Home Screen",
+      addConfirm: "Add",
+      addToggle: "Open as Web App",
+      addNote: "An icon will be added to your Home Screen so you can quickly access this website.",
+      homeSearch: "Search",
+    },
+    meta: {
+      title: "Atlas on your iPhone",
+      description: "How to add your Atlas account to the Home Screen of an iPhone or iPad — five taps in Safari.",
+    },
+  },
   home: {
     hero: {
       kicker: "Servers in {countries} · {trial} free trial",

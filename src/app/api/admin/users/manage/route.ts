@@ -6,6 +6,7 @@ import { rotatePanelSubscription, syncUserToPanel } from "@/lib/subscription-syn
 import { applySubscriptionEvent, withTransaction } from "@/lib/subscription-ledger";
 import { adminGrant, adminSetPlan } from "@/lib/admin-actions";
 import { adminGrantBypass } from "@/lib/bypass-grants";
+import { unlinkTelegramAccount, type UnlinkKeep } from "@/lib/telegram-link";
 
 const PLAN_NAME: Record<string, string> = { trial: "Пробный", basic: "Basic", plus: "Plus" };
 
@@ -34,6 +35,7 @@ function formatDuration(key: string): string {
  *   regen-key
  *   send-notification   { title, message }
  *   grant-traffic       { gb: 0.1–5000, requestId } — bypass GB, idempotent per requestId
+ *   unlink-telegram     { keep: "site" | "bot" } — отвязка Telegram
  */
 export async function POST(request: NextRequest) {
   const auth = await verifyAdmin();
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { action, userId, plan, duration, days, title, message, gb, requestId } = await request.json();
+    const { action, userId, plan, duration, days, title, message, gb, requestId, keep: rawKeep } = await request.json();
 
     if (!userId) {
       return NextResponse.json({ success: false, error: "userId обязателен" }, { status: 400 });
@@ -127,6 +129,40 @@ export async function POST(request: NextRequest) {
       }
       await createAuditLog("admin.regen", "Ссылка подписки перевыпущена администратором", userId, user.email);
       return NextResponse.json({ success: true, data: { vpnKey: r.subscriptionUrl, subscriptionUrl: r.subscriptionUrl } });
+    }
+
+    /**
+     * Отвязка Telegram — ТОЛЬКО ОТСЮДА (владелец, 22.09.2026).
+     *
+     * Из кабинета отвязка убрана, `/api/user/telegram-unlink` закрыт:
+     * при ней гигабайты, купленные на сайте, оставались в ботовской
+     * сущности и для человека пропадали, а починка упирается в
+     * развилку, где платны оба пути (`docs/bot/TZ_BYPASS_MERGE.md`).
+     *
+     * Здесь она оставлена намеренно: админ видит и карточку человека, и
+     * обе сущности, и может разобраться с гигабайтами руками. Пока
+     * развилку не решили, это единственный безопасный путь.
+     */
+    if (action === "unlink-telegram") {
+      if (rawKeep !== "site" && rawKeep !== "bot") {
+        return NextResponse.json({ success: false, error: "Укажите, где остаётся подписка: site или bot" }, { status: 400 });
+      }
+      if (!user.telegramId && !user.telegramLinked) {
+        return NextResponse.json({ success: false, error: "Telegram не привязан" }, { status: 400 });
+      }
+      const keep: UnlinkKeep = rawKeep;
+      const r = await unlinkTelegramAccount(userId, "site", keep);
+      if (!r.ok) {
+        return NextResponse.json({ success: false, error: r.error }, { status: r.status === 503 ? 503 : 400 });
+      }
+      await createAuditLog(
+        "admin.telegram_unlink",
+        `TG:${r.previousTelegramId ?? "—"} отвязан администратором; подписка остаётся: ${keep === "bot" ? "у бота" : "на сайте"}. ` +
+          "ГИГАБАЙТЫ ОБХОДА НЕ ПЕРЕНЕСЕНЫ — проверить вручную (TZ_BYPASS_MERGE)",
+        userId,
+        user.email
+      );
+      return NextResponse.json({ success: true, data: { unlinked: true, keep: r.keep } });
     }
 
     if (action === "send-notification") {

@@ -94,11 +94,9 @@ function DashboardViewInner({ cards, locale, units, t }: Cards) {
   const [loading, setLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [unlinkStep, setUnlinkStep] = useState(0);
   // Остаток обхода для плашки профиля. Панель спрашивается после
   // отрисовки: экран не ждёт её, как и весь остальной кабинет.
   const bypass = useBypassLive(true);
-  const [unlinking, setUnlinking] = useState(false);
   const [tgLink, setTgLink] = useState<TgLinkState>({ state: "idle" });
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -190,32 +188,6 @@ function DashboardViewInner({ cards, locale, units, t }: Cards) {
     } catch {
       win?.close();
       setTgLink({ state: "error", error: t.netFail });
-    }
-  };
-
-  /**
-   * Отвязка с выбором стороны (ТЗ 16–17, решение владельца 20.09.2026).
-   *
-   * Умолчание здесь — «на сайте»: человек стоит в кабинете, и ключ его
-   * стороны сайтовый. В боте умолчание зеркальное.
-   */
-  const handleUnlinkTelegram = async (keep: "site" | "bot" = "site") => {
-    setUnlinking(true);
-    try {
-      const res = await fetch("/api/user/telegram-unlink", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keep }),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setData((prev) => (prev ? { ...prev, telegramLinked: false } : prev));
-        setUnlinkStep(0);
-      }
-    } catch {
-      // как раньше: молча
-    } finally {
-      setUnlinking(false);
     }
   };
 
@@ -380,11 +352,7 @@ function DashboardViewInner({ cards, locale, units, t }: Cards) {
               tSettings={t.settings}
               data={data}
               tgLink={tgLink}
-              unlinkStep={unlinkStep}
-              unlinking={unlinking}
               onStartTelegramLink={startTelegramLink}
-              onUnlinkStepChange={setUnlinkStep}
-              onUnlinkTelegram={handleUnlinkTelegram}
               isAdmin={!!data.isAdmin}
               onOpenNotifications={() => setShowNotifications(true)}
               unreadCount={unreadCount}
@@ -462,11 +430,7 @@ function ProfilePanel({
   tSettings,
   data,
   tgLink,
-  unlinkStep,
-  unlinking,
   onStartTelegramLink,
-  onUnlinkStepChange,
-  onUnlinkTelegram,
   isAdmin,
   onOpenNotifications,
   unreadCount,
@@ -478,11 +442,7 @@ function ProfilePanel({
   tSettings: T["settings"];
   data: SubscriptionData;
   tgLink: TgLinkState;
-  unlinkStep: number;
-  unlinking: boolean;
   onStartTelegramLink: () => void;
-  onUnlinkStepChange: (n: number) => void;
-  onUnlinkTelegram: (keep?: "site" | "bot") => void;
   isAdmin: boolean;
   onOpenNotifications: () => void;
   unreadCount: number;
@@ -510,31 +470,25 @@ function ProfilePanel({
               <Icon name="send" size={16} />
               {tgLink.state === "busy" ? t.tgPreparing : tgLink.state === "ready" ? t.tgNewLink : t.tgLink}
             </button>
-          ) : unlinkStep === 0 ? (
-            <button type="button" onClick={() => onUnlinkStepChange(1)} className="v-btn v-btn-soft v-btn-sm">{t.unlink}</button>
-          ) : (
-            <button type="button" onClick={() => onUnlinkStepChange(0)} className="v-btn v-btn-soft v-btn-sm">{t.cancel}</button>
-          )}
+          ) : null}
         </div>
-        {/* Выбор стороны. Сначала та, на которой человек стоит: он в
-            кабинете, значит «На сайте» первой (ТЗ 17.4). И оба текста
-            прямо говорят, что ключ продолжит работать, — без этого
-            экран читается как «выберите, что потерять». */}
-        {data.telegramLinked && unlinkStep === 1 && (
-          <div className="vc-unlink" role="group" aria-label={t.unlinkTitle}>
-            <p className="vc-unlink-h">{t.unlinkTitle}</p>
-            <p className="vc-fine">{t.unlinkText}</p>
-            <div className="vc-actions">
-              <button type="button" onClick={() => onUnlinkTelegram("site")} disabled={unlinking} className="v-btn v-btn-primary v-btn-sm">
-                {unlinking ? t.unlinkBusy : t.keepSite}
-              </button>
-              <button type="button" onClick={() => onUnlinkTelegram("bot")} disabled={unlinking} className="v-btn v-btn-soft v-btn-sm">
-                {t.keepBot}
-              </button>
-            </div>
-            <p className="vc-fine">{t.unlinkFine}</p>
-          </div>
-        )}
+        {/* ОТВЯЗКИ В КАБИНЕТЕ БОЛЬШЕ НЕТ (владелец, 22.09.2026).
+            Здесь стояла кнопка и выбор стороны — «оставить на сайте» или
+            «оставить в боте».
+
+            Причина не в кнопке, а в том, что за ней. Разбор жалобы
+            (`docs/bot/TZ_BYPASS_MERGE.md`) показал: при отвязке
+            гигабайты, купленные на сайте, оставались в ботовской
+            сущности и для человека пропадали. Починка упирается в
+            развилку, где оба пути платные: перенести байты — у человека
+            меняется ключ обхода и приложение надо настраивать заново;
+            передать сущность — бот навсегда теряет её из виду, потому
+            что ищет по имени.
+
+            Решение владельца: пока развилка не решена, отвязку людям не
+            показывать. Сама логика цела и доступна админке — там
+            человек в контуре и видит последствия. Связку доводим
+            отдельно: она работает и складывает верно. */}
         {!data.telegramLinked && tgLink.state === "ready" && (
           tgLink.url ? (
             tgLink.mobile ? (

@@ -294,13 +294,27 @@ export async function addBypassTraffic(input: { panelUserId: number; addBytes: n
   // Опыт на тестовой сущности 22.09.2026 (сторона бота, протокол в
   // `docs/bot/TZ_BYPASS_MERGE.md` §11а.1): панель приняла PATCH с новым
   // `username`, ответила 200 и МОЛЧА проигнорировала поле — ни ошибки,
-  // ни отказа. Ответ при этом вернул фактическое состояние сущности.
+  // ни отказа. Без проверки мы отметили бы начисление применённым, а
+  // гигабайтов у человека не появилось бы; повтора не будет — операция
+  // закрыта.
   //
-  // Значит здесь нельзя отмечать начисление применённым по одному лишь
-  // `ok`: если панель так же молча проглотит лимит, мы запишем «выдано»,
-  // а гигабайтов у человека не появится, и повтора не будет — операция
-  // уже закрыта. Сверяем с тем, что панель вернула.
-  if (r.data.trafficLimitBytes !== target) {
+  // НО СВЕРЯТЬСЯ С ТЕЛОМ ОТВЕТА НЕЛЬЗЯ, и это я сначала сделал зря.
+  // Опыт доказал поведение ОДНОГО поля — `username`. Из него не
+  // следует, что панель возвращает свежее состояние по ЛЮБОМУ полю.
+  // Окажись это не так для лимита — проверка заваливала бы вообще все
+  // начисления, то есть чинила бы редкую потерю постоянной.
+  //
+  // Поэтому проверяем ПЕРЕЧИТЫВАНИЕМ: оно ничего не предполагает о
+  // формате ответа. Цена — один GET на начисление; начисления редки,
+  // а цена ошибки здесь — чужие деньги.
+  const after = await rwGetUserById(input.panelUserId);
+  if (!after.ok) {
+    // Записали, но убедиться не смогли. Операцию НЕ закрываем: пусть
+    // повторится и перечитает. Повтор безопасен — `base_limit` записан.
+    console.warn(`[BYPASS] op ${input.opId}: write sent, read-back failed (${describeRwError(after)}) — left open`);
+    return { ok: false, state: "panel_error", error: `read-back failed: ${describeRwError(after)}` };
+  }
+  if (after.data.trafficLimitBytes !== target) {
     // ОПЕРАЦИЯ НЕ ЗАКРЫВАЕТСЯ — она должна повториться.
     //
     // Сначала я помечал этот случай `conflict`, то есть «стоп, разбирать
@@ -321,18 +335,18 @@ export async function addBypassTraffic(input: { panelUserId: number; addBytes: n
     // они выбирают двойную. Один симптом, разные гарантии — разные
     // решения; копировать чужое здесь нельзя.
     console.error(
-      `[BYPASS] op ${input.opId}: panel returned ${r.data.trafficLimitBytes}, expected ${target} — ` +
+      `[BYPASS] op ${input.opId}: panel kept ${after.data.trafficLimitBytes}, expected ${target} — ` +
         "field ignored, operation left open for retry"
     );
     return {
       ok: false,
       state: "panel_error",
-      error: `panel kept ${r.data.trafficLimitBytes}, expected ${target}`,
+      error: `panel kept ${after.data.trafficLimitBytes}, expected ${target}`,
     };
   }
   await finishOp(input.opId, "applied", null);
   cache.delete(`id:${input.panelUserId}`);
-  return { ok: true, applied: true, duplicate: false, limitBytes: r.data.trafficLimitBytes };
+  return { ok: true, applied: true, duplicate: false, limitBytes: after.data.trafficLimitBytes };
 }
 
 /**
@@ -358,13 +372,15 @@ export async function mergeBypassEntities(keep: PanelUser, other: PanelUser): Pr
   if (other.status !== "DISABLED") {
     const d = await updateUser({ id: other.id, status: "DISABLED" });
     if (!d.ok) return { ok: false, error: describeRwError(d) };
-    // Сверяем фактическое состояние, а не код ответа (см. пояснение в
+    // Сверяем ПЕРЕЧИТЫВАНИЕМ, а не телом ответа (довод — в
     // `addBypassTraffic`). Не погашенная проигравшая сущность — это
     // ДВОЙНЫЕ гигабайты: её остаток уже прибавлен к `keep`, а сама она
     // осталась живой со своим. И при следующей связке она снова
     // сойдёт за живого кандидата.
-    if (d.data.status !== "DISABLED") {
-      return { ok: false, error: `panel kept ${other.id} in ${d.data.status} — not disabled` };
+    const back = await rwGetUserById(other.id);
+    if (!back.ok) return { ok: false, error: `disable sent, read-back failed: ${describeRwError(back)}` };
+    if (back.data.status !== "DISABLED") {
+      return { ok: false, error: `panel kept ${other.id} in ${back.data.status} — not disabled` };
     }
   }
   cache.delete(`id:${other.id}`);

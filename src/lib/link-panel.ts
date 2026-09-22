@@ -76,14 +76,20 @@ async function disableLoser(row: LinkOpsRow, id: number, keptId: number | null):
   // TZ_BYPASS_MERGE.md` §11а.1). Не погашенный проигравший ключ — это
   // ДВА живых ключа у одного человека, то самое «один человек, один
   // ключ», ради которого вся связка и затеяна.
-  if (r.data.status !== "DISABLED") {
-    console.error(`[LINK-OPS ${row.id.slice(0, 8)}] panel kept ${id} in ${r.data.status} — NOT disabled`);
+  //
+  // Проверяем ПЕРЕЧИТЫВАНИЕМ, а не телом ответа: опыт доказал поведение
+  // одного поля, и переносить его на все — та самая ошибка, против
+  // которой написано правило 5.
+  const back = await rwGetUserById(id);
+  if (!back.ok) return isUserGone(back) ? null : back;
+  if (back.data.status !== "DISABLED") {
+    console.error(`[LINK-OPS ${row.id.slice(0, 8)}] panel kept ${id} in ${back.data.status} — NOT disabled`);
     return {
       ok: false,
       kind: "conflict",
       status: 409,
       errorCode: "PANEL_IGNORED_DISABLE",
-      message: `panel kept ${id} in ${r.data.status}`,
+      message: `panel kept ${id} in ${back.data.status}`,
       method: "PATCH",
       path: "/api/users",
     } as RwError;

@@ -158,6 +158,22 @@ export interface MergeDecision {
   newEnd: number | null;
   /** Остаток проигравшей стороны, прибавленный к сроку (0 — складывать было нечего). */
   addedMs: number;
+  /**
+   * ОБА СЛАГАЕМЫХ, как они выглядели в момент сложения.
+   *
+   * Нужны не для отчётности. Сумма после связки лежит у владельца, а
+   * вторая сторона показывает её зеркалом — и зеркало неотличимо от
+   * собственного срока, если не с чем сравнить. Записав слагаемые, мы
+   * при следующей связке можем сказать: «то, что нам показывают, это
+   * ровно наша прошлая сумма, а не новые дни» (`mirrorGuard`).
+   */
+  addends: { siteMs: number; botMs: number };
+  /**
+   * Сложение не состоялось, потому что проигравшая сторона показывала
+   * НАШУ ЖЕ ПРОШЛУЮ СУММУ (см. `mirrorGuard`). Не ошибка человека —
+   * сигнал, что обнуление где-то не сработало.
+   */
+  mirrorSuppressed: boolean;
   /** Live panel entities that lose (status → DISABLED, term untouched). */
   disable: number[];
 }
@@ -207,10 +223,36 @@ export function actorSideOf(via: LinkVia): ActorSide {
   return null; // relink — сверка, человека рядом нет
 }
 
+/**
+ * Допуск при сравнении с прошлой суммой. Зеркало ставит ровно то
+ * число, что мы записали, но панель округляет до секунды, а между
+ * записью и чтением проходит время на сети. Две минуты — с запасом
+ * больше любой такой погрешности и заведомо меньше самой короткой
+ * покупки, какую можно совершить.
+ */
+const MIRROR_TOLERANCE_MS = 120_000;
+
+/**
+ * Не складывать собственную прошлую сумму, вернувшуюся зеркалом.
+ *
+ * После связки сумма живёт у владельца, а вторая сторона показывает её
+ * копией. Копия неотличима от собственного срока — если не с чем
+ * сравнить. Сравнивать есть с чем: мы записали получившийся срок в
+ * событие журнала, и здесь сверяем АБСОЛЮТНУЮ дату, а не остаток.
+ * Остаток тает со временем, дата — нет.
+ *
+ * Разбор, откуда берётся зеркало в панели бота, — `docs/bot/
+ * TZ_BYPASS_MERGE.md`, Т-Н4в.
+ */
+function isMirrorOfPreviousSum(end: number, previousMergedEnd: number | null): boolean {
+  return previousMergedEnd !== null && Math.abs(end - previousMergedEnd) <= MIRROR_TOLERANCE_MS;
+}
+
 export function decideMerge(
   c: { site: MergeCandidate | null; placeholder: MergeCandidate | null; bot: MergeCandidate | null },
   now = Date.now(),
-  actor: ActorSide = null
+  actor: ActorSide = null,
+  previousMergedEnd: number | null = null
 ): MergeDecision {
   const siteSide = [c.site, c.placeholder]
     .filter((x): x is MergeCandidate => !!x && x.live)
@@ -219,6 +261,7 @@ export function decideMerge(
 
   let kept: KeptSide;
   let winner: MergeCandidate | null;
+  let mirrorSuppressed = false;
   /** Остаток проигравшей стороны, который прибавится к сроку победителя. */
   let addMs = 0;
   if (siteSide && bot) {
@@ -245,6 +288,12 @@ export function decideMerge(
     kept = winner === bot ? "bot" : "site";
     const loser = winner === bot ? siteSide : bot;
     addMs = Math.max(0, loser.end - now);
+    if (isMirrorOfPreviousSum(loser.end, previousMergedEnd)) {
+      // Проигравшая сторона показывает ровно нашу прошлую сумму —
+      // складывать её нельзя, это копия, а не новые дни.
+      addMs = 0;
+      mirrorSuppressed = true;
+    }
   } else if (bot) {
     winner = bot;
     kept = "only-bot";
@@ -266,6 +315,11 @@ export function decideMerge(
     keptEntity,
     newEnd: winner ? winner.end + addMs : null,
     addedMs: addMs,
+    addends: {
+      siteMs: siteSide ? Math.max(0, siteSide.end - now) : 0,
+      botMs: bot ? Math.max(0, bot.end - now) : 0,
+    },
+    mirrorSuppressed,
     disable: Array.from(new Set(disable)),
   };
 }
@@ -498,6 +552,12 @@ export async function linkTelegramAccount(input: LinkInput): Promise<LinkResult>
       if (botBypass && (await foreign(botBypass))) botBypass = null;
 
       const now = Date.now();
+      // Чем кончилось прошлое сложение по этому Telegram ID. Нужно,
+      // чтобы не сложить собственную сумму, вернувшуюся зеркалом
+      // (`isMirrorOfPreviousSum`). Читаем ПО TELEGRAM ID, а не по
+      // аккаунту: человек мог связать бота с другим аккаунтом сайта, и
+      // зеркало пришло бы оттуда.
+      const previousMergedEnd = await readPreviousMergedEnd(c, telegramId);
       const cand = (s: "site" | "placeholder", u: UserRecord | null, entity: PanelUser | null): MergeCandidate | null => {
         if (!u) return null;
         const end = new Date(u.subscriptionEnd).getTime();
@@ -510,7 +570,8 @@ export async function linkTelegramAccount(input: LinkInput): Promise<LinkResult>
           bot: bot ? { side: "bot", end: Date.parse(bot.expireAt), live: panelEntityLive(bot, now), entity: bot } : null,
         },
         now,
-        actorSideOf(input.via)
+        actorSideOf(input.via),
+        previousMergedEnd
       );
       const keptId = decision.keptEntity?.id ?? null;
 
@@ -528,7 +589,24 @@ export async function linkTelegramAccount(input: LinkInput): Promise<LinkResult>
           setEnd: new Date(decision.newEnd),
           plan,
           actor: `link:${input.via}`,
-          meta: { telegramId, kept: decision.kept, keptPanelUserId: keptId, disabled: decision.disable, via: input.via },
+          // ОБА СЛАГАЕМЫХ И РЕЗУЛЬТАТ. Без них следующая связка не
+          // отличит новые дни второй стороны от нашей же суммы,
+          // вернувшейся зеркалом.
+          meta: {
+            telegramId,
+            kept: decision.kept,
+            keptPanelUserId: keptId,
+            disabled: decision.disable,
+            via: input.via,
+            // ОБА СЛАГАЕМЫХ И РЕЗУЛЬТАТ. Без них следующая связка не
+            // отличит новые дни второй стороны от нашей же суммы,
+            // вернувшейся зеркалом.
+            siteMs: decision.addends.siteMs,
+            botMs: decision.addends.botMs,
+            addedMs: decision.addedMs,
+            mergedEnd: new Date(decision.newEnd).toISOString(),
+            ...(decision.mirrorSuppressed ? { mirrorSuppressed: true } : {}),
+          },
         });
         ledgerApplied = led.applied;
       }
@@ -890,4 +968,36 @@ export async function adoptVerifiedPanelAccount(emailRaw: string, ctx: { ip?: st
 /** Owner of a panel id among local accounts — exported for routes that need a quick check. */
 export async function localOwnerOfPanelId(panelId: number, exceptUserId = ""): Promise<string | null> {
   return panelIdOwner(pool, panelId, exceptUserId);
+}
+
+/**
+ * Чем кончилось прошлое сложение по этому Telegram ID.
+ *
+ * Возвращает АБСОЛЮТНУЮ дату, а не остаток: остаток тает со временем,
+ * и сравнивать с ним бесполезно. Ищем по Telegram ID внутри
+ * `source_id` события — так найдём и связку с другим аккаунтом сайта,
+ * откуда зеркало тоже могло прийти.
+ *
+ * Ошибка чтения — не повод рушить связку: вернём `null`, сложение
+ * пройдёт как раньше. Защита от зеркала обязана быть дополнительной,
+ * а не единственной опорой.
+ */
+async function readPreviousMergedEnd(c: Queryable, telegramId: string): Promise<number | null> {
+  try {
+    const r = await c.query<{ meta: unknown }>(
+      `SELECT meta FROM subscription_events
+        WHERE kind = 'link_merge' AND source_id LIKE $1
+        ORDER BY created_at DESC LIMIT 1`,
+      [`link:${telegramId}:%`]
+    );
+    const raw = r.rows[0]?.meta;
+    if (!raw) return null;
+    const meta = (typeof raw === "string" ? JSON.parse(raw) : raw) as { mergedEnd?: unknown };
+    if (typeof meta.mergedEnd !== "string") return null;
+    const t = Date.parse(meta.mergedEnd);
+    return Number.isFinite(t) ? t : null;
+  } catch (err) {
+    console.warn("[LINK] previous merge not read:", err instanceof Error ? err.message : err);
+    return null;
+  }
 }

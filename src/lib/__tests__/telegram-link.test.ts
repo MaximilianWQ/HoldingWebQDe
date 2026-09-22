@@ -187,6 +187,54 @@ describe("decideMerge — owner rule 2", () => {
     expect(d.newEnd).toBe(now + 20 * DAY);
     expect(d.addedMs).toBe(0);
   });
+  // ─── Защита от сложения собственной прошлой суммы ──────────────
+  // Разбор: docs/bot/TZ_BYPASS_MERGE.md, Т-Н4в и Т-Н4г. После связки
+  // сумма лежит у владельца, а вторая сторона показывает её копией —
+  // и копия неотличима от своих дней, если не с чем сравнить.
+  it("прошлая сумма, вернувшаяся зеркалом, НЕ складывается второй раз", () => {
+    // Связка №1 дала 7 + 30 = 37 дней.
+    const merged = now + 37 * DAY;
+    // Связка №2: бот показывает ровно те же 37 — это зеркало, не покупка.
+    const d = decideMerge(
+      { site: c("site", 37, ent(1, 37)), placeholder: null, bot: c("bot", 37, ent(2, 37)) },
+      now,
+      "site",
+      merged
+    );
+    expect(d.addedMs).toBe(0);
+    expect(d.mirrorSuppressed).toBe(true);
+    expect(d.newEnd).toBe(now + 37 * DAY);
+  });
+
+  it("новая покупка в боте поверх зеркала складывается, а не глотается", () => {
+    const merged = now + 37 * DAY;
+    // Бот продал ещё 10 дней: 47 ≠ 37, это не зеркало.
+    const d = decideMerge(
+      { site: c("site", 37, ent(1, 37)), placeholder: null, bot: c("bot", 47, ent(2, 47)) },
+      now,
+      "site",
+      merged
+    );
+    expect(d.mirrorSuppressed).toBe(false);
+    expect(d.addedMs).toBe(47 * DAY);
+  });
+
+  it("без записи о прошлом сложении защита молчит и ничего не меняет", () => {
+    const d = decideMerge(
+      { site: c("site", 30, ent(1, 30)), placeholder: null, bot: c("bot", 7, ent(2, 7)) },
+      now,
+      "site",
+      null
+    );
+    expect(d.mirrorSuppressed).toBe(false);
+    expect(d.newEnd).toBe(now + 37 * DAY);
+  });
+
+  it("оба слагаемых записаны в решении — из них потом строится проверка", () => {
+    const d = decideMerge({ site: c("site", 30, ent(1, 30)), placeholder: null, bot: c("bot", 7, ent(2, 7)) }, now, "site");
+    expect(d.addends).toEqual({ siteMs: 30 * DAY, botMs: 7 * DAY });
+  });
+
   it("tie keeps the site", () => {
     expect(decideMerge({ site: c("site", 9, ent(1, 9)), placeholder: null, bot: c("bot", 9, ent(2, 9)) }, now).kept).toBe("site");
   });

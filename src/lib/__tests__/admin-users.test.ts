@@ -160,9 +160,18 @@ describe("listUsers", () => {
 describe("parseLogsParams", () => {
   it("defaults and validation", () => {
     const d = parseLogsParams(sp(""));
-    expect(d.ok && d.params).toEqual({ userId: null, level: null, limit: 200, cursor: null });
+    expect(d.ok && d.params).toEqual({ userId: null, level: null, action: null, limit: 200, cursor: null });
     expect(parseLogsParams(sp("level=debug")).ok).toBe(false);
     const w = parseLogsParams(sp("level=warn&userId=u1&limit=9999"));
     expect(w.ok && w.params).toMatchObject({ level: "warn", userId: "u1", limit: 500 });
+  });
+
+  it("action: точное имя события, чужие знаки не пропускаются", () => {
+    const a = parseLogsParams(sp("action=telegram.unlink"));
+    expect(a.ok && a.params.action).toBe("telegram.unlink");
+    // Иначе значение уехало бы в SQL как есть — фильтр принимает только
+    // то, чем действия и называются в коде.
+    expect(parseLogsParams(sp("action=telegram.unlink' OR 1=1--")).ok).toBe(false);
+    expect(parseLogsParams(sp("action=" + "a".repeat(65))).ok).toBe(false);
   });
 });

@@ -289,6 +289,22 @@ export async function addBypassTraffic(input: { panelUserId: number; addBytes: n
   }
   const r = await updateUser({ id: input.panelUserId, trafficLimitBytes: target });
   if (!r.ok) return { ok: false, state: "panel_error", error: describeRwError(r) };
+  // ОТВЕТ 200 НЕ ЗНАЧИТ, ЧТО ПОЛЕ ПРИМЕНИЛОСЬ.
+  //
+  // Опыт на тестовой сущности 22.09.2026 (сторона бота, протокол в
+  // `docs/bot/TZ_BYPASS_MERGE.md` §11а.1): панель приняла PATCH с новым
+  // `username`, ответила 200 и МОЛЧА проигнорировала поле — ни ошибки,
+  // ни отказа. Ответ при этом вернул фактическое состояние сущности.
+  //
+  // Значит здесь нельзя отмечать начисление применённым по одному лишь
+  // `ok`: если панель так же молча проглотит лимит, мы запишем «выдано»,
+  // а гигабайтов у человека не появится, и повтора не будет — операция
+  // уже закрыта. Сверяем с тем, что панель вернула.
+  if (r.data.trafficLimitBytes !== target) {
+    await finishOp(input.opId, "conflict", `panel kept ${r.data.trafficLimitBytes} instead of ${target}`);
+    console.error(`[BYPASS] op ${input.opId}: panel ignored the limit (${r.data.trafficLimitBytes} ≠ ${target}) — marked conflict`);
+    return { ok: false, state: "conflict", error: `panel kept ${r.data.trafficLimitBytes}, expected ${target}` };
+  }
   await finishOp(input.opId, "applied", null);
   cache.delete(`id:${input.panelUserId}`);
   return { ok: true, applied: true, duplicate: false, limitBytes: r.data.trafficLimitBytes };
@@ -317,6 +333,14 @@ export async function mergeBypassEntities(keep: PanelUser, other: PanelUser): Pr
   if (other.status !== "DISABLED") {
     const d = await updateUser({ id: other.id, status: "DISABLED" });
     if (!d.ok) return { ok: false, error: describeRwError(d) };
+    // Сверяем фактическое состояние, а не код ответа (см. пояснение в
+    // `addBypassTraffic`). Не погашенная проигравшая сущность — это
+    // ДВОЙНЫЕ гигабайты: её остаток уже прибавлен к `keep`, а сама она
+    // осталась живой со своим. И при следующей связке она снова
+    // сойдёт за живого кандидата.
+    if (d.data.status !== "DISABLED") {
+      return { ok: false, error: `panel kept ${other.id} in ${d.data.status} — not disabled` };
+    }
   }
   cache.delete(`id:${other.id}`);
   return { ok: true, addedBytes: added, disabledId: other.id };

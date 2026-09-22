@@ -71,6 +71,23 @@ async function disableLoser(row: LinkOpsRow, id: number, keptId: number | null):
   if (isBypassEntity(cur.data) || cur.data.status === "DISABLED") return null;
   const r = await updateUser({ id, status: "DISABLED" });
   if (!r.ok) return r;
+  // Ответ 200 не значит, что поле применилось: панель умеет молча
+  // игнорировать поля PATCH (опыт 22.09.2026, `docs/bot/
+  // TZ_BYPASS_MERGE.md` §11а.1). Не погашенный проигравший ключ — это
+  // ДВА живых ключа у одного человека, то самое «один человек, один
+  // ключ», ради которого вся связка и затеяна.
+  if (r.data.status !== "DISABLED") {
+    console.error(`[LINK-OPS ${row.id.slice(0, 8)}] panel kept ${id} in ${r.data.status} — NOT disabled`);
+    return {
+      ok: false,
+      kind: "conflict",
+      status: 409,
+      errorCode: "PANEL_IGNORED_DISABLE",
+      message: `panel kept ${id} in ${r.data.status}`,
+      method: "PATCH",
+      path: "/api/users",
+    } as RwError;
+  }
   console.log(`[LINK-OPS ${row.id.slice(0, 8)}] panel user ${id} (${cur.data.username}) DISABLED — one key per person`);
   return null;
 }

@@ -301,9 +301,34 @@ export async function addBypassTraffic(input: { panelUserId: number; addBytes: n
   // а гигабайтов у человека не появится, и повтора не будет — операция
   // уже закрыта. Сверяем с тем, что панель вернула.
   if (r.data.trafficLimitBytes !== target) {
-    await finishOp(input.opId, "conflict", `panel kept ${r.data.trafficLimitBytes} instead of ${target}`);
-    console.error(`[BYPASS] op ${input.opId}: panel ignored the limit (${r.data.trafficLimitBytes} ≠ ${target}) — marked conflict`);
-    return { ok: false, state: "conflict", error: `panel kept ${r.data.trafficLimitBytes}, expected ${target}` };
+    // ОПЕРАЦИЯ НЕ ЗАКРЫВАЕТСЯ — она должна повториться.
+    //
+    // Сначала я помечал этот случай `conflict`, то есть «стоп, разбирать
+    // руками». Это неверно: `conflict` отравляет `op_id` навсегда, и
+    // разовый сбой панели превращается в застрявшее начисление, которое
+    // ждёт человека.
+    //
+    // Повтор здесь БЕЗОПАСЕН именно потому, что операция идемпотентна:
+    // `base_limit` записан, и следующая попытка увидит лимит на прежнем
+    // месте и повторит запись. А если панель всё-таки применила её, но
+    // вернула устаревшее тело, следующая попытка увидит `limit !== base`
+    // и пометит конфликт сама — эта защита уже стоит выше.
+    //
+    // Сторона бота в том же месте выбрала ПРОТИВОПОЛОЖНОЕ — вернуть
+    // «не начислено» и позволить повтор с риском двойного начисления.
+    // И это тоже правильно, потому что у них операция НЕ идемпотентна:
+    // им приходится выбирать между потерей платежа и двойной выдачей, и
+    // они выбирают двойную. Один симптом, разные гарантии — разные
+    // решения; копировать чужое здесь нельзя.
+    console.error(
+      `[BYPASS] op ${input.opId}: panel returned ${r.data.trafficLimitBytes}, expected ${target} — ` +
+        "field ignored, operation left open for retry"
+    );
+    return {
+      ok: false,
+      state: "panel_error",
+      error: `panel kept ${r.data.trafficLimitBytes}, expected ${target}`,
+    };
   }
   await finishOp(input.opId, "applied", null);
   cache.delete(`id:${input.panelUserId}`);

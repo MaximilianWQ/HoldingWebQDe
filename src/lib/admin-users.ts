@@ -9,7 +9,7 @@ import { AuditLevel, isAuditLevel } from "./audit-level";
 
 // ─── Users list ─────────────────────────────────────────────────
 
-export const USER_FILTERS = ["all", "active", "paid", "trial", "expiring", "expired", "shared_ip", "no_link", "sync_error", "linked_active"] as const;
+export const USER_FILTERS = ["all", "active", "paid", "trial", "expiring", "expired", "shared_ip", "no_link", "sync_error"] as const;
 export type UserFilter = (typeof USER_FILTERS)[number];
 
 /** The current UI's filter names map onto the API ones. */
@@ -35,16 +35,6 @@ const FILTER_SQL: Record<UserFilter, string> = {
   shared_ip: "b.registration_ip IS NOT NULL AND b.accounts_on_ip > 1",
   no_link: "b.subscription_end > NOW() AND b.subscription_url IS NULL",
   sync_error: "b.panel_sync_state = 'error'",
-  /**
-   * Связанные с живой подпиской. Заведено 23.09.2026 для сверки с
-   * зеркалом бота: их число и наше обязаны сойтись, расхождение
-   * означает, что зеркало донесло не всех.
-   *
-   * Условие — `telegram_id IS NOT NULL`, а НЕ флаг `telegram_linked`:
-   * флаг снимается и ставится отдельно, а сверяем мы именно тех, у
-   * кого есть Telegram ID, — по нему бот и считает своих.
-   */
-  linked_active: "b.subscription_end > NOW() AND b.telegram_id IS NOT NULL",
 };
 
 export const USERS_DEFAULT_LIMIT = 100;
@@ -224,19 +214,9 @@ export const LOGS_MAX_LIMIT = 500;
 export interface LogsParams {
   userId: string | null;
   level: AuditLevel | null;
-  /**
-   * Точное имя действия (`telegram.unlink`, `admin.grant`, …). Поиск в
-   * карточке журнала идёт по уже загруженным строкам, поэтому найти
-   * редкое событие в старой истории через него нельзя — для этого и
-   * нужен фильтр на стороне базы.
-   */
-  action: string | null;
   limit: number;
   cursor: { createdAt: string; id: string } | null;
 }
-
-/** Имена действий пишутся кодом: латиница, точка, подчёркивание. */
-const ACTION_RE = /^[a-z0-9_.]{1,64}$/;
 
 export function encodeLogCursor(createdAt: string, id: string): string {
   return Buffer.from(JSON.stringify({ t: createdAt, i: id })).toString("base64url");
@@ -246,8 +226,6 @@ export function parseLogsParams(sp: URLSearchParams): { ok: true; params: LogsPa
   const userId = (sp.get("userId") || "").trim() || null;
   const rawLevel = (sp.get("level") || "").trim() || null;
   if (rawLevel && !isAuditLevel(rawLevel)) return { ok: false, error: "level: info, warn или error" };
-  const action = (sp.get("action") || "").trim() || null;
-  if (action && !ACTION_RE.test(action)) return { ok: false, error: "action: латиница, цифры, точка и подчёркивание, до 64 знаков" };
   const rawLimit = sp.get("limit");
   const limit = rawLimit === null ? LOGS_DEFAULT_LIMIT : Number(rawLimit);
   if (!Number.isInteger(limit) || limit < 1) return { ok: false, error: "limit должен быть целым числом ≥ 1" };
@@ -262,7 +240,7 @@ export function parseLogsParams(sp: URLSearchParams): { ok: true; params: LogsPa
       return { ok: false, error: "Неверный курсор" };
     }
   }
-  return { ok: true, params: { userId, level: rawLevel as AuditLevel | null, action, limit: Math.min(limit, LOGS_MAX_LIMIT), cursor } };
+  return { ok: true, params: { userId, level: rawLevel as AuditLevel | null, limit: Math.min(limit, LOGS_MAX_LIMIT), cursor } };
 }
 
 export interface AdminLogItem {
@@ -282,10 +260,9 @@ export async function listLogs(p: LogsParams): Promise<{ logs: AdminLogItem[]; n
      WHERE ($1::text IS NULL OR user_id = $1)
        AND ($2::text IS NULL OR level = $2)
        AND ($3::timestamptz IS NULL OR created_at < $3 OR (created_at = $3 AND id < $4))
-       AND ($6::text IS NULL OR action = $6)
      ORDER BY created_at DESC, id DESC
      LIMIT $5`,
-    [p.userId, p.level, p.cursor?.createdAt ?? null, p.cursor?.id ?? "", p.limit + 1, p.action]
+    [p.userId, p.level, p.cursor?.createdAt ?? null, p.cursor?.id ?? "", p.limit + 1]
   );
   const hasMore = r.rows.length > p.limit;
   const rows = r.rows.slice(0, p.limit);

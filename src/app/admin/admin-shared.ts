@@ -41,13 +41,7 @@ export interface UserInfo {
   bypassPanelUserId?: number | null;
 }
 
-/**
- * Копия списка из `src/lib/admin-users.ts` намеренно: тот файл
- * серверный (тянет пул соединений), а этот читает браузер. Список
- * меняется в обоих местах — забыть нельзя, `counts` типизирован им же
- * и сборка падает.
- */
-export type UserFilter = "all" | "active" | "paid" | "trial" | "expiring" | "expired" | "shared_ip" | "no_link" | "sync_error" | "linked_active";
+export type UserFilter = "all" | "active" | "paid" | "trial" | "expiring" | "expired" | "shared_ip" | "no_link" | "sync_error";
 export type UserSort = "new" | "old" | "soon" | "long" | "email" | "last_payment";
 
 /** GET /api/admin/users?q=&filter=&sort=&limit=&cursor= — одна страница. */

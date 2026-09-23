@@ -184,6 +184,18 @@ describe("bot/register", () => {
   });
 });
 
+describe("bot/linked", () => {
+  it("список связанных не отдаётся без ключа бота", async () => {
+    // Маршрут отдаёт множество Telegram ID разом. Проверка ключа стоит
+    // ДО обращения к базе, поэтому отказ виден и на голом маршруте.
+    const { GET } = await import("@/app/api/bot/linked/route");
+    const r = await GET(makeReq("/api/bot/linked"));
+    expect(r.status).toBe(401);
+    const wrong = await GET(makeReq("/api/bot/linked", { headers: { "X-Bot-Api-Key": BOT_KEY + "x" } }));
+    expect(wrong.status).toBe(401);
+  });
+});
+
 describe("client IP and limits", () => {
   const h = (o: Record<string, string>) => new Headers(o);
 

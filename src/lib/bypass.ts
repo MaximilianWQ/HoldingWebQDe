@@ -66,9 +66,33 @@ export function toBypassSnapshot(u: PanelUser): BypassSnapshot {
   };
 }
 
-/** The bot's bypass entity of THIS Telegram id: exact username and the same panel telegramId. */
+/**
+ * Сущность обхода бота для ЭТОГО Telegram ID.
+ *
+ * Опознаётся ПО ИМЕНИ: бот называет обход голым Telegram ID
+ * (`289126237`), премиум рядом — `tg_289126237_premium`, наши —
+ * `ST…`/`ST…_bp` (их отсекает `isSiteUsername`). Имя, совпадающее с
+ * идентификатором, само по себе доказывает принадлежность.
+ *
+ * ПОЛЕ `telegramId` ПАНЕЛИ БОЛЬШЕ НЕ ТРЕБУЕТСЯ НЕПУСТЫМ (23.09.2026).
+ * Раньше требовалось — и это прятало гигабайты у тех, чьи сущности
+ * заведены ботом ДО бэкфилла 3.x: поле у них пустое навсегда. Замер
+ * стороны бота по всем десяти связанным: совпадение 10 из 10 —
+ * пустое поле ↔ `bypass: null` у нас, заполненное ↔ показываем. Они
+ * же поставили опыт: проставили поле одному человеку (`PATCH
+ * /api/users {id, telegramId}`) — и обход появился, у контрольного
+ * остался null. То есть терялись НЕ редкие случаи, а четверо из
+ * десяти, с 65 ГБ, 125 ГБ, 210 ГБ и 1,29 ТБ.
+ *
+ * Чужое значение по-прежнему отвергается: поле, заполненное ДРУГИМ
+ * идентификатором, означает, что имя и владелец разошлись, и такую
+ * сущность человеку показывать нельзя. Проверка ослаблена ровно на
+ * «пусто», а не снята.
+ */
 export function isBotBypassFor(u: PanelUser, telegramId: string): boolean {
-  return u.username === botBypassUsername(telegramId) && String(u.telegramId) === telegramId && !isSiteUsername(u.username);
+  if (u.username !== botBypassUsername(telegramId) || isSiteUsername(u.username)) return false;
+  const onEntity = u.telegramId != null && String(u.telegramId) !== "" ? String(u.telegramId) : null;
+  return onEntity === null || onEntity === telegramId;
 }
 
 export type BypassLookup = { ok: true; user: PanelUser | null } | { ok: false; error: RwError };

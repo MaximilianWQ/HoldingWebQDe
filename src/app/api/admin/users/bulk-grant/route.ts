@@ -145,6 +145,7 @@ const FILTER_TITLES: Record<UserFilter, string> = {
   shared_ip: "общий IP",
   no_link: "без ключа",
   sync_error: "ошибка синхронизации",
+  linked_active: "связаны с Telegram, подписка действует",
 };
 
 function grantLabel(days: number, plan: GrantPlan, trafficGb: number | null): string {

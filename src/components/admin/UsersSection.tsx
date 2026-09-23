@@ -43,6 +43,7 @@ const FILTERS: Array<{ key: UserFilter; label: string }> = [
   { key: "sync_error", label: "Ошибка синхронизации" },
   { key: "shared_ip", label: "Общий IP" },
   { key: "no_link", label: "Без ссылки" },
+  { key: "linked_active", label: "Связаны с TG" },
 ];
 
 const SORTS: Array<{ key: UserSort; label: string }> = [

@@ -9,7 +9,7 @@ import { AuditLevel, isAuditLevel } from "./audit-level";
 
 // ─── Users list ─────────────────────────────────────────────────
 
-export const USER_FILTERS = ["all", "active", "paid", "trial", "expiring", "expired", "shared_ip", "no_link", "sync_error"] as const;
+export const USER_FILTERS = ["all", "active", "paid", "trial", "expiring", "expired", "shared_ip", "no_link", "sync_error", "linked_active"] as const;
 export type UserFilter = (typeof USER_FILTERS)[number];
 
 /** The current UI's filter names map onto the API ones. */
@@ -35,6 +35,16 @@ const FILTER_SQL: Record<UserFilter, string> = {
   shared_ip: "b.registration_ip IS NOT NULL AND b.accounts_on_ip > 1",
   no_link: "b.subscription_end > NOW() AND b.subscription_url IS NULL",
   sync_error: "b.panel_sync_state = 'error'",
+  /**
+   * Связанные с живой подпиской. Заведено 23.09.2026 для сверки с
+   * зеркалом бота: их число и наше обязаны сойтись, расхождение
+   * означает, что зеркало донесло не всех.
+   *
+   * Условие — `telegram_id IS NOT NULL`, а НЕ флаг `telegram_linked`:
+   * флаг снимается и ставится отдельно, а сверяем мы именно тех, у
+   * кого есть Telegram ID, — по нему бот и считает своих.
+   */
+  linked_active: "b.subscription_end > NOW() AND b.telegram_id IS NOT NULL",
 };
 
 export const USERS_DEFAULT_LIMIT = 100;
